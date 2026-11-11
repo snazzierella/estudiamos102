@@ -1,6 +1,14 @@
 // Level metadata and pedagogical guidance for Spanish 102 Quest Stages and Levels
 
-export function getLevelInfo(stageNum, levelNum) {
+export function getLevelInfo(stageNum, levelNum, isEarlyBoss = false) {
+  if (levelNum === 20 && isEarlyBoss) {
+    return {
+      title: `⚡ Desafío de Salto (Jefe de Unidad ${stageNum})`,
+      focus: "Muerte Súbita (Sudden Death) • 30 Preguntas",
+      desc: `¡Reto de Salto Anticipado! Enfréntate directamente al Jefe para saltarte las 19 lecciones de la Unidad ${stageNum}. Evaluación extendida de 30 preguntas de síntesis avanzada en Muerte Súbita: ¡un solo fallo termina el reto de inmediato!`
+    };
+  }
+
   if (stageNum === 1) {
     switch (levelNum) {
       case 1:

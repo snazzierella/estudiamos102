@@ -29,7 +29,9 @@ import {
   Lock,
   RotateCcw,
   Layers,
-  Compass
+  Compass,
+  Zap,
+  Skull
 } from 'lucide-react';
 import { getLevelInfo } from '../utils/levelInfoHelper';
 
@@ -108,6 +110,8 @@ export default function StudyQuest({
   const [activeQuestLevel, setActiveQuestLevel] = useState(state.isReviewReady ? 20 : (state.questLevel || 1));
   const [activeQuestIsReview, setActiveQuestIsReview] = useState(state.isReviewReady || false);
   const [activeQuestIsReplay, setActiveQuestIsReplay] = useState(false);
+  const [activeQuestIsEarlyBoss, setActiveQuestIsEarlyBoss] = useState(false);
+  const [earlyBossFailed, setEarlyBossFailed] = useState(false);
 
   // Sync selected stage/level when campaign state changes
   useEffect(() => {
@@ -119,6 +123,10 @@ export default function StudyQuest({
       setSelectedLevel(state.isReviewReady ? 20 : (state.questLevel || 1));
     }
   }, [state.questLevel, state.isReviewReady, state.questStage, selectedStage]);
+
+  const isEarlyBossLevel = (stageNum, levelNum) => {
+    return stageNum === state.questStage && levelNum === 20 && !state.isReviewReady;
+  };
 
   const isLevelPassed = (stageNum, levelNum) => {
     const levelKey = `${stageNum}-${levelNum}`;
@@ -137,6 +145,8 @@ export default function StudyQuest({
   };
 
   const isLevelLocked = (stageNum, levelNum) => {
+    // Early boss challenge (Level 20 on current stage) is never locked!
+    if (isEarlyBossLevel(stageNum, levelNum)) return false;
     return !isLevelPassed(stageNum, levelNum) && !isLevelCurrent(stageNum, levelNum);
   };
 
@@ -720,6 +730,7 @@ export default function StudyQuest({
     if (!activeStage) return;
 
     let levelVal = targetLevel !== undefined ? targetLevel : (selectedLevel || (state.isReviewReady ? 20 : state.questLevel));
+    const isEarlyBoss = stageVal === state.questStage && levelVal === 20 && !state.isReviewReady;
     const isReview = levelVal === 20;
     const isReplay = isLevelPassed(stageVal, levelVal);
 
@@ -727,6 +738,8 @@ export default function StudyQuest({
     setActiveQuestLevel(levelVal);
     setActiveQuestIsReview(isReview);
     setActiveQuestIsReplay(isReplay);
+    setActiveQuestIsEarlyBoss(isEarlyBoss);
+    setEarlyBossFailed(false);
 
     setQuestMissedQuestions([]);
     setComboCount(0);
@@ -785,7 +798,14 @@ export default function StudyQuest({
       let conjugationCount = 8;
       let vocabCount = 3;
 
-      if (isReview) {
+      if (isEarlyBoss) {
+        // Early Boss Challenge (Test-Out / Unit Skip):
+        // Extended 30 questions: 14 Sentence Builders, 9 Verb Conjugations, 7 Fill-in-the-Blank
+        sentenceCount = 14;
+        fillCount = 7;
+        conjugationCount = 9;
+        vocabCount = 0;
+      } else if (isReview) {
         // Review Gate (Boss Battle): 50% Sentence Builder, 30% Conjugation, 20% Fill in the Blank
         sentenceCount = 10;
         fillCount = 4;
@@ -976,8 +996,10 @@ export default function StudyQuest({
         ...chosenVocab
       ].sort(() => Math.random() - 0.5);
 
-      // Pad to exactly 20 if needed
-      while (u1Questions.length < 20 && verbCandidates.length > 0) {
+      const targetQuestionsTotal = isEarlyBoss ? 30 : 20;
+
+      // Pad to exactly targetQuestionsTotal if needed
+      while (u1Questions.length < targetQuestionsTotal && verbCandidates.length > 0) {
         const vItem = verbCandidates[Math.floor(Math.random() * verbCandidates.length)];
         const qSpec = generateConjugationQuestion(vItem, { tense: "present", excludeVosotros: state.excludeVosotros });
         if (qSpec) {
@@ -1003,7 +1025,140 @@ export default function StudyQuest({
         }
       }
 
-      finalQuestions = u1Questions.slice(0, 20);
+      finalQuestions = u1Questions.slice(0, targetQuestionsTotal);
+    } else if (isEarlyBoss) {
+      // Early Boss Challenge for Unit 2+ (Test-Out / Unit Skip):
+      // 30 questions with 0 card intros:
+      // - 12 Sentence Builder questions
+      // - 10 Conjugation questions
+      // - 8 Fill-in-the-blank / comprehensive vocabulary questions
+      const unitSentencesPool = [...(SENTENCE_POOLS[stageVal] || SENTENCE_POOLS[1] || [])].sort(() => Math.random() - 0.5);
+      const chosenSentences = [];
+      for (let i = 0; i < 12; i++) {
+        const sentenceItem = unitSentencesPool[i % unitSentencesPool.length];
+        const sSpec = generateSentenceBuilderQuestion({ unit: stageVal, sentenceItem });
+        if (sSpec) {
+          chosenSentences.push({
+            item: { spanish: sSpec.targetSentence, english: sSpec.meaning, subcategory: "Stage Sentences", category: `Unidad ${stageVal}` },
+            isCardIntro: false,
+            isConjugation: false,
+            isFillInTheBlank: false,
+            isSentenceBuilder: true,
+            unit: sSpec.unit,
+            prompt: sSpec.prompt,
+            promptLanguage: sSpec.promptLanguage,
+            targetLanguage: sSpec.targetLanguage,
+            targetSentence: sSpec.targetSentence,
+            targetWords: sSpec.targetWords,
+            targetTokens: sSpec.targetTokens,
+            bankTokens: sSpec.bankTokens,
+            distractors: sSpec.distractors,
+            meaning: sSpec.meaning,
+            hint: sSpec.hint,
+            correct: sSpec.targetSentence,
+            questionWord: sSpec.prompt,
+            choices: []
+          });
+        }
+      }
+
+      // Fill in the blank candidates from this stage
+      const stageFillCandidates = vocabularyData.filter(item => 
+        activeStage.subcategories.includes(item.subcategory) && generateFillInTheBlank(item)
+      ).sort(() => Math.random() - 0.5);
+
+      const chosenFills = [];
+      const seenFills = new Set();
+      for (const item of stageFillCandidates) {
+        if (chosenFills.length >= 8) break;
+        const fillSpec = generateFillInTheBlank(item);
+        if (fillSpec && !seenFills.has(fillSpec.sentence)) {
+          seenFills.add(fillSpec.sentence);
+          chosenFills.push({
+            item,
+            isCardIntro: false,
+            isConjugation: false,
+            isFillInTheBlank: true,
+            questionWord: fillSpec.sentence,
+            meaning: fillSpec.meaning,
+            correct: fillSpec.correct,
+            choices: fillSpec.choices,
+            hint: fillSpec.hint
+          });
+        }
+      }
+
+      // Conjugation questions for this stage
+      const stageVerbs = vocabularyData.filter(item => 
+        activeStage.subcategories.includes(item.subcategory) && isVerbItem(item)
+      ).sort(() => Math.random() - 0.5);
+
+      const stageTense = (stageVal >= 3) ? "preterite" : "present";
+      const chosenConjugations = [];
+      const seenStageVerbs = new Set();
+      for (const vItem of stageVerbs) {
+        if (chosenConjugations.length >= 10) break;
+        if (!seenStageVerbs.has(vItem.spanish)) {
+          seenStageVerbs.add(vItem.spanish);
+          const qSpec = generateConjugationQuestion(vItem, { 
+            tense: stageTense, 
+            excludeVosotros: state.excludeVosotros 
+          });
+          if (qSpec) {
+            chosenConjugations.push({
+              item: vItem,
+              isCardIntro: false,
+              isConjugation: true,
+              isGustar: qSpec.isGustar,
+              isReciprocal: qSpec.isReciprocal,
+              subjectPronoun: qSpec.subjectPronoun,
+              infinitive: qSpec.infinitive,
+              prompt: qSpec.prompt,
+              subjectMeaning: qSpec.subjectMeaning,
+              questionWord: qSpec.verb,
+              meaning: qSpec.meaning,
+              pronoun: qSpec.pronoun,
+              tense: qSpec.tense,
+              tenseLabel: qSpec.tenseLabel,
+              isReflexive: qSpec.isReflexive,
+              correct: qSpec.correct,
+              choices: qSpec.choices
+            });
+          }
+        }
+      }
+
+      // Fill remaining spots with vocabulary/grammar steps
+      const otherStageItems = stageItems.filter(item => 
+        !seenStageVerbs.has(item.spanish) && !seenFills.has(item.spanish)
+      ).sort(() => Math.random() - 0.5);
+
+      const chosenVocab = [];
+      for (const item of otherStageItems) {
+        if (chosenSentences.length + chosenFills.length + chosenConjugations.length + chosenVocab.length >= 30) break;
+        const step = buildProgressiveQuizStep(item, 20, true);
+        if (step && !step.isCardIntro) {
+          chosenVocab.push(step);
+        }
+      }
+
+      const combined30 = [
+        ...chosenSentences,
+        ...chosenFills,
+        ...chosenConjugations,
+        ...chosenVocab
+      ].sort(() => Math.random() - 0.5);
+
+      // Pad to 30 if needed
+      while (combined30.length < 30 && stageItems.length > 0) {
+        const item = stageItems[Math.floor(Math.random() * stageItems.length)];
+        const step = buildProgressiveQuizStep(item, 20, true);
+        if (step && !step.isCardIntro) {
+          combined30.push(step);
+        }
+      }
+
+      finalQuestions = combined30.slice(0, 30);
     } else {
       // Unit 2+ progressive flow with gradual introduction of words
       const targetCardCount = (isReview || isReplay) ? 0 : Math.max(1, 16 - Math.floor((levelVal - 1) * 0.85));
@@ -1193,6 +1348,10 @@ export default function StudyQuest({
       
       setComboCount(0); // reset combo
 
+      if (activeQuestIsEarlyBoss) {
+        setEarlyBossFailed(true);
+      }
+
       // Update Leitner SRS
       if (updateWordMastery && currentQ.item) {
         updateWordMastery(currentQ.item.spanish, false);
@@ -1372,6 +1531,10 @@ export default function StudyQuest({
       playSound('wrong');
       setComboCount(0);
 
+      if (activeQuestIsEarlyBoss) {
+        setEarlyBossFailed(true);
+      }
+
       if (updateWordMastery && currentQ.item) {
         updateWordMastery(currentQ.item.spanish, false);
       }
@@ -1420,6 +1583,10 @@ export default function StudyQuest({
       playSound('wrong');
       setComboCount(0);
 
+      if (activeQuestIsEarlyBoss) {
+        setEarlyBossFailed(true);
+      }
+
       if (updateWordMastery && currentQ.item) {
         updateWordMastery(currentQ.item.spanish, false);
       }
@@ -1439,6 +1606,12 @@ export default function StudyQuest({
   };
 
   const handleQuestNext = () => {
+    // If Sudden Death failed on early boss challenge, immediately end session
+    if (activeQuestIsEarlyBoss && earlyBossFailed) {
+      finishQuestSession();
+      return;
+    }
+
     setQuestSelected(null);
     setQuestAnswered(false);
     setTypedAnswer("");
@@ -1562,7 +1735,37 @@ export default function StudyQuest({
 
     const usedHints = hintsUsedInSession > 0;
 
-    if (activeQuestIsReplay) {
+    if (activeQuestIsEarlyBoss) {
+      // Early Boss Challenge (Test-Out / Boss Skip)
+      // Flawless requirement: 100% accuracy required (zero mistakes allowed)
+      const flawless = questScore === quizQuestionsCount && !earlyBossFailed;
+      recordQuizPerformance(questScore, quizQuestionsCount);
+      if (recordLevelCompletion) {
+        recordLevelCompletion(activeQuestStage, 20, questScore, quizQuestionsCount, usedHints);
+      }
+
+      if (flawless) {
+        passStageReview(questScore, quizQuestionsCount, usedHints, true);
+        const extraGold = 100;
+        const extraXp = 400;
+        if (comboMultiplier > 1.0) {
+          totalGoldEarned = Math.ceil((baseGoldReward + extraGold) * comboMultiplier);
+          totalXpEarned = Math.ceil((baseXpReward + extraXp) * comboMultiplier);
+        } else {
+          totalGoldEarned += extraGold;
+          totalXpEarned += extraXp;
+        }
+        addGold(totalGoldEarned);
+        addXp(totalXpEarned);
+        playSound('fanfare');
+
+        const hintlessMsg = !usedHints ? " 🧠 ¡Maestría Sin Pistas! (Sin pistas utilizadas)" : "";
+        setQuestSuccessMsg(`⚡ ¡VICTORIA IMPLACABLE! ¡Has superado el Desafío de Salto con 100% de precisión perfecta (${questScore}/${quizQuestionsCount})! Has saltado la Unidad ${activeQuestStage} y desbloqueado la siguiente etapa. Ganaste +${totalGoldEarned} Oro & +${totalXpEarned} XP! (Streak Multiplier: ${comboMultiplier}x)${hintlessMsg}`);
+      } else {
+        playSound('gameover');
+        setQuestFailMsg(`💀 ¡Desafío de Salto Fallado! En el Desafío de Salto se exige Muerte Súbita (0 fallos permitidos). Lograste ${questScore}/${quizQuestionsCount} preguntas correctas antes de cometer un fallo. Completa las lecciones de la unidad (1-19) para desbloquear la Puerta de Revisión estándar con 80% de margen o vuelve a intentarlo con precisión perfecta.`);
+      }
+    } else if (activeQuestIsReplay) {
       // Replaying an already passed level for extra practice:
       // Does NOT move the main campaign pointer forward or backward
       const passingRequired = activeQuestIsReview 
@@ -1954,7 +2157,7 @@ export default function StudyQuest({
   };
 
   const selectedStageSpec = STAGES[selectedStage];
-  const selectedLevelInfo = getLevelInfo(selectedStage, selectedLevel);
+  const selectedLevelInfo = getLevelInfo(selectedStage, selectedLevel, isEarlyBossLevel(selectedStage, selectedLevel));
 
   const currentQuestQ = questQuestions[questCurrentIdx];
   const shakeClass = shakeTrigger ? "shake damage-flash" : healTrigger ? "heal-flash" : "";
@@ -2054,14 +2257,45 @@ export default function StudyQuest({
                 textAlign: 'center'
               }}
             >
-              <Award size={48} color={questSuccessMsg ? "var(--accent)" : "var(--danger)"} style={{ margin: '0 auto 12px', animation: 'float 3s ease-in-out infinite' }} />
+              {activeQuestIsEarlyBoss ? (
+                questSuccessMsg ? (
+                  <Zap size={48} color="var(--gold)" style={{ margin: '0 auto 12px', animation: 'float 3s ease-in-out infinite' }} />
+                ) : (
+                  <Skull size={48} color="var(--danger)" style={{ margin: '0 auto 12px', animation: 'float 3s ease-in-out infinite' }} />
+                )
+              ) : (
+                <Award size={48} color={questSuccessMsg ? "var(--accent)" : "var(--danger)"} style={{ margin: '0 auto 12px', animation: 'float 3s ease-in-out infinite' }} />
+              )}
               <h3 style={{ fontSize: '1.4rem', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>
-                {questSuccessMsg ? "¡Misión Cumplida!" : "Misión Fallida"}
+                {activeQuestIsEarlyBoss
+                  ? (questSuccessMsg ? "⚡ ¡Desafío de Salto Superado!" : "💀 Desafío de Salto Fallado (Muerte Súbita)")
+                  : (questSuccessMsg ? "¡Misión Cumplida!" : "Misión Fallida")}
               </h3>
-              <p style={{ fontSize: '0.95rem', color: '#e2e8f0', maxWidth: '500px', margin: '0 auto 16px', lineHeight: '1.4' }}>
+              <p style={{ fontSize: '0.95rem', color: '#e2e8f0', maxWidth: '540px', margin: '0 auto 16px', lineHeight: '1.4' }}>
                 {questSuccessMsg || questFailMsg}
               </p>
               
+              {activeQuestIsEarlyBoss && questSuccessMsg && (
+                <div style={{
+                  margin: '0 auto 16px',
+                  padding: '8px 18px',
+                  borderRadius: '20px',
+                  background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(251, 191, 36, 0.2))',
+                  border: '1.5px solid rgba(251, 191, 36, 0.6)',
+                  color: '#fef08a',
+                  fontSize: '0.88rem',
+                  fontWeight: 'bold',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 0 20px rgba(251, 191, 36, 0.25)'
+                }}>
+                  <span>⚡</span>
+                  <span>¡Trofeo Desbloqueado: Desafío Implacable (Skip Master)!</span>
+                  <span>🏆</span>
+                </div>
+              )}
+
               {questSuccessMsg && hintsUsedInSession === 0 && (
                 <div style={{
                   margin: '0 auto 16px',
@@ -2093,7 +2327,7 @@ export default function StudyQuest({
                     <div style={{ borderLeft: '1px solid rgba(255,255,255,0.1)' }}></div>
                     <div>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Loot Gained</span>
-                      <strong style={{ fontSize: '1.2rem', color: 'var(--gold)' }}>+{state.isReviewReady ? 50 : 12} Gold</strong>
+                      <strong style={{ fontSize: '1.2rem', color: 'var(--gold)' }}>+{activeQuestIsEarlyBoss ? 100 : state.isReviewReady ? 50 : 12} Gold</strong>
                     </div>
                   </>
                 )}
@@ -2107,7 +2341,42 @@ export default function StudyQuest({
                 >
                   <Layers size={16} /> Selector de Niveles
                 </button>
-                {activeQuestIsReplay ? (
+                {activeQuestIsEarlyBoss ? (
+                  questSuccessMsg ? (
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={() => { 
+                        setQuestFinished(false); 
+                        setSelectedStage(state.questStage); 
+                        setSelectedLevel(1); 
+                      }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      Continuar a la Nueva Unidad <Play size={16} />
+                    </button>
+                  ) : (
+                    <>
+                      <button 
+                        className="btn btn-danger" 
+                        onClick={() => { setQuestFinished(false); startQuestLevel(activeQuestStage, 20); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <Zap size={16} /> Reintentar Reto de Salto
+                      </button>
+                      <button 
+                        className="btn btn-secondary" 
+                        onClick={() => { 
+                          setQuestFinished(false); 
+                          setSelectedStage(state.questStage); 
+                          setSelectedLevel(state.isReviewReady ? 20 : state.questLevel); 
+                        }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        Volver a Lecciones de Campaña
+                      </button>
+                    </>
+                  )
+                ) : activeQuestIsReplay ? (
                   <button 
                     className="btn btn-primary" 
                     onClick={() => { setQuestFinished(false); startQuestLevel(activeQuestStage, activeQuestLevel); }}
@@ -2210,13 +2479,37 @@ export default function StudyQuest({
                       <div>
                         {selectedStage === state.questStage ? (
                           !state.fainted && (
-                            <button
-                              className={`btn ${state.isReviewReady ? 'btn-danger' : 'btn-primary'}`}
-                              onClick={() => startQuestLevel(state.questStage, state.isReviewReady ? 20 : state.questLevel)}
-                              style={{ fontSize: '0.88rem', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}
-                            >
-                              <Play size={14} /> Jugar Nivel Actual ({state.isReviewReady ? 'Review Gate' : `Lvl ${state.questLevel}`})
-                            </button>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              <button
+                                className={`btn ${state.isReviewReady ? 'btn-danger' : 'btn-primary'}`}
+                                onClick={() => startQuestLevel(state.questStage, state.isReviewReady ? 20 : state.questLevel)}
+                                style={{ fontSize: '0.88rem', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                              >
+                                <Play size={14} /> Jugar Nivel Actual ({state.isReviewReady ? 'Review Gate' : `Lvl ${state.questLevel}`})
+                              </button>
+                              {!state.isReviewReady && (
+                                <button
+                                  className="btn btn-danger"
+                                  onClick={() => {
+                                    setSelectedLevel(20);
+                                    startQuestLevel(state.questStage, 20);
+                                  }}
+                                  style={{ 
+                                    fontSize: '0.88rem', 
+                                    padding: '10px 16px', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '6px',
+                                    background: 'rgba(239, 68, 68, 0.15)',
+                                    border: '1.5px solid rgba(239, 68, 68, 0.5)',
+                                    color: '#fca5a5'
+                                  }}
+                                  title="Salta toda la unidad enfrentándote al Jefe ahora en Muerte Súbita (30 preguntas, 0 fallos permitidos)"
+                                >
+                                  <Zap size={14} /> ⚡ Reto de Salto (Jefe)
+                                </button>
+                              )}
+                            </div>
                           )
                         ) : (
                           <button
@@ -2297,8 +2590,9 @@ export default function StudyQuest({
                         const locked = isLevelLocked(selectedStage, lvl);
                         const isSelected = selectedLevel === lvl;
                         const isReviewGate = lvl === 20;
+                        const isEarlyBoss = isEarlyBossLevel(selectedStage, lvl);
 
-                        const levelInfo = getLevelInfo(selectedStage, lvl);
+                        const levelInfo = getLevelInfo(selectedStage, lvl, isEarlyBoss);
                         const recordKey = `${selectedStage}-${lvl}`;
                         const record = state.levelRecords?.[recordKey];
 
@@ -2320,23 +2614,29 @@ export default function StudyQuest({
                               borderRadius: '14px',
                               border: isSelected
                                 ? '2px solid var(--primary)'
-                                : current
-                                  ? '2px solid var(--gold)'
-                                  : passed
-                                    ? '1.5px solid rgba(16, 185, 129, 0.45)'
-                                    : '1px solid rgba(255, 255, 255, 0.08)',
+                                : isEarlyBoss
+                                  ? '2px dashed rgba(239, 68, 68, 0.7)'
+                                  : current
+                                    ? '2px solid var(--gold)'
+                                    : passed
+                                      ? '1.5px solid rgba(16, 185, 129, 0.45)'
+                                      : '1px solid rgba(255, 255, 255, 0.08)',
                               background: isSelected
                                 ? 'rgba(99, 102, 241, 0.18)'
-                                : current
-                                  ? 'linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(99, 102, 241, 0.1))'
-                                  : passed
-                                    ? 'rgba(16, 185, 129, 0.06)'
-                                    : 'rgba(255, 255, 255, 0.02)',
+                                : isEarlyBoss
+                                  ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(245, 158, 11, 0.08))'
+                                  : current
+                                    ? 'linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(99, 102, 241, 0.1))'
+                                    : passed
+                                      ? 'rgba(16, 185, 129, 0.06)'
+                                      : 'rgba(255, 255, 255, 0.02)',
                               boxShadow: isSelected
                                 ? '0 0 16px var(--primary-glow)'
-                                : current
-                                  ? '0 0 14px rgba(250, 204, 21, 0.25)'
-                                  : 'none',
+                                : isEarlyBoss
+                                  ? '0 0 14px rgba(239, 68, 68, 0.35)'
+                                  : current
+                                    ? '0 0 14px rgba(250, 204, 21, 0.25)'
+                                    : 'none',
                               opacity: locked ? 0.35 : 1,
                               cursor: locked ? 'not-allowed' : 'pointer',
                               transition: 'all 0.2s ease',
@@ -2345,7 +2645,11 @@ export default function StudyQuest({
                           >
                             {/* Top Badge */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
-                              {isReviewGate ? (
+                              {isEarlyBoss ? (
+                                <span style={{ fontSize: '0.72rem', background: 'rgba(239, 68, 68, 0.25)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.5)', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>
+                                  ⚡ Salto
+                                </span>
+                              ) : isReviewGate ? (
                                 <span style={{ fontSize: '0.72rem', background: current ? 'rgba(239, 68, 68, 0.2)' : passed ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)', color: current ? 'var(--danger)' : passed ? 'var(--accent)' : 'var(--text-muted)', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>
                                   🛡️ Boss
                                 </span>
@@ -2360,6 +2664,10 @@ export default function StudyQuest({
                             <div style={{ margin: '4px 0 6px' }}>
                               {passed ? (
                                 <CheckCircle2 size={24} color="var(--accent)" />
+                              ) : isEarlyBoss ? (
+                                <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', animation: 'float 2s ease-in-out infinite' }}>
+                                  ⚡💀
+                                </div>
                               ) : current ? (
                                 <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', animation: 'float 2s ease-in-out infinite' }}>
                                   ⚔️
@@ -2373,7 +2681,7 @@ export default function StudyQuest({
                             <span style={{ 
                               fontSize: '0.75rem', 
                               fontWeight: 600, 
-                              color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)',
+                              color: isSelected ? 'var(--text-primary)' : isEarlyBoss ? '#fca5a5' : 'var(--text-secondary)',
                               lineHeight: 1.2,
                               display: '-webkit-box',
                               WebkitLineClamp: 2,
@@ -2381,15 +2689,19 @@ export default function StudyQuest({
                               overflow: 'hidden',
                               minHeight: '2.4em'
                             }}>
-                              {levelInfo.title}
+                              {isEarlyBoss ? '⚡ Reto de Salto (Jefe)' : levelInfo.title}
                             </span>
 
-                            {/* Score / Best badge */}
-                            {record && (
+                            {/* Subtitle / Best score badge */}
+                            {isEarlyBoss ? (
+                              <span style={{ marginTop: '4px', fontSize: '0.68rem', color: '#f87171', fontWeight: 'bold' }}>
+                                0 fallos • 30 Qs
+                              </span>
+                            ) : record ? (
                               <span style={{ marginTop: '4px', fontSize: '0.68rem', color: 'var(--gold)', fontWeight: 600 }}>
                                 ⭐ {record.bestScore}/{record.total}
                               </span>
-                            )}
+                            ) : null}
                           </button>
                         );
                       })}
@@ -2397,22 +2709,30 @@ export default function StudyQuest({
                   </div>
 
                   {/* Selected Level Detail Card */}
-                  {selectedLevelInfo && (
+                  {selectedLevelInfo && (() => {
+                    const isEarlyBoss = isEarlyBossLevel(selectedStage, selectedLevel);
+
+                    return (
                     <div 
                       className="glass-panel" 
                       style={{ 
                         padding: '24px', 
                         borderRadius: '16px',
-                        border: isLevelCurrent(selectedStage, selectedLevel)
-                          ? '2px solid var(--gold)'
-                          : isLevelPassed(selectedStage, selectedLevel)
-                            ? '2px solid var(--accent)'
-                            : '1px solid var(--card-border)',
-                        background: isLevelCurrent(selectedStage, selectedLevel)
-                          ? 'rgba(250, 204, 21, 0.03)'
-                          : isLevelPassed(selectedStage, selectedLevel)
-                            ? 'rgba(16, 185, 129, 0.03)'
-                            : 'rgba(255, 255, 255, 0.02)',
+                        border: isEarlyBoss
+                          ? '2px solid rgba(239, 68, 68, 0.7)'
+                          : isLevelCurrent(selectedStage, selectedLevel)
+                            ? '2px solid var(--gold)'
+                            : isLevelPassed(selectedStage, selectedLevel)
+                              ? '2px solid var(--accent)'
+                              : '1px solid var(--card-border)',
+                        background: isEarlyBoss
+                          ? 'rgba(239, 68, 68, 0.05)'
+                          : isLevelCurrent(selectedStage, selectedLevel)
+                            ? 'rgba(250, 204, 21, 0.03)'
+                            : isLevelPassed(selectedStage, selectedLevel)
+                              ? 'rgba(16, 185, 129, 0.03)'
+                              : 'rgba(255, 255, 255, 0.02)',
+                        boxShadow: isEarlyBoss ? '0 0 25px rgba(239, 68, 68, 0.2)' : 'none',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '16px'
@@ -2427,29 +2747,35 @@ export default function StudyQuest({
                               textTransform: 'uppercase', 
                               padding: '3px 10px', 
                               borderRadius: '8px',
-                              background: isLevelPassed(selectedStage, selectedLevel)
-                                ? 'rgba(16, 185, 129, 0.15)'
-                                : isLevelCurrent(selectedStage, selectedLevel)
-                                  ? 'rgba(250, 204, 21, 0.15)'
-                                  : 'rgba(255, 255, 255, 0.05)',
-                              color: isLevelPassed(selectedStage, selectedLevel)
-                                ? 'var(--accent)'
-                                : isLevelCurrent(selectedStage, selectedLevel)
-                                  ? 'var(--gold)'
-                                  : 'var(--text-muted)'
+                              background: isEarlyBoss
+                                ? 'rgba(239, 68, 68, 0.25)'
+                                : isLevelPassed(selectedStage, selectedLevel)
+                                  ? 'rgba(16, 185, 129, 0.15)'
+                                  : isLevelCurrent(selectedStage, selectedLevel)
+                                    ? 'rgba(250, 204, 21, 0.15)'
+                                    : 'rgba(255, 255, 255, 0.05)',
+                              color: isEarlyBoss
+                                ? '#f87171'
+                                : isLevelPassed(selectedStage, selectedLevel)
+                                  ? 'var(--accent)'
+                                  : isLevelCurrent(selectedStage, selectedLevel)
+                                    ? 'var(--gold)'
+                                    : 'var(--text-muted)'
                             }}>
-                              {isLevelPassed(selectedStage, selectedLevel)
-                                ? '✓ Nivel Aprobado (Listo para Repasar)'
-                                : isLevelCurrent(selectedStage, selectedLevel)
-                                  ? '⚔️ Misión de Campaña Actual'
-                                  : '🔒 Nivel Bloqueado'}
+                              {isEarlyBoss
+                                ? '⚡ Desafío de Salto (Muerte Súbita - 0 Errores)'
+                                : isLevelPassed(selectedStage, selectedLevel)
+                                  ? '✓ Nivel Aprobado (Listo para Repasar)'
+                                  : isLevelCurrent(selectedStage, selectedLevel)
+                                    ? '⚔️ Misión de Campaña Actual'
+                                    : '🔒 Nivel Bloqueado'}
                             </span>
                             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                              {selectedLevel === 20 ? 'Puerta de Revisión' : `Nivel ${selectedLevel} de 19`}
+                              {selectedLevel === 20 ? 'Puerta de Revisión (Jefe)' : `Nivel ${selectedLevel} de 19`}
                             </span>
                           </div>
 
-                          <h3 style={{ fontSize: '1.3rem', fontFamily: 'var(--font-display)', margin: '4px 0' }}>
+                          <h3 style={{ fontSize: '1.3rem', fontFamily: 'var(--font-display)', margin: '4px 0', color: isEarlyBoss ? '#fca5a5' : 'inherit' }}>
                             {selectedLevelInfo.title}
                           </h3>
                           <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '4px 0 0', maxWidth: '650px', lineHeight: 1.4 }}>
@@ -2469,22 +2795,64 @@ export default function StudyQuest({
                       </div>
 
                       {/* Level requirements explanation */}
-                      <div style={{ background: 'rgba(0,0,0,0.15)', padding: '12px 16px', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span>💡</span>
-                        <span>
-                          {selectedLevel === 20
-                            ? 'Evaluación tipo Jefe: Requiere al menos 16/20 (80%) para aprobar.'
-                            : isLevelPassed(selectedStage, selectedLevel)
-                              ? 'Práctica Extra: Acierta al menos 12/20 (60%) para completar la sesión de repaso y ganar oro/XP extra. ¡No arriesga tu progreso de campaña!'
-                              : 'Misión de Campaña: Acierta al menos 12/20 (60%) para desbloquear el siguiente nivel.'}
-                        </span>
-                      </div>
+                      {isEarlyBoss ? (
+                        <div style={{
+                          background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(245, 158, 11, 0.1))',
+                          border: '1.5px solid rgba(239, 68, 68, 0.45)',
+                          padding: '14px 18px',
+                          borderRadius: '12px',
+                          fontSize: '0.88rem',
+                          color: '#fee2e2',
+                          lineHeight: 1.5,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', fontSize: '0.95rem', color: '#fca5a5' }}>
+                            <Zap size={18} color="#fca5a5" />
+                            <span>Reglas del Desafío de Salto (Unit Skip Challenge):</span>
+                          </div>
+                          <ul style={{ margin: 0, paddingLeft: '20px', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <li><strong>Evaluación Extendida:</strong> 30 preguntas de síntesis completa (construcción de oraciones, conjugación y oraciones contextuales).</li>
+                            <li><strong>Muerte Súbita:</strong> No se permite cometer <em>ningún error</em> (100% de precisión requerida). ¡Un solo fallo termina el reto de inmediato!</li>
+                            <li><strong>Recompensa de Salto:</strong> Al ganar con 30/30, apruebas toda la Unidad {selectedStage} al instante, desbloqueas la siguiente unidad, ganas +100 Oro, +400 XP y el Trofeo Exclusivo <em>Desafío Implacable</em>.</li>
+                          </ul>
+                        </div>
+                      ) : (
+                        <div style={{ background: 'rgba(0,0,0,0.15)', padding: '12px 16px', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span>💡</span>
+                          <span>
+                            {selectedLevel === 20
+                              ? 'Evaluación tipo Jefe: Requiere al menos 16/20 (80%) para aprobar.'
+                              : isLevelPassed(selectedStage, selectedLevel)
+                                ? 'Práctica Extra: Acierta al menos 12/20 (60%) para completar la sesión de repaso y ganar oro/XP extra. ¡No arriesga tu progreso de campaña!'
+                                : 'Misión de Campaña: Acierta al menos 12/20 (60%) para desbloquear el siguiente nivel.'}
+                          </span>
+                        </div>
+                      )}
 
                       {/* Start Level Button */}
                       <div>
                         {state.fainted ? (
                           <button className="btn btn-secondary" disabled style={{ opacity: 0.5 }}>
                             Estás debilitado. ¡Visita la tienda para curarte!
+                          </button>
+                        ) : isEarlyBoss ? (
+                          <button 
+                            className="btn btn-danger"
+                            onClick={() => startQuestLevel(selectedStage, 20)}
+                            style={{ 
+                              fontSize: '1rem', 
+                              padding: '12px 24px', 
+                              display: 'inline-flex', 
+                              alignItems: 'center', 
+                              gap: '8px',
+                              background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
+                              boxShadow: '0 0 20px rgba(220, 38, 38, 0.4)',
+                              fontWeight: 'bold'
+                            }}
+                          >
+                            <Zap size={18} /> ⚡ Desafiar al Jefe (Muerte Súbita - 30 Preguntas)
                           </button>
                         ) : isLevelLocked(selectedStage, selectedLevel) ? (
                           <button className="btn btn-secondary" disabled style={{ opacity: 0.5, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
@@ -2509,7 +2877,8 @@ export default function StudyQuest({
                         )}
                       </div>
                     </div>
-                  )}
+                    );
+                  })()}
                 </div>
               )}
             </div>
@@ -2539,8 +2908,28 @@ export default function StudyQuest({
           <div className="quiz-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                Quest Stage {activeQuestStage} | Level {activeQuestIsReview ? 'Review Gate (Boss)' : activeQuestLevel}
+                Quest Stage {activeQuestStage} | Level {activeQuestIsEarlyBoss ? 'Reto de Salto (Jefe)' : activeQuestIsReview ? 'Review Gate (Boss)' : activeQuestLevel}
               </span>
+              {activeQuestIsEarlyBoss && (
+                <span 
+                  style={{ 
+                    fontSize: '0.72rem', 
+                    padding: '3px 10px', 
+                    borderRadius: '12px', 
+                    background: 'rgba(239, 68, 68, 0.2)', 
+                    color: '#fca5a5', 
+                    border: '1px solid rgba(239, 68, 68, 0.5)',
+                    fontWeight: 'bold',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.3)'
+                  }}
+                  title="Muerte Súbita: 0 errores permitidos en 30 preguntas para saltar la unidad"
+                >
+                  <Skull size={12} /> ⚡ Muerte Súbita (0 Fallos)
+                </span>
+              )}
               {activeQuestIsReplay && (
                 <span 
                   style={{ 
@@ -2949,9 +3338,35 @@ export default function StudyQuest({
                           ? `Incorrecto. Correct word: "${currentQuestQ.correct}"`
                           : `Incorrecto! Correct translation: "${currentQuestQ.correct}"`
                   }
-                  <button className="btn btn-primary" onClick={handleQuestNext} style={{ width: '100%', marginTop: '16px' }}>
-                    {questCurrentIdx === questQuestions.length - 1 ? "Finish Quest" : "Next Challenge"} <ArrowRight size={16} />
-                  </button>
+                  
+                  {activeQuestIsEarlyBoss && !isQuestUserCorrect ? (
+                    <div style={{
+                      marginTop: '14px',
+                      padding: '12px 14px',
+                      borderRadius: '10px',
+                      background: 'rgba(239, 68, 68, 0.2)',
+                      border: '1px solid rgba(239, 68, 68, 0.4)',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fca5a5', marginBottom: '4px' }}>
+                        💀 ¡Muerte Súbita! Reto de Salto Fallado
+                      </div>
+                      <div style={{ fontSize: '0.82rem', color: '#fef2f2', marginBottom: '12px', lineHeight: 1.4 }}>
+                        En el Desafío de Salto debes tener 100% de precisión (0 fallos permitidos). El reto termina aquí (pregunta {questCurrentIdx + 1} de {questQuestions.length}).
+                      </div>
+                      <button 
+                        className="btn btn-danger" 
+                        onClick={finishQuestSession} 
+                        style={{ width: '100%', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold' }}
+                      >
+                        <Skull size={16} /> Ver Resultados del Desafío
+                      </button>
+                    </div>
+                  ) : (
+                    <button className="btn btn-primary" onClick={handleQuestNext} style={{ width: '100%', marginTop: '16px' }}>
+                      {questCurrentIdx === questQuestions.length - 1 ? "Finish Quest" : "Next Challenge"} <ArrowRight size={16} />
+                    </button>
+                  )}
                 </div>
               )}
             </div>

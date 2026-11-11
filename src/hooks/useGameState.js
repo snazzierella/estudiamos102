@@ -628,8 +628,10 @@ export function useGameState() {
     return true;
   };
 
-  const passStageReview = (score, totalQuizzes = 20, usedHints = false) => {
-    // 80% pass threshold for stage reviews (Boss battles)
+  const passStageReview = (score, totalQuizzes = 20, usedHints = false, isEarlySkip = false) => {
+    // If early skip: 100% accuracy required (0 mistakes allowed)
+    if (isEarlySkip && score < totalQuizzes) return false;
+    // 80% pass threshold for standard stage reviews (Boss battles)
     const requiredScore = Math.ceil(totalQuizzes * 0.8);
     if (score < requiredScore) return false;
 
@@ -642,8 +644,12 @@ export function useGameState() {
         newBadges.push("game_beaten");
       }
 
-      let goldReward = 50;
-      let xpReward = 200;
+      if (isEarlySkip && !newBadges.includes("unit_skip_master")) {
+        newBadges.push("unit_skip_master");
+      }
+
+      let goldReward = isEarlySkip ? 100 : 50;
+      let xpReward = isEarlySkip ? 400 : 200;
       if (prev.equipped && prev.equipped.amulet === "goldenAmulet") {
         goldReward = Math.ceil(goldReward * 1.2);
       }
@@ -707,9 +713,12 @@ export function useGameState() {
       const updatedAnswered = [...new Set([...(prev.wordsAnsweredCorrectly || []), ...passedStageWords])];
 
       const reviewLevelKey = `${prev.questStage}-20`;
-      const updatedCompleted = prev.completedLevels?.includes(reviewLevelKey)
-        ? prev.completedLevels
-        : [...(prev.completedLevels || []), reviewLevelKey];
+      const stageLevelKeys = Array.from({ length: 20 }, (_, i) => `${prev.questStage}-${i + 1}`);
+      const updatedCompleted = [...new Set([
+        ...(prev.completedLevels || []),
+        reviewLevelKey,
+        ...(isEarlySkip ? stageLevelKeys : [])
+      ])];
       const existingRecord = prev.levelRecords?.[reviewLevelKey];
       const bestScore = Math.max(existingRecord?.bestScore || 0, score);
       const updatedRecords = {

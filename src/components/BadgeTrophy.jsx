@@ -123,6 +123,12 @@ const BADGES_LIST = [
     icon: "🏆"
   },
   {
+    id: "unit_skip_master",
+    name: "Desafío Implacable (Skip Master)",
+    desc: "Defeat a Unit Boss through the early 30-question Sudden Death challenge with 100% accuracy.",
+    icon: "⚡"
+  },
+  {
     id: "game_beaten",
     name: "Maestro de Estudiamos 102 (Game Champion)",
     desc: "Complete all campaign stages and reviews.",

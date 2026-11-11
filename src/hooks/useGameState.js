@@ -42,7 +42,7 @@ const INITIAL_STATE = {
   questStage: 1,
   questLevel: 1,
   isReviewReady: false,
-  stageFlashcardsSeen: [],
+  stageFlashcardsSeen: getStageWords(1),
   wordsAnsweredCorrectly: [],
   equipped: {
     shield: null,
@@ -81,11 +81,10 @@ export function useGameState() {
         const parsed = JSON.parse(saved);
         const excludeVosotros = parsed._hasSetVosotros ? parsed.excludeVosotros : true;
 
-        let stageFlashcardsSeen = parsed.stageFlashcardsSeen || [];
+        const unit1Words = getStageWords(1);
+        let stageFlashcardsSeen = [...new Set([...(parsed.stageFlashcardsSeen || []), ...unit1Words])];
         let wordsAnsweredCorrectly = parsed.wordsAnsweredCorrectly || [];
         if (parsed.questStage > 1) {
-          const unit1Words = getStageWords(1);
-          stageFlashcardsSeen = [...new Set([...stageFlashcardsSeen, ...unit1Words])];
           wordsAnsweredCorrectly = [...new Set([...wordsAnsweredCorrectly, ...unit1Words])];
         }
 

@@ -78,6 +78,102 @@ export const SENTENCE_POOLS = {
       english: "What time is the English class",
       distractors: ["son", "en", "el"],
       hint: "Time question with 'es' for a singular event"
+    },
+    {
+      spanish: "Los estudiantes leen muchos libros interesantes",
+      english: "The students read many interesting books",
+      distractors: ["lee", "mucho", "interesante"],
+      hint: "3rd person plural verb ending (-en) and plural adjective agreement"
+    },
+    {
+      spanish: "Yo sé la respuesta a la pregunta",
+      english: "I know the answer to the question",
+      distractors: ["conozco", "sabe", "el"],
+      hint: "Use saber for facts/answers; irregular yo form is 'sé'"
+    },
+    {
+      spanish: "Nosotros conocemos a la profesora nueva",
+      english: "We know the new female teacher",
+      distractors: ["sabemos", "conocen", "nuevo"],
+      hint: "Use conocer with personal 'a' for people; feminine adjective"
+    },
+    {
+      spanish: "A ellos les gustan las frutas frescas",
+      english: "They like fresh fruits",
+      distractors: ["gusta", "le", "fresco"],
+      hint: "Use plural 'gustan' for plural fruits and indirect pronoun 'les'"
+    },
+    {
+      spanish: "Tú duermes ocho horas todas las noches",
+      english: "You sleep eight hours every night",
+      distractors: ["duerme", "dormir", "todos"],
+      hint: "Stem-changing verb dormir (o -> ue) for tú"
+    },
+    {
+      spanish: "El profesor explica la lección difícil",
+      english: "The professor explains the difficult lesson",
+      distractors: ["explico", "un", "las"],
+      hint: "Regular -ar verb ending (-a) with feminine noun agreement"
+    },
+    {
+      spanish: "Mi familia y yo comemos juntos los domingos",
+      english: "My family and I eat together on Sundays",
+      distractors: ["come", "comen", "junto"],
+      hint: "Mi familia y yo = nosotros (comemos)"
+    },
+    {
+      spanish: "Ustedes pueden hablar con el director hoy",
+      english: "You all can speak with the principal today",
+      distractors: ["puedo", "puede", "hablan"],
+      hint: "Modal verb poder (o -> ue) followed by an infinitive"
+    },
+    {
+      spanish: "Yo salgo con mis amigos los fines de semana",
+      english: "I go out with my friends on the weekends",
+      distractors: ["sale", "el", "amigo"],
+      hint: "Irregular yo form of salir: 'salgo'"
+    },
+    {
+      spanish: "El agua fría está en el refrigerador",
+      english: "The cold water is in the refrigerator",
+      distractors: ["es", "frío", "los"],
+      hint: "Agua is feminine (fría), uses estar for location"
+    },
+    {
+      spanish: "Nosotros siempre decimos la verdad en casa",
+      english: "We always tell the truth at home",
+      distractors: ["decen", "dices", "el"],
+      hint: "Irregular verb decir with nosotros ending (-imos)"
+    },
+    {
+      spanish: "Ella prefiere tomar té por la mañana",
+      english: "She prefers to drink tea in the morning",
+      distractors: ["prefiero", "toma", "el"],
+      hint: "Stem changer preferir (e -> ie) + infinitive"
+    },
+    {
+      spanish: "Los niños juegan en el jardín grande",
+      english: "The children play in the big garden",
+      distractors: ["juega", "jugamos", "la"],
+      hint: "Stem changer jugar (u -> ue) for plural ellos"
+    },
+    {
+      spanish: "Yo pongo los libros en la mesa",
+      english: "I put the books on the table",
+      distractors: ["pone", "el", "las"],
+      hint: "Irregular yo form of poner: 'pongo'"
+    },
+    {
+      spanish: "Mi hermano menor pide ayuda con la tarea",
+      english: "My younger brother asks for help with homework",
+      distractors: ["pede", "pido", "el"],
+      hint: "Stem changer pedir (e -> i) for 3rd person singular"
+    },
+    {
+      spanish: "Dónde compras tú la ropa bonita",
+      english: "Where do you buy pretty clothes",
+      distractors: ["compra", "el", "bonito"],
+      hint: "Question word with tú form of regular -ar verb"
     }
   ],
 

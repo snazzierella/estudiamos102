@@ -13,7 +13,7 @@ import {
   INDIRECT_OBJECT_PRONOUNS
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
-import { generateSentenceBuilderQuestion } from '../utils/sentenceBuilderHelper';
+import { generateSentenceBuilderQuestion, SENTENCE_POOLS } from '../utils/sentenceBuilderHelper';
 import SentenceBuilder from './SentenceBuilder';
 import { 
   Swords, 
@@ -707,111 +707,337 @@ export default function StudyQuest({
     const seenWords = state.stageFlashcardsSeen || [];
     const unseenStageItems = stageItems.filter(item => !seenWords.includes(item.spanish));
 
-    const targetCardCount = state.isReviewReady ? 0 : Math.max(1, 16 - Math.floor((levelVal - 1) * 0.85));
-    const cardCount = Math.min(targetCardCount, unseenStageItems.length);
-    const quizCount = 20 - cardCount;
-
+    const isUnit1 = state.questStage === 1;
     let finalQuestions = [];
-    const selectedFlashcards = [];
 
-    if (cardCount > 0) {
-      unseenStageItems.sort(() => Math.random() - 0.5);
-      const takeUnseen = unseenStageItems.slice(0, cardCount);
-      selectedFlashcards.push(...takeUnseen);
+    if (isUnit1) {
+      // In Unit 1 (Repaso de 101), we assume students have seen all 101 words at least once.
+      // Therefore, NO flashcards are shown in Campaign mode.
+      // The focus is primarily on:
+      // 1. Verb Conjugation (present tense)
+      // 2. Fill in the Blank
+      // 3. Sentence Construction (SentenceBuilder)
+      // With Vocab Translation as a minor secondary component,
+      // and increasing difficulty across later levels (1-19 & Review Gate).
 
-      const newlySeen = takeUnseen.map(item => item.spanish);
-      if (newlySeen.length > 0 && markFlashcardsSeen) {
-        markFlashcardsSeen(newlySeen);
+      let sentenceCount = 3;
+      let fillCount = 6;
+      let conjugationCount = 8;
+      let vocabCount = 3;
+
+      if (state.isReviewReady) {
+        // Review Gate (Boss Battle): 50% Sentence Builder, 30% Conjugation, 20% Fill in the Blank
+        sentenceCount = 10;
+        fillCount = 4;
+        conjugationCount = 6;
+        vocabCount = 0;
+      } else if (levelVal >= 16) {
+        // Levels 16-19: Late mastery
+        sentenceCount = 9;
+        fillCount = 4;
+        conjugationCount = 6;
+        vocabCount = 1;
+      } else if (levelVal >= 11) {
+        // Levels 11-15: Advanced syntax & agreement
+        sentenceCount = 7;
+        fillCount = 4;
+        conjugationCount = 7;
+        vocabCount = 2;
+      } else if (levelVal >= 6) {
+        // Levels 6-10: Stem-changers & irregular yo
+        sentenceCount = 5;
+        fillCount = 5;
+        conjugationCount = 8;
+        vocabCount = 2;
+      } else {
+        // Levels 1-5: Foundations & regular verbs
+        sentenceCount = 3;
+        fillCount = 6;
+        conjugationCount = 8;
+        vocabCount = 3;
       }
-    }
 
-    const cardSteps = selectedFlashcards.map(item => ({
-      item,
-      isCardIntro: true
-    }));
-
-    const currentlyIntroduced = selectedFlashcards.map(item => item.spanish);
-    const eligibleStageItems = stageItems.filter(item => 
-      seenWords.includes(item.spanish) || currentlyIntroduced.includes(item.spanish)
-    );
-
-    const stageQuizPool = eligibleStageItems.length > 0 
-      ? eligibleStageItems 
-      : (selectedFlashcards.length > 0 ? selectedFlashcards : stageItems.slice(0, 5));
-
-    let quizItems = [];
-    if (state.isReviewReady) {
-      const pool = eligibleStageItems.length > 0 ? eligibleStageItems : stageItems;
-      const shuffledStage = [...pool].sort(() => Math.random() - 0.5);
-      quizItems = shuffledStage.slice(0, 20);
-      
-      while (quizItems.length < 20 && pool.length > 0) {
-        const needed = 20 - quizItems.length;
-        const extra = [...pool].sort(() => Math.random() - 0.5).slice(0, needed);
-        quizItems = [...quizItems, ...extra];
+      // 1. Sentence Builder Questions
+      const u1SentencePool = [...(SENTENCE_POOLS[1] || [])].sort(() => Math.random() - 0.5);
+      const chosenSentences = [];
+      for (let i = 0; i < sentenceCount; i++) {
+        const sentenceItem = u1SentencePool[i % u1SentencePool.length];
+        const sSpec = generateSentenceBuilderQuestion({ unit: 1, sentenceItem });
+        if (sSpec) {
+          chosenSentences.push({
+            item: { spanish: sSpec.targetSentence, english: sSpec.meaning, subcategory: "Syllabus Sentences", category: "Unidad 1" },
+            isCardIntro: false,
+            isConjugation: false,
+            isFillInTheBlank: false,
+            isSentenceBuilder: true,
+            unit: sSpec.unit,
+            prompt: sSpec.prompt,
+            promptLanguage: sSpec.promptLanguage,
+            targetLanguage: sSpec.targetLanguage,
+            targetSentence: sSpec.targetSentence,
+            targetWords: sSpec.targetWords,
+            targetTokens: sSpec.targetTokens,
+            bankTokens: sSpec.bankTokens,
+            distractors: sSpec.distractors,
+            meaning: sSpec.meaning,
+            hint: sSpec.hint,
+            correct: sSpec.targetSentence,
+            questionWord: sSpec.prompt,
+            choices: []
+          });
+        }
       }
-    } else {
-      const currentQuizCount = Math.ceil(quizCount * 0.7);
-      const reviewQuizCount = quizCount - currentQuizCount;
 
-      let reviewQuizItems = [];
-      // Only review prior 102 stages (Stage 2+) during later lessons so 101 words are not repeated
-      if (state.questStage > 2 && reviewQuizCount > 0) {
-        const pastSubcategories = [];
-        for (let s = 2; s < state.questStage; s++) {
-          if (STAGES[s]?.subcategories) {
-            pastSubcategories.push(...STAGES[s].subcategories);
+      // 2. Fill in the Blank Questions
+      const u1FillCandidates = vocabularyData.filter(item => 
+        (item.subcategory === "Syllabus Sentences" || item.unit === "Unit 1: Repaso 101" || !item.unit) &&
+        generateFillInTheBlank(item)
+      ).sort(() => Math.random() - 0.5);
+
+      const chosenFills = [];
+      const seenFillPrompts = new Set();
+      for (const item of u1FillCandidates) {
+        if (chosenFills.length >= fillCount) break;
+        const fillSpec = generateFillInTheBlank(item);
+        if (fillSpec && !seenFillPrompts.has(fillSpec.sentence)) {
+          seenFillPrompts.add(fillSpec.sentence);
+          chosenFills.push({
+            item,
+            isCardIntro: false,
+            isConjugation: false,
+            isFillInTheBlank: true,
+            questionWord: fillSpec.sentence,
+            meaning: fillSpec.meaning,
+            correct: fillSpec.correct,
+            choices: fillSpec.choices,
+            hint: fillSpec.hint
+          });
+        }
+      }
+
+      // 3. Verb Conjugation Questions
+      const allU1Verbs = vocabularyData.filter(item => 
+        (item.unit === "Unit 1: Repaso 101" || !item.unit) && (
+          item.category === "Verbs" || 
+          item.subcategory?.includes("Verbs") || 
+          item.subcategory?.includes("Gustar") ||
+          item.subcategory === "Verbs for Knowing"
+        )
+      );
+
+      let primaryVerbSubs = [];
+      if (levelVal <= 5) {
+        primaryVerbSubs = ["Regular -ar Verbs", "Regular -er Verbs", "Regular -ir Verbs", "Core Irregular Verbs"];
+      } else if (levelVal <= 10) {
+        primaryVerbSubs = [
+          "Stem-Changing Verbs (o -> ue)", 
+          "Stem-Changing Verbs (e -> ie)", 
+          "Stem-Changing Verbs (e -> i)", 
+          "Irregular Yo Form Verbs",
+          "Verbs Structured Like Gustar",
+          "Core Irregular Verbs"
+        ];
+      } else {
+        primaryVerbSubs = [
+          "Regular -ar Verbs",
+          "Regular -er Verbs",
+          "Regular -ir Verbs",
+          "Stem-Changing Verbs (o -> ue)", 
+          "Stem-Changing Verbs (e -> ie)", 
+          "Stem-Changing Verbs (e -> i)", 
+          "Irregular Yo Form Verbs",
+          "Verbs for Knowing",
+          "Verbs Structured Like Gustar",
+          "Core Irregular Verbs"
+        ];
+      }
+
+      const leveledVerbs = allU1Verbs.filter(v => primaryVerbSubs.includes(v.subcategory)).sort(() => Math.random() - 0.5);
+      const fallbackVerbs = allU1Verbs.sort(() => Math.random() - 0.5);
+      const verbCandidates = [...leveledVerbs, ...fallbackVerbs];
+
+      const chosenConjugations = [];
+      const seenVerbNames = new Set();
+      for (const vItem of verbCandidates) {
+        if (chosenConjugations.length >= conjugationCount) break;
+        if (!seenVerbNames.has(vItem.spanish)) {
+          seenVerbNames.add(vItem.spanish);
+          const qSpec = generateConjugationQuestion(vItem, { 
+            tense: "present", 
+            excludeVosotros: state.excludeVosotros 
+          });
+          if (qSpec) {
+            chosenConjugations.push({
+              item: vItem,
+              isCardIntro: false,
+              isConjugation: true,
+              isGustar: qSpec.isGustar,
+              isReciprocal: qSpec.isReciprocal,
+              questionWord: qSpec.verb,
+              meaning: qSpec.meaning,
+              pronoun: qSpec.pronoun,
+              tense: qSpec.tense,
+              tenseLabel: qSpec.tenseLabel,
+              isReflexive: qSpec.isReflexive,
+              correct: qSpec.correct,
+              choices: qSpec.choices
+            });
           }
         }
-        const pastItems = vocabularyData.filter(item => 
-          pastSubcategories.includes(item.subcategory)
-        );
-        // Only review past 102 words that the user has already answered correctly or seen
-        const knownPast = pastItems.filter(item => 
-          state.wordsAnsweredCorrectly?.includes(item.spanish) ||
-          state.stageFlashcardsSeen?.includes(item.spanish)
-        );
-        if (knownPast.length > 0) {
-          reviewQuizItems = [...knownPast].sort(() => Math.random() - 0.5).slice(0, reviewQuizCount);
+      }
+
+      // 4. Vocab Translation Questions (minor secondary focus)
+      const nonVerbNonSentenceItems = vocabularyData.filter(item => 
+        (item.unit === "Unit 1: Repaso 101" || !item.unit) &&
+        !item.subcategory?.includes("Verbs") &&
+        !item.subcategory?.includes("Gustar") &&
+        item.subcategory !== "Syllabus Sentences" &&
+        item.category !== "Verbs"
+      ).sort(() => Math.random() - 0.5);
+
+      const chosenVocab = [];
+      for (const item of nonVerbNonSentenceItems) {
+        if (chosenVocab.length >= vocabCount) break;
+        const step = buildProgressiveQuizStep(item, levelVal, false);
+        if (step && !step.isCardIntro && !step.isSentenceBuilder && !step.isConjugation) {
+          chosenVocab.push(step);
         }
       }
 
-      // Fill remaining quiz items from stageQuizPool (words already introduced/seen)
-      const neededCurrent = quizCount - reviewQuizItems.length;
-      let filledCurrent = [];
-      while (filledCurrent.length < neededCurrent && stageQuizPool.length > 0) {
-        const needed = neededCurrent - filledCurrent.length;
-        const extra = [...stageQuizPool].sort(() => Math.random() - 0.5).slice(0, needed);
-        filledCurrent = [...filledCurrent, ...extra];
+      // Combine and shuffle all 20 questions
+      const u1Questions = [
+        ...chosenSentences,
+        ...chosenFills,
+        ...chosenConjugations,
+        ...chosenVocab
+      ].sort(() => Math.random() - 0.5);
+
+      // Pad to exactly 20 if needed
+      while (u1Questions.length < 20 && verbCandidates.length > 0) {
+        const vItem = verbCandidates[Math.floor(Math.random() * verbCandidates.length)];
+        const qSpec = generateConjugationQuestion(vItem, { tense: "present", excludeVosotros: state.excludeVosotros });
+        if (qSpec) {
+          u1Questions.push({
+            item: vItem,
+            isCardIntro: false,
+            isConjugation: true,
+            isGustar: qSpec.isGustar,
+            isReciprocal: qSpec.isReciprocal,
+            questionWord: qSpec.verb,
+            meaning: qSpec.meaning,
+            pronoun: qSpec.pronoun,
+            tense: qSpec.tense,
+            tenseLabel: qSpec.tenseLabel,
+            isReflexive: qSpec.isReflexive,
+            correct: qSpec.correct,
+            choices: qSpec.choices
+          });
+        }
       }
 
-      quizItems = [...filledCurrent, ...reviewQuizItems];
-    }
+      finalQuestions = u1Questions.slice(0, 20);
+    } else {
+      // Unit 2+ progressive flow with gradual introduction of words
+      const targetCardCount = state.isReviewReady ? 0 : Math.max(1, 16 - Math.floor((levelVal - 1) * 0.85));
+      const cardCount = Math.min(targetCardCount, unseenStageItems.length);
+      const quizCount = 20 - cardCount;
 
-    const isWordKnownForConjugation = (word) => {
-      return (state.stageFlashcardsSeen || []).includes(word) || (state.wordsAnsweredCorrectly || []).includes(word);
-    };
+      const selectedFlashcards = [];
 
-    const quizSteps = quizItems.map(item => buildProgressiveQuizStep(item, levelVal, isWordKnownForConjugation(item.spanish)));
-    const shuffledQuizSteps = [...quizSteps].sort(() => Math.random() - 0.5);
+      if (cardCount > 0) {
+        unseenStageItems.sort(() => Math.random() - 0.5);
+        const takeUnseen = unseenStageItems.slice(0, cardCount);
+        selectedFlashcards.push(...takeUnseen);
 
-    // CRITICAL: Present all flashcard learning introductions FIRST.
-    // The user will NEVER encounter a quiz question before seeing the flashcard that teaches it!
-    finalQuestions = [...cardSteps, ...shuffledQuizSteps];
-
-    // Ensure exactly 20 items if possible, backfilling ONLY from verified seen/introduced words
-    if (finalQuestions.length < 20 && stageQuizPool.length > 0) {
-      while (finalQuestions.length < 20) {
-        const needed = 20 - finalQuestions.length;
-        const extra = [...stageQuizPool].sort(() => Math.random() - 0.5).slice(0, needed);
-        const extraSteps = extra.map(item => buildProgressiveQuizStep(item, levelVal, isWordKnownForConjugation(item.spanish)));
-        finalQuestions = [...finalQuestions, ...extraSteps];
+        const newlySeen = takeUnseen.map(item => item.spanish);
+        if (newlySeen.length > 0 && markFlashcardsSeen) {
+          markFlashcardsSeen(newlySeen);
+        }
       }
-    } else if (finalQuestions.length > 20) {
-      if (cardSteps.length < 20) {
-        finalQuestions = [...cardSteps, ...shuffledQuizSteps.slice(0, 20 - cardSteps.length)];
+
+      const cardSteps = selectedFlashcards.map(item => ({
+        item,
+        isCardIntro: true
+      }));
+
+      const currentlyIntroduced = selectedFlashcards.map(item => item.spanish);
+      const eligibleStageItems = stageItems.filter(item => 
+        seenWords.includes(item.spanish) || currentlyIntroduced.includes(item.spanish)
+      );
+
+      const stageQuizPool = eligibleStageItems.length > 0 
+        ? eligibleStageItems 
+        : (selectedFlashcards.length > 0 ? selectedFlashcards : stageItems.slice(0, 5));
+
+      let quizItems = [];
+      if (state.isReviewReady) {
+        const pool = eligibleStageItems.length > 0 ? eligibleStageItems : stageItems;
+        const shuffledStage = [...pool].sort(() => Math.random() - 0.5);
+        quizItems = shuffledStage.slice(0, 20);
+        
+        while (quizItems.length < 20 && pool.length > 0) {
+          const needed = 20 - quizItems.length;
+          const extra = [...pool].sort(() => Math.random() - 0.5).slice(0, needed);
+          quizItems = [...quizItems, ...extra];
+        }
       } else {
-        finalQuestions = finalQuestions.slice(0, 20);
+        const currentQuizCount = Math.ceil(quizCount * 0.7);
+        const reviewQuizCount = quizCount - currentQuizCount;
+
+        let reviewQuizItems = [];
+        if (state.questStage > 2 && reviewQuizCount > 0) {
+          const pastSubcategories = [];
+          for (let s = 2; s < state.questStage; s++) {
+            if (STAGES[s]?.subcategories) {
+              pastSubcategories.push(...STAGES[s].subcategories);
+            }
+          }
+          const pastItems = vocabularyData.filter(item => 
+            pastSubcategories.includes(item.subcategory)
+          );
+          const knownPast = pastItems.filter(item => 
+            state.wordsAnsweredCorrectly?.includes(item.spanish) ||
+            state.stageFlashcardsSeen?.includes(item.spanish)
+          );
+          if (knownPast.length > 0) {
+            reviewQuizItems = [...knownPast].sort(() => Math.random() - 0.5).slice(0, reviewQuizCount);
+          }
+        }
+
+        const neededCurrent = quizCount - reviewQuizItems.length;
+        let filledCurrent = [];
+        while (filledCurrent.length < neededCurrent && stageQuizPool.length > 0) {
+          const needed = neededCurrent - filledCurrent.length;
+          const extra = [...stageQuizPool].sort(() => Math.random() - 0.5).slice(0, needed);
+          filledCurrent = [...filledCurrent, ...extra];
+        }
+
+        quizItems = [...filledCurrent, ...reviewQuizItems];
+      }
+
+      const isWordKnownForConjugation = (word) => {
+        if (state.questStage === 1) return true;
+        return (state.stageFlashcardsSeen || []).includes(word) || (state.wordsAnsweredCorrectly || []).includes(word);
+      };
+
+      const quizSteps = quizItems.map(item => buildProgressiveQuizStep(item, levelVal, isWordKnownForConjugation(item.spanish)));
+      const shuffledQuizSteps = [...quizSteps].sort(() => Math.random() - 0.5);
+
+      finalQuestions = [...cardSteps, ...shuffledQuizSteps];
+
+      if (finalQuestions.length < 20 && stageQuizPool.length > 0) {
+        while (finalQuestions.length < 20) {
+          const needed = 20 - finalQuestions.length;
+          const extra = [...stageQuizPool].sort(() => Math.random() - 0.5).slice(0, needed);
+          const extraSteps = extra.map(item => buildProgressiveQuizStep(item, levelVal, isWordKnownForConjugation(item.spanish)));
+          finalQuestions = [...finalQuestions, ...extraSteps];
+        }
+      } else if (finalQuestions.length > 20) {
+        if (cardSteps.length < 20) {
+          finalQuestions = [...cardSteps, ...shuffledQuizSteps.slice(0, 20 - cardSteps.length)];
+        } else {
+          finalQuestions = finalQuestions.slice(0, 20);
+        }
       }
     }
 

@@ -661,57 +661,79 @@ export default function StudyQuest({
       seenWords.includes(item.spanish) || currentlyIntroduced.includes(item.spanish)
     );
 
-    const stageQuizPool = eligibleStageItems.length > 0 ? eligibleStageItems : stageItems;
+    const stageQuizPool = eligibleStageItems.length > 0 
+      ? eligibleStageItems 
+      : (selectedFlashcards.length > 0 ? selectedFlashcards : stageItems.slice(0, 5));
 
     let quizItems = [];
     if (state.isReviewReady) {
-      const shuffledStage = [...stageItems].sort(() => Math.random() - 0.5);
+      const pool = eligibleStageItems.length > 0 ? eligibleStageItems : stageItems;
+      const shuffledStage = [...pool].sort(() => Math.random() - 0.5);
       quizItems = shuffledStage.slice(0, 20);
       
-      if (quizItems.length < 20) {
+      while (quizItems.length < 20 && pool.length > 0) {
         const needed = 20 - quizItems.length;
-        const extraPool = vocabularyData.filter(item => !activeStage.subcategories.includes(item.subcategory));
-        const extraItems = extraPool.sort(() => Math.random() - 0.5).slice(0, needed);
-        quizItems = [...quizItems, ...extraItems];
+        const extra = [...pool].sort(() => Math.random() - 0.5).slice(0, needed);
+        quizItems = [...quizItems, ...extra];
       }
     } else {
-      const currentQuizCount = Math.ceil(quizCount * 0.6);
+      const currentQuizCount = Math.ceil(quizCount * 0.7);
       const reviewQuizCount = quizCount - currentQuizCount;
-
-      const shuffledCurrent = [...stageQuizPool].sort(() => Math.random() - 0.5);
-      const currentQuizItems = shuffledCurrent.slice(0, currentQuizCount);
 
       let reviewQuizItems = [];
       if (state.questStage > 1 && reviewQuizCount > 0) {
         const pastSubcategories = [];
         for (let s = 1; s < state.questStage; s++) {
-          pastSubcategories.push(...STAGES[s].subcategories);
+          if (STAGES[s]?.subcategories) {
+            pastSubcategories.push(...STAGES[s].subcategories);
+          }
         }
         const pastItems = vocabularyData.filter(item => 
           pastSubcategories.includes(item.subcategory)
         );
-        const shuffledPast = pastItems.sort(() => Math.random() - 0.5);
-        reviewQuizItems = shuffledPast.slice(0, reviewQuizCount);
+        // Only review past words that the user has already answered correctly or seen
+        const knownPast = pastItems.filter(item => 
+          state.wordsAnsweredCorrectly?.includes(item.spanish) ||
+          state.stageFlashcardsSeen?.includes(item.spanish)
+        );
+        if (knownPast.length > 0) {
+          reviewQuizItems = [...knownPast].sort(() => Math.random() - 0.5).slice(0, reviewQuizCount);
+        }
       }
 
-      if (reviewQuizItems.length < reviewQuizCount) {
-        const needed = reviewQuizCount - reviewQuizItems.length;
-        const extra = shuffledCurrent.slice(currentQuizCount, currentQuizCount + needed);
-        quizItems = [...currentQuizItems, ...reviewQuizItems, ...extra];
-      } else {
-        quizItems = [...currentQuizItems, ...reviewQuizItems];
+      // Fill remaining quiz items from stageQuizPool (words already introduced/seen)
+      const neededCurrent = quizCount - reviewQuizItems.length;
+      let filledCurrent = [];
+      while (filledCurrent.length < neededCurrent && stageQuizPool.length > 0) {
+        const needed = neededCurrent - filledCurrent.length;
+        const extra = [...stageQuizPool].sort(() => Math.random() - 0.5).slice(0, needed);
+        filledCurrent = [...filledCurrent, ...extra];
       }
+
+      quizItems = [...filledCurrent, ...reviewQuizItems];
     }
 
     const quizSteps = quizItems.map(item => buildProgressiveQuizStep(item, levelVal));
-    finalQuestions = [...cardSteps, ...quizSteps].sort(() => Math.random() - 0.5);
+    const shuffledQuizSteps = [...quizSteps].sort(() => Math.random() - 0.5);
 
-    if (finalQuestions.length < 20) {
-      const needed = 20 - finalQuestions.length;
-      const backfills = stageItems.sort(() => Math.random() - 0.5).slice(0, needed).map(item => buildProgressiveQuizStep(item, levelVal));
-      finalQuestions = [...finalQuestions, ...backfills];
+    // CRITICAL: Present all flashcard learning introductions FIRST.
+    // The user will NEVER encounter a quiz question before seeing the flashcard that teaches it!
+    finalQuestions = [...cardSteps, ...shuffledQuizSteps];
+
+    // Ensure exactly 20 items if possible, backfilling ONLY from verified seen/introduced words
+    if (finalQuestions.length < 20 && stageQuizPool.length > 0) {
+      while (finalQuestions.length < 20) {
+        const needed = 20 - finalQuestions.length;
+        const extra = [...stageQuizPool].sort(() => Math.random() - 0.5).slice(0, needed);
+        const extraSteps = extra.map(item => buildProgressiveQuizStep(item, levelVal));
+        finalQuestions = [...finalQuestions, ...extraSteps];
+      }
     } else if (finalQuestions.length > 20) {
-      finalQuestions = finalQuestions.slice(0, 20);
+      if (cardSteps.length < 20) {
+        finalQuestions = [...cardSteps, ...shuffledQuizSteps.slice(0, 20 - cardSteps.length)];
+      } else {
+        finalQuestions = finalQuestions.slice(0, 20);
+      }
     }
 
     setQuestQuestions(finalQuestions);
@@ -1797,8 +1819,11 @@ export default function StudyQuest({
               <div className="glass-panel" style={{ padding: '30px', textAlign: 'center', maxWidth: '550px', margin: '0 auto' }}>
                 <Swords size={36} color="var(--primary)" style={{ margin: '0 auto 12px' }} />
                 <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '8px' }}>Start Custom Practice Quiz</h4>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: '1.4' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', lineHeight: '1.4' }}>
                   Test yourself in: <strong>{selectedSubcategory}</strong>. You will receive 10 questions. Errors deal damage to your HP!
+                </p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--accent)', marginBottom: '20px', background: 'rgba(16, 185, 129, 0.05)', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.15)', display: 'inline-block' }}>
+                  💡 Tip: First time studying this topic? Switch to <strong>Flashcards</strong> above to learn the words first!
                 </p>
 
                 {selectedCategory === "Verbs" && selectedSubcategory !== "Verbs Structured Like Gustar" && (

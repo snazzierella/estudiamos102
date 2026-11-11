@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import vocabularyData from '../data/vocabulary.json';
 import { formatEnglishPrompt } from '../utils/difficultyMapper';
 import { Swords, ArrowRight, Trophy } from 'lucide-react';
+import { generateConjugationQuestion } from '../utils/conjugationHelper';
+import { generateSentenceBuilderQuestion } from '../utils/sentenceBuilderHelper';
+import SentenceBuilder from './SentenceBuilder';
 
 export default function PlacementTest({ completePlacement }) {
   const [started, setStarted] = useState(false);
@@ -12,8 +15,12 @@ export default function PlacementTest({ completePlacement }) {
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
-  // Generate 16 balanced questions (2 from each of the 8 core subcategories)
+  // Generate 16 balanced questions:
+  // - 8 Vocabulary (1 from each core 101 subcategory)
+  // - 4 Verb Conjugation (Present tense of core 101 verbs)
+  // - 4 Sentence Construction (Drag-and-drop / tap syntax with distractors)
   const generateQuestions = () => {
+    // 1. Eight Core Vocabulary Questions
     const targetSubcategories = [
       "Greetings, Goodbyes, & Conversation",
       "Family",
@@ -25,60 +32,105 @@ export default function PlacementTest({ completePlacement }) {
       "Colors"
     ];
 
-    const generated = [];
+    const vocabQuestions = [];
 
     targetSubcategories.forEach(sub => {
-      // Find all vocabulary words matching this subcategory
       const subWords = vocabularyData.filter(item => item.subcategory === sub);
       if (subWords.length === 0) return;
 
-      // Shuffle and pick 2 unique random words
       const shuffled = [...subWords].sort(() => Math.random() - 0.5);
-      const picked = shuffled.slice(0, 2);
+      const randWord = shuffled[0];
 
-      picked.forEach(randWord => {
-        // Translation direction: 0 = Spanish to English, 1 = English to Spanish
-        const qType = Math.random() > 0.5 ? 1 : 0;
-        const correctVal = qType === 1 ? randWord.spanish : formatEnglishPrompt(randWord.spanish, randWord.english);
-        const questionWord = qType === 1 ? formatEnglishPrompt(randWord.spanish, randWord.english) : randWord.spanish;
+      // Translation direction: 0 = Spanish to English, 1 = English to Spanish
+      const qType = Math.random() > 0.5 ? 1 : 0;
+      const correctVal = qType === 1 ? randWord.spanish : formatEnglishPrompt(randWord.spanish, randWord.english);
+      const questionWord = qType === 1 ? formatEnglishPrompt(randWord.spanish, randWord.english) : randWord.spanish;
 
-        // distractor generator: prioritizes same subcategory first
-        const distractors = [];
-        const shuffledSub = [...subWords].sort(() => Math.random() - 0.5);
-        for (let item of shuffledSub) {
+      const distractors = [];
+      const shuffledSub = [...subWords].sort(() => Math.random() - 0.5);
+      for (let item of shuffledSub) {
+        const val = qType === 1 ? item.spanish : formatEnglishPrompt(item.spanish, item.english);
+        if (val.toLowerCase() !== correctVal.toLowerCase() && !distractors.includes(val) && val.length < 35) {
+          distractors.push(val);
+        }
+        if (distractors.length === 3) break;
+      }
+
+      if (distractors.length < 3) {
+        const shuffledAll = [...vocabularyData].sort(() => Math.random() - 0.5);
+        for (let item of shuffledAll) {
           const val = qType === 1 ? item.spanish : formatEnglishPrompt(item.spanish, item.english);
           if (val.toLowerCase() !== correctVal.toLowerCase() && !distractors.includes(val) && val.length < 35) {
             distractors.push(val);
           }
           if (distractors.length === 3) break;
         }
+      }
 
-        // Fallback to general pool if we don't have 3 distractors
-        if (distractors.length < 3) {
-          const shuffledAll = [...vocabularyData].sort(() => Math.random() - 0.5);
-          for (let item of shuffledAll) {
-            const val = qType === 1 ? item.spanish : formatEnglishPrompt(item.spanish, item.english);
-            if (val.toLowerCase() !== correctVal.toLowerCase() && !distractors.includes(val) && val.length < 35) {
-              distractors.push(val);
-            }
-            if (distractors.length === 3) break;
-          }
-        }
+      const choices = [correctVal, ...distractors].sort(() => Math.random() - 0.5);
 
-        const choices = [correctVal, ...distractors].sort(() => Math.random() - 0.5);
-
-        generated.push({
-          spanish: questionWord,
-          correct: correctVal,
-          choices: choices,
-          subcategory: sub,
-          originalItem: randWord
-        });
+      vocabQuestions.push({
+        isVocab: true,
+        spanish: questionWord,
+        correct: correctVal,
+        choices: choices,
+        subcategory: sub,
+        originalItem: randWord
       });
     });
 
-    // Shuffle all 16 questions to mix topics organically
-    return generated.sort(() => Math.random() - 0.5);
+    // 2. Four Verb Conjugation Questions (Present Tense of Core 101 Verbs)
+    const CORE_101_VERBS = [
+      { spanish: "hablar", english: "to speak" },
+      { spanish: "comer", english: "to eat" },
+      { spanish: "vivir", english: "to live" },
+      { spanish: "tener", english: "to have" },
+      { spanish: "ser", english: "to be (identity/characteristic)" },
+      { spanish: "estar", english: "to be (state/location)" },
+      { spanish: "ir", english: "to go" },
+      { spanish: "hacer", english: "to do / make" },
+      { spanish: "querer", english: "to want" },
+      { spanish: "estudiar", english: "to study" },
+      { spanish: "comprar", english: "to buy" }
+    ];
+
+    const shuffledVerbs = [...CORE_101_VERBS].sort(() => Math.random() - 0.5);
+    const chosenVerbs = shuffledVerbs.slice(0, 4);
+    const conjugationQuestions = chosenVerbs.map(v => {
+      const qSpec = generateConjugationQuestion(v, { tense: "present", excludeVosotros: true });
+      return {
+        isConjugation: true,
+        verb: qSpec.verb,
+        meaning: qSpec.meaning,
+        pronoun: qSpec.pronoun,
+        tense: qSpec.tense,
+        tenseLabel: qSpec.tenseLabel,
+        correct: qSpec.correct,
+        choices: qSpec.choices,
+        spanish: qSpec.verb
+      };
+    });
+
+    // 3. Four Sentence Construction Questions (Drag & Drop / Tap from Unit 1 pool)
+    const sentenceQuestions = [];
+    const usedSentences = new Set();
+    while (sentenceQuestions.length < 4) {
+      const sSpec = generateSentenceBuilderQuestion({ unit: 1 });
+      if (!usedSentences.has(sSpec.targetSentence)) {
+        usedSentences.add(sSpec.targetSentence);
+        sentenceQuestions.push({
+          isSentenceBuilder: true,
+          ...sSpec,
+          correct: sSpec.targetSentence,
+          spanish: sSpec.prompt,
+          choices: []
+        });
+      }
+    }
+
+    // Combine and shuffle all 16 questions
+    const allQuestions = [...vocabQuestions, ...conjugationQuestions, ...sentenceQuestions];
+    return allQuestions.sort(() => Math.random() - 0.5);
   };
 
   // Generate questions list on mount
@@ -95,6 +147,15 @@ export default function PlacementTest({ completePlacement }) {
     setSelectedAnswer(choice);
     
     const isCorrect = choice.trim().toLowerCase() === activeQuestion.correct.trim().toLowerCase();
+
+    if (isCorrect) {
+      setScore(prev => prev + 1);
+    }
+  };
+
+  const handleSentenceAnswer = (isCorrect, answerStr) => {
+    if (selectedAnswer !== null) return; // locked
+    setSelectedAnswer(isCorrect ? activeQuestion.correct : answerStr);
 
     if (isCorrect) {
       setScore(prev => prev + 1);
@@ -143,7 +204,7 @@ export default function PlacementTest({ completePlacement }) {
         <Swords size={60} color="var(--accent)" style={{ margin: '0 auto 20px', animation: 'float 3s ease-in-out infinite' }} />
         <h2 style={{ fontSize: '2rem', fontFamily: 'var(--font-display)', marginBottom: '12px' }}>Prueba de Nivel</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5', marginBottom: '30px' }}>
-          Welcome to Estudiamos 102! This quick 16-question placement test determines your starting stage. It tests 2 words from each of our core Spanish 101 review categories (Family, Food, Professions, Numbers, Calendar, Hobbies, Colors, and Greetings).
+          Welcome to Estudiamos 102! This comprehensive 16-question placement test determines your starting stage. It evaluates your core Spanish 101 foundations: 8 essential vocabulary terms, 4 present-tense verb conjugations, and 4 sentence construction challenges (drag and drop words into proper grammar order).
         </p>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -218,36 +279,81 @@ export default function PlacementTest({ completePlacement }) {
         <div className="quiz-progress-fill" style={{ width: `${((currentIdx + 1) / 16) * 100}%` }}></div>
       </div>
 
-      <div className="quiz-question-card">
-        <div className="quiz-question-lbl">
-          Translate this term:
+      {/* Conjugation Card */}
+      {activeQuestion.isConjugation ? (
+        <div className="quiz-question-card" style={{ textAlign: 'center' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
+            border: '1.5px solid #10b981',
+            borderRadius: '999px',
+            padding: '4px 14px',
+            color: '#34d399',
+            fontSize: '0.78rem',
+            fontWeight: 800,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            marginBottom: '10px',
+            boxShadow: '0 0 14px rgba(16, 185, 129, 0.25)'
+          }}>
+            ⚡ TIEMPO PRESENTE
+          </div>
+          <div className="quiz-question-lbl">
+            Conjugate for: <strong style={{ color: 'var(--primary)', fontSize: '1.05rem' }}>{activeQuestion.pronoun}</strong>
+          </div>
+          <h3 className="quiz-word" style={{ margin: '8px 0 4px' }}>{activeQuestion.verb}</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', margin: 0 }}>
+            ({activeQuestion.meaning})
+          </p>
         </div>
-        <h3 className="quiz-word">{activeQuestion.spanish}</h3>
-      </div>
+      ) : !activeQuestion.isSentenceBuilder ? (
+        /* Standard Vocabulary Card */
+        <div className="quiz-question-card">
+          <div className="quiz-question-lbl">
+            Translate this term:
+          </div>
+          <h3 className="quiz-word">{activeQuestion.spanish}</h3>
+        </div>
+      ) : null}
 
-      <div className="quiz-choices-grid">
-        {activeQuestion.choices.map((choice, idx) => {
-          let btnClass = "";
-          if (selectedAnswer !== null) {
-            if (choice === activeQuestion.correct) {
-              btnClass = "correct";
-            } else if (choice === selectedAnswer) {
-              btnClass = "wrong";
+      {/* Question Interaction Area */}
+      {activeQuestion.isSentenceBuilder ? (
+        <div style={{ marginTop: '10px' }}>
+          <SentenceBuilder
+            question={activeQuestion}
+            onAnswer={handleSentenceAnswer}
+            answered={selectedAnswer !== null}
+            userCorrect={selectedAnswer === activeQuestion.correct}
+            showSubmitButton={true}
+          />
+        </div>
+      ) : (
+        <div className="quiz-choices-grid">
+          {activeQuestion.choices.map((choice, idx) => {
+            let btnClass = "";
+            if (selectedAnswer !== null) {
+              if (choice === activeQuestion.correct) {
+                btnClass = "correct";
+              } else if (choice === selectedAnswer) {
+                btnClass = "wrong";
+              }
             }
-          }
 
-          return (
-            <button
-              key={idx}
-              className={`quiz-choice-btn ${btnClass}`}
-              onClick={() => handleSelect(choice)}
-              disabled={selectedAnswer !== null}
-            >
-              {choice}
-            </button>
-          );
-        })}
-      </div>
+            return (
+              <button
+                key={idx}
+                className={`quiz-choice-btn ${btnClass}`}
+                onClick={() => handleSelect(choice)}
+                disabled={selectedAnswer !== null}
+              >
+                {choice}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {selectedAnswer !== null && (
         <div 
@@ -256,7 +362,11 @@ export default function PlacementTest({ completePlacement }) {
         >
           {selectedAnswer === activeQuestion.correct 
             ? "¡Correcto! Bien hecho." 
-            : `Incorrecto. Correct translation: "${activeQuestion.correct}".`
+            : activeQuestion.isSentenceBuilder
+              ? `Incorrecto. Frase correcta: "${activeQuestion.correct}".`
+              : activeQuestion.isConjugation
+                ? `Incorrecto. Forma correcta: "${activeQuestion.correct}".`
+                : `Incorrecto. Correct translation: "${activeQuestion.correct}".`
           }
           <button 
             className="btn btn-primary" 

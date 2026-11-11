@@ -13,6 +13,8 @@ import {
   INDIRECT_OBJECT_PRONOUNS
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
+import { generateSentenceBuilderQuestion } from '../utils/sentenceBuilderHelper';
+import SentenceBuilder from './SentenceBuilder';
 import { 
   Swords, 
   ArrowLeft, 
@@ -464,19 +466,66 @@ export default function StudyQuest({
 
     const isVerb = isVerbItem(item);
 
-    let format = "mc"; // "mc", "conjugation", "typing"
+    let format = "mc"; // "mc", "conjugation", "typing", "sentenceBuilder"
     
     // Only allow conjugation if this verb has been introduced and seen in prior flashcards/study
     const canConjugate = isVerb && allowConjugation;
 
+    // Difficulty scaling across unit levels (1 to 19 & Review Gate):
+    // Sentence construction questions are reserved for later levels in the unit
     if (L <= 5) {
+      // Early introductory levels: 100% Multiple Choice (safe intro)
       format = "mc";
     } else if (L <= 10) {
+      // Intermediate early: mostly MC, occasional conjugation/typing (~30%), 0% sentence construction
       format = Math.random() > 0.7 ? (canConjugate ? "conjugation" : "typing") : "mc";
-    } else if (L <= 15) {
-      format = Math.random() > 0.4 ? (canConjugate ? "conjugation" : "typing") : "mc";
+    } else if (L <= 14) {
+      // Intermediate late: sentence construction is introduced (~25%)
+      const rand = Math.random();
+      if (rand < 0.25) {
+        format = "sentenceBuilder";
+      } else if (rand < 0.65) {
+        format = canConjugate ? "conjugation" : "typing";
+      } else {
+        format = "mc";
+      }
     } else {
-      format = Math.random() > 0.3 ? (canConjugate ? "conjugation" : "typing") : "mc";
+      // Later levels (L >= 15) and Review Gate: sentence construction is prominently featured (~45%)
+      const rand = Math.random();
+      if (rand < 0.45) {
+        format = "sentenceBuilder";
+      } else if (rand < 0.75) {
+        format = canConjugate ? "conjugation" : "typing";
+      } else {
+        format = "mc";
+      }
+    }
+
+    if (format === "sentenceBuilder") {
+      const sSpec = generateSentenceBuilderQuestion({ unit: state.questStage || 1 });
+      if (sSpec) {
+        return {
+          item,
+          isCardIntro: false,
+          isConjugation: false,
+          isFillInTheBlank: false,
+          isSentenceBuilder: true,
+          unit: sSpec.unit,
+          prompt: sSpec.prompt,
+          promptLanguage: sSpec.promptLanguage,
+          targetLanguage: sSpec.targetLanguage,
+          targetSentence: sSpec.targetSentence,
+          targetWords: sSpec.targetWords,
+          targetTokens: sSpec.targetTokens,
+          bankTokens: sSpec.bankTokens,
+          distractors: sSpec.distractors,
+          meaning: sSpec.meaning,
+          hint: sSpec.hint,
+          correct: sSpec.targetSentence,
+          questionWord: sSpec.prompt,
+          choices: []
+        };
+      }
     }
 
     if (format === "conjugation") {
@@ -924,6 +973,34 @@ export default function StudyQuest({
     }
   };
 
+  const handlePracticeSentenceAnswer = (isCorrect, answerStr) => {
+    if (practiceAnswered) return;
+    const currentQ = practiceQuestions[practiceCurrentIdx];
+    setPracticeSelected(isCorrect ? currentQ.correct : answerStr);
+    setPracticeAnswered(true);
+
+    if (isCorrect) {
+      setPracticeScore(prev => prev + 1);
+      setHealTrigger(true);
+      playSound('correct');
+      if (updateWordMastery && currentQ.item) {
+        updateWordMastery(currentQ.item.spanish, true);
+      }
+      setTimeout(() => setHealTrigger(false), 500);
+    } else {
+      setShakeTrigger(true);
+      playSound('wrong');
+      if (updateWordMastery && currentQ.item) {
+        updateWordMastery(currentQ.item.spanish, false);
+      }
+      if (addMistake && currentQ.item) {
+        addMistake(currentQ.item.spanish);
+      }
+      if (!state.fainted) takeDamage(15);
+      setTimeout(() => setShakeTrigger(false), 500);
+    }
+  };
+
   const handlePracticeCardLearned = () => {
     addXp(2);
     setHealTrigger(true);
@@ -1009,6 +1086,54 @@ export default function StudyQuest({
     }
   };
 
+  const handleQuestSentenceAnswer = (isCorrect, answerStr) => {
+    if (questAnswered) return;
+    const currentQ = questQuestions[questCurrentIdx];
+    setQuestSelected(isCorrect ? currentQ.correct : answerStr);
+    setQuestAnswered(true);
+
+    if (isCorrect) {
+      setQuestScore(prev => prev + 1);
+      setHealTrigger(true);
+      playSound('correct');
+      
+      if (updateWordMastery && currentQ.item) {
+        updateWordMastery(currentQ.item.spanish, true);
+      }
+
+      setComboCount(prev => {
+        const next = prev + 1;
+        setMaxCombo(m => Math.max(m, next));
+        return next;
+      });
+
+      if (recordWordAnsweredCorrectly && currentQ.item) {
+        recordWordAnsweredCorrectly(currentQ.item.spanish);
+      }
+      setTimeout(() => setHealTrigger(false), 500);
+    } else {
+      setShakeTrigger(true);
+      playSound('wrong');
+      setComboCount(0);
+
+      if (updateWordMastery && currentQ.item) {
+        updateWordMastery(currentQ.item.spanish, false);
+      }
+
+      setQuestMissedQuestions(prev => {
+        if (prev.some(q => q.questionWord === currentQ.questionWord)) return prev;
+        return [...prev, currentQ];
+      });
+
+      if (addMistake && currentQ.item) {
+        addMistake(currentQ.item.spanish);
+      }
+
+      takeDamage(15);
+      setTimeout(() => setShakeTrigger(false), 500);
+    }
+  };
+
   const handleQuestNext = () => {
     setQuestSelected(null);
     setQuestAnswered(false);
@@ -1028,6 +1153,23 @@ export default function StudyQuest({
 
     const currentQ = redemptionQuestions[redemptionCurrentIdx];
     if (choice === currentQ.correct) {
+      playSound('correct');
+      setRedemptionScore(prev => prev + 1);
+    } else {
+      playSound('wrong');
+      setTimeout(() => {
+        setRedemptionFailed(true);
+      }, 800);
+    }
+  };
+
+  const handleRedemptionSentenceAnswer = (isCorrect, answerStr) => {
+    if (redemptionAnswered) return;
+    const currentQ = redemptionQuestions[redemptionCurrentIdx];
+    setRedemptionAnswered(true);
+    setRedemptionSelected(isCorrect ? currentQ.correct : answerStr);
+
+    if (isCorrect) {
       playSound('correct');
       setRedemptionScore(prev => prev + 1);
     } else {
@@ -1262,7 +1404,56 @@ export default function StudyQuest({
         };
       });
 
-      questions = [...cardSteps, ...quizSteps];
+      // 3. Include sentence builder challenge in mixed mode
+      const sSpecMixed = generateSentenceBuilderQuestion({ unit: state.questStage || 1 });
+      const sentenceSteps = [{
+        item: null,
+        isCardIntro: false,
+        isConjugation: false,
+        isFillInTheBlank: false,
+        isSentenceBuilder: true,
+        unit: sSpecMixed.unit,
+        prompt: sSpecMixed.prompt,
+        promptLanguage: sSpecMixed.promptLanguage,
+        targetLanguage: sSpecMixed.targetLanguage,
+        targetSentence: sSpecMixed.targetSentence,
+        targetWords: sSpecMixed.targetWords,
+        targetTokens: sSpecMixed.targetTokens,
+        bankTokens: sSpecMixed.bankTokens,
+        distractors: sSpecMixed.distractors,
+        meaning: sSpecMixed.meaning,
+        hint: sSpecMixed.hint,
+        correct: sSpecMixed.targetSentence,
+        questionWord: sSpecMixed.prompt,
+        choices: []
+      }];
+
+      questions = [...cardSteps, ...quizSteps, ...sentenceSteps];
+    } else if (practiceQuizMode === "sentence") {
+      questions = Array.from({ length: 8 }).map(() => {
+        const sSpec = generateSentenceBuilderQuestion({ unit: state.questStage || 1 });
+        return {
+          item: null,
+          isCardIntro: false,
+          isConjugation: false,
+          isFillInTheBlank: false,
+          isSentenceBuilder: true,
+          unit: sSpec.unit,
+          prompt: sSpec.prompt,
+          promptLanguage: sSpec.promptLanguage,
+          targetLanguage: sSpec.targetLanguage,
+          targetSentence: sSpec.targetSentence,
+          targetWords: sSpec.targetWords,
+          targetTokens: sSpec.targetTokens,
+          bankTokens: sSpec.bankTokens,
+          distractors: sSpec.distractors,
+          meaning: sSpec.meaning,
+          hint: sSpec.hint,
+          correct: sSpec.targetSentence,
+          questionWord: sSpec.prompt,
+          choices: []
+        };
+      });
     } else {
       let pool = practiceCards;
       if (practiceQuizMode === "conjugation") {
@@ -1411,10 +1602,14 @@ export default function StudyQuest({
   const shakeClass = shakeTrigger ? "shake damage-flash" : healTrigger ? "heal-flash" : "";
 
   const isQuestUserCorrect = questAnswered && currentQuestQ && (
-    compareAnswers(currentQuestQ.correct, questSelected)
+    currentQuestQ.isSentenceBuilder
+      ? questSelected?.trim().toLowerCase() === currentQuestQ.correct?.trim().toLowerCase()
+      : compareAnswers(currentQuestQ.correct, questSelected)
   );
   const isPracticeUserCorrect = practiceAnswered && practiceQuestions[practiceCurrentIdx] && (
-    compareAnswers(practiceQuestions[practiceCurrentIdx].correct, practiceSelected)
+    practiceQuestions[practiceCurrentIdx].isSentenceBuilder
+      ? practiceSelected?.trim().toLowerCase() === practiceQuestions[practiceCurrentIdx].correct?.trim().toLowerCase()
+      : compareAnswers(practiceQuestions[practiceCurrentIdx].correct, practiceSelected)
   );
 
   // RPG Sprite calculations
@@ -1760,118 +1955,130 @@ export default function StudyQuest({
             </div>
           ) : (
             <div>
-              <div 
-                className="quiz-question-card"
-                style={currentQuestQ.isConjugation ? {
-                  borderTop: isPreteriteTense(currentQuestQ) ? '4px solid #f97316' : '4px solid #10b981',
-                  boxShadow: isPreteriteTense(currentQuestQ) ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
-                } : undefined}
-              >
-                {currentQuestQ.isConjugation ? (
-                  <>
-                    {/* High-Noticeability Tense Banner */}
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                      <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
+              {!currentQuestQ.isSentenceBuilder && (
+                <div 
+                  className="quiz-question-card"
+                  style={currentQuestQ.isConjugation ? {
+                    borderTop: isPreteriteTense(currentQuestQ) ? '4px solid #f97316' : '4px solid #10b981',
+                    boxShadow: isPreteriteTense(currentQuestQ) ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
+                  } : undefined}
+                >
+                  {currentQuestQ.isConjugation ? (
+                    <>
+                      {/* High-Noticeability Tense Banner */}
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                        <div style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '6px 16px',
+                          borderRadius: '20px',
+                          background: isPreteriteTense(currentQuestQ) 
+                            ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15))' 
+                            : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
+                          border: isPreteriteTense(currentQuestQ) ? '2px solid #f97316' : '2px solid #10b981',
+                          color: isPreteriteTense(currentQuestQ) ? '#fed7aa' : '#a7f3d0',
+                          fontWeight: '800',
+                          fontSize: '0.88rem',
+                          letterSpacing: '0.04em',
+                          boxShadow: isPreteriteTense(currentQuestQ) ? '0 0 14px rgba(249, 115, 22, 0.35)' : '0 0 14px rgba(16, 185, 129, 0.35)',
+                          textTransform: 'uppercase'
+                        }}>
+                          <span>{isPreteriteTense(currentQuestQ) ? '⏳' : '⚡'}</span>
+                          <span>TIEMPO: <strong>{isPreteriteTense(currentQuestQ) ? 'PRETÉRITO (PAST TENSE)' : 'PRESENTE (PRESENT TENSE)'}</strong></span>
+                        </div>
+                      </div>
+
+                      <div className="quiz-question-lbl" style={{ marginBottom: '8px' }}>
+                        Conjugate in <strong style={{ color: isPreteriteTense(currentQuestQ) ? '#fb923c' : '#34d399', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+                          {isPreteriteTense(currentQuestQ) ? 'PAST TENSE (Pretérito)' : 'PRESENT TENSE (Presente)'}
+                        </strong> for:
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+                        {currentQuestQ.isReciprocal ? (
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
+                            🤝 Acción Recíproca ("Each Other")
+                          </span>
+                        ) : currentQuestQ.isReflexive ? (
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
+                            Reflexivo (me, te, se, nos, os, se)
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <h3 className="quiz-word" style={{ color: 'var(--primary)' }}>{currentQuestQ.questionWord}</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQuestQ.meaning})</p>
+                      
+                      <div style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
                         gap: '8px',
-                        padding: '6px 16px',
-                        borderRadius: '20px',
-                        background: isPreteriteTense(currentQuestQ) 
-                          ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15))' 
-                          : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
-                        border: isPreteriteTense(currentQuestQ) ? '2px solid #f97316' : '2px solid #10b981',
-                        color: isPreteriteTense(currentQuestQ) ? '#fed7aa' : '#a7f3d0',
-                        fontWeight: '800',
-                        fontSize: '0.88rem',
-                        letterSpacing: '0.04em',
-                        boxShadow: isPreteriteTense(currentQuestQ) ? '0 0 14px rgba(249, 115, 22, 0.35)' : '0 0 14px rgba(16, 185, 129, 0.35)',
-                        textTransform: 'uppercase'
+                        background: 'rgba(250, 204, 21, 0.1)', 
+                        padding: '6px 14px', 
+                        borderRadius: '16px', 
+                        color: 'var(--gold)', 
+                        fontWeight: 'bold', 
+                        fontSize: '0.9rem' 
                       }}>
-                        <span>{isPreteriteTense(currentQuestQ) ? '⏳' : '⚡'}</span>
-                        <span>TIEMPO: <strong>{isPreteriteTense(currentQuestQ) ? 'PRETÉRITO (PAST TENSE)' : 'PRESENTE (PRESENT TENSE)'}</strong></span>
-                      </div>
-                    </div>
-
-                    <div className="quiz-question-lbl" style={{ marginBottom: '8px' }}>
-                      Conjugate in <strong style={{ color: isPreteriteTense(currentQuestQ) ? '#fb923c' : '#34d399', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-                        {isPreteriteTense(currentQuestQ) ? 'PAST TENSE (Pretérito)' : 'PRESENT TENSE (Presente)'}
-                      </strong> for:
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                      {currentQuestQ.isReciprocal ? (
-                        <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
-                          🤝 Acción Recíproca ("Each Other")
+                        <span>Pronoun: {currentQuestQ.pronoun}</span>
+                        <span style={{
+                          fontSize: '0.7rem',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          background: isPreteriteTense(currentQuestQ) ? '#f97316' : '#10b981',
+                          color: '#ffffff',
+                          fontWeight: '800',
+                          letterSpacing: '0.04em'
+                        }}>
+                          {isPreteriteTense(currentQuestQ) ? 'PASADO' : 'PRESENTE'}
                         </span>
-                      ) : currentQuestQ.isReflexive ? (
-                        <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
-                          Reflexivo (me, te, se, nos, os, se)
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <h3 className="quiz-word" style={{ color: 'var(--primary)' }}>{currentQuestQ.questionWord}</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQuestQ.meaning})</p>
-                    
-                    <div style={{ 
-                      display: 'inline-flex', 
-                      alignItems: 'center', 
-                      gap: '8px',
-                      background: 'rgba(250, 204, 21, 0.1)', 
-                      padding: '6px 14px', 
-                      borderRadius: '16px', 
-                      color: 'var(--gold)', 
-                      fontWeight: 'bold', 
-                      fontSize: '0.9rem' 
-                    }}>
-                      <span>Pronoun: {currentQuestQ.pronoun}</span>
-                      <span style={{
-                        fontSize: '0.7rem',
-                        padding: '2px 8px',
-                        borderRadius: '6px',
-                        background: isPreteriteTense(currentQuestQ) ? '#f97316' : '#10b981',
-                        color: '#ffffff',
-                        fontWeight: '800',
-                        letterSpacing: '0.04em'
-                      }}>
-                        {isPreteriteTense(currentQuestQ) ? 'PASADO' : 'PRESENTE'}
-                      </span>
-                    </div>
-                  </>
-                ) : currentQuestQ.isFillInTheBlank ? (
-                  <>
-                    <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
-                    <h3 className="quiz-word" style={{ color: 'var(--accent)' }}>{currentQuestQ.questionWord}</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: currentQuestQ.hint ? '8px' : '12px' }}>({currentQuestQ.meaning})</p>
-                    {currentQuestQ.hint && (
-                      <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '5px 12px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.78rem', marginBottom: '12px', maxWidth: '90%' }}>
-                        💡 <strong>Pista:</strong> {currentQuestQ.hint}
                       </div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <div className="quiz-question-lbl">
-                      {currentQuestQ.type === 2 ? "Type the Spanish translation:" : "Choose the correct translation:"}
-                    </div>
-                    <h3 className="quiz-word">{currentQuestQ.questionWord}</h3>
-                  </>
-                )}
-                
-                {isVerbItem(currentQuestQ.item) && (
-                  <button 
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => openCodex(currentQuestQ.item)}
-                    style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
-                  >
-                    📖 Ver Conjugaciones
-                  </button>
-                )}
-              </div>
+                    </>
+                  ) : currentQuestQ.isFillInTheBlank ? (
+                    <>
+                      <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
+                      <h3 className="quiz-word" style={{ color: 'var(--accent)' }}>{currentQuestQ.questionWord}</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: currentQuestQ.hint ? '8px' : '12px' }}>({currentQuestQ.meaning})</p>
+                      {currentQuestQ.hint && (
+                        <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '5px 12px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.78rem', marginBottom: '12px', maxWidth: '90%' }}>
+                          💡 <strong>Pista:</strong> {currentQuestQ.hint}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="quiz-question-lbl">
+                        {currentQuestQ.type === 2 ? "Type the Spanish translation:" : "Choose the correct translation:"}
+                      </div>
+                      <h3 className="quiz-word">{currentQuestQ.questionWord}</h3>
+                    </>
+                  )}
+                  
+                  {isVerbItem(currentQuestQ.item) && (
+                    <button 
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openCodex(currentQuestQ.item)}
+                      style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
+                    >
+                      📖 Ver Conjugaciones
+                    </button>
+                  )}
+                </div>
+              )}
 
-              {currentQuestQ.isConjugation || currentQuestQ.isFillInTheBlank || currentQuestQ.type !== 2 ? (
+              {currentQuestQ.isSentenceBuilder ? (
+                <div style={{ marginTop: '10px' }}>
+                  <SentenceBuilder
+                    question={currentQuestQ}
+                    onAnswer={handleQuestSentenceAnswer}
+                    answered={questAnswered}
+                    userCorrect={isQuestUserCorrect}
+                    showSubmitButton={true}
+                  />
+                </div>
+              ) : currentQuestQ.isConjugation || currentQuestQ.isFillInTheBlank || currentQuestQ.type !== 2 ? (
                 <div className="quiz-choices-grid">
                   {currentQuestQ.choices.map((choice, idx) => {
                     let btnClass = "";
@@ -1955,11 +2162,13 @@ export default function StudyQuest({
                 >
                   {isQuestUserCorrect 
                     ? `¡Correcto! ${comboCount >= 3 ? `Combo Streak ${comboCount}! ` : ''}` 
-                    : currentQuestQ.isConjugation
-                      ? `Incorrecto. Correct form (${isPreteriteTense(currentQuestQ) ? 'Pretérito / Past' : 'Presente'}): "${currentQuestQ.correct}"`
-                      : currentQuestQ.isFillInTheBlank
-                        ? `Incorrecto. Correct word: "${currentQuestQ.correct}"`
-                        : `Incorrecto! Correct translation: "${currentQuestQ.correct}"`
+                    : currentQuestQ.isSentenceBuilder
+                      ? `Incorrecto. Frase correcta: "${currentQuestQ.correct}"`
+                      : currentQuestQ.isConjugation
+                        ? `Incorrecto. Correct form (${isPreteriteTense(currentQuestQ) ? 'Pretérito / Past' : 'Presente'}): "${currentQuestQ.correct}"`
+                        : currentQuestQ.isFillInTheBlank
+                          ? `Incorrecto. Correct word: "${currentQuestQ.correct}"`
+                          : `Incorrecto! Correct translation: "${currentQuestQ.correct}"`
                   }
                   <button className="btn btn-primary" onClick={handleQuestNext} style={{ width: '100%', marginTop: '16px' }}>
                     {questCurrentIdx === questQuestions.length - 1 ? "Finish Quest" : "Next Challenge"} <ArrowRight size={16} />
@@ -2133,34 +2342,47 @@ export default function StudyQuest({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '440px', margin: '0 auto 20px' }}>
                     <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
                       <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Quiz Type</label>
-                      <div style={{ display: 'flex', gap: '6px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
                         <button 
                           className={`btn ${practiceQuizMode === 'translation' ? 'btn-primary' : 'btn-secondary'}`} 
-                          style={{ flex: 1, padding: '7px 4px', fontSize: '0.78rem' }} 
+                          style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
                           onClick={() => setPracticeQuizMode("translation")}
                         >
                           Traducción
                         </button>
                         <button 
                           className={`btn ${practiceQuizMode === 'conjugation' ? 'btn-primary' : 'btn-secondary'}`} 
-                          style={{ flex: 1, padding: '7px 4px', fontSize: '0.78rem' }} 
+                          style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
                           onClick={() => setPracticeQuizMode("conjugation")}
                         >
                           ⚡ Conjugación
                         </button>
                         <button 
+                          className={`btn ${practiceQuizMode === 'sentence' ? 'btn-primary' : 'btn-secondary'}`} 
+                          style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
+                          onClick={() => setPracticeQuizMode("sentence")}
+                        >
+                          🧩 Frases
+                        </button>
+                        <button 
                           className={`btn ${practiceQuizMode === 'mixed' ? 'btn-primary' : 'btn-secondary'}`} 
-                          style={{ flex: 1.3, padding: '7px 4px', fontSize: '0.78rem' }} 
+                          style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
                           onClick={() => setPracticeQuizMode("mixed")}
                         >
-                          🔀 Mixto (Cards + Conj)
+                          🔀 Mixto
                         </button>
                       </div>
                     </div>
 
+                    {practiceQuizMode === 'sentence' && (
+                      <p style={{ fontSize: '0.78rem', color: 'var(--accent)', margin: '-4px 0 2px', lineHeight: '1.4' }}>
+                        🧩 Construcción de Frases: Arrastra o toca las palabras para ordenar correctamente las oraciones en español con distractores gramaticales.
+                      </p>
+                    )}
+
                     {practiceQuizMode === 'mixed' && (
                       <p style={{ fontSize: '0.78rem', color: 'var(--accent)', margin: '-4px 0 2px', lineHeight: '1.4' }}>
-                        🔀 Modo Mixto: Repasa primero tarjetas interactivas de verbos y vocabulario, ¡y luego pon a prueba sus conjugaciones en el mismo mazo!
+                        🔀 Modo Mixto: Repasa tarjetas interactivas, desafíos de conjugación y construcción de frases en el mismo mazo integral.
                       </p>
                     )}
 
@@ -2347,7 +2569,7 @@ export default function StudyQuest({
                     ¡Entendido! / Siguiente (+2 XP)
                   </button>
                 </div>
-              ) : practiceQuestions[practiceCurrentIdx]?.isConjugation ? (
+              ) : practiceQuestions[practiceCurrentIdx]?.isSentenceBuilder ? null : practiceQuestions[practiceCurrentIdx]?.isConjugation ? (
                 (() => {
                   const currQ = practiceQuestions[practiceCurrentIdx];
                   const isPret = isPreteriteTense(currQ);
@@ -2494,7 +2716,17 @@ export default function StudyQuest({
               )}
 
               {!practiceQuestions[practiceCurrentIdx]?.isCardIntro && (
-                practiceQuestions[practiceCurrentIdx]?.isConjugation || practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank || practiceQuestions[practiceCurrentIdx]?.type !== 2 ? (
+                practiceQuestions[practiceCurrentIdx]?.isSentenceBuilder ? (
+                  <div style={{ marginTop: '10px' }}>
+                    <SentenceBuilder
+                      question={practiceQuestions[practiceCurrentIdx]}
+                      onAnswer={handlePracticeSentenceAnswer}
+                      answered={practiceAnswered}
+                      userCorrect={isPracticeUserCorrect}
+                      showSubmitButton={true}
+                    />
+                  </div>
+                ) : practiceQuestions[practiceCurrentIdx]?.isConjugation || practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank || practiceQuestions[practiceCurrentIdx]?.type !== 2 ? (
                   <div className="quiz-choices-grid">
                     {practiceQuestions[practiceCurrentIdx]?.choices.map((choice, idx) => {
                       let btnClass = "";
@@ -2577,9 +2809,11 @@ export default function StudyQuest({
                 >
                   {isPracticeUserCorrect 
                     ? "¡Correcto! +10 XP | +1 Gold" 
-                    : practiceQuestions[practiceCurrentIdx]?.isConjugation
-                      ? `Incorrecto! Correct form (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito / Past' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
-                      : `Incorrecto! Correct Answer: "${practiceQuestions[practiceCurrentIdx].correct}"`
+                    : practiceQuestions[practiceCurrentIdx]?.isSentenceBuilder
+                      ? `Incorrecto! Frase correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`
+                      : practiceQuestions[practiceCurrentIdx]?.isConjugation
+                        ? `Incorrecto! Correct form (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito / Past' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                        : `Incorrecto! Correct Answer: "${practiceQuestions[practiceCurrentIdx].correct}"`
                   }
                   <button className="btn btn-primary" onClick={handlePracticeNext} style={{ width: '100%', marginTop: '16px' }}>
                     Next Question <ArrowRight size={16} />
@@ -2622,14 +2856,15 @@ export default function StudyQuest({
 
             return (
               <div>
-                <div 
-                  className="quiz-question-card"
-                  style={currentQ.isConjugation ? {
-                    borderTop: isPreteriteTense(currentQ) ? '4px solid #f97316' : '4px solid #10b981',
-                    boxShadow: isPreteriteTense(currentQ) ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
-                  } : undefined}
-                >
-                  {currentQ.isConjugation ? (
+                {!currentQ.isSentenceBuilder && (
+                  <div 
+                    className="quiz-question-card"
+                    style={currentQ.isConjugation ? {
+                      borderTop: isPreteriteTense(currentQ) ? '4px solid #f97316' : '4px solid #10b981',
+                      boxShadow: isPreteriteTense(currentQ) ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
+                    } : undefined}
+                  >
+                    {currentQ.isConjugation ? (
                     <>
                       {/* High-Noticeability Tense Banner */}
                       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
@@ -2721,6 +2956,7 @@ export default function StudyQuest({
                     </>
                   )}
                 </div>
+              )}
 
                 {redemptionFailed ? (
                   <div style={{ textAlign: 'center', padding: '20px 0' }}>
@@ -2751,7 +2987,17 @@ export default function StudyQuest({
                   </div>
                 ) : (
                   <div>
-                    {currentQ.isConjugation || currentQ.isFillInTheBlank || currentQ.type !== 2 ? (
+                    {currentQ.isSentenceBuilder ? (
+                      <div style={{ marginTop: '10px' }}>
+                        <SentenceBuilder
+                          question={currentQ}
+                          onAnswer={handleRedemptionSentenceAnswer}
+                          answered={redemptionAnswered}
+                          userCorrect={isRedemptionCorrect}
+                          showSubmitButton={true}
+                        />
+                      </div>
+                    ) : currentQ.isConjugation || currentQ.isFillInTheBlank || currentQ.type !== 2 ? (
                       <div className="quiz-choices-grid">
                         {currentQ.choices.map((choice, idx) => {
                           let btnClass = "";
@@ -2821,9 +3067,11 @@ export default function StudyQuest({
                       >
                         {isRedemptionCorrect
                           ? "¡Correcto!" 
-                          : currentQ.isConjugation
-                            ? `Incorrecto. Correct form (${isPreteriteTense(currentQ) ? 'Pretérito / Past' : 'Presente'}): "${currentQ.correct}"`
-                            : `Incorrecto. Correct answer: "${currentQ.correct}"`
+                          : currentQ.isSentenceBuilder
+                            ? `Incorrecto. Frase correcta: "${currentQ.correct}"`
+                            : currentQ.isConjugation
+                              ? `Incorrecto. Correct form (${isPreteriteTense(currentQ) ? 'Pretérito / Past' : 'Presente'}): "${currentQ.correct}"`
+                              : `Incorrecto. Correct answer: "${currentQ.correct}"`
                         }
                         <button className="btn btn-primary" onClick={handleRedemptionNext} style={{ width: '100%', marginTop: '16px' }}>
                           Next Question <ArrowRight size={16} />

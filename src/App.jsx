@@ -29,6 +29,7 @@ export default function App() {
     checkAndUpdateStreak,
     advanceQuest,
     passStageReview,
+    recordLevelCompletion,
     resetAllProgress,
     setExcludeVosotros,
     markFlashcardsSeen,
@@ -125,6 +126,8 @@ export default function App() {
             recordQuizPerformance={recordQuizPerformance}
             advanceQuest={advanceQuest}
             passStageReview={passStageReview}
+            recordLevelCompletion={recordLevelCompletion}
+            incrementBountyCount={incrementBountyCount}
             markFlashcardsSeen={markFlashcardsSeen}
             recordWordAnsweredCorrectly={recordWordAnsweredCorrectly}
             addMistake={addMistake}

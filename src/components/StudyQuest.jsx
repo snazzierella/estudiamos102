@@ -24,8 +24,14 @@ import {
   Heart, 
   Award, 
   Shuffle, 
-  Play
+  Play,
+  CheckCircle2,
+  Lock,
+  RotateCcw,
+  Layers,
+  Compass
 } from 'lucide-react';
+import { getLevelInfo } from '../utils/levelInfoHelper';
 
 export default function StudyQuest({ 
   state, 
@@ -37,6 +43,8 @@ export default function StudyQuest({
   recordQuizPerformance, 
   advanceQuest, 
   passStageReview, 
+  recordLevelCompletion,
+  incrementBountyCount,
   markFlashcardsSeen, 
   addMistake, 
   updateWordMastery, 
@@ -92,6 +100,45 @@ export default function StudyQuest({
   
   const questInputRef = useRef(null);
   const practiceInputRef = useRef(null);
+
+  // Level select & replay state
+  const [selectedStage, setSelectedStage] = useState(state.questStage || 1);
+  const [selectedLevel, setSelectedLevel] = useState(state.isReviewReady ? 20 : (state.questLevel || 1));
+  const [activeQuestStage, setActiveQuestStage] = useState(state.questStage || 1);
+  const [activeQuestLevel, setActiveQuestLevel] = useState(state.isReviewReady ? 20 : (state.questLevel || 1));
+  const [activeQuestIsReview, setActiveQuestIsReview] = useState(state.isReviewReady || false);
+  const [activeQuestIsReplay, setActiveQuestIsReplay] = useState(false);
+
+  // Sync selected stage/level when campaign state changes
+  useEffect(() => {
+    setSelectedStage(prev => (prev > (state.questStage || 1) ? (state.questStage || 1) : prev));
+  }, [state.questStage]);
+
+  useEffect(() => {
+    if (selectedStage === state.questStage) {
+      setSelectedLevel(state.isReviewReady ? 20 : (state.questLevel || 1));
+    }
+  }, [state.questLevel, state.isReviewReady, state.questStage, selectedStage]);
+
+  const isLevelPassed = (stageNum, levelNum) => {
+    const levelKey = `${stageNum}-${levelNum}`;
+    if (state.completedLevels?.includes(levelKey)) return true;
+    if (stageNum < state.questStage) return true;
+    if (stageNum > state.questStage) return false;
+    // For current stage:
+    if (state.isReviewReady) return levelNum < 20;
+    return levelNum < state.questLevel;
+  };
+
+  const isLevelCurrent = (stageNum, levelNum) => {
+    if (stageNum !== state.questStage) return false;
+    if (state.isReviewReady) return levelNum === 20;
+    return levelNum === state.questLevel;
+  };
+
+  const isLevelLocked = (stageNum, levelNum) => {
+    return !isLevelPassed(stageNum, levelNum) && !isLevelCurrent(stageNum, levelNum);
+  };
 
   const openCodex = (verbItemOrString) => {
     const verbStr = typeof verbItemOrString === 'string' ? verbItemOrString : (verbItemOrString?.spanish || "");
@@ -662,10 +709,20 @@ export default function StudyQuest({
     };
   };
 
-  const startQuestLevel = () => {
+  const startQuestLevel = (targetStage, targetLevel) => {
     initAudio();
-    const activeStage = STAGES[state.questStage];
+    const stageVal = targetStage !== undefined ? targetStage : (selectedStage || state.questStage);
+    const activeStage = STAGES[stageVal];
     if (!activeStage) return;
+
+    let levelVal = targetLevel !== undefined ? targetLevel : (selectedLevel || (state.isReviewReady ? 20 : state.questLevel));
+    const isReview = levelVal === 20;
+    const isReplay = isLevelPassed(stageVal, levelVal);
+
+    setActiveQuestStage(stageVal);
+    setActiveQuestLevel(levelVal);
+    setActiveQuestIsReview(isReview);
+    setActiveQuestIsReplay(isReplay);
 
     setQuestMissedQuestions([]);
     setComboCount(0);
@@ -703,11 +760,10 @@ export default function StudyQuest({
 
     const stageItems = getUniqueItems(weightedItems, stageItemsRaw.length);
 
-    const levelVal = state.questLevel;
     const seenWords = state.stageFlashcardsSeen || [];
     const unseenStageItems = stageItems.filter(item => !seenWords.includes(item.spanish));
 
-    const isUnit1 = state.questStage === 1;
+    const isUnit1 = stageVal === 1;
     let finalQuestions = [];
 
     if (isUnit1) {
@@ -725,7 +781,7 @@ export default function StudyQuest({
       let conjugationCount = 8;
       let vocabCount = 3;
 
-      if (state.isReviewReady) {
+      if (isReview) {
         // Review Gate (Boss Battle): 50% Sentence Builder, 30% Conjugation, 20% Fill in the Blank
         sentenceCount = 10;
         fillCount = 4;
@@ -938,7 +994,7 @@ export default function StudyQuest({
       finalQuestions = u1Questions.slice(0, 20);
     } else {
       // Unit 2+ progressive flow with gradual introduction of words
-      const targetCardCount = state.isReviewReady ? 0 : Math.max(1, 16 - Math.floor((levelVal - 1) * 0.85));
+      const targetCardCount = (isReview || isReplay) ? 0 : Math.max(1, 16 - Math.floor((levelVal - 1) * 0.85));
       const cardCount = Math.min(targetCardCount, unseenStageItems.length);
       const quizCount = 20 - cardCount;
 
@@ -970,7 +1026,7 @@ export default function StudyQuest({
         : (selectedFlashcards.length > 0 ? selectedFlashcards : stageItems.slice(0, 5));
 
       let quizItems = [];
-      if (state.isReviewReady) {
+      if (isReview) {
         const pool = eligibleStageItems.length > 0 ? eligibleStageItems : stageItems;
         const shuffledStage = [...pool].sort(() => Math.random() - 0.5);
         quizItems = shuffledStage.slice(0, 20);
@@ -985,9 +1041,9 @@ export default function StudyQuest({
         const reviewQuizCount = quizCount - currentQuizCount;
 
         let reviewQuizItems = [];
-        if (state.questStage > 2 && reviewQuizCount > 0) {
+        if (stageVal > 2 && reviewQuizCount > 0) {
           const pastSubcategories = [];
-          for (let s = 2; s < state.questStage; s++) {
+          for (let s = 2; s < stageVal; s++) {
             if (STAGES[s]?.subcategories) {
               pastSubcategories.push(...STAGES[s].subcategories);
             }
@@ -1016,7 +1072,7 @@ export default function StudyQuest({
       }
 
       const isWordKnownForConjugation = (word) => {
-        if (state.questStage === 1) return true;
+        if (stageVal === 1) return true;
         return (state.stageFlashcardsSeen || []).includes(word) || (state.wordsAnsweredCorrectly || []).includes(word);
       };
 
@@ -1486,18 +1542,53 @@ export default function StudyQuest({
     else if (maxCombo >= 5) comboMultiplier = 1.75;
     else if (maxCombo >= 3) comboMultiplier = 1.5;
 
-    let baseGoldReward = state.isReviewReady ? 50 : 12;
-    let baseXpReward = state.isReviewReady ? 200 : 60;
+    let baseGoldReward = activeQuestIsReview ? 50 : 12;
+    let baseXpReward = activeQuestIsReview ? 200 : 60;
 
     let totalGoldEarned = baseGoldReward;
     let totalXpEarned = baseXpReward;
 
     const usedHints = hintsUsedInSession > 0;
 
-    if (state.isReviewReady) {
+    if (activeQuestIsReplay) {
+      // Replaying an already passed level for extra practice:
+      // Does NOT move the main campaign pointer forward or backward
+      const passingRequired = activeQuestIsReview 
+        ? Math.ceil(quizQuestionsCount * 0.8) 
+        : Math.ceil(quizQuestionsCount * 0.6);
+      const passed = questScore >= passingRequired;
+
+      recordQuizPerformance(questScore, quizQuestionsCount);
+      if (incrementBountyCount) {
+        incrementBountyCount("quest");
+      }
+
+      if (passed) {
+        let practiceGold = activeQuestIsReview ? 25 : 10;
+        let practiceXp = activeQuestIsReview ? 100 : 40;
+        if (comboMultiplier > 1.0) {
+          practiceGold = Math.ceil(practiceGold * comboMultiplier);
+          practiceXp = Math.ceil(practiceXp * comboMultiplier);
+        }
+        addGold(practiceGold);
+        addXp(practiceXp);
+
+        if (recordLevelCompletion) {
+          recordLevelCompletion(activeQuestStage, activeQuestLevel, questScore, quizQuestionsCount, usedHints);
+        }
+
+        const hintlessMsg = !usedHints ? " 🧠 ¡Maestría Sin Pistas! (Sin pistas utilizadas)" : "";
+        setQuestSuccessMsg(`¡Práctica de Nivel Superada! You cleared Level ${activeQuestIsReview ? 'Review Gate' : activeQuestLevel} with ${questScore}/${quizQuestionsCount} (${Math.round((questScore/quizQuestionsCount)*100)}%)! Gained +${practiceGold} Gold & +${practiceXp} XP! (Streak Multiplier: ${comboMultiplier}x)${hintlessMsg}`);
+      } else {
+        setQuestFailMsg(`Práctica no superada. You scored ${questScore}/${quizQuestionsCount} (Required: ${passingRequired}/${quizQuestionsCount}). ¡Sigue practicando!`);
+      }
+    } else if (activeQuestIsReview) {
       const passingRequired = Math.ceil(quizQuestionsCount * 0.8); // 80% Boss Review Gate
       const success = passStageReview(questScore, quizQuestionsCount, usedHints);
       recordQuizPerformance(questScore, quizQuestionsCount);
+      if (recordLevelCompletion) {
+        recordLevelCompletion(activeQuestStage, 20, questScore, quizQuestionsCount, usedHints);
+      }
       if (success) {
         if (comboMultiplier > 1.0) {
           const extraGold = Math.ceil(baseGoldReward * (comboMultiplier - 1));
@@ -1516,6 +1607,9 @@ export default function StudyQuest({
       const passingRequired = Math.ceil(quizQuestionsCount * 0.6);
       const success = advanceQuest(questScore, quizQuestionsCount, usedHints);
       recordQuizPerformance(questScore, quizQuestionsCount);
+      if (recordLevelCompletion) {
+        recordLevelCompletion(activeQuestStage, activeQuestLevel, questScore, quizQuestionsCount, usedHints);
+      }
       if (success) {
         if (comboMultiplier > 1.0) {
           const extraGold = Math.ceil(baseGoldReward * (comboMultiplier - 1));
@@ -1839,9 +1933,8 @@ export default function StudyQuest({
     }
   };
 
-  const activeStageSpec = STAGES[state.questStage];
-  const maxStageProgress = 19;
-  const stageProgressPct = Math.round((Math.min(19, state.questLevel - 1) / maxStageProgress) * 100);
+  const selectedStageSpec = STAGES[selectedStage];
+  const selectedLevelInfo = getLevelInfo(selectedStage, selectedLevel);
 
   const currentQuestQ = questQuestions[questCurrentIdx];
   const shakeClass = shakeTrigger ? "shake damage-flash" : healTrigger ? "heal-flash" : "";
@@ -1986,107 +2079,420 @@ export default function StudyQuest({
                 )}
               </div>
 
-              <button className="btn btn-primary" onClick={() => { setQuestFinished(false); startQuestLevel(); }}>
-                {questSuccessMsg ? "Continue Next Quest" : "Retake Quest Level"}
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={() => setQuestFinished(false)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Layers size={16} /> Selector de Niveles
+                </button>
+                {activeQuestIsReplay ? (
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => { setQuestFinished(false); startQuestLevel(activeQuestStage, activeQuestLevel); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <RotateCcw size={16} /> Repetir Práctica ({activeQuestIsReview ? 'Review Gate' : `Nivel ${activeQuestLevel}`})
+                  </button>
+                ) : (
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => { setQuestFinished(false); startQuestLevel(); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    {questSuccessMsg ? "Continuar al Siguiente Nivel" : "Reintentar Nivel"} <Play size={16} />
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
-          {!questFinished && activeStageSpec && (
-            state.questStage >= 5 ? (
-              <div className="glass-panel" style={{ padding: '36px 30px', maxWidth: '650px', margin: '0 auto', textAlign: 'center' }}>
-                <div style={{ fontSize: '3.5rem', marginBottom: '12px', animation: 'float 3s ease-in-out infinite' }}>⏳</div>
-                
-                <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--gold)', letterSpacing: '0.12em', fontWeight: 'bold' }}>
-                  Campamento de Aprendizaje
-                </span>
-                <h3 style={{ fontSize: '1.9rem', fontFamily: 'var(--font-display)', margin: '6px 0 16px' }}>
-                  Stage {state.questStage}: {activeStageSpec.name}
-                </h3>
+          {!questFinished && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Stage Navigator (Stages 1 through 4) */}
+              <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+                {[1, 2, 3, 4].map(sNum => {
+                  const isStageUnlocked = sNum <= state.questStage;
+                  const isStageCurrent = sNum === state.questStage;
+                  const isStageCompleted = sNum < state.questStage;
+                  const isStageSelected = sNum === selectedStage;
 
-                <div style={{ background: 'rgba(0,0,0,0.15)', padding: '20px', borderRadius: '16px', textAlign: 'left', border: '1px solid var(--card-border)', marginBottom: '24px' }}>
-                  <h4 style={{ fontSize: '0.95rem', color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>📚</span> Próximamente / Coming Soon in Class
-                  </h4>
-                  <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
-                    Units 5 through 8 will unlock as we cover them in class! In the meantime, you can sharpen your mastery with <strong>Práctica Libre (Free Practice)</strong> or revisit and review Units 1 through 4.
-                  </p>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-                  <button 
-                    className="btn btn-primary" 
-                    onClick={() => setActiveTab("practice")}
-                    style={{ fontSize: '0.95rem', padding: '12px 24px' }}
-                  >
-                    Go to Free Practice <ArrowRight size={16} />
-                  </button>
-                </div>
+                  return (
+                    <button
+                      key={sNum}
+                      onClick={() => {
+                        if (isStageUnlocked) {
+                          setSelectedStage(sNum);
+                          setSelectedLevel(sNum === state.questStage ? (state.isReviewReady ? 20 : state.questLevel) : 1);
+                        }
+                      }}
+                      disabled={!isStageUnlocked}
+                      className={`btn ${isStageSelected ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 16px',
+                        fontSize: '0.88rem',
+                        borderRadius: '12px',
+                        opacity: isStageUnlocked ? 1 : 0.45,
+                        cursor: isStageUnlocked ? 'pointer' : 'not-allowed',
+                        border: isStageSelected ? '2px solid var(--primary)' : isStageCurrent ? '1.5px solid var(--gold)' : undefined,
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      <span>{sNum === 1 ? '🏰' : sNum === 2 ? '🩺' : sNum === 3 ? '🛍️' : '✈️'}</span>
+                      <span>Etapa {sNum}</span>
+                      {isStageCompleted && (
+                        <span style={{ fontSize: '0.7rem', background: 'rgba(16, 185, 129, 0.2)', color: 'var(--accent)', padding: '2px 6px', borderRadius: '8px', fontWeight: 'bold' }}>
+                          ✓ 100%
+                        </span>
+                      )}
+                      {isStageCurrent && (
+                        <span style={{ fontSize: '0.7rem', background: 'rgba(250, 204, 21, 0.2)', color: 'var(--gold)', padding: '2px 6px', borderRadius: '8px', fontWeight: 'bold' }}>
+                          Actual
+                        </span>
+                      )}
+                      {!isStageUnlocked && <Lock size={12} color="var(--text-muted)" />}
+                    </button>
+                  );
+                })}
               </div>
-            ) : (
-              <div className="glass-panel" style={{ padding: '30px', maxWidth: '650px', margin: '0 auto', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '8px', animation: 'float 3s ease-in-out infinite' }}>🗺️</div>
-                
-                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--gold)', letterSpacing: '0.1em', fontWeight: 'bold' }}>
-                  Campamento de Aprendizaje
-                </span>
-                <h3 style={{ fontSize: '1.8rem', fontFamily: 'var(--font-display)', margin: '4px 0 16px' }}>
-                  Stage {state.questStage}: {activeStageSpec.name}
-                </h3>
 
-                <div style={{ background: 'rgba(0,0,0,0.15)', padding: '16px 20px', borderRadius: '16px', textAlign: 'left', border: '1px solid var(--card-border)', marginBottom: '24px' }}>
-                  <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '6px', fontWeight: 'bold' }}>
-                    Unlocks Vocabulary:
-                  </h4>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                    {activeStageSpec.subcategories.map(sub => (
-                      <span key={sub} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', padding: '4px 10px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600 }}>
-                        {sub}
+              {/* Selected Stage Panel */}
+              {selectedStageSpec && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  
+                  {/* Stage Summary Banner */}
+                  <div className="glass-panel" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--card-border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+                      <div style={{ maxWidth: '650px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--gold)', letterSpacing: '0.1em', fontWeight: 'bold' }}>
+                            Etapa {selectedStage} {selectedStage < state.questStage ? '• Completada ✓' : selectedStage === state.questStage ? '• En Curso ⚔️' : ''}
+                          </span>
+                        </div>
+                        <h3 style={{ fontSize: '1.4rem', fontFamily: 'var(--font-display)', margin: '0 0 6px' }}>
+                          {selectedStageSpec.name}
+                        </h3>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                          {selectedStage < state.questStage 
+                            ? "Has superado todos los niveles de esta etapa. ¡Selecciona cualquier nivel para practicarlo libremente para ganar Oro y XP extra!"
+                            : selectedStage === state.questStage
+                              ? `Progreso de campaña: Nivel ${state.isReviewReady ? 'Puerta de Revisión' : state.questLevel} de 19. Puedes volver a niveles anteriores para practicar sin riesgo.`
+                              : "Etapa bloqueada."}
+                        </p>
+                      </div>
+
+                      {/* Quick play current quest level */}
+                      <div>
+                        {selectedStage === state.questStage ? (
+                          !state.fainted && (
+                            <button
+                              className={`btn ${state.isReviewReady ? 'btn-danger' : 'btn-primary'}`}
+                              onClick={() => startQuestLevel(state.questStage, state.isReviewReady ? 20 : state.questLevel)}
+                              style={{ fontSize: '0.88rem', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                            >
+                              <Play size={14} /> Jugar Nivel Actual ({state.isReviewReady ? 'Review Gate' : `Lvl ${state.questLevel}`})
+                            </button>
+                          )
+                        ) : (
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => {
+                              setSelectedStage(state.questStage);
+                              setSelectedLevel(state.isReviewReady ? 20 : state.questLevel);
+                            }}
+                            style={{ fontSize: '0.88rem', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                          >
+                            <Compass size={14} /> Ir a Mi Etapa Actual ({state.questStage})
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Progress Bar in Selected Stage */}
+                    <div className="stat-row" style={{ margin: '0 0 16px' }}>
+                      <div className="stat-label">
+                        <span>Niveles de Etapa Aprobados</span>
+                        <strong>
+                          {selectedStage < state.questStage 
+                            ? "20 / 20 (100%)" 
+                            : selectedStage === state.questStage 
+                              ? (state.isReviewReady ? "19 / 20 (95%) • Puerta de Revisión Lista" : `${Math.min(19, state.questLevel - 1)} / 20 (${Math.round((Math.min(19, state.questLevel - 1) / 20) * 100)}%)`)
+                              : "0 / 20"}
+                        </strong>
+                      </div>
+                      <div className="progress-bar-outer" style={{ height: '8px' }}>
+                        <div 
+                          className="progress-bar-inner xp" 
+                          style={{ 
+                            width: selectedStage < state.questStage 
+                              ? '100%' 
+                              : selectedStage === state.questStage 
+                                ? (state.isReviewReady ? '95%' : `${Math.round((Math.min(19, state.questLevel - 1) / 20) * 100)}%`)
+                                : '0%' 
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Subcategories tags */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {selectedStageSpec.subcategories.slice(0, 10).map(sub => (
+                        <span key={sub} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                          {sub}
+                        </span>
+                      ))}
+                      {selectedStageSpec.subcategories.length > 10 && (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', alignSelf: 'center' }}>
+                          +{selectedStageSpec.subcategories.length - 10} más
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 20 Levels Grid */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ fontSize: '1rem', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Layers size={18} color="var(--primary)" /> Niveles de la Etapa {selectedStage}
+                      </h4>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        Haz clic en un nivel aprobado para practicar
                       </span>
-                    ))}
+                    </div>
+
+                    <div style={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', 
+                      gap: '12px', 
+                      marginBottom: '16px' 
+                    }}>
+                      {Array.from({ length: 20 }, (_, i) => i + 1).map(lvl => {
+                        const passed = isLevelPassed(selectedStage, lvl);
+                        const current = isLevelCurrent(selectedStage, lvl);
+                        const locked = isLevelLocked(selectedStage, lvl);
+                        const isSelected = selectedLevel === lvl;
+                        const isReviewGate = lvl === 20;
+
+                        const levelInfo = getLevelInfo(selectedStage, lvl);
+                        const recordKey = `${selectedStage}-${lvl}`;
+                        const record = state.levelRecords?.[recordKey];
+
+                        return (
+                          <button
+                            key={lvl}
+                            onClick={() => {
+                              if (!locked) {
+                                setSelectedLevel(lvl);
+                              }
+                            }}
+                            disabled={locked}
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              textAlign: 'center',
+                              padding: '12px 8px',
+                              borderRadius: '14px',
+                              border: isSelected
+                                ? '2px solid var(--primary)'
+                                : current
+                                  ? '2px solid var(--gold)'
+                                  : passed
+                                    ? '1.5px solid rgba(16, 185, 129, 0.45)'
+                                    : '1px solid rgba(255, 255, 255, 0.08)',
+                              background: isSelected
+                                ? 'rgba(99, 102, 241, 0.18)'
+                                : current
+                                  ? 'linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(99, 102, 241, 0.1))'
+                                  : passed
+                                    ? 'rgba(16, 185, 129, 0.06)'
+                                    : 'rgba(255, 255, 255, 0.02)',
+                              boxShadow: isSelected
+                                ? '0 0 16px var(--primary-glow)'
+                                : current
+                                  ? '0 0 14px rgba(250, 204, 21, 0.25)'
+                                  : 'none',
+                              opacity: locked ? 0.35 : 1,
+                              cursor: locked ? 'not-allowed' : 'pointer',
+                              transition: 'all 0.2s ease',
+                              position: 'relative'
+                            }}
+                          >
+                            {/* Top Badge */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
+                              {isReviewGate ? (
+                                <span style={{ fontSize: '0.72rem', background: current ? 'rgba(239, 68, 68, 0.2)' : passed ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)', color: current ? 'var(--danger)' : passed ? 'var(--accent)' : 'var(--text-muted)', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>
+                                  🛡️ Boss
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: current ? 'var(--gold)' : passed ? 'var(--accent)' : 'var(--text-secondary)' }}>
+                                  Nivel {lvl}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Status Icon */}
+                            <div style={{ margin: '4px 0 6px' }}>
+                              {passed ? (
+                                <CheckCircle2 size={24} color="var(--accent)" />
+                              ) : current ? (
+                                <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', animation: 'float 2s ease-in-out infinite' }}>
+                                  ⚔️
+                                </div>
+                              ) : (
+                                <Lock size={20} color="var(--text-muted)" />
+                              )}
+                            </div>
+
+                            {/* Level Title */}
+                            <span style={{ 
+                              fontSize: '0.75rem', 
+                              fontWeight: 600, 
+                              color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)',
+                              lineHeight: 1.2,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              minHeight: '2.4em'
+                            }}>
+                              {levelInfo.title}
+                            </span>
+
+                            {/* Score / Best badge */}
+                            {record && (
+                              <span style={{ marginTop: '4px', fontSize: '0.68rem', color: 'var(--gold)', fontWeight: 600 }}>
+                                ⭐ {record.bestScore}/{record.total}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <div className="stat-row" style={{ margin: 0 }}>
-                    <div className="stat-label">
-                      <span>Stage Completion Progress</span>
-                      <strong>{state.isReviewReady ? "100%" : `${stageProgressPct}%`}</strong>
+                  {/* Selected Level Detail Card */}
+                  {selectedLevelInfo && (
+                    <div 
+                      className="glass-panel" 
+                      style={{ 
+                        padding: '24px', 
+                        borderRadius: '16px',
+                        border: isLevelCurrent(selectedStage, selectedLevel)
+                          ? '2px solid var(--gold)'
+                          : isLevelPassed(selectedStage, selectedLevel)
+                            ? '2px solid var(--accent)'
+                            : '1px solid var(--card-border)',
+                        background: isLevelCurrent(selectedStage, selectedLevel)
+                          ? 'rgba(250, 204, 21, 0.03)'
+                          : isLevelPassed(selectedStage, selectedLevel)
+                            ? 'rgba(16, 185, 129, 0.03)'
+                            : 'rgba(255, 255, 255, 0.02)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '16px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                            <span style={{ 
+                              fontSize: '0.75rem', 
+                              fontWeight: 'bold', 
+                              textTransform: 'uppercase', 
+                              padding: '3px 10px', 
+                              borderRadius: '8px',
+                              background: isLevelPassed(selectedStage, selectedLevel)
+                                ? 'rgba(16, 185, 129, 0.15)'
+                                : isLevelCurrent(selectedStage, selectedLevel)
+                                  ? 'rgba(250, 204, 21, 0.15)'
+                                  : 'rgba(255, 255, 255, 0.05)',
+                              color: isLevelPassed(selectedStage, selectedLevel)
+                                ? 'var(--accent)'
+                                : isLevelCurrent(selectedStage, selectedLevel)
+                                  ? 'var(--gold)'
+                                  : 'var(--text-muted)'
+                            }}>
+                              {isLevelPassed(selectedStage, selectedLevel)
+                                ? '✓ Nivel Aprobado (Listo para Repasar)'
+                                : isLevelCurrent(selectedStage, selectedLevel)
+                                  ? '⚔️ Misión de Campaña Actual'
+                                  : '🔒 Nivel Bloqueado'}
+                            </span>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                              {selectedLevel === 20 ? 'Puerta de Revisión' : `Nivel ${selectedLevel} de 19`}
+                            </span>
+                          </div>
+
+                          <h3 style={{ fontSize: '1.3rem', fontFamily: 'var(--font-display)', margin: '4px 0' }}>
+                            {selectedLevelInfo.title}
+                          </h3>
+                          <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '4px 0 0', maxWidth: '650px', lineHeight: 1.4 }}>
+                            {selectedLevelInfo.desc}
+                          </p>
+                        </div>
+
+                        {/* Best score badge if present */}
+                        {state.levelRecords?.[`${selectedStage}-${selectedLevel}`] && (
+                          <div style={{ background: 'rgba(250, 204, 21, 0.08)', border: '1px solid rgba(250, 204, 21, 0.25)', padding: '8px 14px', borderRadius: '12px', textAlign: 'center' }}>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Mejor Puntuación</span>
+                            <strong style={{ fontSize: '1.1rem', color: 'var(--gold)' }}>
+                              ⭐ {state.levelRecords[`${selectedStage}-${selectedLevel}`].bestScore} / {state.levelRecords[`${selectedStage}-${selectedLevel}`].total}
+                            </strong>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Level requirements explanation */}
+                      <div style={{ background: 'rgba(0,0,0,0.15)', padding: '12px 16px', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>💡</span>
+                        <span>
+                          {selectedLevel === 20
+                            ? 'Evaluación tipo Jefe: Requiere al menos 16/20 (80%) para aprobar.'
+                            : isLevelPassed(selectedStage, selectedLevel)
+                              ? 'Práctica Extra: Acierta al menos 12/20 (60%) para completar la sesión de repaso y ganar oro/XP extra. ¡No arriesga tu progreso de campaña!'
+                              : 'Misión de Campaña: Acierta al menos 12/20 (60%) para desbloquear el siguiente nivel.'}
+                        </span>
+                      </div>
+
+                      {/* Start Level Button */}
+                      <div>
+                        {state.fainted ? (
+                          <button className="btn btn-secondary" disabled style={{ opacity: 0.5 }}>
+                            Estás debilitado. ¡Visita la tienda para curarte!
+                          </button>
+                        ) : isLevelLocked(selectedStage, selectedLevel) ? (
+                          <button className="btn btn-secondary" disabled style={{ opacity: 0.5, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                            <Lock size={16} /> Nivel Bloqueado (Supera los niveles anteriores)
+                          </button>
+                        ) : isLevelPassed(selectedStage, selectedLevel) ? (
+                          <button 
+                            className="btn btn-primary"
+                            onClick={() => startQuestLevel(selectedStage, selectedLevel)}
+                            style={{ fontSize: '1rem', padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                          >
+                            <RotateCcw size={16} /> Practicar Nivel {selectedLevel === 20 ? 'Review Gate' : selectedLevel} (Práctica Extra)
+                          </button>
+                        ) : (
+                          <button 
+                            className={`btn ${selectedLevel === 20 ? 'btn-danger' : 'btn-primary'}`}
+                            onClick={() => startQuestLevel(selectedStage, selectedLevel)}
+                            style={{ fontSize: '1rem', padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                          >
+                            <Play size={16} /> {selectedLevel === 20 ? 'Iniciar Puerta de Revisión' : `Iniciar Nivel ${selectedLevel} de Campaña`}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="progress-bar-outer" style={{ height: '8px' }}>
-                      <div className="progress-bar-inner xp" style={{ width: state.isReviewReady ? '100%' : `${stageProgressPct}%` }}></div>
-                    </div>
-                  </div>
+                  )}
                 </div>
-
-                {state.isReviewReady ? (
-                  <div style={{ background: 'rgba(239, 68, 68, 0.03)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '20px', borderRadius: '16px', marginBottom: '24px' }}>
-                    <h4 style={{ color: 'var(--danger)', fontFamily: 'var(--font-display)', fontSize: '1.1rem', marginBottom: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                      🛡️ Stage Review Gate Active
-                    </h4>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                      You have unlocked all content in Stage {state.questStage}! To level up to Stage {state.questStage + 1}, you must pass the Review Gate. <strong>Requires a strict 80% passing grade (16/20 or higher) to pass.</strong>
-                    </p>
-                  </div>
-                ) : (
-                  <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.4' }}>
-                    Quest Level {state.questLevel} of 19. Level quizzes mix safe flashcard previews with translation challenges. Score 12/20 to pass.
-                  </p>
-                )}
-
-                {state.fainted ? (
-                  <button className="btn btn-secondary" disabled style={{ opacity: 0.5 }}>
-                    You are fainted. Visit the shop to heal!
-                  </button>
-                ) : (
-                  <button 
-                    className={`btn ${state.isReviewReady ? 'btn-danger' : 'btn-primary'}`} 
-                    onClick={startQuestLevel}
-                    style={{ width: '100%', maxWidth: '280px', margin: '0 auto', fontSize: '1rem', padding: '14px 20px' }}
-                  >
-                    {state.isReviewReady ? "Start Review Gate" : `Start Quest Level ${state.questLevel}`} <Play size={16} />
-                  </button>
-                )}
-              </div>
-            )
+              )}
+            </div>
           )}
         </div>
       )}
@@ -2111,9 +2517,30 @@ export default function StudyQuest({
           
           {/* Header HP details */}
           <div className="quiz-header">
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-              Quest Stage {state.questStage} | Level {state.isReviewReady ? 'Review Gate' : state.questLevel}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                Quest Stage {activeQuestStage} | Level {activeQuestIsReview ? 'Review Gate (Boss)' : activeQuestLevel}
+              </span>
+              {activeQuestIsReplay && (
+                <span 
+                  style={{ 
+                    fontSize: '0.72rem', 
+                    padding: '2px 8px', 
+                    borderRadius: '12px', 
+                    background: 'rgba(99, 102, 241, 0.15)', 
+                    color: '#818cf8', 
+                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                    fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  title="Extra practice session. Your campaign progress will not decrease."
+                >
+                  <RotateCcw size={12} /> Práctica Extra
+                </span>
+              )}
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               {hintsUsedInSession === 0 ? (
                 <span 

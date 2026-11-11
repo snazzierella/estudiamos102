@@ -70,7 +70,9 @@ const INITIAL_STATE = {
   difficultyMode: "standard",
   ttsVoice: "",
   ttsRate: 0.95,
-  useGeminiTts: false
+  useGeminiTts: false,
+  completedLevels: [],
+  levelRecords: {}
 };
 
 export function useGameState() {
@@ -94,6 +96,8 @@ export function useGameState() {
           excludeVosotros,
           stageFlashcardsSeen,
           wordsAnsweredCorrectly,
+          completedLevels: parsed.completedLevels || [],
+          levelRecords: parsed.levelRecords || {},
           hintlessLessonsCount: parsed.hintlessLessonsCount || 0
         };
       }
@@ -590,6 +594,21 @@ export function useGameState() {
       let newDailyBounties = { ...prev.dailyBounties };
       newDailyBounties.questCount = (newDailyBounties.questCount || 0) + 1;
 
+      const currentLevelKey = `${prev.questStage}-${prev.questLevel}`;
+      const updatedCompleted = prev.completedLevels?.includes(currentLevelKey)
+        ? prev.completedLevels
+        : [...(prev.completedLevels || []), currentLevelKey];
+      const existingRecord = prev.levelRecords?.[currentLevelKey];
+      const bestScore = Math.max(existingRecord?.bestScore || 0, score);
+      const updatedRecords = {
+        ...(prev.levelRecords || {}),
+        [currentLevelKey]: {
+          bestScore,
+          total: totalQuizzes,
+          completedAt: Date.now()
+        }
+      };
+
       return {
         ...prev,
         questLevel: nextLevel,
@@ -601,6 +620,8 @@ export function useGameState() {
         badges: leveledBadges,
         hintlessLessonsCount: nextHintlessCount,
         dailyBounties: newDailyBounties,
+        completedLevels: updatedCompleted,
+        levelRecords: updatedRecords,
         _levelUpFlag: isLevelUp ? Date.now() : prev._levelUpFlag
       };
     });
@@ -685,6 +706,21 @@ export function useGameState() {
       const updatedSeen = [...new Set([...(prev.stageFlashcardsSeen || []), ...passedStageWords])];
       const updatedAnswered = [...new Set([...(prev.wordsAnsweredCorrectly || []), ...passedStageWords])];
 
+      const reviewLevelKey = `${prev.questStage}-20`;
+      const updatedCompleted = prev.completedLevels?.includes(reviewLevelKey)
+        ? prev.completedLevels
+        : [...(prev.completedLevels || []), reviewLevelKey];
+      const existingRecord = prev.levelRecords?.[reviewLevelKey];
+      const bestScore = Math.max(existingRecord?.bestScore || 0, score);
+      const updatedRecords = {
+        ...(prev.levelRecords || {}),
+        [reviewLevelKey]: {
+          bestScore,
+          total: totalQuizzes,
+          completedAt: Date.now()
+        }
+      };
+
       return {
         ...prev,
         questStage: nextStage,
@@ -699,10 +735,54 @@ export function useGameState() {
         stageFlashcardsSeen: updatedSeen,
         wordsAnsweredCorrectly: updatedAnswered,
         dailyBounties: newDailyBounties,
+        completedLevels: updatedCompleted,
+        levelRecords: updatedRecords,
         _levelUpFlag: isLevelUp ? Date.now() : prev._levelUpFlag
       };
     });
     return true;
+  };
+
+  const recordLevelCompletion = (stage, level, score, total, usedHints = false) => {
+    setState(prev => {
+      const levelKey = `${stage}-${level}`;
+      const existingRecord = prev.levelRecords?.[levelKey];
+      const bestScore = Math.max(existingRecord?.bestScore || 0, score);
+      const updatedRecords = {
+        ...(prev.levelRecords || {}),
+        [levelKey]: {
+          bestScore,
+          total,
+          completedAt: Date.now()
+        }
+      };
+      const updatedCompleted = prev.completedLevels?.includes(levelKey)
+        ? prev.completedLevels
+        : [...(prev.completedLevels || []), levelKey];
+
+      let nextHintlessCount = prev.hintlessLessonsCount || 0;
+      const leveledBadges = [...prev.badges];
+      if (!usedHints) {
+        nextHintlessCount += 1;
+        if (!leveledBadges.includes("hintless_scholar")) {
+          leveledBadges.push("hintless_scholar");
+        }
+        if (nextHintlessCount >= 5 && !leveledBadges.includes("hintless_master")) {
+          leveledBadges.push("hintless_master");
+        }
+        if (level === 20 && !leveledBadges.includes("hintless_boss")) {
+          leveledBadges.push("hintless_boss");
+        }
+      }
+
+      return {
+        ...prev,
+        levelRecords: updatedRecords,
+        completedLevels: updatedCompleted,
+        hintlessLessonsCount: nextHintlessCount,
+        badges: leveledBadges
+      };
+    });
   };
 
   const buyEquipment = (itemKey, cost, slot) => {
@@ -798,7 +878,15 @@ export function useGameState() {
   const incrementBountyCount = (bountyType) => {
     setState(prev => {
       const daily = prev.dailyBounties || {};
-      if (bountyType === "chat") {
+      if (bountyType === "quest") {
+        return {
+          ...prev,
+          dailyBounties: {
+            ...daily,
+            questCount: (daily.questCount || 0) + 1
+          }
+        };
+      } else if (bountyType === "chat") {
         return {
           ...prev,
           dailyBounties: {
@@ -954,6 +1042,7 @@ export function useGameState() {
     checkAndUpdateStreak,
     advanceQuest,
     passStageReview,
+    recordLevelCompletion,
     resetAllProgress,
     setExcludeVosotros,
     markFlashcardsSeen,

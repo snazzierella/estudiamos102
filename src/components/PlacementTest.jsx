@@ -101,6 +101,9 @@ export default function PlacementTest({ completePlacement }) {
       return {
         isConjugation: true,
         verb: qSpec.verb,
+        infinitive: qSpec.infinitive,
+        subjectPronoun: qSpec.subjectPronoun,
+        prompt: qSpec.prompt,
         meaning: qSpec.meaning,
         pronoun: qSpec.pronoun,
         tense: qSpec.tense,
@@ -286,26 +289,31 @@ export default function PlacementTest({ completePlacement }) {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
-            border: '1.5px solid #10b981',
-            borderRadius: '999px',
-            padding: '4px 14px',
-            color: '#34d399',
+            background: 'rgba(16, 185, 129, 0.15)',
+            border: '1px solid #10b981',
+            borderRadius: '12px',
+            padding: '3px 12px',
+            color: '#a7f3d0',
             fontSize: '0.78rem',
-            fontWeight: 800,
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            marginBottom: '10px',
-            boxShadow: '0 0 14px rgba(16, 185, 129, 0.25)'
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            marginBottom: '8px'
           }}>
-            ⚡ TIEMPO PRESENTE
+            ⚡ Tiempo Presente
           </div>
-          <div className="quiz-question-lbl">
-            Conjugate for: <strong style={{ color: 'var(--primary)', fontSize: '1.05rem' }}>{activeQuestion.pronoun}</strong>
+          <div className="quiz-question-lbl" style={{ marginBottom: '4px' }}>
+            Conjugate for the subject pronoun:
           </div>
-          <h3 className="quiz-word" style={{ margin: '8px 0 4px' }}>{activeQuestion.verb}</h3>
+          <h3 className="quiz-word" style={{ fontSize: '2.2rem', margin: '6px 0 4px' }}>
+            <span style={{ color: 'var(--gold)', fontWeight: 800 }}>
+              {activeQuestion.subjectPronoun || activeQuestion.verb?.split(' ')[0]}
+            </span>{' '}
+            <span style={{ color: 'var(--primary)' }}>
+              ({activeQuestion.infinitive || activeQuestion.spanish?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
+            </span>
+          </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', margin: 0 }}>
-            ({activeQuestion.meaning})
+            {activeQuestion.pronoun} • ({activeQuestion.meaning})
           </p>
         </div>
       ) : !activeQuestion.isSentenceBuilder ? (

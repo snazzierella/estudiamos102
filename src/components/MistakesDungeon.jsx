@@ -109,6 +109,9 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
           isGustar: qSpec.isGustar,
           isReciprocal: qSpec.isReciprocal,
           isReflexive: qSpec.isReflexive,
+          subjectPronoun: qSpec.subjectPronoun,
+          infinitive: qSpec.infinitive,
+          prompt: qSpec.prompt,
           tense: qSpec.tense,
           tenseLabel: qSpec.tenseLabel,
           questionWord: qSpec.verb,
@@ -422,63 +425,49 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
               
               {isConjugation ? (
                 <div>
-                  {/* Glowing High-Noticeability Tense Banner */}
-                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-                    <div style={{
+                  {/* Tasteful Compact Tense Pill */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                    <span style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '8px',
-                      padding: '5px 14px',
-                      borderRadius: '18px',
+                      gap: '6px',
+                      padding: '4px 14px',
+                      borderRadius: '12px',
                       background: isPret 
-                        ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15))' 
-                        : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
-                      border: isPret ? '2px solid #f97316' : '2px solid #10b981',
+                        ? 'rgba(249, 115, 22, 0.15)' 
+                        : 'rgba(16, 185, 129, 0.15)',
+                      border: isPret ? '1px solid #f97316' : '1px solid #10b981',
                       color: isPret ? '#fed7aa' : '#a7f3d0',
-                      fontWeight: '800',
-                      fontSize: '0.85rem',
-                      letterSpacing: '0.04em',
-                      boxShadow: isPret ? '0 0 12px rgba(249, 115, 22, 0.35)' : '0 0 12px rgba(16, 185, 129, 0.35)',
-                      textTransform: 'uppercase'
+                      fontWeight: '700',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.03em'
                     }}>
                       <span>{isPret ? '⏳' : '⚡'}</span>
-                      <span>TIEMPO: <strong>{isPret ? 'PRETÉRITO (PAST TENSE)' : 'PRESENTE (PRESENT TENSE)'}</strong></span>
-                    </div>
+                      <span>{isPret ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Presente'}</span>
+                    </span>
                   </div>
 
                   <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                    Conjugate in <strong style={{ color: isPret ? '#fb923c' : '#34d399', textDecoration: 'underline' }}>
-                      {isPret ? 'PAST TENSE (Pretérito)' : 'PRESENT TENSE (Presente)'}
-                    </strong>:
+                    Conjugate for the subject pronoun:
                   </div>
 
-                  <div style={{ fontSize: '1.2rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>
-                    {currentQ.questionWord} <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic', fontWeight: 'normal' }}>({currentQ.meaning})</span>
-                  </div>
-
+                  {/* Prominent Subject + Verb Headline: e.g. "yo (tener)" */}
                   <div style={{ 
-                    fontSize: '1.6rem', 
+                    fontSize: '2.1rem', 
                     fontFamily: 'var(--font-display)', 
-                    color: 'var(--primary)', 
                     fontWeight: '800', 
-                    marginTop: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px'
+                    margin: '8px 0 4px'
                   }}>
-                    <span>{currentQ.pronoun} [______]</span>
-                    <span style={{
-                      fontSize: '0.72rem',
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                      background: isPret ? '#f97316' : '#10b981',
-                      color: '#ffffff',
-                      fontWeight: '800',
-                      letterSpacing: '0.04em'
-                    }}>
-                      {isPret ? 'PASADO' : 'PRESENTE'}
+                    <span style={{ color: 'var(--gold)' }}>
+                      {currentQ.subjectPronoun || currentQ.questionWord?.split(' ')[0]}
+                    </span>{' '}
+                    <span style={{ color: 'var(--primary)' }}>
+                      ({currentQ.infinitive || currentQ.item?.spanish || currentQ.questionWord?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
                     </span>
+                  </div>
+
+                  <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '12px' }}>
+                    {currentQ.pronoun} • ({currentQ.meaning})
                   </div>
                 </div>
               ) : (

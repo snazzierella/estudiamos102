@@ -608,6 +608,10 @@ export default function StudyQuest({
           isConjugation: true,
           isGustar: qSpec.isGustar,
           isReciprocal: qSpec.isReciprocal,
+          subjectPronoun: qSpec.subjectPronoun,
+          infinitive: qSpec.infinitive,
+          prompt: qSpec.prompt,
+          subjectMeaning: qSpec.subjectMeaning,
           questionWord: qSpec.verb,
           meaning: qSpec.meaning,
           pronoun: qSpec.pronoun,
@@ -929,6 +933,10 @@ export default function StudyQuest({
               isConjugation: true,
               isGustar: qSpec.isGustar,
               isReciprocal: qSpec.isReciprocal,
+              subjectPronoun: qSpec.subjectPronoun,
+              infinitive: qSpec.infinitive,
+              prompt: qSpec.prompt,
+              subjectMeaning: qSpec.subjectMeaning,
               questionWord: qSpec.verb,
               meaning: qSpec.meaning,
               pronoun: qSpec.pronoun,
@@ -979,6 +987,10 @@ export default function StudyQuest({
             isConjugation: true,
             isGustar: qSpec.isGustar,
             isReciprocal: qSpec.isReciprocal,
+            subjectPronoun: qSpec.subjectPronoun,
+            infinitive: qSpec.infinitive,
+            prompt: qSpec.prompt,
+            subjectMeaning: qSpec.subjectMeaning,
             questionWord: qSpec.verb,
             meaning: qSpec.meaning,
             pronoun: qSpec.pronoun,
@@ -1698,6 +1710,10 @@ export default function StudyQuest({
               isConjugation: true,
               isGustar: qSpec.isGustar,
               isReciprocal: qSpec.isReciprocal,
+              subjectPronoun: qSpec.subjectPronoun,
+              infinitive: qSpec.infinitive,
+              prompt: qSpec.prompt,
+              subjectMeaning: qSpec.subjectMeaning,
               questionWord: qSpec.verb,
               meaning: qSpec.meaning,
               pronoun: qSpec.pronoun,
@@ -1853,6 +1869,10 @@ export default function StudyQuest({
               isConjugation: true,
               isGustar: qSpec.isGustar,
               isReciprocal: qSpec.isReciprocal,
+              subjectPronoun: qSpec.subjectPronoun,
+              infinitive: qSpec.infinitive,
+              prompt: qSpec.prompt,
+              subjectMeaning: qSpec.subjectMeaning,
               questionWord: qSpec.verb,
               meaning: qSpec.meaning,
               pronoun: qSpec.pronoun,
@@ -2694,75 +2714,65 @@ export default function StudyQuest({
                 >
                   {currentQuestQ.isConjugation ? (
                     <>
-                      {/* High-Noticeability Tense Banner */}
+                      {/* Tasteful Compact Tense Pill */}
                       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                        <div style={{
+                        <span style={{
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '8px',
-                          padding: '6px 16px',
-                          borderRadius: '20px',
+                          gap: '6px',
+                          padding: '4px 14px',
+                          borderRadius: '12px',
                           background: isPreteriteTense(currentQuestQ) 
-                            ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15))' 
-                            : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
-                          border: isPreteriteTense(currentQuestQ) ? '2px solid #f97316' : '2px solid #10b981',
+                            ? 'rgba(249, 115, 22, 0.15)' 
+                            : 'rgba(16, 185, 129, 0.15)',
+                          border: isPreteriteTense(currentQuestQ) ? '1px solid #f97316' : '1px solid #10b981',
                           color: isPreteriteTense(currentQuestQ) ? '#fed7aa' : '#a7f3d0',
-                          fontWeight: '800',
-                          fontSize: '0.88rem',
-                          letterSpacing: '0.04em',
-                          boxShadow: isPreteriteTense(currentQuestQ) ? '0 0 14px rgba(249, 115, 22, 0.35)' : '0 0 14px rgba(16, 185, 129, 0.35)',
-                          textTransform: 'uppercase'
+                          fontWeight: '700',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.03em'
                         }}>
                           <span>{isPreteriteTense(currentQuestQ) ? '⏳' : '⚡'}</span>
-                          <span>TIEMPO: <strong>{isPreteriteTense(currentQuestQ) ? 'PRETÉRITO (PAST TENSE)' : 'PRESENTE (PRESENT TENSE)'}</strong></span>
-                        </div>
-                      </div>
-
-                      <div className="quiz-question-lbl" style={{ marginBottom: '8px' }}>
-                        Conjugate in <strong style={{ color: isPreteriteTense(currentQuestQ) ? '#fb923c' : '#34d399', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-                          {isPreteriteTense(currentQuestQ) ? 'PAST TENSE (Pretérito)' : 'PRESENT TENSE (Presente)'}
-                        </strong> for:
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                        {currentQuestQ.isReciprocal ? (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
-                            🤝 Acción Recíproca ("Each Other")
-                          </span>
-                        ) : currentQuestQ.isReflexive ? (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
-                            Reflexivo (me, te, se, nos, os, se)
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <h3 className="quiz-word" style={{ color: 'var(--primary)' }}>{currentQuestQ.questionWord}</h3>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQuestQ.meaning})</p>
-                      
-                      <div style={{ 
-                        display: 'inline-flex', 
-                        alignItems: 'center', 
-                        gap: '8px',
-                        background: 'rgba(250, 204, 21, 0.1)', 
-                        padding: '6px 14px', 
-                        borderRadius: '16px', 
-                        color: 'var(--gold)', 
-                        fontWeight: 'bold', 
-                        fontSize: '0.9rem' 
-                      }}>
-                        <span>Pronoun: {currentQuestQ.pronoun}</span>
-                        <span style={{
-                          fontSize: '0.7rem',
-                          padding: '2px 8px',
-                          borderRadius: '6px',
-                          background: isPreteriteTense(currentQuestQ) ? '#f97316' : '#10b981',
-                          color: '#ffffff',
-                          fontWeight: '800',
-                          letterSpacing: '0.04em'
-                        }}>
-                          {isPreteriteTense(currentQuestQ) ? 'PASADO' : 'PRESENTE'}
+                          <span>{isPreteriteTense(currentQuestQ) ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Presente'}</span>
                         </span>
                       </div>
+
+                      <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
+                        {currentQuestQ.isGustar ? "Select the correct form of gustar:" : "Conjugate for the subject pronoun:"}
+                      </div>
+
+                      {(currentQuestQ.isReciprocal || currentQuestQ.isReflexive) && (
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+                          {currentQuestQ.isReciprocal ? (
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
+                              🤝 Acción Recíproca ("Each Other")
+                            </span>
+                          ) : currentQuestQ.isReflexive ? (
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px' }}>
+                              Reflexivo (me, te, se, nos, os, se)
+                            </span>
+                          ) : null}
+                        </div>
+                      )}
+
+                      {/* Prominent Subject + Verb Headline: e.g. "yo (tener)" */}
+                      <h3 className="quiz-word" style={{ fontSize: currentQuestQ.isGustar ? '1.8rem' : '2.3rem', margin: '8px 0 4px' }}>
+                        {currentQuestQ.isGustar ? (
+                          currentQuestQ.questionWord
+                        ) : (
+                          <>
+                            <span style={{ color: 'var(--gold)', fontWeight: 800 }}>
+                              {currentQuestQ.subjectPronoun || currentQuestQ.questionWord?.split(' ')[0]}
+                            </span>{' '}
+                            <span style={{ color: 'var(--primary)' }}>
+                              ({currentQuestQ.infinitive || currentQuestQ.item?.spanish || currentQuestQ.questionWord?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
+                            </span>
+                          </>
+                        )}
+                      </h3>
+
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '14px' }}>
+                        {currentQuestQ.isGustar ? currentQuestQ.meaning : `${currentQuestQ.pronoun} • ${currentQuestQ.meaning}`}
+                      </p>
                     </>
                   ) : currentQuestQ.isFillInTheBlank ? (
                     <>
@@ -2934,7 +2944,7 @@ export default function StudyQuest({
                     : currentQuestQ.isSentenceBuilder
                       ? `Incorrecto. Frase correcta: "${currentQuestQ.correct}"`
                       : currentQuestQ.isConjugation
-                        ? `Incorrecto. Correct form (${isPreteriteTense(currentQuestQ) ? 'Pretérito / Past' : 'Presente'}): "${currentQuestQ.correct}"`
+                        ? `Incorrecto. Correct form for "${currentQuestQ.subjectPronoun || 'subject'}" (${isPreteriteTense(currentQuestQ) ? 'Pretérito' : 'Presente'}): "${currentQuestQ.correct}"`
                         : currentQuestQ.isFillInTheBlank
                           ? `Incorrecto. Correct word: "${currentQuestQ.correct}"`
                           : `Incorrecto! Correct translation: "${currentQuestQ.correct}"`
@@ -3351,94 +3361,68 @@ export default function StudyQuest({
                         boxShadow: isPret ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
                       }}
                     >
-                      {/* High-Noticeability Tense Banner */}
+                      {/* Tasteful Compact Tense Pill */}
                       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                        <div style={{
+                        <span style={{
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '8px',
-                          padding: '6px 16px',
-                          borderRadius: '20px',
+                          gap: '6px',
+                          padding: '4px 14px',
+                          borderRadius: '12px',
                           background: isPret 
-                            ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15))' 
-                            : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
-                          border: isPret ? '2px solid #f97316' : '2px solid #10b981',
+                            ? 'rgba(249, 115, 22, 0.15)' 
+                            : 'rgba(16, 185, 129, 0.15)',
+                          border: isPret ? '1px solid #f97316' : '1px solid #10b981',
                           color: isPret ? '#fed7aa' : '#a7f3d0',
-                          fontWeight: '800',
-                          fontSize: '0.88rem',
-                          letterSpacing: '0.04em',
-                          boxShadow: isPret ? '0 0 14px rgba(249, 115, 22, 0.35)' : '0 0 14px rgba(16, 185, 129, 0.35)',
-                          textTransform: 'uppercase'
+                          fontWeight: '700',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.03em'
                         }}>
                           <span>{isPret ? '⏳' : '⚡'}</span>
-                          <span>TIEMPO: <strong>{isPret ? 'PRETÉRITO (PAST TENSE)' : 'PRESENTE (PRESENT TENSE)'}</strong></span>
-                        </div>
+                          <span>{isPret ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Presente'}</span>
+                        </span>
                       </div>
 
-                      <div className="quiz-question-lbl" style={{ marginBottom: '8px' }}>
-                        {currQ?.isGustar ? (
-                          <>
-                            Elige la forma de gustar en <strong style={{ color: isPret ? '#fb923c' : '#34d399', textDecoration: 'underline' }}>
-                              {isPret ? 'PRETÉRITO (gustó vs gustaron)' : 'PRESENTE (gusta vs gustan)'}
-                            </strong>:
-                          </>
-                        ) : (
-                          <>
-                            Conjugate in <strong style={{ color: isPret ? '#fb923c' : '#34d399', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-                              {isPret ? 'PAST TENSE (Pretérito)' : 'PRESENT TENSE (Presente)'}
-                            </strong> for:
-                          </>
-                        )}
+                      <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
+                        {currQ?.isGustar ? "Select the correct form of gustar:" : "Conjugate for the subject pronoun:"}
                       </div>
 
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
                         {currQ.isReciprocal ? (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
                             🤝 Acción Recíproca ("Each Other")
                           </span>
                         ) : currQ.isReflexive ? (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px' }}>
                             Reflexivo (me, te, se, nos, os, se)
                           </span>
                         ) : null}
                         {currQ.isGustar && (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.15)', color: 'var(--gold)', borderColor: 'rgba(234, 179, 8, 0.3)' }}>
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.15)', color: 'var(--gold)', borderColor: 'rgba(234, 179, 8, 0.3)' }}>
                             ✨ Tipo Gustar ({isPret ? 'gustó vs gustaron' : 'gusta vs gustan'})
                           </span>
                         )}
                       </div>
 
-                      <h3 className="quiz-word" style={{ color: 'var(--primary)', fontSize: currQ?.isGustar ? '1.8rem' : '2.4rem' }}>
-                        {currQ.questionWord}
+                      {/* Prominent Subject + Verb Headline: e.g. "yo (tener)" */}
+                      <h3 className="quiz-word" style={{ fontSize: currQ?.isGustar ? '1.8rem' : '2.3rem', margin: '8px 0 4px' }}>
+                        {currQ.isGustar ? (
+                          currQ.questionWord
+                        ) : (
+                          <>
+                            <span style={{ color: 'var(--gold)', fontWeight: 800 }}>
+                              {currQ.subjectPronoun || currQ.questionWord?.split(' ')[0]}
+                            </span>{' '}
+                            <span style={{ color: 'var(--primary)' }}>
+                              ({currQ.infinitive || currQ.item?.spanish || currQ.questionWord?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
+                            </span>
+                          </>
+                        )}
                       </h3>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>
-                        ({currQ.meaning})
-                      </p>
 
-                      <div style={{ 
-                        display: 'inline-flex', 
-                        alignItems: 'center', 
-                        gap: '8px',
-                        background: 'rgba(250, 204, 21, 0.1)', 
-                        padding: '6px 14px', 
-                        borderRadius: '16px', 
-                        color: 'var(--gold)', 
-                        fontWeight: 'bold', 
-                        fontSize: '0.9rem' 
-                      }}>
-                        <span>{currQ?.isGustar ? currQ.pronoun : `Pronoun: ${currQ.pronoun}`}</span>
-                        <span style={{
-                          fontSize: '0.7rem',
-                          padding: '2px 8px',
-                          borderRadius: '6px',
-                          background: isPret ? '#f97316' : '#10b981',
-                          color: '#ffffff',
-                          fontWeight: '800',
-                          letterSpacing: '0.04em'
-                        }}>
-                          {isPret ? 'PASADO' : 'PRESENTE'}
-                        </span>
-                      </div>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '14px' }}>
+                        {currQ.isGustar ? currQ.meaning : `${currQ.pronoun} • ${currQ.meaning}`}
+                      </p>
                       
                       <button 
                         type="button"
@@ -3617,7 +3601,7 @@ export default function StudyQuest({
                     : practiceQuestions[practiceCurrentIdx]?.isSentenceBuilder
                       ? `Incorrecto! Frase correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`
                       : practiceQuestions[practiceCurrentIdx]?.isConjugation
-                        ? `Incorrecto! Correct form (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito / Past' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                        ? `Incorrecto! Correct form for "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'subject'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
                         : `Incorrecto! Correct Answer: "${practiceQuestions[practiceCurrentIdx].correct}"`
                   }
                   <button className="btn btn-primary" onClick={handlePracticeNext} style={{ width: '100%', marginTop: '16px' }}>
@@ -3671,75 +3655,65 @@ export default function StudyQuest({
                   >
                     {currentQ.isConjugation ? (
                     <>
-                      {/* High-Noticeability Tense Banner */}
+                      {/* Tasteful Compact Tense Pill */}
                       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                        <div style={{
+                        <span style={{
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '8px',
-                          padding: '6px 16px',
-                          borderRadius: '20px',
+                          gap: '6px',
+                          padding: '4px 14px',
+                          borderRadius: '12px',
                           background: isPreteriteTense(currentQ) 
-                            ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15))' 
-                            : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
-                          border: isPreteriteTense(currentQ) ? '2px solid #f97316' : '2px solid #10b981',
+                            ? 'rgba(249, 115, 22, 0.15)' 
+                            : 'rgba(16, 185, 129, 0.15)',
+                          border: isPreteriteTense(currentQ) ? '1px solid #f97316' : '1px solid #10b981',
                           color: isPreteriteTense(currentQ) ? '#fed7aa' : '#a7f3d0',
-                          fontWeight: '800',
-                          fontSize: '0.88rem',
-                          letterSpacing: '0.04em',
-                          boxShadow: isPreteriteTense(currentQ) ? '0 0 14px rgba(249, 115, 22, 0.35)' : '0 0 14px rgba(16, 185, 129, 0.35)',
-                          textTransform: 'uppercase'
+                          fontWeight: '700',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.03em'
                         }}>
                           <span>{isPreteriteTense(currentQ) ? '⏳' : '⚡'}</span>
-                          <span>TIEMPO: <strong>{isPreteriteTense(currentQ) ? 'PRETÉRITO (PAST TENSE)' : 'PRESENTE (PRESENT TENSE)'}</strong></span>
-                        </div>
-                      </div>
-
-                      <div className="quiz-question-lbl" style={{ marginBottom: '8px' }}>
-                        Conjugate in <strong style={{ color: isPreteriteTense(currentQ) ? '#fb923c' : '#34d399', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-                          {isPreteriteTense(currentQ) ? 'PAST TENSE (Pretérito)' : 'PRESENT TENSE (Presente)'}
-                        </strong> for:
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                        {currentQ.isReciprocal ? (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
-                            🤝 Acción Recíproca ("Each Other")
-                          </span>
-                        ) : currentQ.isReflexive ? (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
-                            Reflexivo (me, te, se, nos, os, se)
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <h3 className="quiz-word" style={{ color: 'var(--primary)' }}>{currentQ.questionWord}</h3>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQ.meaning})</p>
-                      
-                      <div style={{ 
-                        display: 'inline-flex', 
-                        alignItems: 'center', 
-                        gap: '8px',
-                        background: 'rgba(250, 204, 21, 0.1)', 
-                        padding: '6px 14px', 
-                        borderRadius: '16px', 
-                        color: 'var(--gold)', 
-                        fontWeight: 'bold', 
-                        fontSize: '0.9rem' 
-                      }}>
-                        <span>Pronoun: {currentQ.pronoun}</span>
-                        <span style={{
-                          fontSize: '0.7rem',
-                          padding: '2px 8px',
-                          borderRadius: '6px',
-                          background: isPreteriteTense(currentQ) ? '#f97316' : '#10b981',
-                          color: '#ffffff',
-                          fontWeight: '800',
-                          letterSpacing: '0.04em'
-                        }}>
-                          {isPreteriteTense(currentQ) ? 'PASADO' : 'PRESENTE'}
+                          <span>{isPreteriteTense(currentQ) ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Presente'}</span>
                         </span>
                       </div>
+
+                      <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
+                        {currentQ.isGustar ? "Select the correct form of gustar:" : "Conjugate for the subject pronoun:"}
+                      </div>
+
+                      {(currentQ.isReciprocal || currentQ.isReflexive) && (
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+                          {currentQ.isReciprocal ? (
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
+                              🤝 Acción Recíproca ("Each Other")
+                            </span>
+                          ) : currentQ.isReflexive ? (
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px' }}>
+                              Reflexivo (me, te, se, nos, os, se)
+                            </span>
+                          ) : null}
+                        </div>
+                      )}
+
+                      {/* Prominent Subject + Verb Headline: e.g. "yo (tener)" */}
+                      <h3 className="quiz-word" style={{ fontSize: currentQ.isGustar ? '1.8rem' : '2.3rem', margin: '8px 0 4px' }}>
+                        {currentQ.isGustar ? (
+                          currentQ.questionWord
+                        ) : (
+                          <>
+                            <span style={{ color: 'var(--gold)', fontWeight: 800 }}>
+                              {currentQ.subjectPronoun || currentQ.questionWord?.split(' ')[0]}
+                            </span>{' '}
+                            <span style={{ color: 'var(--primary)' }}>
+                              ({currentQ.infinitive || currentQ.item?.spanish || currentQ.questionWord?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
+                            </span>
+                          </>
+                        )}
+                      </h3>
+
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '14px' }}>
+                        {currentQ.isGustar ? currentQ.meaning : `${currentQ.pronoun} • ${currentQ.meaning}`}
+                      </p>
                     </>
                   ) : currentQ.isFillInTheBlank ? (
                     <>
@@ -3911,7 +3885,7 @@ export default function StudyQuest({
                           : currentQ.isSentenceBuilder
                             ? `Incorrecto. Frase correcta: "${currentQ.correct}"`
                             : currentQ.isConjugation
-                              ? `Incorrecto. Correct form (${isPreteriteTense(currentQ) ? 'Pretérito / Past' : 'Presente'}): "${currentQ.correct}"`
+                              ? `Incorrecto. Correct form for "${currentQ.subjectPronoun || 'subject'}" (${isPreteriteTense(currentQ) ? 'Pretérito' : 'Presente'}): "${currentQ.correct}"`
                               : `Incorrecto. Correct answer: "${currentQ.correct}"`
                         }
                         <button className="btn btn-primary" onClick={handleRedemptionNext} style={{ width: '100%', marginTop: '16px' }}>

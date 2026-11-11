@@ -174,6 +174,66 @@ export const SENTENCE_POOLS = {
       english: "Where do you buy pretty clothes",
       distractors: ["compra", "el", "bonito"],
       hint: "Question word with tú form of regular -ar verb"
+    },
+    {
+      spanish: "Nosotros almorzamos en la cafetería a las doce",
+      english: "We eat lunch in the cafeteria at twelve",
+      distractors: ["almuerzan", "el", "almuerzo"],
+      hint: "Remember the nosotros form (-amos) does not change stem for almorzar"
+    },
+    {
+      spanish: "Tú tienes que hacer la tarea de matemáticas",
+      english: "You have to do the math homework",
+      distractors: ["hago", "por", "los"],
+      hint: "Tener que + infinitive expresses obligation"
+    },
+    {
+      spanish: "Mi hermana menor tiene quince años",
+      english: "My younger sister is fifteen years old",
+      distractors: ["es", "un", "hermano"],
+      hint: "In Spanish, age uses tener (to have years), not ser"
+    },
+    {
+      spanish: "A mi padre le gusta beber café con leche",
+      english: "My father likes to drink coffee with milk",
+      distractors: ["gustan", "me", "el"],
+      hint: "Use le gusta before an infinitive verb (beber)"
+    },
+    {
+      spanish: "Ellos entienden la lección de gramática hoy",
+      english: "They understand the grammar lesson today",
+      distractors: ["entiende", "un", "las"],
+      hint: "Stem changer entender (e -> ie) for ellos"
+    },
+    {
+      spanish: "Yo quiero pedir una hamburguesa con papas fritas",
+      english: "I want to order a hamburger with french fries",
+      distractors: ["quiere", "pido", "la"],
+      hint: "First verb is conjugated (quiero), second is infinitive (pedir)"
+    },
+    {
+      spanish: "Nosotros sabemos dónde está la biblioteca central",
+      english: "We know where the central library is",
+      distractors: ["conocemos", "saben", "el"],
+      hint: "Use saber for facts/locations of places with interrogatives"
+    },
+    {
+      spanish: "Tú conoces muy bien esta hermosa ciudad",
+      english: "You know this beautiful city very well",
+      distractors: ["sabes", "este", "bueno"],
+      hint: "Use conocer to be acquainted with a city/place"
+    },
+    {
+      spanish: "A qué hora empieza la fiesta de cumpleaños",
+      english: "What time does the birthday party start",
+      distractors: ["son", "en", "empiezan"],
+      hint: "Stem changer empezar (e -> ie) for singular la fiesta"
+    },
+    {
+      spanish: "El profesor repite las palabras difíciles para los estudiantes",
+      english: "The professor repeats the difficult words for the students",
+      distractors: ["repito", "difícil", "por"],
+      hint: "Stem changer repetir (e -> i) with plural adjective agreement"
     }
   ],
 
@@ -238,6 +298,102 @@ export const SENTENCE_POOLS = {
       english: "You wake up early in the morning",
       distractors: ["se", "despierto", "para"],
       hint: "Stem-changing reflexive (e -> ie): 'te despiertas'"
+    },
+    {
+      spanish: "Yo me despierto a las siete de la mañana",
+      english: "I wake up at seven in the morning",
+      distractors: ["te", "despierta", "por"],
+      hint: "Stem-changing reflexive (e -> ie) with pronoun 'me'"
+    },
+    {
+      spanish: "Mi hermano se levanta tarde los fines de semana",
+      english: "My brother gets up late on weekends",
+      distractors: ["me", "levantan", "el"],
+      hint: "Reflexive pronoun 'se' with 3rd-person singular 'levanta'"
+    },
+    {
+      spanish: "Nosotros nos duchamos con agua caliente",
+      english: "We shower with hot water",
+      distractors: ["se", "duchan", "duchamos"],
+      hint: "Nosotros requires the reflexive pronoun 'nos'"
+    },
+    {
+      spanish: "Ella se viste rápidamente para ir a trabajar",
+      english: "She gets dressed quickly to go to work",
+      distractors: ["me", "visten", "por"],
+      hint: "Stem-changing reflexive vestir (e -> i): 'se viste'"
+    },
+    {
+      spanish: "Tú te acuestas temprano cuando tienes examen",
+      english: "You go to bed early when you have an exam",
+      distractors: ["se", "acuesto", "para"],
+      hint: "Stem-changing reflexive acostar (o -> ue): 'te acuestas'"
+    },
+    {
+      spanish: "Antes de acostarse los niños leen un cuento",
+      english: "Before going to bed the children read a story",
+      distractors: ["acostarse", "se acuestan", "acostar"],
+      hint: "After a preposition (antes de), use infinitive with attached pronoun: acostarse"
+    },
+    {
+      spanish: "Yo voy a lavarme la cara con jabón",
+      english: "I am going to wash my face with soap",
+      distractors: ["me lavo", "lavarse", "el"],
+      hint: "With 'ir a + infinitive', attach pronoun 'me' to the end: lavarme"
+    },
+    {
+      spanish: "A mi hermano le duele mucho la garganta hoy",
+      english: "My brother's throat hurts a lot today",
+      distractors: ["duelen", "me", "el"],
+      hint: "Doler agrees with the singular body part: 'duele'"
+    },
+    {
+      spanish: "El médico dice que debes tomar esta medicina por cinco días",
+      english: "The doctor says you must take this medicine for five days",
+      distractors: ["para", "dice", "este"],
+      hint: "Use 'por' to express duration of time"
+    },
+    {
+      spanish: "Nosotros nos sentimos muy cansados después de correr",
+      english: "We feel very tired after running",
+      distractors: ["se", "sienten", "cansado"],
+      hint: "Sentirse expresses how one feels emotionally or physically"
+    },
+    {
+      spanish: "Tengo fiebre y necesito descansar en la cama",
+      english: "I have a fever and need to rest in bed",
+      distractors: ["estoy", "un", "el"],
+      hint: "Use tener for symptoms like fiebre (fever) and tos (cough)"
+    },
+    {
+      spanish: "Ella toma té de manzanilla para aliviar el dolor de estómago",
+      english: "She drinks chamomile tea to relieve the stomach ache",
+      distractors: ["por", "los", "alivia"],
+      hint: "Use 'para' before an infinitive to express purpose ('in order to')"
+    },
+    {
+      spanish: "Los amigos se saludan con un apretón de manos",
+      english: "The friends greet each other with a handshake",
+      distractors: ["nos", "saluda", "saludarse"],
+      hint: "Reciprocal action with plural subject (ellos se saludan)"
+    },
+    {
+      spanish: "Mis abuelos se miran con mucho cariño y amor",
+      english: "My grandparents look at each other with much affection and love",
+      distractors: ["nos", "mira", "mirarse"],
+      hint: "Reciprocal action (they look at each other): 'se miran'"
+    },
+    {
+      spanish: "Los dos hermanos se abrazan con alegría en el aeropuerto",
+      english: "The two brothers hug each other with joy at the airport",
+      distractors: ["abrazan", "abraza", "abrazarse"],
+      hint: "Reciprocal verb 'abrazarse': plural brothers hug each other"
+    },
+    {
+      spanish: "Nosotros nos vemos todos los días en la cafetería",
+      english: "We see each other every day in the cafeteria",
+      distractors: ["se", "vemos", "ve"],
+      hint: "Reciprocal action for we: 'nosotros nos vemos'"
     }
   ],
 
@@ -290,6 +446,102 @@ export const SENTENCE_POOLS = {
       english: "They liked the restaurant food",
       distractors: ["gustaron", "gusta", "la"],
       hint: "Gustar in preterite for singular food: 'gustó'"
+    },
+    {
+      spanish: "Esta camisa de algodón cuesta treinta dólares",
+      english: "This cotton shirt costs thirty dollars",
+      distractors: ["cuestan", "este", "cuero"],
+      hint: "Demonstrative 'esta' for feminine camisa; costar (o -> ue)"
+    },
+    {
+      spanish: "Ella se probó el vestido rojo en el vestidor",
+      english: "She tried on the red dress in the fitting room",
+      distractors: ["se prueba", "la", "un"],
+      hint: "Preterite of probarse for ella: 'se probó'"
+    },
+    {
+      spanish: "Yo pagué en efectivo porque no tenía tarjeta",
+      english: "I paid in cash because I did not have a card",
+      distractors: ["pago", "pagó", "el"],
+      hint: "Preterite spelling change for pagar (g -> gu): 'pagué'"
+    },
+    {
+      spanish: "Nosotros compramos unos pantalones negros de lana",
+      english: "We bought some black wool pants",
+      distractors: ["compro", "negro", "la"],
+      hint: "Preterite of comprar for nosotros: 'compramos'"
+    },
+    {
+      spanish: "El dependiente me mostró los zapatos de cuero elegante",
+      english: "The clerk showed me the elegant leather shoes",
+      distractors: ["muestra", "te", "los"],
+      hint: "Preterite 3rd-person singular: 'mostró'"
+    },
+    {
+      spanish: "La tienda de ropa tiene rebajas fantásticas este fin de semana",
+      english: "The clothing store has fantastic sales this weekend",
+      distractors: ["tienen", "esta", "fantástico"],
+      hint: "Agreement with feminine plural 'rebajas fantásticas'"
+    },
+    {
+      spanish: "Tú encontraste una ganga increíble en el mercado",
+      english: "You found an incredible bargain at the market",
+      distractors: ["encuentras", "un", "increíbles"],
+      hint: "Preterite -ar ending for tú: 'encontraste'"
+    },
+    {
+      spanish: "Ayer mi hermana barrió el piso de la cocina",
+      english: "Yesterday my sister swept the kitchen floor",
+      distractors: ["barre", "el", "barrieron"],
+      hint: "Preterite -er verb ending for 3rd person singular (-ió)"
+    },
+    {
+      spanish: "Nosotros arreglamos los dormitorios antes de la fiesta",
+      english: "We tidied the bedrooms before the party",
+      distractors: ["arregla", "el", "arreglaron"],
+      hint: "Preterite regular -ar ending for nosotros (-amos)"
+    },
+    {
+      spanish: "Mi padre sacó la basura anoche después de la cena",
+      english: "My father took out the trash last night after dinner",
+      distractors: ["saca", "la", "sacaron"],
+      hint: "Preterite 3rd person singular (-ó): 'sacó'"
+    },
+    {
+      spanish: "Yo pasé la aspiradora por toda la casa ayer",
+      english: "I vacuumed throughout the whole house yesterday",
+      distractors: ["pasa", "para", "el"],
+      hint: "Preterite yo ending (-é): 'pasé'"
+    },
+    {
+      spanish: "Anoche comí pollo asado con verduras en el restaurante",
+      english: "Last night I ate roast chicken with vegetables at the restaurant",
+      distractors: ["como", "comió", "un"],
+      hint: "Preterite -er verb ending for yo (-í): 'comí'"
+    },
+    {
+      spanish: "Ellos escribieron una carta formal para el profesor",
+      english: "They wrote a formal letter for the professor",
+      distractors: ["escriben", "escribió", "por"],
+      hint: "Preterite -ir verb ending for ellos (-ieron): 'escribieron'"
+    },
+    {
+      spanish: "Yo empecé a estudiar español hace tres meses",
+      english: "I began to study Spanish three months ago",
+      distractors: ["empiezo", "empezó", "en"],
+      hint: "Preterite spelling change (z -> c) for yo: 'empecé'"
+    },
+    {
+      spanish: "Tú decidiste comprar el suéter verde y abrigado",
+      english: "You decided to buy the warm green sweater",
+      distractors: ["decides", "decidió", "la"],
+      hint: "Preterite -ir verb ending for tú (-iste): 'decidiste'"
+    },
+    {
+      spanish: "El sábado pasado bailamos salsa en la fiesta con amigos",
+      english: "Last Saturday we danced salsa at the party with friends",
+      distractors: ["bailan", "bailo", "el"],
+      hint: "Past time marker 'el sábado pasado' with preterite 'bailamos'"
     }
   ],
 
@@ -342,6 +594,90 @@ export const SENTENCE_POOLS = {
       english: "She explained it to me calmly",
       distractors: ["te", "la", "explica"],
       hint: "Double object pronouns: Indirect (me) + Direct (lo)"
+    },
+    {
+      spanish: "Nosotros pasamos por el control de seguridad del aeropuerto",
+      english: "We went through the airport security checkpoint",
+      distractors: ["pasa", "para", "los"],
+      hint: "Preterite travel verb with preposition 'por'"
+    },
+    {
+      spanish: "El avión aterrizó en la pista a las cinco de la tarde",
+      english: "The plane landed on the runway at five in the afternoon",
+      distractors: ["aterriza", "el", "aterrizaron"],
+      hint: "Preterite singular: 'aterrizó'"
+    },
+    {
+      spanish: "Yo facturé mi equipaje antes de subir al avión",
+      english: "I checked my luggage before boarding the plane",
+      distractors: ["facturo", "facturó", "la"],
+      hint: "Preterite yo form (-é): 'facturé'"
+    },
+    {
+      spanish: "El agente de aduanas revisó nuestras maletas cuidadosamente",
+      english: "The customs agent inspected our suitcases carefully",
+      distractors: ["revisa", "nuestro", "los"],
+      hint: "Preterite 3rd-person singular: 'revisó'"
+    },
+    {
+      spanish: "Tú compraste un boleto de ida y vuelta para Madrid",
+      english: "You bought a round-trip ticket to Madrid",
+      distractors: ["compras", "una", "por"],
+      hint: "Preterite -ar ending for tú: 'compraste'"
+    },
+    {
+      spanish: "El recepcionista nos dio la llave de la habitación doble",
+      english: "The receptionist gave us the key to the double room",
+      distractors: ["da", "les", "el"],
+      hint: "Irregular preterite dar for 3rd person singular: 'dio'"
+    },
+    {
+      spanish: "Nosotros reservamos una habitación con vista al mar",
+      english: "We reserved a room with an ocean view",
+      distractors: ["reserva", "un", "reservaron"],
+      hint: "Preterite 'nosotros reservamos'"
+    },
+    {
+      spanish: "El botones llevó las maletas pesadas en el ascensor",
+      english: "The bellhop carried the heavy suitcases in the elevator",
+      distractors: ["lleva", "pesado", "los"],
+      hint: "Preterite 3rd person singular: 'llevó'"
+    },
+    {
+      spanish: "Ayer yo no pude encontrar mi pasaporte en la mochila",
+      english: "Yesterday I could not find my passport in the backpack",
+      distractors: ["puedo", "pudo", "el"],
+      hint: "Irregular preterite stem pud- for yo: 'pude'"
+    },
+    {
+      spanish: "Ella tuvo que cancelar la reserva por mal tiempo",
+      english: "She had to cancel the reservation due to bad weather",
+      distractors: ["tiene", "para", "tuvieron"],
+      hint: "Irregular preterite stem tuv- for ella: 'tuvo'"
+    },
+    {
+      spanish: "Nosotros estuvimos en España durante las vacaciones de verano",
+      english: "We were in Spain during the summer vacation",
+      distractors: ["estamos", "estuvo", "por"],
+      hint: "Irregular preterite stem estuv- for nosotros: 'estuvimos'"
+    },
+    {
+      spanish: "Ellos dijeron la verdad sobre el retraso del vuelo",
+      english: "They told the truth about the flight delay",
+      distractors: ["dicen", "dijo", "el"],
+      hint: "Irregular preterite stem dij- for ellos: 'dijeron'"
+    },
+    {
+      spanish: "Yo puse los boletos de tren encima del escritorio",
+      english: "I put the train tickets on top of the desk",
+      distractors: ["pongo", "puso", "las"],
+      hint: "Irregular preterite stem pus- for yo: 'puse'"
+    },
+    {
+      spanish: "El camarero se la sirvió caliente a los clientes",
+      english: "The waiter served it hot to the customers",
+      distractors: ["le", "lo", "sirve"],
+      hint: "Double object pronoun: indirect 'le' changes to 'se' before 'la'"
     }
   ]
 };

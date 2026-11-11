@@ -12,6 +12,29 @@ export const PRONOUNS = [
 
 export const REFLEXIVE_PRONOUNS = ["me", "te", "se", "nos", "os", "se"];
 
+export const CONCRETE_PRONOUN_MAP = {
+  0: [{ pronoun: "yo", meaning: "I", fullLabel: "yo (I)" }],
+  1: [{ pronoun: "tú", meaning: "you, informal", fullLabel: "tú (you, informal)" }],
+  2: [
+    { pronoun: "él", meaning: "he", fullLabel: "él (he)" },
+    { pronoun: "ella", meaning: "she", fullLabel: "ella (she)" },
+    { pronoun: "usted", meaning: "you, formal", fullLabel: "usted (you, formal)" }
+  ],
+  3: [
+    { pronoun: "nosotros", meaning: "we", fullLabel: "nosotros (we)" },
+    { pronoun: "nosotras", meaning: "we, female", fullLabel: "nosotras (we, female)" }
+  ],
+  4: [
+    { pronoun: "vosotros", meaning: "you all, Spain", fullLabel: "vosotros (you all, Spain)" },
+    { pronoun: "vosotras", meaning: "you all, Spain female", fullLabel: "vosotras (you all, Spain female)" }
+  ],
+  5: [
+    { pronoun: "ellos", meaning: "they", fullLabel: "ellos (they)" },
+    { pronoun: "ellas", meaning: "they, female", fullLabel: "ellas (they, female)" },
+    { pronoun: "ustedes", meaning: "you all", fullLabel: "ustedes (you all)" }
+  ]
+};
+
 // -------------------------------------------------------------
 // PRESENT TENSE IRREGULARS & STEM CHANGERS
 // -------------------------------------------------------------
@@ -519,12 +542,17 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     choices = choices.sort(() => Math.random() - 0.5);
 
     return {
-      verb: "gustar (Estructura: gusta vs gustan)",
+      verb: tpl.sentence,
+      infinitive: "gustar",
+      subjectPronoun: tpl.isPlural ? "plural" : "singular",
+      subjectMeaning: tpl.isPlural ? "plural object" : "singular object",
+      prompt: tpl.sentence,
       meaning: tpl.meaning,
       pronoun: tpl.isPlural ? "Objeto Plural (¿gusta o gustan?)" : "Objeto Singular / Verbo (¿gusta o gustan?)",
       tense: tpl.tense,
       tenseLabel: tenseLabel,
       isReflexive: false,
+      isReciprocal: false,
       isGustar: true,
       questionWord: tpl.sentence,
       correct: correct,
@@ -550,12 +578,17 @@ export function generateConjugationQuestion(verbItem, options = {}) {
   const randPronoun = allowedPronouns[Math.floor(Math.random() * allowedPronouns.length)];
   const correctForm = conjugate(verbItem.spanish, randPronoun.idx, targetTense);
 
-  let pronounLabel = randPronoun.label;
+  // Concrete subject pronoun for clean "yo (tener)" prompt formatting
+  const candidates = CONCRETE_PRONOUN_MAP[randPronoun.idx] || CONCRETE_PRONOUN_MAP[0];
+  const chosenPronounObj = candidates[Math.floor(Math.random() * candidates.length)];
+  const chosenSubject = chosenPronounObj.pronoun;
+
+  let pronounLabel = chosenPronounObj.fullLabel;
   if (isReciprocal) {
-    if (randPronoun.idx === 3) pronounLabel = "nosotros / nosotras (we — each other)";
-    else if (randPronoun.idx === 4) pronounLabel = "vosotros / vosotras (you all — each other, Spain)";
-    else if (randPronoun.idx === 5) pronounLabel = "ellos / ellas / ustedes (they/you all — each other)";
+    pronounLabel = `${chosenSubject} (${chosenPronounObj.meaning} — each other)`;
   }
+
+  const prompt = `${chosenSubject} (${verbItem.spanish})`;
 
   // Generate 3 plausible distractors
   const distractors = new Set();
@@ -604,15 +637,12 @@ export function generateConjugationQuestion(verbItem, options = {}) {
 
   const choices = [correctForm, ...distractorsArray].sort(() => Math.random() - 0.5);
 
-  let displayVerb = verbItem.spanish;
-  if (isReciprocal) {
-    displayVerb = `${verbItem.spanish} (Acción Recíproca: "each other")`;
-  } else if (isReflexive) {
-    displayVerb = `${verbItem.spanish} (Verbo Reflexivo)`;
-  }
-
   return {
-    verb: displayVerb,
+    verb: prompt,
+    infinitive: verbItem.spanish,
+    subjectPronoun: chosenSubject,
+    subjectMeaning: chosenPronounObj.meaning,
+    prompt: prompt,
     meaning: verbItem.english,
     pronoun: pronounLabel,
     tense: targetTense,
@@ -620,11 +650,12 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     isReflexive,
     isReciprocal,
     isGustar: false,
-    questionWord: displayVerb,
+    questionWord: prompt,
     correct: correctForm,
     choices: choices
   };
 }
+
 
 // -------------------------------------------------------------
 // FILL IN THE BLANK SENTENCE PRACTICE
@@ -937,6 +968,162 @@ export function generateFillInTheBlank(sentenceItem) {
       choices: ["a", "de", "con", "por"],
       type: "preposition",
       hint: "Se usa la 'a' personal porque el objeto directo son personas específicas."
+    },
+    "yo me despierto a las siete de la mañana": {
+      blanked: "yo [_____] a las siete de la mañana",
+      correct: "me despierto",
+      choices: ["me despierto", "te despiertas", "se despierta", "nos despertamos"],
+      type: "verb",
+      hint: "Verbo reflexivo con cambio de raíz (e -> ie) conjugado para 'yo'."
+    },
+    "mi hermano se levanta tarde los fines de semana": {
+      blanked: "mi hermano [_____] tarde los fines de semana",
+      correct: "se levanta",
+      choices: ["se levanta", "me levanto", "te levantas", "se levantan"],
+      type: "verb"
+    },
+    "nosotros nos duchamos con agua caliente": {
+      blanked: "nosotros [_____] con agua caliente",
+      correct: "nos duchamos",
+      choices: ["nos duchamos", "se duchan", "me ducho", "duchamos"],
+      type: "verb"
+    },
+    "a mi hermano le duele mucho la garganta hoy": {
+      blanked: "a mi hermano le [_____] mucho la garganta hoy",
+      correct: "duele",
+      choices: ["duele", "duelen", "doler", "duelo"],
+      type: "verb",
+      hint: "Doler concuerda con el sujeto singular ('la garganta'): duele."
+    },
+    "nosotros nos sentimos muy cansados": {
+      blanked: "nosotros nos [_____] muy cansados",
+      correct: "sentimos",
+      choices: ["sentimos", "sienten", "siento", "sientes"],
+      type: "verb"
+    },
+    "los amigos se saludan con un apretón de manos": {
+      blanked: "los amigos [_____] con un apretón de manos",
+      correct: "se saludan",
+      choices: ["se saludan", "saludarse", "nos saludamos", "saludan"],
+      type: "verb",
+      hint: "Acción recíproca entre amigos (ellos): se saludan."
+    },
+    "ayer compré una camisa azul en la tienda": {
+      blanked: "ayer [_____] una camisa azul en la tienda",
+      correct: "compré",
+      choices: ["compré", "compro", "compró", "compramos"],
+      type: "verb",
+      hint: "Pretérito regular de -ar para 'yo': compré."
+    },
+    "nosotros lavamos los platos anoche": {
+      blanked: "nosotros [_____] los platos anoche",
+      correct: "lavamos",
+      choices: ["lavamos", "lavaron", "lavo", "lavaste"],
+      type: "verb"
+    },
+    "ella fue al supermercado ayer por la tarde": {
+      blanked: "ella [_____] al supermercado ayer por la tarde",
+      correct: "fue",
+      choices: ["fue", "va", "fueron", "fui"],
+      type: "verb",
+      hint: "Pretérito irregular del verbo ir para 'ella': fue."
+    },
+    "mis amigos limpiaron la casa esta mañana": {
+      blanked: "mis amigos [_____] la casa esta mañana",
+      correct: "limpiaron",
+      choices: ["limpiaron", "limpian", "limpió", "limpiamos"],
+      type: "verb"
+    },
+    "tú pagaste la ropa con tarjeta de crédito": {
+      blanked: "tú [_____] la ropa con tarjeta de crédito",
+      correct: "pagaste",
+      choices: ["pagaste", "pagas", "pagó", "pagué"],
+      type: "verb"
+    },
+    "yo busqué los zapatos nuevos en el centro comercial": {
+      blanked: "yo [_____] los zapatos nuevos en el centro comercial",
+      correct: "busqué",
+      choices: ["busqué", "busco", "buscó", "buscaron"],
+      type: "verb",
+      hint: "Cambio ortográfico en pretérito (c -> qu) para 'yo': busqué."
+    },
+    "esta camisa de algodón cuesta treinta dólares": {
+      blanked: "esta camisa de algodón [_____] treinta dólares",
+      correct: "cuesta",
+      choices: ["cuesta", "cuestan", "costó", "costar"],
+      type: "verb"
+    },
+    "anoche comí pollo asado con verduras": {
+      blanked: "anoche [_____] pollo asado con verduras",
+      correct: "comí",
+      choices: ["comí", "como", "comió", "comimos"],
+      type: "verb"
+    },
+    "nosotros viajamos a méxico en avión": {
+      blanked: "nosotros [_____] a México en avión",
+      correct: "viajamos",
+      choices: ["viajamos", "viajo", "viajaron", "viaja"],
+      type: "verb"
+    },
+    "el pasajero mostró el pasaporte en el mostrador": {
+      blanked: "el pasajero [_____] el pasaporte en el mostrador",
+      correct: "mostró",
+      choices: ["mostró", "muestra", "mostraron", "mostré"],
+      type: "verb"
+    },
+    "ellos hicieron las maletas antes del viaje": {
+      blanked: "ellos [_____] las maletas antes del viaje",
+      correct: "hicieron",
+      choices: ["hicieron", "hacen", "hizo", "hicimos"],
+      type: "verb",
+      hint: "Pretérito irregular de hacer con raíz 'hic-': hicieron."
+    },
+    "yo le di la tarjeta de embarque al agente": {
+      blanked: "yo le [_____] la tarjeta de embarque al agente",
+      correct: "di",
+      choices: ["di", "da", "dio", "dimos"],
+      type: "verb",
+      hint: "Pretérito irregular de dar para 'yo': di."
+    },
+    "nosotros nos quedamos en un hotel cómodo": {
+      blanked: "nosotros [_____] en un hotel cómodo",
+      correct: "nos quedamos",
+      choices: ["nos quedamos", "se quedaron", "me quedé", "quedamos"],
+      type: "verb"
+    },
+    "el recepcionista nos dio la llave de la habitación": {
+      blanked: "el recepcionista nos [_____] la llave de la habitación",
+      correct: "dio",
+      choices: ["dio", "da", "di", "dieron"],
+      type: "verb"
+    },
+    "ayer yo no pude encontrar mi pasaporte": {
+      blanked: "ayer yo no [_____] encontrar mi pasaporte",
+      correct: "pude",
+      choices: ["pude", "puedo", "pudo", "pudimos"],
+      type: "verb",
+      hint: "Pretérito irregular de poder para 'yo': pude."
+    },
+    "ella tuvo que cancelar la reserva": {
+      blanked: "ella [_____] que cancelar la reserva",
+      correct: "tuvo",
+      choices: ["tuvo", "tiene", "tuve", "tuvieron"],
+      type: "verb",
+      hint: "Pretérito irregular de tener para 'ella': tuvo."
+    },
+    "nosotros estuvimos en españa durante las vacaciones": {
+      blanked: "nosotros [_____] en España durante las vacaciones",
+      correct: "estuvimos",
+      choices: ["estuvimos", "estamos", "estuvo", "estuvieron"],
+      type: "verb",
+      hint: "Pretérito irregular de estar con raíz 'estuv-': estuvimos."
+    },
+    "ella me lo explicó con calma": {
+      blanked: "ella me [_____] explicó con calma",
+      correct: "lo",
+      choices: ["lo", "la", "los", "las"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo masculino singular: lo."
     }
   };
 

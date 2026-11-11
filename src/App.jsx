@@ -8,7 +8,7 @@ import AiChat from './components/AiChat';
 import MiniGames from './components/MiniGames';
 import BadgeTrophy from './components/BadgeTrophy';
 import MistakesDungeon from './components/MistakesDungeon';
-import { Settings, RefreshCw, Mail, Volume2, Sparkles } from 'lucide-react';
+import { Settings, RefreshCw, Mail, Volume2, Sparkles, X } from 'lucide-react';
 import { subscribeToVoices, formatVoiceLabel, speakSpanish } from './utils/speechHelper';
 import './App.css';
 
@@ -81,6 +81,17 @@ export default function App() {
   useEffect(() => {
     setTempKey(state.apiKeys.gemini || "");
   }, [state.apiKeys.gemini]);
+
+  // Close settings on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showSettings) {
+        setShowSettings(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showSettings]);
 
   const handleSaveSettings = () => {
     setApiKey(tempKey);
@@ -273,167 +284,230 @@ export default function App() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="modal-overlay">
-          <div className="glass-panel modal-content" style={{ animation: 'pop-in 0.3s ease-out' }}>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Settings size={20} color="var(--primary)" /> Configuración (Settings)
-            </h3>
-            
-            <div className="form-group" style={{ marginTop: '10px' }}>
-              <label className="form-label">Gemini API Key (Optional)</label>
-              <input
-                type="password"
-                placeholder="AIzaSy..."
-                value={tempKey}
-                onChange={(e) => setTempKey(e.target.value)}
-                className="form-input"
-              />
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Required to speak freely with Elena in the AI Chat.
-              </span>
+        <div className="modal-overlay" onClick={() => setShowSettings(false)}>
+          <div 
+            className="glass-panel modal-content" 
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+              maxWidth: '460px', 
+              maxHeight: 'calc(100dvh - 36px)', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              padding: 0, 
+              overflow: 'hidden',
+              animation: 'pop-in 0.25s ease-out',
+              borderRadius: '16px'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '14px 18px',
+              borderBottom: '1px solid var(--card-border)',
+              background: 'rgba(255, 255, 255, 0.02)',
+              flexShrink: 0
+            }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <Settings size={18} color="var(--primary)" /> Configuración (Settings)
+              </h3>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setShowSettings(false)}
+                style={{ padding: '4px 8px', borderRadius: '8px', lineHeight: 1 }}
+                title="Cerrar (Close)"
+              >
+                <X size={16} />
+              </button>
             </div>
 
-            <div className="form-group" style={{ marginTop: '12px', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
-              <input
-                type="checkbox"
-                id="excludeVosotros"
-                checked={Boolean(state.excludeVosotros)}
-                onChange={(e) => setExcludeVosotros(e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--primary)' }}
-              />
-              <div>
-                <label htmlFor="excludeVosotros" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
-                  Ignore &quot;vosotros&quot; forms (Spain)
-                </label>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>
-                  Hides Spain-specific plural forms in conjugation quizzes and Codex (active by default for Latin American Spanish).
-                </span>
-              </div>
-            </div>
-
-            {/* Difficulty selector radio group */}
-            <div className="form-group" style={{ marginTop: '14px', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
-              <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '8px', display: 'block' }}>Dificultad (Difficulty Mode)</label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                {['relaxed', 'standard', 'hardcore'].map(mode => (
-                  <button 
-                    key={mode}
-                    type="button"
-                    className={`btn ${state.difficultyMode === mode ? 'btn-primary' : 'btn-secondary'}`}
-                    onClick={() => setDifficultyMode(mode)}
-                    style={{ flex: 1, textTransform: 'capitalize', fontSize: '0.75rem', padding: '6px' }}
-                  >
-                    {mode === 'relaxed' ? 'Relaxed' : mode === 'hardcore' ? 'Hardcore' : 'Standard'}
-                  </button>
-                ))}
-              </div>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginTop: '6px' }}>
-                {state.difficultyMode === 'relaxed' && "Relaxed: No quiz damage. 50% XP/Gold rewards."}
-                {state.difficultyMode === 'standard' && "Standard: 15 HP damage on mistakes."}
-                {state.difficultyMode === 'hardcore' && "Hardcore: 30 HP damage. Fainting resets quest level. 2x XP/Gold rewards!"}
-              </span>
-            </div>
-
-            {/* Voice & Pronunciation settings */}
-            <div className="form-group" style={{ marginTop: '14px', background: 'rgba(255,255,255,0.02)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
-              <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Volume2 size={16} color="var(--primary)" /> Pronunciación y Voz (Text-to-Speech)
-              </label>
-
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
-                  Voz en Español:
-                </label>
-                <select
-                  className="form-input"
-                  value={state.ttsVoice || ""}
-                  onChange={(e) => setTtsVoice(e.target.value)}
-                  style={{ fontSize: '0.8rem', padding: '6px 10px', width: '100%' }}
-                >
-                  <option value="">Auto (Voz natural más recomendada de tu sistema)</option>
-                  {availableVoices.map((v) => (
-                    <option key={v.name} value={v.name}>
-                      {formatVoiceLabel(v)}
-                    </option>
-                  ))}
-                </select>
+            {/* Modal Scrollable Body */}
+            <div style={{
+              padding: '16px 18px',
+              overflowY: 'auto',
+              overscrollBehavior: 'contain',
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}>
+              {/* Ignore Vosotros */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
+                <input
+                  type="checkbox"
+                  id="excludeVosotros"
+                  checked={Boolean(state.excludeVosotros)}
+                  onChange={(e) => setExcludeVosotros(e.target.checked)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--primary)', flexShrink: 0 }}
+                />
+                <div>
+                  <label htmlFor="excludeVosotros" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+                    Ignore &quot;vosotros&quot; forms (Spain)
+                  </label>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', lineHeight: 1.3 }}>
+                    Hides Spain-specific plural forms in quizzes & Codex (active by default).
+                  </span>
+                </div>
               </div>
 
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
-                  Velocidad:
+              {/* Difficulty Mode */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: '6px', display: 'block' }}>
+                  Dificultad (Difficulty Mode)
                 </label>
                 <div style={{ display: 'flex', gap: '6px' }}>
-                  {[0.85, 0.95, 1.0, 1.1].map((r) => (
-                    <button
-                      key={r}
+                  {['relaxed', 'standard', 'hardcore'].map(mode => (
+                    <button 
+                      key={mode}
                       type="button"
-                      className={`btn ${(state.ttsRate ?? 0.95) === r ? 'btn-primary' : 'btn-secondary'}`}
-                      onClick={() => setTtsRate(r)}
-                      style={{ flex: 1, fontSize: '0.75rem', padding: '4px 6px' }}
+                      className={`btn ${state.difficultyMode === mode ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => setDifficultyMode(mode)}
+                      style={{ flex: 1, textTransform: 'capitalize', fontSize: '0.75rem', padding: '5px 4px' }}
                     >
-                      {r}x {r === 0.95 ? "(Opt)" : ""}
+                      {mode === 'relaxed' ? 'Relaxed' : mode === 'hardcore' ? 'Hardcore' : 'Standard'}
                     </button>
                   ))}
                 </div>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginTop: '6px', lineHeight: 1.3 }}>
+                  {state.difficultyMode === 'relaxed' && "Relaxed: No quiz damage. 50% XP/Gold rewards."}
+                  {state.difficultyMode === 'standard' && "Standard: 15 HP damage on mistakes."}
+                  {state.difficultyMode === 'hardcore' && "Hardcore: 30 HP damage. Fainting resets quest level. 2x rewards!"}
+                </span>
               </div>
 
-              {Boolean(state.apiKeys.gemini) && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', padding: '8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
-                  <input
-                    type="checkbox"
-                    id="useGeminiTts"
-                    checked={Boolean(state.useGeminiTts)}
-                    onChange={(e) => setUseGeminiTts(e.target.checked)}
-                    style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
-                  />
-                  <div>
-                    <label htmlFor="useGeminiTts" style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Sparkles size={13} /> Gemini Studio AI Voice (Voz humana)
-                    </label>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>
-                      Genera pronunciación ultra-realista con modelo neuronal de Google Gemini.
-                    </span>
+              {/* Voice & Pronunciation */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Volume2 size={15} color="var(--primary)" /> Pronunciación y Voz (Text-to-Speech)
+                </label>
+
+                <div style={{ marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '3px' }}>
+                    Voz en Español:
+                  </label>
+                  <select
+                    className="form-input"
+                    value={state.ttsVoice || ""}
+                    onChange={(e) => setTtsVoice(e.target.value)}
+                    style={{ fontSize: '0.78rem', padding: '6px 8px', width: '100%' }}
+                  >
+                    <option value="">Auto (Voz natural recomendada de tu sistema)</option>
+                    {availableVoices.map((v) => (
+                      <option key={v.name} value={v.name}>
+                        {formatVoiceLabel(v)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '3px' }}>
+                    Velocidad:
+                  </label>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {[0.85, 0.95, 1.0, 1.1].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        className={`btn ${(state.ttsRate ?? 0.95) === r ? 'btn-primary' : 'btn-secondary'}`}
+                        onClick={() => setTtsRate(r)}
+                        style={{ flex: 1, fontSize: '0.72rem', padding: '4px 6px' }}
+                      >
+                        {r}x {r === 0.95 ? "(Opt)" : ""}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              )}
 
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => speakSpanish("¡Hola! Me llamo Elena. Bienvenidos a Estudiamos 102. Vamos a aprender español juntos.", { state })}
-                style={{ width: '100%', fontSize: '0.8rem', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-              >
-                <Volume2 size={15} color="var(--primary)" /> 🔊 Probar Pronunciación (Audition Voice)
-              </button>
+                {Boolean(state.apiKeys.gemini) && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '6px 8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                    <input
+                      type="checkbox"
+                      id="useGeminiTts"
+                      checked={Boolean(state.useGeminiTts)}
+                      onChange={(e) => setUseGeminiTts(e.target.checked)}
+                      style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)', flexShrink: 0 }}
+                    />
+                    <div>
+                      <label htmlFor="useGeminiTts" style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Sparkles size={12} /> Gemini Studio AI Voice (Voz humana)
+                      </label>
+                      <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', display: 'block' }}>
+                        Pronunciación ultra-realista generada por IA.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => speakSpanish("¡Hola! Me llamo Elena. Bienvenidos a Estudiamos 102. Vamos a aprender español juntos.", { state })}
+                  style={{ width: '100%', fontSize: '0.75rem', padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  <Volume2 size={14} color="var(--primary)" /> 🔊 Probar Pronunciación
+                </button>
+              </div>
+
+              {/* Gemini API Key */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: '4px', display: 'block' }}>
+                  Gemini API Key (Opcional)
+                </label>
+                <input
+                  type="password"
+                  placeholder="AIzaSy..."
+                  value={tempKey}
+                  onChange={(e) => setTempKey(e.target.value)}
+                  className="form-input"
+                  style={{ fontSize: '0.8rem', padding: '7px 10px', width: '100%' }}
+                />
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                  Requerido para chatear libremente con Elena en el AI Chat.
+                </span>
+              </div>
+
+              {/* Feedback Button */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: '6px', display: 'block' }}>
+                  Comentarios y Sugerencias
+                </label>
+                <a 
+                  href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback" 
+                  className="btn btn-secondary" 
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', textDecoration: 'none', fontSize: '0.78rem', padding: '6px 10px' }}
+                >
+                  <Mail size={14} color="var(--primary)" /> Enviar correo a jsorba@mail.pima.edu
+                </a>
+              </div>
+
+              {/* Danger Zone */}
+              <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--danger)', display: 'block', marginBottom: '6px' }}>
+                  Zona de Peligro (Danger Zone)
+                </span>
+                <button className="btn btn-danger btn-sm" onClick={handleReset} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.75rem', width: '100%', padding: '6px 10px' }}>
+                  <RefreshCw size={13} /> Reiniciar Todo el Progreso
+                </button>
+              </div>
             </div>
 
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '14px', marginTop: '14px' }}>
-              <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '6px', display: 'block' }}>
-                Comentarios y Sugerencias
-              </label>
-              <a 
-                href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback" 
-                className="btn btn-secondary" 
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', textDecoration: 'none', fontSize: '0.85rem' }}
-              >
-                <Mail size={15} color="var(--primary)" /> Enviar correo a jsorba@mail.pima.edu
-              </a>
-            </div>
-
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--danger)' }}>Zone of Danger</span>
-              <button className="btn btn-danger" onClick={handleReset} style={{ display: 'flex', gap: '8px', fontSize: '0.85rem' }}>
-                <RefreshCw size={14} /> Reset All Progress
+            {/* Modal Footer */}
+            <div style={{
+              display: 'flex',
+              gap: '10px',
+              padding: '12px 18px',
+              borderTop: '1px solid var(--card-border)',
+              background: 'rgba(0, 0, 0, 0.25)',
+              flexShrink: 0
+            }}>
+              <button className="btn btn-secondary" onClick={() => setShowSettings(false)} style={{ flex: 1, padding: '8px', fontSize: '0.82rem' }}>
+                Cerrar (Close)
               </button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              <button className="btn btn-secondary" onClick={() => setShowSettings(false)} style={{ flex: 1 }}>
-                Close
-              </button>
-              <button className="btn btn-primary" onClick={handleSaveSettings} style={{ flex: 1 }}>
-                Save Key
+              <button className="btn btn-primary" onClick={handleSaveSettings} style={{ flex: 1, padding: '8px', fontSize: '0.82rem' }}>
+                Guardar (Save)
               </button>
             </div>
           </div>

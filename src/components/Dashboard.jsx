@@ -9,7 +9,8 @@ import {
   Coins, 
   Gamepad2, 
   Settings, 
-  Heart
+  Heart,
+  Mail
 } from 'lucide-react';
 import NarfySprite from './NarfySprite';
 
@@ -497,6 +498,24 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
             </div>
 
           </div>
+        </div>
+
+        {/* Feedback / Contact Teacher Panel */}
+        <div className="glass-panel" style={{ padding: '16px', textAlign: 'center', background: 'rgba(59, 130, 246, 0.04)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+          <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '4px' }}>✉️</span>
+          <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '4px' }}>
+            Comentarios o Sugerencias
+          </h4>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '10px', lineHeight: '1.3' }}>
+            ¿Tienes dudas, sugerencias o encontraste un error en el sitio?
+          </p>
+          <a 
+            href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback"
+            className="btn btn-secondary btn-sm"
+            style={{ width: '100%', textDecoration: 'none', display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}
+          >
+            <Mail size={13} color="var(--primary)" /> jsorba@mail.pima.edu
+          </a>
         </div>
       </div>
     </div>

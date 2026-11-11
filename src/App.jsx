@@ -8,7 +8,7 @@ import AiChat from './components/AiChat';
 import MiniGames from './components/MiniGames';
 import BadgeTrophy from './components/BadgeTrophy';
 import MistakesDungeon from './components/MistakesDungeon';
-import { Settings, RefreshCw } from 'lucide-react';
+import { Settings, RefreshCw, Mail } from 'lucide-react';
 import './App.css';
 
 export default function App() {
@@ -178,7 +178,7 @@ export default function App() {
         </div>
 
         {state.hasCompletedPlacement && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               Lvl <strong>{state.level}</strong>
             </div>
@@ -188,6 +188,25 @@ export default function App() {
             <div style={{ fontSize: '0.85rem', color: '#ff7a00', fontWeight: 'bold' }}>
               🔥 {state.streak} days
             </div>
+            <a 
+              href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback"
+              className="btn btn-secondary btn-sm"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.78rem',
+                padding: '5px 12px',
+                borderRadius: '20px',
+                textDecoration: 'none',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--card-border)'
+              }}
+              title="Enviar comentarios o sugerencias a jsorba@mail.pima.edu"
+            >
+              <Mail size={13} color="var(--primary)" />
+              <span>Feedback</span>
+            </a>
           </div>
         )}
       </header>
@@ -198,8 +217,19 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer style={{ marginTop: '40px', padding: '20px 0', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-        Estudiamos 102 © 2026. Made with Google Antigravity. Strictly Spanish 102 Syllabus Vocabulary.
+      <footer style={{ marginTop: '40px', padding: '24px 0', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        <div style={{ marginBottom: '6px' }}>
+          Estudiamos 102 © 2026. Made with Google Antigravity. Strictly Spanish 102 Syllabus Vocabulary.
+        </div>
+        <div>
+          ¿Tienes comentarios o encontraste un error?{' '}
+          <a 
+            href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback" 
+            style={{ color: 'var(--primary)', textDecoration: 'underline', fontWeight: 600 }}
+          >
+            Enviar comentarios a jsorba@mail.pima.edu
+          </a>
+        </div>
       </footer>
 
       {/* Level Up Celebration Modal */}
@@ -290,6 +320,19 @@ export default function App() {
                 {state.difficultyMode === 'standard' && "Standard: 15 HP damage on mistakes."}
                 {state.difficultyMode === 'hardcore' && "Hardcore: 30 HP damage. Fainting resets quest level. 2x XP/Gold rewards!"}
               </span>
+            </div>
+
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '14px', marginTop: '14px' }}>
+              <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '6px', display: 'block' }}>
+                Comentarios y Sugerencias
+              </label>
+              <a 
+                href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback" 
+                className="btn btn-secondary" 
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', textDecoration: 'none', fontSize: '0.85rem' }}
+              >
+                <Mail size={15} color="var(--primary)" /> Enviar correo a jsorba@mail.pima.edu
+              </a>
             </div>
 
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>

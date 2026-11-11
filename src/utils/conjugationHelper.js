@@ -179,12 +179,78 @@ export function parseVerb(rawVerb) {
   return { base: mainWord, isReflexive, suffix };
 }
 
+export const GUSTAR_VERBS = [
+  "gustar",
+  "encantar",
+  "doler",
+  "molestar",
+  "fascinar",
+  "importar",
+  "faltar",
+  "quedar"
+];
+
+export const GUSTAR_FORMS = {
+  "gustar": {
+    present: { singular: "gusta", plural: "gustan" },
+    preterite: { singular: "gustó", plural: "gustaron" }
+  },
+  "encantar": {
+    present: { singular: "encanta", plural: "encantan" },
+    preterite: { singular: "encantó", plural: "encantaron" }
+  },
+  "doler": {
+    present: { singular: "duele", plural: "duelen" },
+    preterite: { singular: "dolió", plural: "dolieron" }
+  },
+  "molestar": {
+    present: { singular: "molesta", plural: "molestan" },
+    preterite: { singular: "molestó", plural: "molestaron" }
+  },
+  "fascinar": {
+    present: { singular: "fascinan", plural: "fascinan" },
+    preterite: { singular: "fascinó", plural: "fascinaron" }
+  },
+  "importar": {
+    present: { singular: "importa", plural: "importan" },
+    preterite: { singular: "importó", plural: "importaron" }
+  },
+  "faltar": {
+    present: { singular: "falta", plural: "faltan" },
+    preterite: { singular: "faltó", plural: "faltaron" }
+  },
+  "quedar": {
+    present: { singular: "queda", plural: "quedan" },
+    preterite: { singular: "quedó", plural: "quedaron" }
+  }
+};
+
+export const INDIRECT_OBJECT_PRONOUNS = [
+  { pronoun: "(a mí)", iop: "me", translation: "to me / I like" },
+  { pronoun: "(a ti)", iop: "te", translation: "to you (inf) / you like" },
+  { pronoun: "(a él / ella / usted)", iop: "le", translation: "to him/her/you (formal)" },
+  { pronoun: "(a nosotros / nosotras)", iop: "nos", translation: "to us / we like" },
+  { pronoun: "(a vosotros / vosotras)", iop: "os", translation: "to you all (Spain)" },
+  { pronoun: "(a ellos / ellas / ustedes)", iop: "les", translation: "to them/you all" }
+];
+
+export function isGustarVerb(itemOrStr) {
+  if (!itemOrStr) return false;
+  if (typeof itemOrStr === "object") {
+    if (itemOrStr.subcategory === "Verbs Structured Like Gustar") return true;
+    const base = parseVerb(itemOrStr.spanish).base;
+    return GUSTAR_VERBS.includes(base);
+  }
+  const base = parseVerb(itemOrStr).base;
+  return GUSTAR_VERBS.includes(base);
+}
+
 /**
  * Checks if a vocabulary item represents a verb (101 verbs, reflexives, preterites)
  */
 export function isVerbItem(item) {
   if (!item || !item.spanish) return false;
-  if (item.category === "Verbs" && item.subcategory !== "Verbs Structured Like Gustar") return true;
+  if (item.category === "Verbs") return true;
   if (item.subcategory?.includes("Verbos Reflexivos") || item.subcategory?.includes("Pretérito")) return true;
   
   const parsed = parseVerb(item.spanish);
@@ -196,11 +262,22 @@ export function isVerbItem(item) {
 }
 
 /**
- * Conjugates any Spanish 101 or 102 verb in Present or Preterite (Past Tense),
- * automatically prepending reflexive pronouns (me, te, se, nos, os, se) for reflexive verbs.
+ * Conjugates any Spanish 101 or 102 verb in Present or Preterite (Past Tense).
+ * Automatically prepending reflexive pronouns (me, te, se, nos, os, se) for reflexive verbs.
+ * For gustar and gustar-like verbs, returns indirect object pronoun + gusta / gustan.
  */
 export function conjugate(rawVerb, pronounIdx, tense = "present") {
   const { base, isReflexive, suffix } = parseVerb(rawVerb);
+
+  // Special handling for Gustar and verbs structured like it:
+  // Gustar does NOT conjugate by person. It only uses 3rd-person singular/plural with IOPs!
+  if (isGustarVerb(rawVerb)) {
+    const forms = GUSTAR_FORMS[base] || GUSTAR_FORMS["gustar"];
+    const tenseForms = (tense === "preterite" || tense === "past") ? forms.preterite : forms.present;
+    const iop = INDIRECT_OBJECT_PRONOUNS[pronounIdx]?.iop || "le";
+    return `${iop} ${tenseForms.singular} (sing.) / ${iop} ${tenseForms.plural} (pl.)`;
+  }
+
   let conjugatedBase = "";
 
   if (tense === "preterite" || tense === "past") {
@@ -244,17 +321,79 @@ export function conjugate(rawVerb, pronounIdx, tense = "present") {
   return `${conjugatedBase}${suffix}`;
 }
 
+const GUSTAR_PRACTICE_TEMPLATES = [
+  // Present - Singular
+  {
+    sentence: "A mí me [_____] la música clásica.",
+    isPlural: false,
+    meaning: "I like classical music (singular noun)",
+    tense: "present"
+  },
+  {
+    sentence: "A Juan le [_____] comer tacos en el restaurante.",
+    isPlural: false,
+    meaning: "Juan likes eating tacos (verb infinitive)",
+    tense: "present"
+  },
+  {
+    sentence: "A nosotros nos [_____] el café por la mañana.",
+    isPlural: false,
+    meaning: "We like coffee in the morning (singular noun)",
+    tense: "present"
+  },
+  // Present - Plural
+  {
+    sentence: "A mis amigos les [_____] las películas de acción.",
+    isPlural: true,
+    meaning: "My friends like action movies (plural noun)",
+    tense: "present"
+  },
+  {
+    sentence: "¿A ti te [_____] las manzanas rojas?",
+    isPlural: true,
+    meaning: "Do you like red apples? (plural noun)",
+    tense: "present"
+  },
+  {
+    sentence: "A Elena y a Mateo les [_____] los libros de historia.",
+    isPlural: true,
+    meaning: "Elena and Mateo like history books (plural noun)",
+    tense: "present"
+  },
+  // Preterite - Singular
+  {
+    sentence: "Ayer me [_____] mucho la fiesta de cumpleaños.",
+    isPlural: false,
+    meaning: "Yesterday I liked the birthday party a lot (singular past)",
+    tense: "preterite"
+  },
+  {
+    sentence: "¿A ti te [_____] el concierto del sábado pasado?",
+    isPlural: false,
+    meaning: "Did you like last Saturday's concert? (singular past)",
+    tense: "preterite"
+  },
+  // Preterite - Plural
+  {
+    sentence: "A nosotros nos [_____] mucho las vacaciones en México.",
+    isPlural: true,
+    meaning: "We liked the vacation days in Mexico a lot (plural past)",
+    tense: "preterite"
+  },
+  {
+    sentence: "A ellos les [_____] las nuevas canciones del disco.",
+    isPlural: true,
+    meaning: "They liked the new songs on the album (plural past)",
+    tense: "preterite"
+  }
+];
+
 /**
  * Generates an interactive conjugation question for a given verb item.
- * Automatically handles reflexive pronouns and preterite past tense.
+ * Automatically handles reflexive pronouns, preterite past tense, and Gustar-structure verbs.
  */
 export function generateConjugationQuestion(verbItem, options = {}) {
-  const { base, isReflexive, suffix } = parseVerb(verbItem.spanish);
-
-  // Skip gustar-type verbs since they conjugate indirectly
-  if (verbItem.subcategory === "Verbs Structured Like Gustar") {
-    return null;
-  }
+  const isGustar = isGustarVerb(verbItem);
 
   // Determine target tense: check options first, then infer from subcategory
   let targetTense = options.tense || "present";
@@ -265,6 +404,46 @@ export function generateConjugationQuestion(verbItem, options = {}) {
   }
 
   const tenseLabel = targetTense === "preterite" ? "Pretérito (Past Tense)" : "Presente";
+
+  // SPECIAL: Verbs Structured Like Gustar
+  // Gustar does NOT conjugate by pronoun (yo/tú/él). It tests singular (gusta/gustó) vs plural (gustan/gustaron)!
+  if (isGustar) {
+    const templates = GUSTAR_PRACTICE_TEMPLATES.filter(t => t.tense === targetTense);
+    const pool = templates.length > 0 ? templates : GUSTAR_PRACTICE_TEMPLATES;
+    const tpl = pool[Math.floor(Math.random() * pool.length)];
+    
+    let correct = "";
+    let choices = [];
+    if (tpl.tense === "preterite") {
+      correct = tpl.isPlural ? "gustaron" : "gustó";
+      choices = tpl.isPlural 
+        ? ["gustaron", "gustó", "gustan", "gustaronte"] 
+        : ["gustó", "gustaron", "gusta", "gusté"];
+    } else {
+      correct = tpl.isPlural ? "gustan" : "gusta";
+      choices = tpl.isPlural 
+        ? ["gustan", "gusta", "gusto", "gustas"] 
+        : ["gusta", "gustan", "gusto", "gustamos"];
+    }
+
+    // Shuffle choices
+    choices = choices.sort(() => Math.random() - 0.5);
+
+    return {
+      verb: "gustar (Estructura: gusta vs gustan)",
+      meaning: tpl.meaning,
+      pronoun: tpl.isPlural ? "Objeto Plural (¿gusta o gustan?)" : "Objeto Singular / Verbo (¿gusta o gustan?)",
+      tense: tpl.tense,
+      tenseLabel: tenseLabel,
+      isReflexive: false,
+      isGustar: true,
+      questionWord: tpl.sentence,
+      correct: correct,
+      choices: choices
+    };
+  }
+
+  const { base, isReflexive, suffix } = parseVerb(verbItem.spanish);
 
   // Filter pronouns based on vosotros preference
   const allowedPronouns = options.excludeVosotros 
@@ -315,6 +494,8 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     tense: targetTense,
     tenseLabel: tenseLabel,
     isReflexive,
+    isGustar: false,
+    questionWord: displayVerb,
     correct: correctForm,
     choices: choices
   };

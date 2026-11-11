@@ -6,7 +6,9 @@ import {
   generateFillInTheBlank, 
   conjugate,
   isVerbItem,
-  parseVerb
+  parseVerb,
+  isGustarVerb,
+  INDIRECT_OBJECT_PRONOUNS
 } from '../utils/conjugationHelper';
 import { 
   Swords, 
@@ -915,6 +917,58 @@ export default function StudyQuest({
     }
   };
 
+  const handlePracticeAnswer = (choice) => {
+    if (practiceAnswered) return;
+    setPracticeSelected(choice);
+    setPracticeAnswered(true);
+
+    const currentQ = practiceQuestions[practiceCurrentIdx];
+    const isCorrect = choice.trim().toLowerCase() === currentQ.correct.trim().toLowerCase();
+
+    if (isCorrect) {
+      setPracticeScore(prev => prev + 1);
+      setHealTrigger(true);
+      playSound('correct');
+      if (updateWordMastery && currentQ.item) {
+        updateWordMastery(currentQ.item.spanish, true);
+      }
+      setTimeout(() => setHealTrigger(false), 500);
+    } else {
+      setShakeTrigger(true);
+      playSound('wrong');
+      if (updateWordMastery && currentQ.item) {
+        updateWordMastery(currentQ.item.spanish, false);
+      }
+      if (addMistake && currentQ.item) {
+        addMistake(currentQ.item.spanish);
+      }
+      if (!state.fainted) takeDamage(15);
+      setTimeout(() => setShakeTrigger(false), 500);
+    }
+  };
+
+  const handlePracticeCardLearned = () => {
+    addXp(2);
+    setHealTrigger(true);
+    setTimeout(() => setHealTrigger(false), 500);
+
+    if (practiceCurrentIdx < practiceQuestions.length - 1) {
+      setPracticeCurrentIdx(prev => prev + 1);
+      setPracticeFlipped(false);
+    } else {
+      const cardCount = practiceQuestions.filter(q => q.isCardIntro).length;
+      const gradedCount = practiceQuestions.filter(q => !q.isCardIntro).length;
+      const earnedXp = (practiceScore * 10) + (cardCount * 2);
+      const earnedGold = practiceScore;
+      addXp(earnedXp);
+      addGold(earnedGold);
+      if (gradedCount > 0) {
+        recordQuizPerformance(practiceScore, gradedCount);
+      }
+      setPracticeQuizFinished(true);
+    }
+  };
+
   const handleQuestCardLearned = () => {
     addXp(2);
     setHealTrigger(true);
@@ -1124,109 +1178,222 @@ export default function StudyQuest({
     initAudio();
     if (practiceCards.length === 0) return;
 
-    let pool = practiceCards;
-    if (practiceQuizMode === "conjugation") {
-      const verbPool = practiceCards.filter(item => isVerbItem(item));
-      if (verbPool.length > 0) {
-        pool = verbPool;
+    let questions = [];
+
+    if (practiceQuizMode === "mixed") {
+      // MIX OF FLASHCARDS AND CONJUGATIONS (with translations for non-verbs)
+      const verbItems = practiceCards.filter(item => isVerbItem(item));
+      const otherItems = practiceCards.filter(item => !isVerbItem(item));
+
+      // 1. Take up to 5 items as flashcards for study/review first
+      const cardSource = verbItems.length >= 3 ? verbItems : practiceCards;
+      const shuffledCards = [...cardSource].sort(() => Math.random() - 0.5);
+      const cardBatch = shuffledCards.slice(0, Math.min(5, cardSource.length));
+
+      const cardSteps = cardBatch.map(item => ({
+        item,
+        isCardIntro: true
+      }));
+
+      // 2. Conjugation & Translation Quiz challenges (6-8 questions)
+      let quizItemsPool = [];
+      if (verbItems.length > 0) {
+        const shuffledVerbs = [...verbItems].sort(() => Math.random() - 0.5);
+        quizItemsPool.push(...shuffledVerbs.slice(0, 6));
       }
-    }
-
-    const shuffled = [...pool].sort(() => Math.random() - 0.5);
-    const chosen = shuffled.slice(0, 10);
-
-    const questions = chosen.map(item => {
-      if (item.category === "Sentences") {
-        const fillSpec = generateFillInTheBlank(item);
-        if (fillSpec) {
-          return {
-            item,
-            isConjugation: false,
-            isFillInTheBlank: true,
-            questionWord: fillSpec.sentence,
-            meaning: fillSpec.meaning,
-            correct: fillSpec.correct,
-            choices: fillSpec.choices
-          };
-        }
+      if (quizItemsPool.length < 6 && otherItems.length > 0) {
+        const shuffledOther = [...otherItems].sort(() => Math.random() - 0.5);
+        quizItemsPool.push(...shuffledOther.slice(0, 6 - quizItemsPool.length));
+      }
+      if (quizItemsPool.length === 0) {
+        quizItemsPool = [...practiceCards].sort(() => Math.random() - 0.5).slice(0, 6);
       }
 
-      const isVerb = isVerbItem(item);
-      const wantsConjugation = isVerb && practiceQuizMode === "conjugation";
+      const quizSteps = quizItemsPool.map(item => {
+        const isVerb = isVerbItem(item);
+        if (isVerb) {
+          let chosenTense = practiceTense;
+          if (chosenTense === "both") {
+            chosenTense = Math.random() > 0.5 ? "present" : "preterite";
+          } else if (chosenTense === "auto") {
+            if (
+              item.unit?.includes("Unit 3") || 
+              item.unit?.includes("Unit 4") || 
+              item.category === "Unidad 3" || 
+              item.category === "Unidad 4" || 
+              item.subcategory?.includes("Pretérito") ||
+              item.english?.toLowerCase().includes("preterite") ||
+              item.english?.toLowerCase().includes("(past)")
+            ) {
+              chosenTense = "preterite";
+            } else {
+              chosenTense = "present";
+            }
+          }
 
-      if (wantsConjugation) {
-        let chosenTense = practiceTense;
-        if (chosenTense === "both") {
-          chosenTense = Math.random() > 0.5 ? "present" : "preterite";
-        } else if (chosenTense === "auto") {
-          if (
-            item.unit?.includes("Unit 3") || 
-            item.unit?.includes("Unit 4") || 
-            item.category === "Unidad 3" || 
-            item.category === "Unidad 4" || 
-            item.subcategory?.includes("Pretérito") ||
-            item.english?.toLowerCase().includes("preterite") ||
-            item.english?.toLowerCase().includes("(past)")
-          ) {
-            chosenTense = "preterite";
-          } else {
-            chosenTense = "present";
+          const qSpec = generateConjugationQuestion(item, { 
+            tense: chosenTense,
+            excludeVosotros: state.excludeVosotros 
+          });
+          if (qSpec) {
+            return {
+              item,
+              isCardIntro: false,
+              isConjugation: true,
+              isGustar: qSpec.isGustar,
+              questionWord: qSpec.verb,
+              meaning: qSpec.meaning,
+              pronoun: qSpec.pronoun,
+              tense: qSpec.tense,
+              tenseLabel: qSpec.tenseLabel,
+              isReflexive: qSpec.isReflexive,
+              correct: qSpec.correct,
+              choices: qSpec.choices
+            };
           }
         }
 
-        const qSpec = generateConjugationQuestion(item, { 
-          tense: chosenTense,
-          excludeVosotros: state.excludeVosotros 
-        });
-        if (qSpec) {
-          return {
-            item,
-            isConjugation: true,
-            questionWord: qSpec.verb,
-            meaning: qSpec.meaning,
-            pronoun: qSpec.pronoun,
-            tense: qSpec.tense,
-            tenseLabel: qSpec.tenseLabel,
-            isReflexive: qSpec.isReflexive,
-            correct: qSpec.correct,
-            choices: qSpec.choices
-          };
+        const qType = Math.random() > 0.5 ? 0 : 1;
+        const isEsToEn = qType === 0;
+        const correctVal = isEsToEn ? formatEnglishPrompt(item.spanish, item.english) : item.spanish;
+        const questionText = isEsToEn ? item.spanish : formatEnglishPrompt(item.spanish, item.english);
+
+        const distractors = [];
+        while (distractors.length < 3) {
+          const rand = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
+          const val = isEsToEn ? formatEnglishPrompt(rand.spanish, rand.english) : rand.spanish;
+          if (
+            val.toLowerCase() !== correctVal.toLowerCase() && 
+            !checkSynonyms(val, correctVal) &&
+            !distractors.includes(val) &&
+            val.length < 35
+          ) {
+            distractors.push(val);
+          }
+        }
+        const choices = [correctVal, ...distractors].sort(() => Math.random() - 0.5);
+
+        return {
+          item,
+          isCardIntro: false,
+          isConjugation: false,
+          type: qType,
+          questionWord: questionText,
+          correct: correctVal,
+          choices: choices
+        };
+      });
+
+      questions = [...cardSteps, ...quizSteps];
+    } else {
+      let pool = practiceCards;
+      if (practiceQuizMode === "conjugation") {
+        const verbPool = practiceCards.filter(item => isVerbItem(item));
+        if (verbPool.length > 0) {
+          pool = verbPool;
         }
       }
 
-      let qType = Math.floor(Math.random() * 3);
-      if (qType === 2 && (item.spanish.includes("/") || item.spanish.includes("(") || item.spanish.length > 25)) {
-        qType = Math.random() > 0.5 ? 0 : 1;
-      }
+      const shuffled = [...pool].sort(() => Math.random() - 0.5);
+      const chosen = shuffled.slice(0, 10);
 
-      const isEsToEn = qType === 0;
-      const correctVal = isEsToEn ? formatEnglishPrompt(item.spanish, item.english) : item.spanish;
-      const questionText = isEsToEn ? item.spanish : formatEnglishPrompt(item.spanish, item.english);
-
-      const distractors = [];
-      while (distractors.length < 3) {
-        const rand = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
-        const val = isEsToEn ? formatEnglishPrompt(rand.spanish, rand.english) : rand.spanish;
-        if (
-          val.toLowerCase() !== correctVal.toLowerCase() && 
-          !checkSynonyms(val, correctVal) &&
-          !distractors.includes(val) &&
-          val.length < 35
-        ) {
-          distractors.push(val);
+      questions = chosen.map(item => {
+        if (item.category === "Sentences") {
+          const fillSpec = generateFillInTheBlank(item);
+          if (fillSpec) {
+            return {
+              item,
+              isCardIntro: false,
+              isConjugation: false,
+              isFillInTheBlank: true,
+              questionWord: fillSpec.sentence,
+              meaning: fillSpec.meaning,
+              correct: fillSpec.correct,
+              choices: fillSpec.choices
+            };
+          }
         }
-      }
-      const choices = [correctVal, ...distractors].sort(() => Math.random() - 0.5);
 
-      return {
-        item,
-        isConjugation: false,
-        type: qType,
-        questionWord: questionText,
-        correct: correctVal,
-        choices: choices
-      };
-    });
+        const isVerb = isVerbItem(item);
+        const wantsConjugation = isVerb && practiceQuizMode === "conjugation";
+
+        if (wantsConjugation) {
+          let chosenTense = practiceTense;
+          if (chosenTense === "both") {
+            chosenTense = Math.random() > 0.5 ? "present" : "preterite";
+          } else if (chosenTense === "auto") {
+            if (
+              item.unit?.includes("Unit 3") || 
+              item.unit?.includes("Unit 4") || 
+              item.category === "Unidad 3" || 
+              item.category === "Unidad 4" || 
+              item.subcategory?.includes("Pretérito") ||
+              item.english?.toLowerCase().includes("preterite") ||
+              item.english?.toLowerCase().includes("(past)")
+            ) {
+              chosenTense = "preterite";
+            } else {
+              chosenTense = "present";
+            }
+          }
+
+          const qSpec = generateConjugationQuestion(item, { 
+            tense: chosenTense,
+            excludeVosotros: state.excludeVosotros 
+          });
+          if (qSpec) {
+            return {
+              item,
+              isCardIntro: false,
+              isConjugation: true,
+              isGustar: qSpec.isGustar,
+              questionWord: qSpec.verb,
+              meaning: qSpec.meaning,
+              pronoun: qSpec.pronoun,
+              tense: qSpec.tense,
+              tenseLabel: qSpec.tenseLabel,
+              isReflexive: qSpec.isReflexive,
+              correct: qSpec.correct,
+              choices: qSpec.choices
+            };
+          }
+        }
+
+        let qType = Math.floor(Math.random() * 3);
+        if (qType === 2 && (item.spanish.includes("/") || item.spanish.includes("(") || item.spanish.length > 25)) {
+          qType = Math.random() > 0.5 ? 0 : 1;
+        }
+
+        const isEsToEn = qType === 0;
+        const correctVal = isEsToEn ? formatEnglishPrompt(item.spanish, item.english) : item.spanish;
+        const questionText = isEsToEn ? item.spanish : formatEnglishPrompt(item.spanish, item.english);
+
+        const distractors = [];
+        while (distractors.length < 3) {
+          const rand = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
+          const val = isEsToEn ? formatEnglishPrompt(rand.spanish, rand.english) : rand.spanish;
+          if (
+            val.toLowerCase() !== correctVal.toLowerCase() && 
+            !checkSynonyms(val, correctVal) &&
+            !distractors.includes(val) &&
+            val.length < 35
+          ) {
+            distractors.push(val);
+          }
+        }
+        const choices = [correctVal, ...distractors].sort(() => Math.random() - 0.5);
+
+        return {
+          item,
+          isCardIntro: false,
+          isConjugation: false,
+          type: qType,
+          questionWord: questionText,
+          correct: correctVal,
+          choices: choices
+        };
+      });
+    }
 
     setPracticeQuestions(questions);
     setPracticeCurrentIdx(0);
@@ -1234,6 +1401,7 @@ export default function StudyQuest({
     setPracticeAnswered(false);
     setPracticeSelected(null);
     setPracticeTyped("");
+    setPracticeFlipped(false);
     setPracticeQuizFinished(false);
     setPracticeQuizStarted(true);
   };
@@ -1246,11 +1414,13 @@ export default function StudyQuest({
     if (practiceCurrentIdx < practiceQuestions.length - 1) {
       setPracticeCurrentIdx(prev => prev + 1);
     } else {
-      const earnedXp = practiceScore * 10;
+      const cardCount = practiceQuestions.filter(q => q.isCardIntro).length;
+      const gradedCount = practiceQuestions.filter(q => !q.isCardIntro).length || 1;
+      const earnedXp = (practiceScore * 10) + (cardCount * 2);
       const earnedGold = practiceScore;
       addXp(earnedXp);
       addGold(earnedGold);
-      recordQuizPerformance(practiceScore, practiceQuestions.length);
+      recordQuizPerformance(practiceScore, gradedCount);
       setPracticeQuizFinished(true);
     }
   };
@@ -1913,21 +2083,42 @@ export default function StudyQuest({
                   💡 Tip: First time studying this topic? Switch to <strong>Flashcards</strong> above to learn the words first!
                 </p>
 
-                {practiceCards.some(item => isVerbItem(item)) && selectedSubcategory !== "Verbs Structured Like Gustar" && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '380px', margin: '0 auto 20px' }}>
+                {practiceCards.some(item => isVerbItem(item)) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '440px', margin: '0 auto 20px' }}>
                     <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
                       <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Quiz Type</label>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className={`btn ${practiceQuizMode === 'translation' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }} onClick={() => setPracticeQuizMode("translation")}>
-                          Translation
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button 
+                          className={`btn ${practiceQuizMode === 'translation' ? 'btn-primary' : 'btn-secondary'}`} 
+                          style={{ flex: 1, padding: '7px 4px', fontSize: '0.78rem' }} 
+                          onClick={() => setPracticeQuizMode("translation")}
+                        >
+                          Traducción
                         </button>
-                        <button className={`btn ${practiceQuizMode === 'conjugation' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }} onClick={() => setPracticeQuizMode("conjugation")}>
-                          ⚡ Conjugation
+                        <button 
+                          className={`btn ${practiceQuizMode === 'conjugation' ? 'btn-primary' : 'btn-secondary'}`} 
+                          style={{ flex: 1, padding: '7px 4px', fontSize: '0.78rem' }} 
+                          onClick={() => setPracticeQuizMode("conjugation")}
+                        >
+                          ⚡ Conjugación
+                        </button>
+                        <button 
+                          className={`btn ${practiceQuizMode === 'mixed' ? 'btn-primary' : 'btn-secondary'}`} 
+                          style={{ flex: 1.3, padding: '7px 4px', fontSize: '0.78rem' }} 
+                          onClick={() => setPracticeQuizMode("mixed")}
+                        >
+                          🔀 Mixto (Cards + Conj)
                         </button>
                       </div>
                     </div>
 
-                    {practiceQuizMode === 'conjugation' && (
+                    {practiceQuizMode === 'mixed' && (
+                      <p style={{ fontSize: '0.78rem', color: 'var(--accent)', margin: '-4px 0 2px', lineHeight: '1.4' }}>
+                        🔀 Modo Mixto: Repasa primero tarjetas interactivas de verbos y vocabulario, ¡y luego pon a prueba sus conjugaciones en el mismo mazo!
+                      </p>
+                    )}
+
+                    {(practiceQuizMode === 'conjugation' || practiceQuizMode === 'mixed') && (
                       <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)', animation: 'pop-in 0.2s ease-out' }}>
                         <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Tense Mode</label>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
@@ -2015,7 +2206,7 @@ export default function StudyQuest({
             <div>
               <div className="quiz-header">
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                  Practice Question {practiceCurrentIdx + 1} of 10
+                  Practice Item {practiceCurrentIdx + 1} of {practiceQuestions.length}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', color: 'var(--danger)', fontWeight: 'bold' }}>
@@ -2028,12 +2219,67 @@ export default function StudyQuest({
               </div>
 
               <div className="quiz-progress-track">
-                <div className="quiz-progress-fill" style={{ width: `${((practiceCurrentIdx + 1) / 10) * 100}%` }}></div>
+                <div className="quiz-progress-fill" style={{ width: `${((practiceCurrentIdx + 1) / practiceQuestions.length) * 100}%` }}></div>
               </div>
 
-              {practiceQuestions[practiceCurrentIdx]?.isConjugation ? (
+              {practiceQuestions[practiceCurrentIdx]?.isCardIntro ? (
+                <div style={{ textAlign: 'center', animation: 'pop-in 0.3s ease-out' }}>
+                  <div 
+                    className="flashcard-wrapper"
+                    onClick={() => setPracticeFlipped(!practiceFlipped)}
+                    style={{ height: '240px', maxWidth: '500px', margin: '0 auto 16px' }}
+                  >
+                    <div className={`flashcard ${practiceFlipped ? 'flipped' : ''}`}>
+                      <div className="flashcard-face flashcard-front">
+                        <span className="flashcard-category">Repaso de Tarjeta (+2 XP)</span>
+                        <h3 className="flashcard-term" style={{ fontSize: '2.2rem' }}>
+                          {practiceQuestions[practiceCurrentIdx].item.spanish}
+                        </h3>
+                        
+                        {isVerbItem(practiceQuestions[practiceCurrentIdx].item) && (
+                          <button 
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={(e) => { e.stopPropagation(); openCodex(practiceQuestions[practiceCurrentIdx].item); }}
+                            style={{ position: 'absolute', top: '16px', right: '16px', padding: '6px 12px', fontSize: '0.75rem', gap: '4px' }}
+                          >
+                            📖 Codex
+                          </button>
+                        )}
+
+                        {speechAvailable && (
+                          <button 
+                            className="btn btn-secondary"
+                            onClick={(e) => { e.stopPropagation(); speakSpanish(practiceQuestions[practiceCurrentIdx].item.spanish); }}
+                            style={{ position: 'absolute', bottom: '60px', borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}
+                          >
+                            <Volume2 size={16} color="var(--primary)" />
+                          </button>
+                        )}
+                        <span className="flashcard-hint">Haz clic para ver la traducción</span>
+                      </div>
+
+                      <div className="flashcard-face flashcard-back">
+                        <span className="flashcard-category">Traducción al Inglés</span>
+                        <h4 className="flashcard-translation" style={{ fontSize: '1.6rem' }}>
+                          {practiceQuestions[practiceCurrentIdx].item.english}
+                        </h4>
+                        <span className="flashcard-hint">Haz clic para volver al español</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button className="btn btn-accent" onClick={handlePracticeCardLearned} style={{ width: '100%', maxWidth: '280px', margin: '0 auto' }}>
+                    ¡Entendido! / Siguiente (+2 XP)
+                  </button>
+                </div>
+              ) : practiceQuestions[practiceCurrentIdx]?.isConjugation ? (
                 <div className="quiz-question-card">
-                  <div className="quiz-question-lbl">Conjugate the verb for this pronoun:</div>
+                  <div className="quiz-question-lbl">
+                    {practiceQuestions[practiceCurrentIdx]?.isGustar 
+                      ? "Elige la forma correcta de gustar (singular vs plural):"
+                      : "Conjugate the verb for this pronoun:"}
+                  </div>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
                     <span className="badge badge-accent" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
                       {practiceQuestions[practiceCurrentIdx].tenseLabel || "Presente"}
@@ -2043,11 +2289,20 @@ export default function StudyQuest({
                         Reflexivo (me, te, se, nos, os, se)
                       </span>
                     )}
+                    {practiceQuestions[practiceCurrentIdx].isGustar && (
+                      <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.15)', color: 'var(--gold)', borderColor: 'rgba(234, 179, 8, 0.3)' }}>
+                        ✨ Tipo Gustar (gusta vs gustan)
+                      </span>
+                    )}
                   </div>
-                  <h3 className="quiz-word" style={{ color: 'var(--primary)', fontSize: '2.4rem' }}>{practiceQuestions[practiceCurrentIdx].questionWord}</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({practiceQuestions[practiceCurrentIdx].meaning})</p>
+                  <h3 className="quiz-word" style={{ color: 'var(--primary)', fontSize: practiceQuestions[practiceCurrentIdx]?.isGustar ? '1.8rem' : '2.4rem' }}>
+                    {practiceQuestions[practiceCurrentIdx].questionWord}
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>
+                    ({practiceQuestions[practiceCurrentIdx].meaning})
+                  </p>
                   <div style={{ display: 'inline-block', background: 'rgba(250, 204, 21, 0.1)', padding: '6px 14px', borderRadius: '16px', color: 'var(--gold)', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                    Pronoun: {practiceQuestions[practiceCurrentIdx].pronoun}
+                    {practiceQuestions[practiceCurrentIdx]?.isGustar ? practiceQuestions[practiceCurrentIdx].pronoun : `Pronoun: ${practiceQuestions[practiceCurrentIdx].pronoun}`}
                   </div>
                   
                   <button 
@@ -2085,82 +2340,84 @@ export default function StudyQuest({
                 </div>
               )}
 
-              {practiceQuestions[practiceCurrentIdx]?.isConjugation || practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank || practiceQuestions[practiceCurrentIdx]?.type !== 2 ? (
-                <div className="quiz-choices-grid">
-                  {practiceQuestions[practiceCurrentIdx]?.choices.map((choice, idx) => {
-                    let btnClass = "";
-                    if (practiceAnswered) {
-                      if (choice === practiceQuestions[practiceCurrentIdx].correct) {
-                        btnClass = "correct";
-                      } else if (choice === practiceSelected) {
-                        btnClass = "wrong";
+              {!practiceQuestions[practiceCurrentIdx]?.isCardIntro && (
+                practiceQuestions[practiceCurrentIdx]?.isConjugation || practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank || practiceQuestions[practiceCurrentIdx]?.type !== 2 ? (
+                  <div className="quiz-choices-grid">
+                    {practiceQuestions[practiceCurrentIdx]?.choices.map((choice, idx) => {
+                      let btnClass = "";
+                      if (practiceAnswered) {
+                        if (choice === practiceQuestions[practiceCurrentIdx].correct) {
+                          btnClass = "correct";
+                        } else if (choice === practiceSelected) {
+                          btnClass = "wrong";
+                        }
                       }
-                    }
 
-                    return (
-                      <button
-                        key={idx}
-                        className={`quiz-choice-btn ${btnClass}`}
-                        onClick={() => handlePracticeAnswer(choice)}
-                        disabled={practiceAnswered}
-                      >
-                        {choice}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <form onSubmit={handlePracticeSubmitTyped}>
-                  <div className="quiz-input-wrapper" style={{ marginTop: '16px' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <input
-                        type="text"
-                        ref={practiceInputRef}
-                        placeholder="Type the Spanish translation..."
-                        value={practiceTyped}
-                        onChange={(e) => setPracticeTyped(e.target.value)}
-                        disabled={practiceAnswered}
-                        className={`quiz-input ${practiceAnswered ? (isPracticeUserCorrect ? 'correct' : 'wrong') : ''}`}
-                        style={{ flex: 1, padding: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--card-border)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '1.1rem', outline: 'none' }}
-                        autoFocus
-                      />
-                      <button 
-                        type="button" 
-                        className={`btn ${isListening ? 'btn-danger pulse' : 'btn-secondary'}`}
-                        disabled={practiceAnswered}
-                        onClick={() => handleVoiceInput("practice")}
-                        style={{ padding: '12px', borderRadius: '12px' }}
-                      >
-                        🎤
-                      </button>
-                    </div>
-                    
-                    {/* Accent Buttons row */}
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px', justifyContent: 'center' }}>
-                      {['á', 'é', 'í', 'ó', 'ú', 'ñ', 'ü', '¿', '¡'].map(char => (
+                      return (
                         <button
-                          key={char}
-                          type="button"
-                          className="btn btn-secondary"
+                          key={idx}
+                          className={`quiz-choice-btn ${btnClass}`}
+                          onClick={() => handlePracticeAnswer(choice)}
                           disabled={practiceAnswered}
-                          onClick={() => handlePracticeInsertAccent(char)}
-                          style={{ padding: '6px 12px', fontSize: '1rem', minWidth: '38px', height: '38px', borderRadius: '8px' }}
                         >
-                          {char}
+                          {choice}
                         </button>
-                      ))}
-                    </div>
-
-                    {!practiceAnswered && (
-                      <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={!practiceTyped.trim()}>
-                        Submit Translation
-                      </button>
-                    )}
+                      );
+                    })}
                   </div>
-                </form>
+                ) : (
+                  <form onSubmit={handlePracticeSubmitTyped}>
+                    <div className="quiz-input-wrapper" style={{ marginTop: '16px' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="text"
+                          ref={practiceInputRef}
+                          placeholder="Type the Spanish translation..."
+                          value={practiceTyped}
+                          onChange={(e) => setPracticeTyped(e.target.value)}
+                          disabled={practiceAnswered}
+                          className={`quiz-input ${practiceAnswered ? (isPracticeUserCorrect ? 'correct' : 'wrong') : ''}`}
+                          style={{ flex: 1, padding: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--card-border)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '1.1rem', outline: 'none' }}
+                          autoFocus
+                        />
+                        <button 
+                          type="button" 
+                          className={`btn ${isListening ? 'btn-danger pulse' : 'btn-secondary'}`}
+                          disabled={practiceAnswered}
+                          onClick={() => handleVoiceInput("practice")}
+                          style={{ padding: '12px', borderRadius: '12px' }}
+                        >
+                          🎤
+                        </button>
+                      </div>
+                      
+                      {/* Accent Buttons row */}
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px', justifyContent: 'center' }}>
+                        {['á', 'é', 'í', 'ó', 'ú', 'ñ', 'ü', '¿', '¡'].map(char => (
+                          <button
+                            key={char}
+                            type="button"
+                            className="btn btn-secondary"
+                            disabled={practiceAnswered}
+                            onClick={() => handlePracticeInsertAccent(char)}
+                            style={{ padding: '6px 12px', fontSize: '1rem', minWidth: '38px', height: '38px', borderRadius: '8px' }}
+                          >
+                            {char}
+                          </button>
+                        ))}
+                      </div>
+
+                      {!practiceAnswered && (
+                        <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={!practiceTyped.trim()}>
+                          Submit Translation
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                )
               )}
 
-              {practiceAnswered && (
+              {practiceAnswered && !practiceQuestions[practiceCurrentIdx]?.isCardIntro && (
                 <div 
                   className={`quiz-feedback-box ${isPracticeUserCorrect ? 'correct' : 'wrong'}`}
                   style={{ animation: 'pop-in 0.3s ease-out' }}
@@ -2421,45 +2678,120 @@ export default function StudyQuest({
               </div>
             )}
             
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <th style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>Pronombre</th>
-                  <th style={{ padding: '8px 10px', color: 'var(--primary)', fontWeight: 'bold' }}>
-                    {codexTense === 'preterite' ? 'Forma Pretérito' : 'Forma Presente'}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { pronoun: "yo", translation: "I" },
-                  { pronoun: "tú", translation: "you (inf)" },
-                  { pronoun: "él / ella / usted", translation: "he/she/you (formal)" },
-                  { pronoun: "nosotros / nosotras", translation: "we" },
-                  { pronoun: "vosotros / vosotras", translation: "you all (Spain)" },
-                  { pronoun: "ellos / ellas / ustedes", translation: "they/you all" }
-                ].map((p, idx) => {
-                  const conjugated = conjugate(codexVerb, idx, codexTense);
-                  const isVosotros = idx === 4;
-                  return (
-                    <tr 
-                      key={idx} 
-                      style={{ 
-                        borderBottom: '1px solid rgba(255,255,255,0.05)',
-                        opacity: isVosotros && state.excludeVosotros ? 0.6 : 1
-                      }}
-                    >
-                      <td style={{ padding: '8px 10px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                        {p.pronoun} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({p.translation})</span>
-                      </td>
-                      <td style={{ padding: '8px 10px', color: 'var(--text-primary)', fontWeight: 600 }}>
-                        {conjugated}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            {isGustarVerb(codexVerb) ? (
+              <div>
+                <div style={{ 
+                  background: 'rgba(234, 179, 8, 0.12)', 
+                  border: '1px solid rgba(234, 179, 8, 0.35)', 
+                  borderRadius: '10px', 
+                  padding: '10px 12px', 
+                  fontSize: '0.82rem', 
+                  marginBottom: '14px', 
+                  color: '#fef08a',
+                  lineHeight: '1.4'
+                }}>
+                  ⚠️ <strong>¡Regla de Oro!</strong> El verbo <em>gustar</em> <strong>NO</strong> se conjuga por la persona que siente el gusto (nunca se dice <em>"yo gusto"</em> para <em>I like</em>).
+                  <br />
+                  Solo tiene <strong>DOS formas</strong>:
+                  <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+                    <li><strong>Singular:</strong> para cosas singulares o verbos infinitivos.</li>
+                    <li><strong>Plural:</strong> para cosas o sustantivos en plural.</li>
+                  </ul>
+                </div>
+
+                {/* 2 Forms display */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px', textAlign: 'center' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px 8px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>Cosa Singular o Verbo</span>
+                    <strong style={{ fontSize: '1.4rem', color: 'var(--primary)', display: 'block', margin: '4px 0' }}>
+                      {codexTense === 'preterite' ? 'gustó' : 'gusta'}
+                    </strong>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                      {codexTense === 'preterite' ? 'ej: Me gustó la fiesta' : 'ej: Me gusta el café / bailar'}
+                    </span>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px 8px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>Cosas Plurales</span>
+                    <strong style={{ fontSize: '1.4rem', color: 'var(--accent)', display: 'block', margin: '4px 0' }}>
+                      {codexTense === 'preterite' ? 'gustaron' : 'gustan'}
+                    </strong>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                      {codexTense === 'preterite' ? 'ej: Me gustaron las fotos' : 'ej: Nos gustan los libros'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Pronouns list */}
+                <h4 style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px', fontWeight: 700 }}>
+                  Pronombres de Objeto Indirecto (¿A quién le gusta?):
+                </h4>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left', marginBottom: '10px' }}>
+                  <tbody>
+                    {INDIRECT_OBJECT_PRONOUNS.map((p, idx) => {
+                      const isVosotros = idx === 4;
+                      const singForm = codexTense === 'preterite' ? 'gustó' : 'gusta';
+                      const plurForm = codexTense === 'preterite' ? 'gustaron' : 'gustan';
+                      return (
+                        <tr 
+                          key={idx} 
+                          style={{ 
+                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                            opacity: isVosotros && state.excludeVosotros ? 0.6 : 1
+                          }}
+                        >
+                          <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>
+                            {p.pronoun} <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>({p.translation})</span>
+                          </td>
+                          <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600 }}>
+                            <span style={{ color: 'var(--gold)' }}>{p.iop}</span> {singForm} / {plurForm}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <th style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>Pronombre</th>
+                    <th style={{ padding: '8px 10px', color: 'var(--primary)', fontWeight: 'bold' }}>
+                      {codexTense === 'preterite' ? 'Forma Pretérito' : 'Forma Presente'}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { pronoun: "yo", translation: "I" },
+                    { pronoun: "tú", translation: "you (inf)" },
+                    { pronoun: "él / ella / usted", translation: "he/she/you (formal)" },
+                    { pronoun: "nosotros / nosotras", translation: "we" },
+                    { pronoun: "vosotros / vosotras", translation: "you all (Spain)" },
+                    { pronoun: "ellos / ellas / ustedes", translation: "they/you all" }
+                  ].map((p, idx) => {
+                    const conjugated = conjugate(codexVerb, idx, codexTense);
+                    const isVosotros = idx === 4;
+                    return (
+                      <tr 
+                        key={idx} 
+                        style={{ 
+                          borderBottom: '1px solid rgba(255,255,255,0.05)',
+                          opacity: isVosotros && state.excludeVosotros ? 0.6 : 1
+                        }}
+                      >
+                        <td style={{ padding: '8px 10px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                          {p.pronoun} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({p.translation})</span>
+                        </td>
+                        <td style={{ padding: '8px 10px', color: 'var(--text-primary)', fontWeight: 600 }}>
+                          {conjugated}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
             
             <button className="btn btn-secondary" onClick={() => setCodexVerb(null)} style={{ marginTop: '18px', width: '100%' }}>
               Cerrar Codex

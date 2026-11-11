@@ -72,7 +72,8 @@ const INITIAL_STATE = {
   ttsRate: 0.95,
   useGeminiTts: false,
   completedLevels: [],
-  levelRecords: {}
+  levelRecords: {},
+  translateInstructions: false
 };
 
 export function useGameState() {
@@ -98,7 +99,8 @@ export function useGameState() {
           wordsAnsweredCorrectly,
           completedLevels: parsed.completedLevels || [],
           levelRecords: parsed.levelRecords || {},
-          hintlessLessonsCount: parsed.hintlessLessonsCount || 0
+          hintlessLessonsCount: parsed.hintlessLessonsCount || 0,
+          translateInstructions: Boolean(parsed.translateInstructions)
         };
       }
     } catch (e) {
@@ -856,6 +858,20 @@ export function useGameState() {
     }));
   };
 
+  const toggleTranslateInstructions = () => {
+    setState(prev => ({
+      ...prev,
+      translateInstructions: !prev.translateInstructions
+    }));
+  };
+
+  const setTranslateInstructions = (val) => {
+    setState(prev => ({
+      ...prev,
+      translateInstructions: Boolean(val)
+    }));
+  };
+
   const claimBounty = (bountyType) => {
     setState(prev => {
       const bounties = prev.dailyBounties || {};
@@ -1070,5 +1086,7 @@ export function useGameState() {
     setTtsVoice,
     setTtsRate,
     setUseGeminiTts,
+    toggleTranslateInstructions,
+    setTranslateInstructions,
   };
 }

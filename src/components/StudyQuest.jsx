@@ -31,7 +31,8 @@ import {
   Layers,
   Compass,
   Zap,
-  Skull
+  Skull,
+  Globe
 } from 'lucide-react';
 import { getLevelInfo } from '../utils/levelInfoHelper';
 
@@ -51,6 +52,7 @@ export default function StudyQuest({
   addMistake, 
   updateWordMastery, 
   toggleAutoSpeak, 
+  toggleTranslateInstructions,
   setView, 
   defaultTab = "quest" 
 }) {
@@ -113,15 +115,21 @@ export default function StudyQuest({
   const [activeQuestIsEarlyBoss, setActiveQuestIsEarlyBoss] = useState(false);
   const [earlyBossFailed, setEarlyBossFailed] = useState(false);
 
+  const translateInstructions = Boolean(state.translateInstructions);
+  const [cardTranslateOverride, setCardTranslateOverride] = useState(null);
+  const showCardTranslate = cardTranslateOverride !== null ? cardTranslateOverride : translateInstructions;
+
   // Sync selected stage/level when campaign state changes
   useEffect(() => {
     setSelectedStage(prev => (prev > (state.questStage || 1) ? (state.questStage || 1) : prev));
+    setCardTranslateOverride(null);
   }, [state.questStage]);
 
   useEffect(() => {
     if (selectedStage === state.questStage) {
       setSelectedLevel(state.isReviewReady ? 20 : (state.questLevel || 1));
     }
+    setCardTranslateOverride(null);
   }, [state.questLevel, state.isReviewReady, state.questStage, selectedStage]);
 
   const isEarlyBossLevel = (stageNum, levelNum) => {
@@ -2157,7 +2165,7 @@ export default function StudyQuest({
   };
 
   const selectedStageSpec = STAGES[selectedStage];
-  const selectedLevelInfo = getLevelInfo(selectedStage, selectedLevel, isEarlyBossLevel(selectedStage, selectedLevel));
+  const selectedLevelInfo = getLevelInfo(selectedStage, selectedLevel, isEarlyBossLevel(selectedStage, selectedLevel), showCardTranslate);
 
   const currentQuestQ = questQuestions[questCurrentIdx];
   const shakeClass = shakeTrigger ? "shake damage-flash" : healTrigger ? "heal-flash" : "";
@@ -2225,17 +2233,42 @@ export default function StudyQuest({
             </button>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
-            <input 
-              type="checkbox" 
-              id="autoSpeakCheckbox" 
-              checked={state.autoSpeak ?? true} 
-              onChange={toggleAutoSpeak} 
-              style={{ cursor: 'pointer', accentColor: 'var(--primary)' }}
-            />
-            <label htmlFor="autoSpeakCheckbox" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
-              🔊 Auto-pronunciar
-            </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
+              <input 
+                type="checkbox" 
+                id="autoSpeakCheckbox" 
+                checked={state.autoSpeak ?? true} 
+                onChange={toggleAutoSpeak} 
+                style={{ cursor: 'pointer', accentColor: 'var(--primary)' }}
+              />
+              <label htmlFor="autoSpeakCheckbox" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
+                🔊 {translateInstructions ? "Auto-pronunciar (Auto-speak)" : "Auto-pronunciar"}
+              </label>
+            </div>
+
+            <button
+              type="button"
+              onClick={toggleTranslateInstructions}
+              className={`btn ${translateInstructions ? 'btn-primary' : 'btn-secondary'}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                fontSize: '0.8rem',
+                borderRadius: '10px',
+                border: translateInstructions ? '1.5px solid var(--primary)' : '1px solid var(--card-border)',
+                background: translateInstructions ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.02)',
+                color: translateInstructions ? '#c7d2fe' : 'var(--text-secondary)',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              title={translateInstructions ? "Instrucciones traducidas al inglés (clic para volver al español)" : "Traducir instrucciones al inglés"}
+            >
+              <Globe size={14} />
+              <span>{translateInstructions ? "Instrucciones: EN (Traducido)" : "Instrucciones: ES (Original)"}</span>
+            </button>
           </div>
         </div>
       )}
@@ -2268,8 +2301,12 @@ export default function StudyQuest({
               )}
               <h3 style={{ fontSize: '1.4rem', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>
                 {activeQuestIsEarlyBoss
-                  ? (questSuccessMsg ? "⚡ ¡Desafío de Salto Superado!" : "💀 Desafío de Salto Fallado (Muerte Súbita)")
-                  : (questSuccessMsg ? "¡Misión Cumplida!" : "Misión Fallida")}
+                  ? (questSuccessMsg 
+                      ? (translateInstructions ? "⚡ ¡Desafío de Salto Superado! (Skip Challenge Cleared!)" : "⚡ ¡Desafío de Salto Superado!") 
+                      : (translateInstructions ? "💀 Desafío de Salto Fallado (Skip Challenge Failed - Sudden Death)" : "💀 Desafío de Salto Fallado (Muerte Súbita)"))
+                  : (questSuccessMsg 
+                      ? (translateInstructions ? "¡Misión Cumplida! (Quest Completed!)" : "¡Misión Cumplida!") 
+                      : (translateInstructions ? "Misión Fallida (Quest Failed)" : "Misión Fallida"))}
               </h3>
               <p style={{ fontSize: '0.95rem', color: '#e2e8f0', maxWidth: '540px', margin: '0 auto 16px', lineHeight: '1.4' }}>
                 {questSuccessMsg || questFailMsg}
@@ -2291,7 +2328,7 @@ export default function StudyQuest({
                   boxShadow: '0 0 20px rgba(251, 191, 36, 0.25)'
                 }}>
                   <span>⚡</span>
-                  <span>¡Trofeo Desbloqueado: Desafío Implacable (Skip Master)!</span>
+                  <span>{translateInstructions ? "¡Trofeo Desbloqueado: Desafío Implacable (Skip Master Trophy Unlocked)!" : "¡Trofeo Desbloqueado: Desafío Implacable (Skip Master)!"}</span>
                   <span>🏆</span>
                 </div>
               )}
@@ -2312,21 +2349,21 @@ export default function StudyQuest({
                   boxShadow: '0 0 16px rgba(251, 191, 36, 0.15)'
                 }}>
                   <span>🧠</span>
-                  <span>¡Victoria Sin Pistas! (Completed without hints!)</span>
+                  <span>{translateInstructions ? "¡Victoria Sin Pistas! (Completed without hints!)" : "¡Victoria Sin Pistas!"}</span>
                   <span>✨</span>
                 </div>
               )}
               
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', width: 'fit-content', margin: '0 auto 20px', border: '1px solid var(--card-border)', display: 'flex', gap: '20px' }}>
                 <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Correct Challenges</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>{translateInstructions ? "Desafíos Correctos (Correct Challenges)" : "Desafíos Correctos"}</span>
                   <strong style={{ fontSize: '1.4rem', color: 'var(--accent)' }}>{questScore} / {questQuestions.filter(q => !q.isCardIntro).length}</strong>
                 </div>
                 {questSuccessMsg && (
                   <>
                     <div style={{ borderLeft: '1px solid rgba(255,255,255,0.1)' }}></div>
                     <div>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Loot Gained</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>{translateInstructions ? "Botín Ganado (Loot Gained)" : "Botín Ganado"}</span>
                       <strong style={{ fontSize: '1.2rem', color: 'var(--gold)' }}>+{activeQuestIsEarlyBoss ? 100 : state.isReviewReady ? 50 : 12} Gold</strong>
                     </div>
                   </>
@@ -2339,7 +2376,7 @@ export default function StudyQuest({
                   onClick={() => setQuestFinished(false)}
                   style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <Layers size={16} /> Selector de Niveles
+                  <Layers size={16} /> {translateInstructions ? "Selector de Niveles (Level Select)" : "Selector de Niveles"}
                 </button>
                 {activeQuestIsEarlyBoss ? (
                   questSuccessMsg ? (
@@ -2352,7 +2389,7 @@ export default function StudyQuest({
                       }}
                       style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                      Continuar a la Nueva Unidad <Play size={16} />
+                      {translateInstructions ? "Continuar a la Nueva Unidad (Continue to Next Unit)" : "Continuar a la Nueva Unidad"} <Play size={16} />
                     </button>
                   ) : (
                     <>
@@ -2361,7 +2398,7 @@ export default function StudyQuest({
                         onClick={() => { setQuestFinished(false); startQuestLevel(activeQuestStage, 20); }}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
-                        <Zap size={16} /> Reintentar Reto de Salto
+                        <Zap size={16} /> {translateInstructions ? "Reintentar Reto de Salto (Retry Skip Challenge)" : "Reintentar Reto de Salto"}
                       </button>
                       <button 
                         className="btn btn-secondary" 
@@ -2372,7 +2409,7 @@ export default function StudyQuest({
                         }}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
-                        Volver a Lecciones de Campaña
+                        {translateInstructions ? "Volver a Lecciones de Campaña (Return to Campaign Lessons)" : "Volver a Lecciones de Campaña"}
                       </button>
                     </>
                   )
@@ -2382,7 +2419,7 @@ export default function StudyQuest({
                     onClick={() => { setQuestFinished(false); startQuestLevel(activeQuestStage, activeQuestLevel); }}
                     style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                   >
-                    <RotateCcw size={16} /> Repetir Práctica ({activeQuestIsReview ? 'Review Gate' : `Nivel ${activeQuestLevel}`})
+                    <RotateCcw size={16} /> {translateInstructions ? `Repetir Práctica (Replay Practice - ${activeQuestIsReview ? 'Review Gate' : `Nivel ${activeQuestLevel}`})` : `Repetir Práctica (${activeQuestIsReview ? 'Review Gate' : `Nivel ${activeQuestLevel}`})`}
                   </button>
                 ) : (
                   <button 
@@ -2390,7 +2427,9 @@ export default function StudyQuest({
                     onClick={() => { setQuestFinished(false); startQuestLevel(); }}
                     style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                   >
-                    {questSuccessMsg ? "Continuar al Siguiente Nivel" : "Reintentar Nivel"} <Play size={16} />
+                    {questSuccessMsg 
+                      ? (translateInstructions ? "Continuar al Siguiente Nivel (Continue to Next Level)" : "Continuar al Siguiente Nivel") 
+                      : (translateInstructions ? "Reintentar Nivel (Retry Level)" : "Reintentar Nivel")} <Play size={16} />
                   </button>
                 )}
               </div>
@@ -2433,7 +2472,7 @@ export default function StudyQuest({
                       }}
                     >
                       <span>{sNum === 1 ? '🏰' : sNum === 2 ? '🩺' : sNum === 3 ? '🛍️' : '✈️'}</span>
-                      <span>Etapa {sNum}</span>
+                      <span>{translateInstructions ? `Stage ${sNum}` : `Etapa ${sNum}`}</span>
                       {isStageCompleted && (
                         <span style={{ fontSize: '0.7rem', background: 'rgba(16, 185, 129, 0.2)', color: 'var(--accent)', padding: '2px 6px', borderRadius: '8px', fontWeight: 'bold' }}>
                           ✓ 100%
@@ -2441,7 +2480,7 @@ export default function StudyQuest({
                       )}
                       {isStageCurrent && (
                         <span style={{ fontSize: '0.7rem', background: 'rgba(250, 204, 21, 0.2)', color: 'var(--gold)', padding: '2px 6px', borderRadius: '8px', fontWeight: 'bold' }}>
-                          Actual
+                          {translateInstructions ? "Current" : "Actual"}
                         </span>
                       )}
                       {!isStageUnlocked && <Lock size={12} color="var(--text-muted)" />}
@@ -2460,7 +2499,7 @@ export default function StudyQuest({
                       <div style={{ maxWidth: '650px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                           <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--gold)', letterSpacing: '0.1em', fontWeight: 'bold' }}>
-                            Etapa {selectedStage} {selectedStage < state.questStage ? '• Completada ✓' : selectedStage === state.questStage ? '• En Curso ⚔️' : ''}
+                            {translateInstructions ? `Stage ${selectedStage}` : `Etapa ${selectedStage}`} {selectedStage < state.questStage ? (translateInstructions ? '• Completed ✓' : '• Completada ✓') : selectedStage === state.questStage ? (translateInstructions ? '• In Progress ⚔️' : '• En Curso ⚔️') : ''}
                           </span>
                         </div>
                         <h3 style={{ fontSize: '1.4rem', fontFamily: 'var(--font-display)', margin: '0 0 6px' }}>
@@ -2468,10 +2507,14 @@ export default function StudyQuest({
                         </h3>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
                           {selectedStage < state.questStage 
-                            ? "Has superado todos los niveles de esta etapa. ¡Selecciona cualquier nivel para practicarlo libremente para ganar Oro y XP extra!"
+                            ? (translateInstructions
+                                ? "You have completed all levels in this stage. Select any level to practice freely and earn bonus Gold & XP!"
+                                : "Has superado todos los niveles de esta etapa. ¡Selecciona cualquier nivel para practicarlo libremente para ganar Oro y XP extra!")
                             : selectedStage === state.questStage
-                              ? `Progreso de campaña: Nivel ${state.isReviewReady ? 'Puerta de Revisión' : state.questLevel} de 19. Puedes volver a niveles anteriores para practicar sin riesgo.`
-                              : "Etapa bloqueada."}
+                              ? (translateInstructions
+                                  ? `Campaign progress: Level ${state.isReviewReady ? 'Review Gate' : state.questLevel} of 19. You can replay previous levels to practice without risk.`
+                                  : `Progreso de campaña: Nivel ${state.isReviewReady ? 'Puerta de Revisión' : state.questLevel} de 19. Puedes volver a niveles anteriores para practicar sin riesgo.`)
+                              : (translateInstructions ? "Stage locked." : "Etapa bloqueada.")}
                         </p>
                       </div>
 
@@ -2485,7 +2528,7 @@ export default function StudyQuest({
                                 onClick={() => startQuestLevel(state.questStage, state.isReviewReady ? 20 : state.questLevel)}
                                 style={{ fontSize: '0.88rem', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}
                               >
-                                <Play size={14} /> Jugar Nivel Actual ({state.isReviewReady ? 'Review Gate' : `Lvl ${state.questLevel}`})
+                                <Play size={14} /> {translateInstructions ? "Play Current Level" : "Jugar Nivel Actual"} ({state.isReviewReady ? 'Review Gate' : `Lvl ${state.questLevel}`})
                               </button>
                               {!state.isReviewReady && (
                                 <button
@@ -2504,9 +2547,9 @@ export default function StudyQuest({
                                     border: '1.5px solid rgba(239, 68, 68, 0.5)',
                                     color: '#fca5a5'
                                   }}
-                                  title="Salta toda la unidad enfrentándote al Jefe ahora en Muerte Súbita (30 preguntas, 0 fallos permitidos)"
+                                  title={translateInstructions ? "Skip the entire unit by defeating the Boss now in Sudden Death (30 questions, 0 mistakes allowed)" : "Salta toda la unidad enfrentándote al Jefe ahora en Muerte Súbita (30 preguntas, 0 fallos permitidos)"}
                                 >
-                                  <Zap size={14} /> ⚡ Reto de Salto (Jefe)
+                                  <Zap size={14} /> {translateInstructions ? "⚡ Skip Challenge (Boss)" : "⚡ Reto de Salto (Jefe)"}
                                 </button>
                               )}
                             </div>
@@ -2520,7 +2563,7 @@ export default function StudyQuest({
                             }}
                             style={{ fontSize: '0.88rem', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}
                           >
-                            <Compass size={14} /> Ir a Mi Etapa Actual ({state.questStage})
+                            <Compass size={14} /> {translateInstructions ? `Go to Current Stage (${state.questStage})` : `Ir a Mi Etapa Actual (${state.questStage})`}
                           </button>
                         )}
                       </div>
@@ -2529,12 +2572,12 @@ export default function StudyQuest({
                     {/* Progress Bar in Selected Stage */}
                     <div className="stat-row" style={{ margin: '0 0 16px' }}>
                       <div className="stat-label">
-                        <span>Niveles de Etapa Aprobados</span>
+                        <span>{translateInstructions ? "Stage Levels Passed" : "Niveles de Etapa Aprobados"}</span>
                         <strong>
                           {selectedStage < state.questStage 
                             ? "20 / 20 (100%)" 
                             : selectedStage === state.questStage 
-                              ? (state.isReviewReady ? "19 / 20 (95%) • Puerta de Revisión Lista" : `${Math.min(19, state.questLevel - 1)} / 20 (${Math.round((Math.min(19, state.questLevel - 1) / 20) * 100)}%)`)
+                              ? (state.isReviewReady ? (translateInstructions ? "19 / 20 (95%) • Review Gate Ready" : "19 / 20 (95%) • Puerta de Revisión Lista") : `${Math.min(19, state.questLevel - 1)} / 20 (${Math.round((Math.min(19, state.questLevel - 1) / 20) * 100)}%)`)
                               : "0 / 20"}
                         </strong>
                       </div>
@@ -2571,10 +2614,10 @@ export default function StudyQuest({
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                       <h4 style={{ fontSize: '1rem', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Layers size={18} color="var(--primary)" /> Niveles de la Etapa {selectedStage}
+                        <Layers size={18} color="var(--primary)" /> {translateInstructions ? `Stage ${selectedStage} Levels` : `Niveles de la Etapa ${selectedStage}`}
                       </h4>
                       <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                        Haz clic en un nivel aprobado para practicar
+                        {translateInstructions ? "Click on a cleared level to practice" : "Haz clic en un nivel aprobado para practicar"}
                       </span>
                     </div>
 
@@ -2592,7 +2635,7 @@ export default function StudyQuest({
                         const isReviewGate = lvl === 20;
                         const isEarlyBoss = isEarlyBossLevel(selectedStage, lvl);
 
-                        const levelInfo = getLevelInfo(selectedStage, lvl, isEarlyBoss);
+                        const levelInfo = getLevelInfo(selectedStage, lvl, isEarlyBoss, translateInstructions);
                         const recordKey = `${selectedStage}-${lvl}`;
                         const record = state.levelRecords?.[recordKey];
 
@@ -2647,7 +2690,7 @@ export default function StudyQuest({
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
                               {isEarlyBoss ? (
                                 <span style={{ fontSize: '0.72rem', background: 'rgba(239, 68, 68, 0.25)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.5)', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>
-                                  ⚡ Salto
+                                  {translateInstructions ? "⚡ Skip" : "⚡ Salto"}
                                 </span>
                               ) : isReviewGate ? (
                                 <span style={{ fontSize: '0.72rem', background: current ? 'rgba(239, 68, 68, 0.2)' : passed ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)', color: current ? 'var(--danger)' : passed ? 'var(--accent)' : 'var(--text-muted)', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>
@@ -2655,7 +2698,7 @@ export default function StudyQuest({
                                 </span>
                               ) : (
                                 <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: current ? 'var(--gold)' : passed ? 'var(--accent)' : 'var(--text-secondary)' }}>
-                                  Nivel {lvl}
+                                  {translateInstructions ? `Level ${lvl}` : `Nivel ${lvl}`}
                                 </span>
                               )}
                             </div>
@@ -2689,13 +2732,13 @@ export default function StudyQuest({
                               overflow: 'hidden',
                               minHeight: '2.4em'
                             }}>
-                              {isEarlyBoss ? '⚡ Reto de Salto (Jefe)' : levelInfo.title}
+                              {isEarlyBoss ? (translateInstructions ? '⚡ Skip Challenge (Boss)' : '⚡ Reto de Salto (Jefe)') : levelInfo.title}
                             </span>
 
                             {/* Subtitle / Best score badge */}
                             {isEarlyBoss ? (
                               <span style={{ marginTop: '4px', fontSize: '0.68rem', color: '#f87171', fontWeight: 'bold' }}>
-                                0 fallos • 30 Qs
+                                {translateInstructions ? "0 mistakes • 30 Qs" : "0 fallos • 30 Qs"}
                               </span>
                             ) : record ? (
                               <span style={{ marginTop: '4px', fontSize: '0.68rem', color: 'var(--gold)', fontWeight: 600 }}>
@@ -2711,6 +2754,7 @@ export default function StudyQuest({
                   {/* Selected Level Detail Card */}
                   {selectedLevelInfo && (() => {
                     const isEarlyBoss = isEarlyBossLevel(selectedStage, selectedLevel);
+                    const currentCardInfo = getLevelInfo(selectedStage, selectedLevel, isEarlyBoss, showCardTranslate);
 
                     return (
                     <div 
@@ -2740,7 +2784,7 @@ export default function StudyQuest({
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
                         <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
                             <span style={{ 
                               fontSize: '0.75rem', 
                               fontWeight: 'bold', 
@@ -2763,35 +2807,60 @@ export default function StudyQuest({
                                     : 'var(--text-muted)'
                             }}>
                               {isEarlyBoss
-                                ? '⚡ Desafío de Salto (Muerte Súbita - 0 Errores)'
+                                ? (showCardTranslate ? '⚡ Skip Challenge (Sudden Death - 0 Mistakes)' : '⚡ Desafío de Salto (Muerte Súbita - 0 Errores)')
                                 : isLevelPassed(selectedStage, selectedLevel)
-                                  ? '✓ Nivel Aprobado (Listo para Repasar)'
+                                  ? (showCardTranslate ? '✓ Cleared Level (Ready to Review)' : '✓ Nivel Aprobado (Listo para Repasar)')
                                   : isLevelCurrent(selectedStage, selectedLevel)
-                                    ? '⚔️ Misión de Campaña Actual'
-                                    : '🔒 Nivel Bloqueado'}
+                                    ? (showCardTranslate ? '⚔️ Current Campaign Mission' : '⚔️ Misión de Campaña Actual')
+                                    : (showCardTranslate ? '🔒 Locked Level' : '🔒 Nivel Bloqueado')}
                             </span>
                             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                              {selectedLevel === 20 ? 'Puerta de Revisión (Jefe)' : `Nivel ${selectedLevel} de 19`}
+                              {selectedLevel === 20 ? (showCardTranslate ? 'Review Gate (Boss)' : 'Puerta de Revisión (Jefe)') : (showCardTranslate ? `Level ${selectedLevel} of 19` : `Nivel ${selectedLevel} de 19`)}
                             </span>
                           </div>
 
                           <h3 style={{ fontSize: '1.3rem', fontFamily: 'var(--font-display)', margin: '4px 0', color: isEarlyBoss ? '#fca5a5' : 'inherit' }}>
-                            {selectedLevelInfo.title}
+                            {currentCardInfo.title}
                           </h3>
                           <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: '4px 0 0', maxWidth: '650px', lineHeight: 1.4 }}>
-                            {selectedLevelInfo.desc}
+                            {currentCardInfo.desc}
                           </p>
                         </div>
 
-                        {/* Best score badge if present */}
-                        {state.levelRecords?.[`${selectedStage}-${selectedLevel}`] && (
-                          <div style={{ background: 'rgba(250, 204, 21, 0.08)', border: '1px solid rgba(250, 204, 21, 0.25)', padding: '8px 14px', borderRadius: '12px', textAlign: 'center' }}>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Mejor Puntuación</span>
-                            <strong style={{ fontSize: '1.1rem', color: 'var(--gold)' }}>
-                              ⭐ {state.levelRecords[`${selectedStage}-${selectedLevel}`].bestScore} / {state.levelRecords[`${selectedStage}-${selectedLevel}`].total}
-                            </strong>
-                          </div>
-                        )}
+                        {/* Card controls (Inline translate button & Best score badge) */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => setCardTranslateOverride(prev => (prev === null ? !translateInstructions : !prev))}
+                            className="btn btn-secondary btn-sm"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontSize: '0.75rem',
+                              padding: '5px 12px',
+                              borderRadius: '12px',
+                              background: showCardTranslate ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                              border: showCardTranslate ? '1px solid var(--primary)' : '1px solid rgba(255, 255, 255, 0.15)',
+                              color: showCardTranslate ? '#c7d2fe' : 'var(--text-secondary)'
+                            }}
+                            title="Alternar traducción al inglés de las explicaciones y reglas de este nivel"
+                          >
+                            <Globe size={13} />
+                            <span>{showCardTranslate ? "Ver en español (ES)" : "Ver en inglés (EN)"}</span>
+                          </button>
+
+                          {state.levelRecords?.[`${selectedStage}-${selectedLevel}`] && (
+                            <div style={{ background: 'rgba(250, 204, 21, 0.08)', border: '1px solid rgba(250, 204, 21, 0.25)', padding: '8px 14px', borderRadius: '12px', textAlign: 'center' }}>
+                              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>
+                                {showCardTranslate ? "Best Score" : "Mejor Puntuación"}
+                              </span>
+                              <strong style={{ fontSize: '1.1rem', color: 'var(--gold)' }}>
+                                ⭐ {state.levelRecords[`${selectedStage}-${selectedLevel}`].bestScore} / {state.levelRecords[`${selectedStage}-${selectedLevel}`].total}
+                              </strong>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Level requirements explanation */}
@@ -2810,12 +2879,27 @@ export default function StudyQuest({
                         }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', fontSize: '0.95rem', color: '#fca5a5' }}>
                             <Zap size={18} color="#fca5a5" />
-                            <span>Reglas del Desafío de Salto (Unit Skip Challenge):</span>
+                            <span>{showCardTranslate ? "Skip Challenge Rules (Unit Skip Challenge):" : "Reglas del Desafío de Salto (Unit Skip Challenge):"}</span>
                           </div>
                           <ul style={{ margin: 0, paddingLeft: '20px', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <li><strong>Evaluación Extendida:</strong> 30 preguntas de síntesis completa (construcción de oraciones, conjugación y oraciones contextuales).</li>
-                            <li><strong>Muerte Súbita:</strong> No se permite cometer <em>ningún error</em> (100% de precisión requerida). ¡Un solo fallo termina el reto de inmediato!</li>
-                            <li><strong>Recompensa de Salto:</strong> Al ganar con 30/30, apruebas toda la Unidad {selectedStage} al instante, desbloqueas la siguiente unidad, ganas +100 Oro, +400 XP y el Trofeo Exclusivo <em>Desafío Implacable</em>.</li>
+                            <li>
+                              <strong>{showCardTranslate ? "Extended Assessment:" : "Evaluación Extendida:"}</strong>{' '}
+                              {showCardTranslate 
+                                ? "30 comprehensive synthesis questions (sentence construction, verb conjugation, and contextual sentences)."
+                                : "30 preguntas de síntesis completa (construcción de oraciones, conjugación y oraciones contextuales)."}
+                            </li>
+                            <li>
+                              <strong>{showCardTranslate ? "Sudden Death:" : "Muerte Súbita:"}</strong>{' '}
+                              {showCardTranslate 
+                                ? "Zero mistakes permitted (100% accuracy required). A single mistake terminates the challenge immediately!"
+                                : "No se permite cometer ningún error (100% de precisión requerida). ¡Un solo fallo termina el reto de inmediato!"}
+                            </li>
+                            <li>
+                              <strong>{showCardTranslate ? "Skip Reward:" : "Recompensa de Salto:"}</strong>{' '}
+                              {showCardTranslate 
+                                ? `Clearing 30/30 instantly passes all of Unit ${selectedStage}, unlocks the next unit, awards +100 Gold, +400 XP, and the Exclusive Skip Master Trophy.`
+                                : `Al ganar con 30/30, apruebas toda la Unidad ${selectedStage} al instante, desbloqueas la siguiente unidad, ganas +100 Oro, +400 XP y el Trofeo Exclusivo Desafío Implacable.`}
+                            </li>
                           </ul>
                         </div>
                       ) : (
@@ -2823,10 +2907,10 @@ export default function StudyQuest({
                           <span>💡</span>
                           <span>
                             {selectedLevel === 20
-                              ? 'Evaluación tipo Jefe: Requiere al menos 16/20 (80%) para aprobar.'
+                              ? (showCardTranslate ? 'Boss Assessment: Requires at least 16/20 (80%) to pass and unlock the next unit.' : 'Evaluación tipo Jefe: Requiere al menos 16/20 (80%) para aprobar.')
                               : isLevelPassed(selectedStage, selectedLevel)
-                                ? 'Práctica Extra: Acierta al menos 12/20 (60%) para completar la sesión de repaso y ganar oro/XP extra. ¡No arriesga tu progreso de campaña!'
-                                : 'Misión de Campaña: Acierta al menos 12/20 (60%) para desbloquear el siguiente nivel.'}
+                                ? (showCardTranslate ? 'Extra Practice: Score at least 12/20 (60%) to complete the review session and earn extra Gold/XP. Doesn\'t risk campaign progress!' : 'Práctica Extra: Acierta al menos 12/20 (60%) para completar la sesión de repaso y ganar oro/XP extra. ¡No arriesga tu progreso de campaña!')
+                                : (showCardTranslate ? 'Campaign Mission: Score at least 12/20 (60%) to unlock the next level.' : 'Misión de Campaña: Acierta al menos 12/20 (60%) para desbloquear el siguiente nivel.')}
                           </span>
                         </div>
                       )}
@@ -2835,7 +2919,7 @@ export default function StudyQuest({
                       <div>
                         {state.fainted ? (
                           <button className="btn btn-secondary" disabled style={{ opacity: 0.5 }}>
-                            Estás debilitado. ¡Visita la tienda para curarte!
+                            {showCardTranslate ? "You are fainted. Visit the shop to heal!" : "Estás debilitado. ¡Visita la tienda para curarte!"}
                           </button>
                         ) : isEarlyBoss ? (
                           <button 
@@ -2852,11 +2936,11 @@ export default function StudyQuest({
                               fontWeight: 'bold'
                             }}
                           >
-                            <Zap size={18} /> ⚡ Desafiar al Jefe (Muerte Súbita - 30 Preguntas)
+                            <Zap size={18} /> {showCardTranslate ? "⚡ Challenge the Boss (Sudden Death - 30 Questions)" : "⚡ Desafiar al Jefe (Muerte Súbita - 30 Preguntas)"}
                           </button>
                         ) : isLevelLocked(selectedStage, selectedLevel) ? (
                           <button className="btn btn-secondary" disabled style={{ opacity: 0.5, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                            <Lock size={16} /> Nivel Bloqueado (Supera los niveles anteriores)
+                            <Lock size={16} /> {showCardTranslate ? "Locked Level (Clear previous levels first)" : "Nivel Bloqueado (Supera los niveles anteriores)"}
                           </button>
                         ) : isLevelPassed(selectedStage, selectedLevel) ? (
                           <button 
@@ -2864,7 +2948,7 @@ export default function StudyQuest({
                             onClick={() => startQuestLevel(selectedStage, selectedLevel)}
                             style={{ fontSize: '1rem', padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                           >
-                            <RotateCcw size={16} /> Practicar Nivel {selectedLevel === 20 ? 'Review Gate' : selectedLevel} (Práctica Extra)
+                            <RotateCcw size={16} /> {showCardTranslate ? `Practice Level ${selectedLevel === 20 ? 'Review Gate' : selectedLevel} (Extra Practice)` : `Practicar Nivel ${selectedLevel === 20 ? 'Review Gate' : selectedLevel} (Práctica Extra)`}
                           </button>
                         ) : (
                           <button 
@@ -2872,7 +2956,7 @@ export default function StudyQuest({
                             onClick={() => startQuestLevel(selectedStage, selectedLevel)}
                             style={{ fontSize: '1rem', padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                           >
-                            <Play size={16} /> {selectedLevel === 20 ? 'Iniciar Puerta de Revisión' : `Iniciar Nivel ${selectedLevel} de Campaña`}
+                            <Play size={16} /> {selectedLevel === 20 ? (showCardTranslate ? 'Start Review Gate' : 'Iniciar Puerta de Revisión') : (showCardTranslate ? `Start Campaign Level ${selectedLevel}` : `Iniciar Nivel ${selectedLevel} de Campaña`)}
                           </button>
                         )}
                       </div>
@@ -2908,7 +2992,7 @@ export default function StudyQuest({
           <div className="quiz-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                Quest Stage {activeQuestStage} | Level {activeQuestIsEarlyBoss ? 'Reto de Salto (Jefe)' : activeQuestIsReview ? 'Review Gate (Boss)' : activeQuestLevel}
+                Quest Stage {activeQuestStage} | {translateInstructions ? "Level" : "Nivel"} {activeQuestIsEarlyBoss ? (translateInstructions ? 'Skip Challenge (Boss)' : 'Reto de Salto (Jefe)') : activeQuestIsReview ? 'Review Gate (Boss)' : activeQuestLevel}
               </span>
               {activeQuestIsEarlyBoss && (
                 <span 
@@ -2925,9 +3009,9 @@ export default function StudyQuest({
                     gap: '4px',
                     boxShadow: '0 0 10px rgba(239, 68, 68, 0.3)'
                   }}
-                  title="Muerte Súbita: 0 errores permitidos en 30 preguntas para saltar la unidad"
+                  title={translateInstructions ? "Sudden Death: 0 mistakes allowed in 30 questions to skip the unit" : "Muerte Súbita: 0 errores permitidos en 30 preguntas para saltar la unidad"}
                 >
-                  <Skull size={12} /> ⚡ Muerte Súbita (0 Fallos)
+                  <Skull size={12} /> {translateInstructions ? "⚡ Sudden Death (0 Mistakes)" : "⚡ Muerte Súbita (0 Fallos)"}
                 </span>
               )}
               {activeQuestIsReplay && (
@@ -2944,13 +3028,35 @@ export default function StudyQuest({
                     alignItems: 'center',
                     gap: '4px'
                   }}
-                  title="Extra practice session. Your campaign progress will not decrease."
+                  title={translateInstructions ? "Extra practice session. Your campaign progress will not decrease." : "Sesión de práctica extra. Tu progreso de campaña no bajará."}
                 >
-                  <RotateCcw size={12} /> Práctica Extra
+                  <RotateCcw size={12} /> {translateInstructions ? "Extra Practice" : "Práctica Extra"}
                 </span>
               )}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={toggleTranslateInstructions}
+                className="btn btn-secondary btn-sm"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '3px 8px',
+                  fontSize: '0.72rem',
+                  borderRadius: '10px',
+                  background: translateInstructions ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.05)',
+                  border: translateInstructions ? '1px solid var(--primary)' : '1px solid rgba(255, 255, 255, 0.12)',
+                  color: translateInstructions ? '#c7d2fe' : 'var(--text-muted)',
+                  cursor: 'pointer'
+                }}
+                title={translateInstructions ? "Instrucciones traducidas al inglés. Clic para ver en español." : "Traducir instrucciones al inglés."}
+              >
+                <Globe size={12} />
+                <span>{translateInstructions ? "EN" : "ES"}</span>
+              </button>
+
               {hintsUsedInSession === 0 ? (
                 <span 
                   style={{ 
@@ -2965,9 +3071,9 @@ export default function StudyQuest({
                     borderRadius: '12px', 
                     fontWeight: 600 
                   }} 
-                  title="No hints used! Finish this lesson hintless to earn achievements."
+                  title={translateInstructions ? "No hints used! Finish this lesson hintless to earn achievements." : "¡Sin pistas usadas! Termina sin pistas para ganar logros."}
                 >
-                  🧠 Sin pistas
+                  {translateInstructions ? "🧠 Sin pistas (No hints)" : "🧠 Sin pistas"}
                 </span>
               ) : (
                 <span 
@@ -3010,7 +3116,7 @@ export default function StudyQuest({
                 background: 'rgba(0,0,0,0.2)', 
                 padding: '12px 18px', 
                 borderRadius: '12px', 
-                marginBottom: '16px',
+                marginBottom: '16px', 
                 border: '1px solid rgba(255,255,255,0.05)',
                 position: 'relative',
                 overflow: 'hidden'
@@ -3053,7 +3159,9 @@ export default function StudyQuest({
               >
                 <div className={`flashcard ${questFlipped ? 'flipped' : ''}`}>
                   <div className="flashcard-face flashcard-front">
-                    <span className="flashcard-category">Preview New Word (+2 XP)</span>
+                    <span className="flashcard-category">
+                      {translateInstructions ? "Preview New Word (+2 XP)" : "Vista Previa de Palabra (+2 XP)"}
+                    </span>
                     <h3 className="flashcard-term" style={{ fontSize: '2rem' }}>{currentQuestQ.item.spanish}</h3>
                     
                     {isVerbItem(currentQuestQ.item) && (
@@ -3076,19 +3184,25 @@ export default function StudyQuest({
                         <Volume2 size={16} color="var(--primary)" />
                       </button>
                     )}
-                    <span className="flashcard-hint">Click card to reveal translation</span>
+                    <span className="flashcard-hint">
+                      {translateInstructions ? "Click card to reveal translation (Haz clic para ver la traducción)" : "Haz clic para ver la traducción"}
+                    </span>
                   </div>
 
                   <div className="flashcard-face flashcard-back">
-                    <span className="flashcard-category">Preview New Word (+2 XP)</span>
+                    <span className="flashcard-category">
+                      {translateInstructions ? "Preview New Word (+2 XP)" : "Vista Previa de Palabra (+2 XP)"}
+                    </span>
                     <h4 className="flashcard-translation" style={{ fontSize: '1.6rem' }}>{currentQuestQ.item.english}</h4>
-                    <span className="flashcard-hint">Click card to reveal Spanish</span>
+                    <span className="flashcard-hint">
+                      {translateInstructions ? "Click card to reveal Spanish (Haz clic para volver al español)" : "Haz clic para volver al español"}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <button className="btn btn-accent" onClick={handleQuestCardLearned} style={{ width: '100%', maxWidth: '240px', marginTop: '10px' }}>
-                I learned this word!
+              <button className="btn btn-accent" onClick={handleQuestCardLearned} style={{ width: '100%', maxWidth: '280px', marginTop: '10px' }}>
+                {translateInstructions ? "I learned this word! (¡Aprendí esta palabra!)" : "¡Aprendí esta palabra!"}
               </button>
             </div>
           ) : (
@@ -3121,23 +3235,25 @@ export default function StudyQuest({
                           letterSpacing: '0.03em'
                         }}>
                           <span>{isPreteriteTense(currentQuestQ) ? '⏳' : '⚡'}</span>
-                          <span>{isPreteriteTense(currentQuestQ) ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Presente'}</span>
+                          <span>{isPreteriteTense(currentQuestQ) ? (translateInstructions ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Pretérito') : (translateInstructions ? 'Tiempo Presente (Present Tense)' : 'Tiempo Presente')}</span>
                         </span>
                       </div>
 
                       <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
-                        {currentQuestQ.isGustar ? "Select the correct form of gustar:" : "Conjugate for the subject pronoun:"}
+                        {currentQuestQ.isGustar 
+                          ? (translateInstructions ? "Selecciona la forma correcta de gustar (Select correct form of gustar):" : "Selecciona la forma correcta de gustar:") 
+                          : (translateInstructions ? "Conjuga para el pronombre (Conjugate for the subject pronoun):" : "Conjuga para el pronombre:")}
                       </div>
 
                       {(currentQuestQ.isReciprocal || currentQuestQ.isReflexive) && (
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
                           {currentQuestQ.isReciprocal ? (
                             <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
-                              🤝 Acción Recíproca ("Each Other")
+                              {translateInstructions ? '🤝 Acción Recíproca ("Each Other")' : '🤝 Acción Recíproca'}
                             </span>
                           ) : currentQuestQ.isReflexive ? (
                             <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px' }}>
-                              Reflexivo (me, te, se, nos, os, se)
+                              {translateInstructions ? 'Reflexivo (me, te, se, nos, os, se)' : 'Reflexivo (me, te, se, nos, os, se)'}
                             </span>
                           ) : null}
                         </div>
@@ -3165,7 +3281,9 @@ export default function StudyQuest({
                     </>
                   ) : currentQuestQ.isFillInTheBlank ? (
                     <>
-                      <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
+                      <div className="quiz-question-lbl">
+                        {translateInstructions ? "Completar la frase (Fill in the blank):" : "Completar la frase:"}
+                      </div>
                       <h3 className="quiz-word" style={{ color: 'var(--accent)' }}>{currentQuestQ.questionWord}</h3>
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '8px' }}>({currentQuestQ.meaning})</p>
                       {currentQuestQ.hint && (
@@ -3202,12 +3320,12 @@ export default function StudyQuest({
                               }}
                             >
                               <span>💡</span>
-                              <span>Ver Pista (Show Hint)</span>
+                              <span>{translateInstructions ? "Ver Pista (Show Hint)" : "Ver Pista"}</span>
                             </button>
                           ) : (
                             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '6px 14px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.8rem', maxWidth: '90%', animation: 'fadeIn 0.2s ease' }}>
                               <span>💡</span>
-                              <span><strong>Pista:</strong> {currentQuestQ.hint}</span>
+                              <span><strong>{translateInstructions ? "Pista (Hint):" : "Pista:"}</strong> {currentQuestQ.hint}</span>
                             </div>
                           )}
                         </div>
@@ -3216,7 +3334,9 @@ export default function StudyQuest({
                   ) : (
                     <>
                       <div className="quiz-question-lbl">
-                        {currentQuestQ.type === 2 ? "Type the Spanish translation:" : "Choose the correct translation:"}
+                        {currentQuestQ.type === 2 
+                          ? (translateInstructions ? "Escribe la traducción al español (Type Spanish translation):" : "Escribe la traducción al español:") 
+                          : (translateInstructions ? "Elige la traducción correcta (Choose correct translation):" : "Elige la traducción correcta:")}
                       </div>
                       <h3 className="quiz-word">{currentQuestQ.questionWord}</h3>
                     </>
@@ -3229,7 +3349,7 @@ export default function StudyQuest({
                       onClick={() => openCodex(currentQuestQ.item)}
                       style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                     >
-                      📖 Ver Conjugaciones
+                      📖 {translateInstructions ? "Ver Conjugaciones (View Conjugations)" : "Ver Conjugaciones"}
                     </button>
                   )}
                 </div>
@@ -3244,6 +3364,7 @@ export default function StudyQuest({
                     userCorrect={isQuestUserCorrect}
                     showSubmitButton={true}
                     onHintRevealed={() => setHintsUsedInSession(prev => prev + 1)}
+                    translateInstructions={translateInstructions}
                   />
                 </div>
               ) : currentQuestQ.isConjugation || currentQuestQ.isFillInTheBlank || currentQuestQ.type !== 2 ? (
@@ -3277,7 +3398,7 @@ export default function StudyQuest({
                       <input
                         type="text"
                         ref={questInputRef}
-                        placeholder="Type the Spanish translation..."
+                        placeholder={translateInstructions ? "Escribe la traducción al español... (Type Spanish translation...)" : "Escribe la traducción al español..."}
                         value={typedAnswer}
                         onChange={(e) => setTypedAnswer(e.target.value)}
                         disabled={questAnswered}
@@ -3316,7 +3437,7 @@ export default function StudyQuest({
 
                     {!questAnswered && (
                       <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={!typedAnswer.trim()}>
-                        Submit Translation
+                        {translateInstructions ? "Enviar Traducción (Submit Translation)" : "Enviar Traducción"}
                       </button>
                     )}
                   </div>
@@ -3331,12 +3452,20 @@ export default function StudyQuest({
                   {isQuestUserCorrect 
                     ? `¡Correcto! ${comboCount >= 3 ? `Combo Streak ${comboCount}! ` : ''}` 
                     : currentQuestQ.isSentenceBuilder
-                      ? `Incorrecto. Frase correcta: "${currentQuestQ.correct}"`
+                      ? (translateInstructions 
+                          ? `Incorrecto (Incorrect). Frase correcta (Correct sentence): "${currentQuestQ.correct}"`
+                          : `Incorrecto. Frase correcta: "${currentQuestQ.correct}"`)
                       : currentQuestQ.isConjugation
-                        ? `Incorrecto. Correct form for "${currentQuestQ.subjectPronoun || 'subject'}" (${isPreteriteTense(currentQuestQ) ? 'Pretérito' : 'Presente'}): "${currentQuestQ.correct}"`
+                        ? (translateInstructions 
+                            ? `Incorrecto (Incorrect). Forma correcta para "${currentQuestQ.subjectPronoun || 'sujeto'}" (${isPreteriteTense(currentQuestQ) ? 'Pretérito' : 'Presente'}): "${currentQuestQ.correct}"`
+                            : `Incorrecto. Forma correcta para "${currentQuestQ.subjectPronoun || 'sujeto'}" (${isPreteriteTense(currentQuestQ) ? 'Pretérito' : 'Presente'}): "${currentQuestQ.correct}"`)
                         : currentQuestQ.isFillInTheBlank
-                          ? `Incorrecto. Correct word: "${currentQuestQ.correct}"`
-                          : `Incorrecto! Correct translation: "${currentQuestQ.correct}"`
+                          ? (translateInstructions 
+                              ? `Incorrecto (Incorrect). Palabra correcta (Correct word): "${currentQuestQ.correct}"`
+                              : `Incorrecto. Palabra correcta: "${currentQuestQ.correct}"`)
+                          : (translateInstructions 
+                              ? `Incorrecto (Incorrect). Traducción correcta (Correct translation): "${currentQuestQ.correct}"`
+                              : `Incorrecto! Traducción correcta: "${currentQuestQ.correct}"`)
                   }
                   
                   {activeQuestIsEarlyBoss && !isQuestUserCorrect ? (
@@ -3349,22 +3478,26 @@ export default function StudyQuest({
                       textAlign: 'center'
                     }}>
                       <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fca5a5', marginBottom: '4px' }}>
-                        💀 ¡Muerte Súbita! Reto de Salto Fallado
+                        💀 {translateInstructions ? "¡Muerte Súbita! Reto de Salto Fallado (Sudden Death! Skip Challenge Failed)" : "¡Muerte Súbita! Reto de Salto Fallado"}
                       </div>
                       <div style={{ fontSize: '0.82rem', color: '#fef2f2', marginBottom: '12px', lineHeight: 1.4 }}>
-                        En el Desafío de Salto debes tener 100% de precisión (0 fallos permitidos). El reto termina aquí (pregunta {questCurrentIdx + 1} de {questQuestions.length}).
+                        {translateInstructions 
+                          ? `En el Desafío de Salto debes tener 100% de precisión (0 fallos permitidos). El reto termina aquí (pregunta ${questCurrentIdx + 1} de ${questQuestions.length}). (In Skip Challenge you must have 100% accuracy with 0 mistakes allowed. The challenge ends here.)`
+                          : `En el Desafío de Salto debes tener 100% de precisión (0 fallos permitidos). El reto termina aquí (pregunta ${questCurrentIdx + 1} de ${questQuestions.length}).`}
                       </div>
                       <button 
                         className="btn btn-danger" 
                         onClick={finishQuestSession} 
                         style={{ width: '100%', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold' }}
                       >
-                        <Skull size={16} /> Ver Resultados del Desafío
+                        <Skull size={16} /> {translateInstructions ? "Ver Resultados del Desafío (View Challenge Results)" : "Ver Resultados del Desafío"}
                       </button>
                     </div>
                   ) : (
                     <button className="btn btn-primary" onClick={handleQuestNext} style={{ width: '100%', marginTop: '16px' }}>
-                      {questCurrentIdx === questQuestions.length - 1 ? "Finish Quest" : "Next Challenge"} <ArrowRight size={16} />
+                      {questCurrentIdx === questQuestions.length - 1 
+                        ? (translateInstructions ? "Finalizar Misión (Finish Quest)" : "Finalizar Misión") 
+                        : (translateInstructions ? "Siguiente Desafío (Next Challenge)" : "Siguiente Desafío")} <ArrowRight size={16} />
                     </button>
                   )}
                 </div>
@@ -3542,41 +3675,45 @@ export default function StudyQuest({
                           style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
                           onClick={() => setPracticeQuizMode("translation")}
                         >
-                          Traducción
+                          {translateInstructions ? "Traducción (Translation)" : "Traducción"}
                         </button>
                         <button 
                           className={`btn ${practiceQuizMode === 'conjugation' ? 'btn-primary' : 'btn-secondary'}`} 
                           style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
                           onClick={() => setPracticeQuizMode("conjugation")}
                         >
-                          ⚡ Conjugación
+                          ⚡ {translateInstructions ? "Conjugación (Conjugation)" : "Conjugación"}
                         </button>
                         <button 
                           className={`btn ${practiceQuizMode === 'sentence' ? 'btn-primary' : 'btn-secondary'}`} 
                           style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
                           onClick={() => setPracticeQuizMode("sentence")}
                         >
-                          🧩 Frases
+                          🧩 {translateInstructions ? "Frases (Sentences)" : "Frases"}
                         </button>
                         <button 
                           className={`btn ${practiceQuizMode === 'mixed' ? 'btn-primary' : 'btn-secondary'}`} 
                           style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
                           onClick={() => setPracticeQuizMode("mixed")}
                         >
-                          🔀 Mixto
+                          🔀 {translateInstructions ? "Mixto (Mixed)" : "Mixto"}
                         </button>
                       </div>
                     </div>
 
                     {practiceQuizMode === 'sentence' && (
                       <p style={{ fontSize: '0.78rem', color: 'var(--accent)', margin: '-4px 0 2px', lineHeight: '1.4' }}>
-                        🧩 Construcción de Frases: Arrastra o toca las palabras para ordenar correctamente las oraciones en español con distractores gramaticales.
+                        {translateInstructions
+                          ? "🧩 Sentence Construction: Drag or tap words to correctly order Spanish sentences with grammatical distractors."
+                          : "🧩 Construcción de Frases: Arrastra o toca las palabras para ordenar correctamente las oraciones en español con distractores gramaticales."}
                       </p>
                     )}
 
                     {practiceQuizMode === 'mixed' && (
                       <p style={{ fontSize: '0.78rem', color: 'var(--accent)', margin: '-4px 0 2px', lineHeight: '1.4' }}>
-                        🔀 Modo Mixto: Repasa tarjetas interactivas, desafíos de conjugación y construcción de frases en el mismo mazo integral.
+                        {translateInstructions
+                          ? "🔀 Mixed Mode: Review interactive flashcards, conjugation drills, and sentence puzzles in the same comprehensive deck."
+                          : "🔀 Modo Mixto: Repasa tarjetas interactivas, desafíos de conjugación y construcción de frases en el mismo mazo integral."}
                       </p>
                     )}
 
@@ -3845,14 +3982,16 @@ export default function StudyQuest({
                         onClick={() => openCodex(currQ.item)}
                         style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                       >
-                        📖 Ver Conjugaciones
+                        📖 {translateInstructions ? "Ver Conjugaciones (View Conjugations)" : "Ver Conjugaciones"}
                       </button>
                     </div>
                   );
                 })()
               ) : practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank ? (
                 <div className="quiz-question-card">
-                  <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
+                  <div className="quiz-question-lbl">
+                    {translateInstructions ? "Completar la frase (Fill in the blank):" : "Completar la frase:"}
+                  </div>
                   <h3 className="quiz-word" style={{ color: 'var(--accent)', fontSize: '2rem' }}>{practiceQuestions[practiceCurrentIdx].questionWord}</h3>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '8px' }}>
                     ({practiceQuestions[practiceCurrentIdx].meaning})
@@ -3888,12 +4027,12 @@ export default function StudyQuest({
                           }}
                         >
                           <span>💡</span>
-                          <span>Ver Pista (Show Hint)</span>
+                          <span>{translateInstructions ? "Ver Pista (Show Hint)" : "Ver Pista"}</span>
                         </button>
                       ) : (
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '6px 14px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.8rem', maxWidth: '90%', animation: 'fadeIn 0.2s ease' }}>
                           <span>💡</span>
-                          <span><strong>Pista:</strong> {practiceQuestions[practiceCurrentIdx].hint}</span>
+                          <span><strong>{translateInstructions ? "Pista (Hint):" : "Pista:"}</strong> {practiceQuestions[practiceCurrentIdx].hint}</span>
                         </div>
                       )}
                     </div>
@@ -3902,7 +4041,9 @@ export default function StudyQuest({
               ) : (
                 <div className="quiz-question-card">
                   <div className="quiz-question-lbl">
-                    {practiceQuestions[practiceCurrentIdx]?.type === 2 ? "Type the Spanish translation:" : "Choose correct translation:"}
+                    {practiceQuestions[practiceCurrentIdx]?.type === 2 
+                      ? (translateInstructions ? "Escribe la traducción al español (Type Spanish translation):" : "Escribe la traducción al español:") 
+                      : (translateInstructions ? "Elige la traducción correcta (Choose correct translation):" : "Elige la traducción correcta:")}
                   </div>
                   <h3 className="quiz-word">{practiceQuestions[practiceCurrentIdx]?.questionWord}</h3>
                   
@@ -3913,7 +4054,7 @@ export default function StudyQuest({
                       onClick={() => openCodex(practiceQuestions[practiceCurrentIdx].item)}
                       style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                     >
-                      📖 Ver Conjugaciones
+                      📖 {translateInstructions ? "Ver Conjugaciones (View Conjugations)" : "Ver Conjugaciones"}
                     </button>
                   )}
                 </div>
@@ -3928,6 +4069,7 @@ export default function StudyQuest({
                       answered={practiceAnswered}
                       userCorrect={isPracticeUserCorrect}
                       showSubmitButton={true}
+                      translateInstructions={translateInstructions}
                     />
                   </div>
                 ) : practiceQuestions[practiceCurrentIdx]?.isConjugation || practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank || practiceQuestions[practiceCurrentIdx]?.type !== 2 ? (
@@ -3961,7 +4103,7 @@ export default function StudyQuest({
                         <input
                           type="text"
                           ref={practiceInputRef}
-                          placeholder="Type the Spanish translation..."
+                          placeholder={translateInstructions ? "Escribe la traducción al español... (Type Spanish translation...)" : "Escribe la traducción al español..."}
                           value={practiceTyped}
                           onChange={(e) => setPracticeTyped(e.target.value)}
                           disabled={practiceAnswered}
@@ -3998,7 +4140,7 @@ export default function StudyQuest({
 
                       {!practiceAnswered && (
                         <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={!practiceTyped.trim()}>
-                          Submit Translation
+                          {translateInstructions ? "Enviar Traducción (Submit Translation)" : "Enviar Traducción"}
                         </button>
                       )}
                     </div>
@@ -4012,15 +4154,21 @@ export default function StudyQuest({
                   style={{ animation: 'pop-in 0.3s ease-out' }}
                 >
                   {isPracticeUserCorrect 
-                    ? "¡Correcto! +10 XP | +1 Gold" 
+                    ? (translateInstructions ? "¡Correcto! (Correct!) +10 XP | +1 Gold" : "¡Correcto! +10 XP | +1 Gold") 
                     : practiceQuestions[practiceCurrentIdx]?.isSentenceBuilder
-                      ? `Incorrecto! Frase correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`
+                      ? (translateInstructions 
+                          ? `Incorrecto (Incorrect). Frase correcta (Correct sentence): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                          : `Incorrecto! Frase correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`)
                       : practiceQuestions[practiceCurrentIdx]?.isConjugation
-                        ? `Incorrecto! Correct form for "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'subject'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
-                        : `Incorrecto! Correct Answer: "${practiceQuestions[practiceCurrentIdx].correct}"`
+                        ? (translateInstructions 
+                            ? `Incorrecto (Incorrect). Forma correcta para "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'sujeto'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                            : `Incorrecto! Forma correcta para "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'sujeto'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`)
+                        : (translateInstructions 
+                            ? `Incorrecto (Incorrect). Respuesta correcta (Correct answer): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                            : `Incorrecto! Respuesta correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`)
                   }
                   <button className="btn btn-primary" onClick={handlePracticeNext} style={{ width: '100%', marginTop: '16px' }}>
-                    Next Question <ArrowRight size={16} />
+                    {translateInstructions ? "Siguiente Pregunta (Next Question)" : "Siguiente Pregunta"} <ArrowRight size={16} />
                   </button>
                 </div>
               )}

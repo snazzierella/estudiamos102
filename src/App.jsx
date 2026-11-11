@@ -47,7 +47,9 @@ export default function App() {
     setDifficultyMode,
     setTtsVoice,
     setTtsRate,
-    setUseGeminiTts
+    setUseGeminiTts,
+    toggleTranslateInstructions,
+    setTranslateInstructions
   } = useGameState();
 
   const [view, setView] = useState('dashboard');
@@ -133,6 +135,7 @@ export default function App() {
             addMistake={addMistake}
             updateWordMastery={updateWordMastery}
             toggleAutoSpeak={toggleAutoSpeak}
+            toggleTranslateInstructions={toggleTranslateInstructions}
             setView={setView}
             defaultTab={studyQuestTab}
           />
@@ -336,6 +339,25 @@ export default function App() {
               flexDirection: 'column',
               gap: '12px'
             }}>
+              {/* Translate Instructions */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
+                <input
+                  type="checkbox"
+                  id="translateInstructions"
+                  checked={Boolean(state.translateInstructions)}
+                  onChange={(e) => setTranslateInstructions(e.target.checked)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--primary)', flexShrink: 0 }}
+                />
+                <div>
+                  <label htmlFor="translateInstructions" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>🌐</span> Traducir instrucciones al inglés (Translate Instructions)
+                  </label>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', lineHeight: 1.3 }}>
+                    Muestra traducciones al inglés en instrucciones de niveles, reglas de desafíos y ejercicios (por defecto en español para máxima inmersión).
+                  </span>
+                </div>
+              </div>
+
               {/* Ignore Vosotros */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
                 <input

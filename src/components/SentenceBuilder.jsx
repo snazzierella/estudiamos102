@@ -8,7 +8,8 @@ export default function SentenceBuilder({
   answered, 
   userCorrect, 
   showSubmitButton = true,
-  onHintRevealed
+  onHintRevealed,
+  translateInstructions = false
 }) {
   const [placedTokens, setPlacedTokens] = useState([]);
   const [bankTokens, setBankTokens] = useState([]);
@@ -124,7 +125,7 @@ export default function SentenceBuilder({
       {/* Target prompt */}
       <div style={{ textAlign: 'center', marginBottom: '4px' }}>
         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
-          Construye la frase (Build the sentence):
+          {translateInstructions ? "Construye la frase • Build the sentence:" : "Construye la frase (Build the sentence):"}
         </div>
         <h3 style={{ 
           fontFamily: 'var(--font-display)', 
@@ -171,7 +172,7 @@ export default function SentenceBuilder({
                 }}
               >
                 <span>💡</span>
-                <span>Ver Pista (Show Hint)</span>
+                <span>{translateInstructions ? "Ver Pista (Show Hint)" : "Ver Pista"}</span>
               </button>
             ) : (
               <div 
@@ -190,7 +191,7 @@ export default function SentenceBuilder({
                 }}
               >
                 <span>💡</span>
-                <span><strong>Pista:</strong> {question.hint}</span>
+                <span><strong>{translateInstructions ? "Pista (Hint):" : "Pista:"}</strong> {question.hint}</span>
               </div>
             )}
           </div>
@@ -221,8 +222,10 @@ export default function SentenceBuilder({
         }}
       >
         {placedTokens.length === 0 ? (
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', userSelect: 'none' }}>
-            👆 Arrastra o toca las palabras de abajo para formar la frase
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', userSelect: 'none', textAlign: 'center' }}>
+            {translateInstructions 
+              ? "👆 Arrastra o toca las palabras de abajo para formar la frase (Drag or tap words below to form sentence)" 
+              : "👆 Arrastra o toca las palabras de abajo para formar la frase"}
           </span>
         ) : (
           placedTokens.map((token, idx) => {
@@ -269,7 +272,7 @@ export default function SentenceBuilder({
                   transform: dragOverIdx === idx ? 'scale(1.08)' : 'scale(1)',
                   transition: 'transform 0.15s ease'
                 }}
-                title={answered ? "" : "Toca para devolver palabra"}
+                title={answered ? "" : (translateInstructions ? "Toca para devolver palabra (Tap to return word)" : "Toca para devolver palabra")}
               >
                 <span>{token.text}</span>
                 {!answered && (
@@ -284,7 +287,7 @@ export default function SentenceBuilder({
       {/* Control bar (Clear button & count) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4px' }}>
         <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-          Palabras elegidas: <strong>{placedTokens.length}</strong> / {question.targetWords.length}
+          {translateInstructions ? "Palabras elegidas (Words placed):" : "Palabras elegidas:"} <strong>{placedTokens.length}</strong> / {question.targetWords.length}
         </span>
         {!answered && placedTokens.length > 0 && (
           <button
@@ -293,7 +296,7 @@ export default function SentenceBuilder({
             className="btn btn-secondary btn-sm"
             style={{ fontSize: '0.75rem', padding: '4px 10px', gap: '4px' }}
           >
-            <RotateCcw size={13} /> Vaciar (Clear)
+            <RotateCcw size={13} /> {translateInstructions ? "Vaciar (Clear)" : "Vaciar"}
           </button>
         )}
       </div>
@@ -317,7 +320,9 @@ export default function SentenceBuilder({
       >
         {bankTokens.length === 0 ? (
           <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-            ¡Todas las palabras están colocadas arriba!
+            {translateInstructions 
+              ? "¡Todas las palabras están colocadas arriba! (All words have been placed above!)" 
+              : "¡Todas las palabras están colocadas arriba!"}
           </span>
         ) : (
           bankTokens.map((token) => (
@@ -378,7 +383,7 @@ export default function SentenceBuilder({
             gap: '8px'
           }}
         >
-          <Check size={18} /> Comprobar Frase (Check Sentence)
+          <Check size={18} /> {translateInstructions ? "Comprobar Frase (Check Sentence)" : "Comprobar Frase"}
         </button>
       )}
 
@@ -397,16 +402,25 @@ export default function SentenceBuilder({
           {userCorrect ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}>
               <Sparkles size={18} color="#10b981" />
-              <span>¡Excelente! Frase construida a la perfección.</span>
+              <span>
+                {translateInstructions 
+                  ? "¡Excelente! Frase construida a la perfección. (Excellent! Sentence constructed perfectly.)"
+                  : "¡Excelente! Frase construida a la perfección."}
+              </span>
             </div>
           ) : (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, marginBottom: '4px', color: '#f87171' }}>
                 <AlertCircle size={18} />
-                <span>Orden incorrecto</span>
+                <span>
+                  {translateInstructions 
+                    ? "Orden incorrecto (Incorrect word order)" 
+                    : "Orden incorrecto"}
+                </span>
               </div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                Frase correcta: <strong style={{ color: '#ffffff' }}>&ldquo;{question.targetSentence}&rdquo;</strong>
+                {translateInstructions ? "Frase correcta (Correct sentence):" : "Frase correcta:"}{' '}
+                <strong style={{ color: '#ffffff' }}>&ldquo;{question.targetSentence}&rdquo;</strong>
               </div>
             </div>
           )}

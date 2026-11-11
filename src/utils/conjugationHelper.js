@@ -747,42 +747,156 @@ export function generateFillInTheBlank(sentenceItem) {
       type: "verb"
     },
 
-    // Spanish 102 Reciprocal and Direct Object Sentences
+    // Spanish 102 Reciprocal and Direct Object Sentences:
+    // Demonstrates both Conjugated forms (se abrazan, se besan) AND
+    // Infinitive with attached pronouns (abrazarse, besarse, ayudarnos, lavarme, lavarse)
+    // after modal verbs, 'ir a', prepositions (antes de, para, después de), and impersonal expressions.
     "los dos amigos se abrazan cuando se ven": {
       blanked: "los dos amigos [_____] cuando se ven",
       correct: "se abrazan",
-      choices: ["se abrazan", "nos abrazamos", "me abrazo", "se abraza"],
-      type: "verb"
+      choices: ["se abrazan", "abrazarse", "abrazan", "se abraza"],
+      type: "verb",
+      hint: "Verbo conjugado principal: los amigos (ellos) realizan la acción directamente."
     },
-    "nosotros nos ayudamos con la tarea de español": {
-      blanked: "nosotros [_____] con la tarea de español",
-      correct: "nos ayudamos",
-      choices: ["nos ayudamos", "se ayudan", "me ayudo", "ayudamos"],
-      type: "verb"
+    "los dos amigos van a abrazarse con alegría": {
+      blanked: "los dos amigos van a [_____] con alegría",
+      correct: "abrazarse",
+      choices: ["abrazarse", "se abrazan", "abrazar", "se abrazaron"],
+      type: "verb",
+      hint: "Con perífrasis verbal ('van a...'), el pronombre se une al infinitivo: abrazarse."
+    },
+    "los dos amigos corrieron para abrazarse con emoción": {
+      blanked: "los dos amigos corrieron para [_____] con emoción",
+      correct: "abrazarse",
+      choices: ["abrazarse", "se abrazan", "abrazar", "se abrazaron"],
+      type: "verb",
+      hint: "Después de una preposición ('para'), se usa el infinitivo con pronombre unido: abrazarse."
+    },
+    "a ellos les encanta abrazarse cuando hace frío": {
+      blanked: "a ellos les encanta [_____] cuando hace frío",
+      correct: "abrazarse",
+      choices: ["abrazarse", "se abrazan", "abrazar", "se abrazaron"],
+      type: "verb",
+      hint: "Después de 'les encanta', el verbo va en infinitivo con pronombre: abrazarse."
     },
     "ellos se besan antes de salir": {
       blanked: "ellos [_____] antes de salir",
       correct: "se besan",
-      choices: ["se besan", "nos besamos", "me beso", "te besas"],
-      type: "verb"
+      choices: ["se besan", "besarse", "besan", "se besaron"],
+      type: "verb",
+      hint: "Verbo conjugado principal: ellos realizan la acción mutuamente."
+    },
+    "los novios quieren besarse en el parque": {
+      blanked: "los novios quieren [_____] en el parque",
+      correct: "besarse",
+      choices: ["besarse", "se besan", "besar", "se besaron"],
+      type: "verb",
+      hint: "Con dos verbos ('quieren + ...'), el segundo verbo va en infinitivo con pronombre unido: besarse."
+    },
+    "los novios van a besarse en el altar": {
+      blanked: "los novios van a [_____] en el altar",
+      correct: "besarse",
+      choices: ["besarse", "se besan", "besar", "se besaron"],
+      type: "verb",
+      hint: "Después de 'van a' (ir a + infinitivo), el pronombre se une al infinitivo: besarse."
+    },
+    "a ellos les gusta besarse bajo la lluvia": {
+      blanked: "a ellos les gusta [_____] bajo la lluvia",
+      correct: "besarse",
+      choices: ["besarse", "se besan", "besar", "se besaron"],
+      type: "verb",
+      hint: "Después de 'les gusta', el verbo va en infinitivo con pronombre: besarse."
+    },
+    "los amigos se despiden en la estación": {
+      blanked: "los amigos [_____] en la estación",
+      correct: "se despiden",
+      choices: ["se despiden", "despedirse", "despiden", "se despide"],
+      type: "verb",
+      hint: "Verbo conjugado principal: los amigos realizan la acción."
+    },
+    "antes de despedirse los estudiantes se dieron un abrazo": {
+      blanked: "antes de [_____] los estudiantes se dieron un abrazo",
+      correct: "despedirse",
+      choices: ["despedirse", "se despiden", "despedir", "se despidieron"],
+      type: "verb",
+      hint: "Después de una preposición ('antes de'), el verbo SIEMPRE va en infinitivo: despedirse."
+    },
+    "nosotros nos ayudamos con la tarea de español": {
+      blanked: "nosotros [_____] con la tarea de español",
+      correct: "nos ayudamos",
+      choices: ["nos ayudamos", "ayudarnos", "se ayudan", "ayudamos"],
+      type: "verb",
+      hint: "Verbo conjugado: nosotros realizamos la acción."
+    },
+    "nosotros debemos ayudarnos en la clase": {
+      blanked: "nosotros debemos [_____] en la clase",
+      correct: "ayudarnos",
+      choices: ["ayudarnos", "nos ayudamos", "ayudarse", "ayudamos"],
+      type: "verb",
+      hint: "Después de un verbo modal ('debemos'), el pronombre 'nos' se une al infinitivo: ayudarnos."
+    },
+    "es muy importante ayudarse entre compañeros": {
+      blanked: "es muy importante [_____] entre compañeros",
+      correct: "ayudarse",
+      choices: ["ayudarse", "se ayudan", "ayudar", "nos ayudamos"],
+      type: "verb",
+      hint: "En expresiones impersonales ('es importante...'), se usa el infinitivo general: ayudarse."
     },
     "mis padres se conocieron en la universidad": {
       blanked: "mis padres [_____] en la universidad",
       correct: "se conocieron",
-      choices: ["se conocieron", "nos conocimos", "me conocí", "se conocen"],
-      type: "verb"
+      choices: ["se conocieron", "conocerse", "se conocen", "conocieron"],
+      type: "verb",
+      hint: "Verbo conjugado en pretérito (pasado): acción completada."
+    },
+    "los dos estudiantes van a conocerse hoy": {
+      blanked: "los dos estudiantes van a [_____] hoy",
+      correct: "conocerse",
+      choices: ["conocerse", "se conocen", "conocer", "se conocieron"],
+      type: "verb",
+      hint: "Después de 'van a' (ir a + infinitivo), el pronombre se une al infinitivo: conocerse."
+    },
+    "los hermanos a veces se pelean por los juguetes": {
+      blanked: "los hermanos a veces [_____] por los juguetes",
+      correct: "se pelean",
+      choices: ["se pelean", "pelearse", "pelean", "se pelea"],
+      type: "verb",
+      hint: "Verbo conjugado principal: los hermanos realizan la acción."
+    },
+    "después de pelearse los niños pidieron perdón": {
+      blanked: "después de [_____] los niños pidieron perdón",
+      correct: "pelearse",
+      choices: ["pelearse", "se pelean", "pelear", "se pelearon"],
+      type: "verb",
+      hint: "Después de una preposición ('después de'), se usa el infinitivo con pronombre unido: pelearse."
     },
     "yo me lavo las manos antes de comer": {
       blanked: "yo [_____] las manos antes de comer",
       correct: "me lavo",
-      choices: ["me lavo", "te lavas", "se lava", "nos lavamos"],
-      type: "verb"
+      choices: ["me lavo", "lavarme", "te lavas", "se lava"],
+      type: "verb",
+      hint: "Verbo reflexivo conjugado para 'yo' con objeto directo ('las manos')."
     },
     "yo me lavo las manos antes de comer (obj)": {
       blanked: "yo me lavo [_____] antes de comer",
       correct: "las manos",
       choices: ["las manos", "los dientes", "la chaqueta", "el pelo"],
-      type: "noun"
+      type: "noun",
+      hint: "Objeto directo: la parte del cuerpo sobre la que recae la acción."
+    },
+    "yo necesito lavarme las manos": {
+      blanked: "yo necesito [_____] las manos",
+      correct: "lavarme",
+      choices: ["lavarme", "me lavo", "lavarse", "lavar"],
+      type: "verb",
+      hint: "Con 'necesito + infinitivo' para 'yo', el pronombre 'me' se une al infinitivo: lavarme."
+    },
+    "antes de comer es necesario lavarse las manos": {
+      blanked: "antes de comer es necesario [_____] las manos",
+      correct: "lavarse",
+      choices: ["lavarse", "se lava", "lavar", "me lavo"],
+      type: "verb",
+      hint: "Frase impersonal ('es necesario...'): se usa el infinitivo general con pronombre unido: lavarse."
     },
     "él se cepilla los dientes después de cenar": {
       blanked: "él [_____] los dientes después de cenar",
@@ -800,26 +914,38 @@ export function generateFillInTheBlank(sentenceItem) {
       blanked: "yo beso [_____] mi madre todas las mañanas",
       correct: "a",
       choices: ["a", "de", "en", "con"],
-      type: "preposition"
+      type: "preposition",
+      hint: "Se usa la 'a' personal porque el objeto directo es una persona específica."
     },
     "nosotros ayudamos a nuestros amigos": {
       blanked: "nosotros ayudamos [_____] nuestros amigos",
       correct: "a",
       choices: ["a", "de", "con", "por"],
-      type: "preposition"
+      type: "preposition",
+      hint: "Se usa la 'a' personal porque el objeto directo son personas específicas."
     }
   };
 
-  let targetKey = sentence;
-  if (sentence === "la mujer come una manzana roja" && Math.random() > 0.5) {
+  const normalizeKey = (str) => (str || "").trim().toLowerCase();
+  let targetKey = normalizeKey(sentence);
+
+  if (targetKey === "la mujer come una manzana roja" && Math.random() > 0.5) {
     targetKey = "la mujer come una manzana roja (adj)";
-  } else if (sentence === "el muchacho tiene un perro negro" && Math.random() > 0.5) {
+  } else if (targetKey === "el muchacho tiene un perro negro" && Math.random() > 0.5) {
     targetKey = "el muchacho tiene un perro negro (adj)";
-  } else if (sentence === "yo me lavo las manos antes de comer" && Math.random() > 0.5) {
+  } else if (targetKey === "yo me lavo las manos antes de comer" && Math.random() > 0.5) {
     targetKey = "yo me lavo las manos antes de comer (obj)";
   }
 
-  const spec = BLANK_SPECS[targetKey];
+  let spec = BLANK_SPECS[targetKey];
+  if (!spec) {
+    // Fallback: match without accents or trailing punctuation
+    const deaccent = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[.,/#!$%^&*;:{}=\-_`~()¿?¡!]/g, "").trim().toLowerCase();
+    const deaccentTarget = deaccent(targetKey);
+    const foundKey = Object.keys(BLANK_SPECS).find(k => deaccent(k) === deaccentTarget);
+    if (foundKey) spec = BLANK_SPECS[foundKey];
+  }
+
   if (!spec) return null;
 
   return {
@@ -827,6 +953,7 @@ export function generateFillInTheBlank(sentenceItem) {
     meaning: sentenceItem.english,
     correct: spec.correct,
     choices: [...spec.choices].sort(() => Math.random() - 0.5),
-    type: spec.type
+    type: spec.type,
+    hint: spec.hint || null
   };
 }

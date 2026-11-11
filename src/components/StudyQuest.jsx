@@ -456,7 +456,8 @@ export default function StudyQuest({
         questionWord: fillSpec.sentence,
         meaning: fillSpec.meaning,
         correct: fillSpec.correct,
-        choices: fillSpec.choices
+        choices: fillSpec.choices,
+        hint: fillSpec.hint
       };
     }
 
@@ -1284,7 +1285,8 @@ export default function StudyQuest({
             questionWord: fillSpec.sentence,
             meaning: fillSpec.meaning,
             correct: fillSpec.correct,
-            choices: fillSpec.choices
+            choices: fillSpec.choices,
+            hint: fillSpec.hint
           };
         }
 
@@ -1785,7 +1787,12 @@ export default function StudyQuest({
                   <>
                     <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
                     <h3 className="quiz-word" style={{ color: 'var(--accent)' }}>{currentQuestQ.questionWord}</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQuestQ.meaning})</p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: currentQuestQ.hint ? '8px' : '12px' }}>({currentQuestQ.meaning})</p>
+                    {currentQuestQ.hint && (
+                      <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '5px 12px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.78rem', marginBottom: '12px', maxWidth: '90%' }}>
+                        💡 <strong>Pista:</strong> {currentQuestQ.hint}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>
@@ -2301,7 +2308,14 @@ export default function StudyQuest({
                 <div className="quiz-question-card">
                   <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
                   <h3 className="quiz-word" style={{ color: 'var(--accent)', fontSize: '2rem' }}>{practiceQuestions[practiceCurrentIdx].questionWord}</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({practiceQuestions[practiceCurrentIdx].meaning})</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: practiceQuestions[practiceCurrentIdx]?.hint ? '8px' : '12px' }}>
+                    ({practiceQuestions[practiceCurrentIdx].meaning})
+                  </p>
+                  {practiceQuestions[practiceCurrentIdx]?.hint && (
+                    <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '5px 12px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.78rem', marginBottom: '12px', maxWidth: '90%' }}>
+                      💡 <strong>Pista:</strong> {practiceQuestions[practiceCurrentIdx].hint}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="quiz-question-card">
@@ -2478,7 +2492,12 @@ export default function StudyQuest({
                     <>
                       <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
                       <h3 className="quiz-word" style={{ color: 'var(--accent)' }}>{currentQ.questionWord}</h3>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQ.meaning})</p>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: currentQ.hint ? '8px' : '12px' }}>({currentQ.meaning})</p>
+                      {currentQ.hint && (
+                        <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '5px 12px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.78rem', marginBottom: '12px', maxWidth: '90%' }}>
+                          💡 <strong>Pista:</strong> {currentQ.hint}
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>
@@ -2840,6 +2859,58 @@ export default function StudyQuest({
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>
                         (Aquí <em>las manos</em> y <em>los dientes</em> son el objeto directo)
                       </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Conjugated vs Infinitive Callout */}
+                <div style={{
+                  background: 'rgba(59, 130, 246, 0.08)',
+                  border: '1px solid rgba(59, 130, 246, 0.25)',
+                  borderRadius: '10px',
+                  padding: '12px',
+                  marginTop: '12px',
+                  fontSize: '0.82rem',
+                  lineHeight: '1.5'
+                }}>
+                  <h4 style={{ color: '#60a5fa', fontSize: '0.88rem', margin: '0 0 6px 0', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    🔄 ¿Cuándo usar "-rse" (infinitivo) vs "se ...n" (conjugado)?
+                  </h4>
+                  <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0' }}>
+                    ¡Ambas formas son correctas y esenciales en español! La elección depende de la estructura de la frase:
+                  </p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                      <strong style={{ color: '#93c5fd' }}>1. Verbo Principal Conjugado (se {parseVerb(codexVerb).base}n):</strong>
+                      <br />
+                      Cuando el verbo es la acción directa de la oración:
+                      <br />
+                      <em>Los dos amigos <u>se {parseVerb(codexVerb).base}n</u> todos los días.</em>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                      <strong style={{ color: '#93c5fd' }}>2. Con Verbo Auxiliar o Perífrasis ({parseVerb(codexVerb).base}rse):</strong>
+                      <br />
+                      Cuando sigue a verbos como <em>ir a, querer, preferir, poder, deber</em>, el pronombre se une al infinitivo:
+                      <br />
+                      <em>Ellos van a <u>{parseVerb(codexVerb).base}rse</u>.</em> / <em>Ellos quieren <u>{parseVerb(codexVerb).base}rse</u>.</em>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>
+                        (También se puede colocar antes del primer verbo: <em>"Se van a {parseVerb(codexVerb).base}r"</em>)
+                      </span>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                      <strong style={{ color: '#93c5fd' }}>3. Después de Preposiciones (antes de, para, al, después de):</strong>
+                      <br />
+                      En español, después de una preposición el verbo SIEMPRE va en infinitivo con el pronombre unido:
+                      <br />
+                      <em>Antes de <u>despedirse</u>, hablaron un momento.</em>
+                      <br />
+                      <em>Corrieron para <u>{parseVerb(codexVerb).base}rse</u> con alegría.</em>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                      <strong style={{ color: '#93c5fd' }}>4. Con Gustar / Encantar y Frases Impersonales:</strong>
+                      <br />
+                      <em>A ellos les gusta <u>{parseVerb(codexVerb).base}rse</u>.</em> / <em>Es importante <u>{parseVerb(codexVerb).base}rse</u>.</em>
                     </div>
                   </div>
                 </div>

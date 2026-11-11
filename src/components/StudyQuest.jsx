@@ -723,9 +723,10 @@ export default function StudyQuest({
       const reviewQuizCount = quizCount - currentQuizCount;
 
       let reviewQuizItems = [];
-      if (state.questStage > 1 && reviewQuizCount > 0) {
+      // Only review prior 102 stages (Stage 2+) during later lessons so 101 words are not repeated
+      if (state.questStage > 2 && reviewQuizCount > 0) {
         const pastSubcategories = [];
-        for (let s = 1; s < state.questStage; s++) {
+        for (let s = 2; s < state.questStage; s++) {
           if (STAGES[s]?.subcategories) {
             pastSubcategories.push(...STAGES[s].subcategories);
           }
@@ -733,7 +734,7 @@ export default function StudyQuest({
         const pastItems = vocabularyData.filter(item => 
           pastSubcategories.includes(item.subcategory)
         );
-        // Only review past words that the user has already answered correctly or seen
+        // Only review past 102 words that the user has already answered correctly or seen
         const knownPast = pastItems.filter(item => 
           state.wordsAnsweredCorrectly?.includes(item.spanish) ||
           state.stageFlashcardsSeen?.includes(item.spanish)

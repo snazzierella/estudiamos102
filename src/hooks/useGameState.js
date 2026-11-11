@@ -1,5 +1,17 @@
 import { useState, useEffect } from 'react';
-import { TOTAL_STAGES } from '../utils/difficultyMapper';
+import { TOTAL_STAGES, STAGES } from '../utils/difficultyMapper';
+import vocabularyData from '../data/vocabulary.json';
+
+export const getStageWords = (stageNum) => {
+  const stage = STAGES[stageNum];
+  if (!stage) return [];
+  const subcats = new Set(stage.subcategories);
+  return Array.from(new Set(
+    vocabularyData
+      .filter(item => subcats.has(item.subcategory))
+      .map(item => item.spanish)
+  ));
+};
 
 const INITIAL_STATE = {
   level: 1,
@@ -24,7 +36,8 @@ const INITIAL_STATE = {
   },
   answersCorrect: 0,
   answersTotal: 0,
-  excludeVosotros: false,
+  excludeVosotros: true,
+  _hasSetVosotros: false,
   questStage: 1,
   questLevel: 1,
   isReviewReady: false,
@@ -62,7 +75,23 @@ export function useGameState() {
       const saved = localStorage.getItem('estudiamos_102_state');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { ...INITIAL_STATE, ...parsed };
+        const excludeVosotros = parsed._hasSetVosotros ? parsed.excludeVosotros : true;
+
+        let stageFlashcardsSeen = parsed.stageFlashcardsSeen || [];
+        let wordsAnsweredCorrectly = parsed.wordsAnsweredCorrectly || [];
+        if (parsed.questStage > 1) {
+          const unit1Words = getStageWords(1);
+          stageFlashcardsSeen = [...new Set([...stageFlashcardsSeen, ...unit1Words])];
+          wordsAnsweredCorrectly = [...new Set([...wordsAnsweredCorrectly, ...unit1Words])];
+        }
+
+        return {
+          ...INITIAL_STATE,
+          ...parsed,
+          excludeVosotros,
+          stageFlashcardsSeen,
+          wordsAnsweredCorrectly
+        };
       }
     } catch (e) {
       console.error("Error loading state from localStorage", e);
@@ -375,6 +404,18 @@ export function useGameState() {
         newBadges.push("placement_done");
       }
 
+      let bonusSeen = [...(prev.stageFlashcardsSeen || [])];
+      let bonusAnswered = [...(prev.wordsAnsweredCorrectly || [])];
+      if (startingStage > 1) {
+        for (let s = 1; s < startingStage; s++) {
+          const sWords = getStageWords(s);
+          bonusSeen.push(...sWords);
+          bonusAnswered.push(...sWords);
+        }
+        bonusSeen = [...new Set(bonusSeen)];
+        bonusAnswered = [...new Set(bonusAnswered)];
+      }
+
       return {
         ...prev,
         hasCompletedPlacement: true,
@@ -384,7 +425,9 @@ export function useGameState() {
         badges: newBadges,
         questStage: startingStage,
         questLevel: 1,
-        isReviewReady: false
+        isReviewReady: false,
+        stageFlashcardsSeen: bonusSeen,
+        wordsAnsweredCorrectly: bonusAnswered
       };
     });
   };
@@ -605,6 +648,11 @@ export function useGameState() {
       let newDailyBounties = { ...prev.dailyBounties };
       newDailyBounties.questCount = (newDailyBounties.questCount || 0) + 1;
 
+      // Mark all words from the passed stage as seen and answered
+      const passedStageWords = getStageWords(prev.questStage);
+      const updatedSeen = [...new Set([...(prev.stageFlashcardsSeen || []), ...passedStageWords])];
+      const updatedAnswered = [...new Set([...(prev.wordsAnsweredCorrectly || []), ...passedStageWords])];
+
       return {
         ...prev,
         questStage: nextStage,
@@ -615,7 +663,8 @@ export function useGameState() {
         level: newLevel,
         hp: newHp,
         badges: newBadges,
-        stageFlashcardsSeen: [],
+        stageFlashcardsSeen: updatedSeen,
+        wordsAnsweredCorrectly: updatedAnswered,
         dailyBounties: newDailyBounties,
         _levelUpFlag: isLevelUp ? Date.now() : prev._levelUpFlag
       };
@@ -828,7 +877,8 @@ export function useGameState() {
   const setExcludeVosotros = (val) => {
     setState(prev => ({
       ...prev,
-      excludeVosotros: val
+      excludeVosotros: val,
+      _hasSetVosotros: true
     }));
   };
 

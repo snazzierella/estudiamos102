@@ -285,16 +285,16 @@ export default function App() {
               <input
                 type="checkbox"
                 id="excludeVosotros"
-                checked={state.excludeVosotros || false}
+                checked={Boolean(state.excludeVosotros)}
                 onChange={(e) => setExcludeVosotros(e.target.checked)}
                 style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--primary)' }}
               />
               <div>
                 <label htmlFor="excludeVosotros" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
-                  Exclude \"vosotros\" forms
+                  Ignore &quot;vosotros&quot; forms (Spain)
                 </label>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>
-                  Hides Spain-specific plural forms in conjugation quizzes.
+                  Hides Spain-specific plural forms in conjugation quizzes and Codex (active by default for Latin American Spanish).
                 </span>
               </div>
             </div>

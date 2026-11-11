@@ -115,7 +115,7 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
 
     const isVerb = item.category === "Verbs" && item.subcategory !== "Verbs Structured Like Gustar";
     // 40% chance of conjugation for verbs, otherwise translation
-    const wantsConjugation = isVerb && !state.excludeVosotros && Math.random() > 0.6;
+    const wantsConjugation = isVerb && Math.random() > 0.6;
 
     if (wantsConjugation) {
       const qSpec = generateConjugationQuestion(item, { excludeVosotros: state.excludeVosotros });

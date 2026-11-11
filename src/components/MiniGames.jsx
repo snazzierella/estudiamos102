@@ -3,38 +3,75 @@ import { ArrowLeft, Trophy, ShieldAlert } from 'lucide-react';
 import NarfySprite from './NarfySprite';
 
 const ADVENTURES = [
+  // Spanish 102 Adventures (New)
+  {
+    id: "clinic",
+    level: "102",
+    title: "El Triaje Clínico (Clinic Patient Care)",
+    desc: "Triage 4 patients at a community clinic: diagnose their symptoms (fracture, toothache, infection, burn) and prescribe the proper medical care.",
+    icon: "🏥"
+  },
+  {
+    id: "routine",
+    level: "102",
+    title: "Rutina Diaria (Daily Routine & Reflexives)",
+    desc: "Guide your character through morning and evening routines using reflexive verbs (despertarse, ducharse, cepillarse, vestirse, acostarse).",
+    icon: "🪞"
+  },
+  {
+    id: "partner",
+    level: "102",
+    title: "¿Qué Hiciste Hoy? (Partner Evening Chat)",
+    desc: "Share stories about your day with your partner at home, conjugating and responding in the Preterite past tense (fui, hice, tuve, compré).",
+    icon: "💬"
+  },
+  {
+    id: "narfy102",
+    level: "102",
+    title: "El Gran Día de Narfy (Narfy's Big Day)",
+    desc: "Relive Narfy the Red Heeler's exciting day out at the park and beach, using Preterite past tense and reflexive actions with live animations!",
+    icon: "🐕"
+  },
+
+  // Spanish 101 Classics
   {
     id: "market",
+    level: "101",
     title: "Mercado de Comida (Salad Run)",
     desc: "Translate English hints to purchase the correct salad ingredients (lettuce, tomato, cucumber) on a 10 peso budget.",
     icon: "🛒"
   },
   {
     id: "nat",
+    level: "101",
     title: "Conociendo a Nat (Cafe Introduction)",
     desc: "Introduce a classmate to your partner Nat at a local cafe using correct pronouns and polite greetings.",
     icon: "☕"
   },
   {
     id: "narfy",
+    level: "101",
     title: "Entrenando a Narfy (Dog Training)",
-    desc: "Translate English commands to teach your dog Narfy all 5 of his tricks.",
+    desc: "Translate English commands to teach your dog Narfy all 5 of his basic commands (correr, andar, comer, dormir, hablar).",
     icon: "🐕"
   },
   {
     id: "directions",
+    level: "101",
     title: "Direcciones en la Ciudad (City Navigation)",
     desc: "Help a lost tourist navigate a grid map using prepositions (cerca de, al lado de, a la derecha).",
     icon: "🗺️"
   },
   {
     id: "restaurant",
+    level: "101",
     title: "En el Restaurante (Table Ordering)",
     desc: "Converse with a waiter to order a meal using formal polite structures (quisiera, me gustaría, la cuenta).",
     icon: "🍷"
   },
   {
     id: "medical",
+    level: "101",
     title: "La Consulta del Médico (Doctor Visit)",
     desc: "Describe physical ailments (me duele, tengo fiebre) to a clinic doctor using body vocabulary.",
     icon: "🩺"
@@ -42,7 +79,8 @@ const ADVENTURES = [
 ];
 
 export default function MiniGames({ state, addXp, addGold, completeAdventure, incrementBountyCount, setView }) {
-  const [activeGame, setActiveGame] = useState("market");
+  const [activeGame, setActiveGame] = useState("clinic");
+  const [categoryFilter, setCategoryFilter] = useState("102"); // "102", "101", "all"
   
   // Track mistakes per game session to award "Victoria Impecable" bounty
   const [mistakeCount, setMistakeCount] = useState(0);
@@ -85,6 +123,31 @@ export default function MiniGames({ state, addXp, addGold, completeAdventure, in
   const [medLog, setMedLog] = useState([]);
   const [medFinished, setMedFinished] = useState(false);
   const [medSuccess, setMedSuccess] = useState(false);
+
+  // 7. Clinic Triage State (102)
+  const [clinicStep, setClinicStep] = useState(1);
+  const [clinicLog, setClinicLog] = useState([]);
+  const [clinicFinished, setClinicFinished] = useState(false);
+  const [clinicSuccess, setClinicSuccess] = useState(false);
+
+  // 8. Routine State (102)
+  const [routineStep, setRoutineStep] = useState(1);
+  const [routineLog, setRoutineLog] = useState([]);
+  const [routineFinished, setRoutineFinished] = useState(false);
+  const [routineSuccess, setRoutineSuccess] = useState(false);
+
+  // 9. Partner Past Tense Chat State (102)
+  const [partnerStep, setPartnerStep] = useState(1);
+  const [partnerLog, setPartnerLog] = useState([]);
+  const [partnerFinished, setPartnerFinished] = useState(false);
+  const [partnerSuccess, setPartnerSuccess] = useState(false);
+
+  // 10. Narfy 102 Big Day State (102)
+  const [narfy102Step, setNarfy102Step] = useState(1);
+  const [narfy102Log, setNarfy102Log] = useState([]);
+  const [narfy102Action, setNarfy102Action] = useState("sit");
+  const [narfy102Finished, setNarfy102Finished] = useState(false);
+  const [narfy102Success, setNarfy102Success] = useState(false);
 
   // Restart functions
   const restartMarket = () => {
@@ -134,6 +197,39 @@ export default function MiniGames({ state, addXp, addGold, completeAdventure, in
     setMedLog([]);
     setMedFinished(false);
     setMedSuccess(false);
+    setMistakeCount(0);
+  };
+
+  const restartClinic = () => {
+    setClinicStep(1);
+    setClinicLog([]);
+    setClinicFinished(false);
+    setClinicSuccess(false);
+    setMistakeCount(0);
+  };
+
+  const restartRoutine = () => {
+    setRoutineStep(1);
+    setRoutineLog([]);
+    setRoutineFinished(false);
+    setRoutineSuccess(false);
+    setMistakeCount(0);
+  };
+
+  const restartPartner = () => {
+    setPartnerStep(1);
+    setPartnerLog([]);
+    setPartnerFinished(false);
+    setPartnerSuccess(false);
+    setMistakeCount(0);
+  };
+
+  const restartNarfy102 = () => {
+    setNarfy102Step(1);
+    setNarfy102Log([]);
+    setNarfy102Action("sit");
+    setNarfy102Finished(false);
+    setNarfy102Success(false);
     setMistakeCount(0);
   };
 
@@ -532,6 +628,379 @@ export default function MiniGames({ state, addXp, addGold, completeAdventure, in
     }
   };
 
+  // 7. Clinic Handlers (102)
+  const handleClinicChoice = (choiceIdx, step) => {
+    if (step === 1) {
+      if (choiceIdx === 0) {
+        setClinicLog(prev => [
+          ...prev,
+          { speaker: "Don Carlos", text: "¡Ay, me caí en las escaleras! Creo que me rompí el tobillo y no puedo caminar. ¿Qué debo hacer?" },
+          { speaker: "You (Nurse)", text: "Vamos a hacer una radiografía y ponerle un yeso para inmovilizar la fractura." },
+          { speaker: "Don Carlos", text: "Muchas gracias, enfermero. Ya me siento en buenas manos." }
+        ]);
+        setClinicStep(2);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setClinicLog(prev => [
+          ...prev,
+          { speaker: "You (Nurse)", text: "Tómese un helado de chocolate y camine 5 kilómetros a casa." },
+          { speaker: "Don Carlos", text: "¡¿Qué?! ¡Apenas puedo mover el pie! Esto es una negligencia médica..." }
+        ]);
+        setClinicFinished(true);
+        setClinicSuccess(false);
+      }
+    } else if (step === 2) {
+      if (choiceIdx === 0) {
+        setClinicLog(prev => [
+          ...prev,
+          { speaker: "Lucía", text: "Tengo un dolor de muelas terrible y me sangran las encías desde anoche. No puedo masticar." },
+          { speaker: "You (Nurse)", text: "Le daré un analgésico para calmar el dolor y la enviaré de inmediato al dentista." },
+          { speaker: "Lucía", text: "¡Uf, qué alivio! El dolor ya está disminuyendo un poco." }
+        ]);
+        setClinicStep(3);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setClinicLog(prev => [
+          ...prev,
+          { speaker: "You (Nurse)", text: "Vamos a operarle la rodilla izquierda ahora mismo." },
+          { speaker: "Lucía", text: "¡Mi rodilla está perfecta! ¡Lo que me duele es un diente! ¡Socorro!" }
+        ]);
+        setClinicFinished(true);
+        setClinicSuccess(false);
+      }
+    } else if (step === 3) {
+      if (choiceIdx === 0) {
+        setClinicLog(prev => [
+          ...prev,
+          { speaker: "Mateo", text: "Me quemé la mano con aceite hirviendo en la cocina. La piel está roja y me arde mucho." },
+          { speaker: "You (Nurse)", text: "Vamos a enfriar la zona con agua fría, aplicar pomada para quemaduras y cubrirla con una gasa esterilizada." },
+          { speaker: "Mateo", text: "¡Mucho mejor! El ardor ya no es tan intenso." }
+        ]);
+        setClinicStep(4);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setClinicLog(prev => [
+          ...prev,
+          { speaker: "You (Nurse)", text: "Ponga la mano en el horno caliente durante diez minutos." },
+          { speaker: "Mateo", text: "¡¿Está loco?! ¡Eso quemará mi mano por completo!" }
+        ]);
+        setClinicFinished(true);
+        setClinicSuccess(false);
+      }
+    } else if (step === 4) {
+      if (choiceIdx === 0) {
+        setClinicLog(prev => [
+          ...prev,
+          { speaker: "Doña Elena", text: "Tengo una fiebre muy alta de 39 grados, escalofríos y una infección en la garganta." },
+          { speaker: "You (Nurse)", text: "El doctor le recetará un antibiótico adecuado y debe guardar reposo en cama con abundantes líquidos." },
+          { speaker: "Doña Elena", text: "¡Muchísimas gracias! Seguiré todas sus indicaciones al pie de la letra." },
+          { speaker: "System", text: "¡Triaje clínico completado con éxito! Todos los pacientes recibieron la atención médica correcta." }
+        ]);
+        setClinicFinished(true);
+        setClinicSuccess(true);
+        addXp(60);
+        addGold(15);
+        completeAdventure("clinic");
+        if (mistakeCount === 0 && incrementBountyCount) {
+          incrementBountyCount("minigame");
+        }
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setClinicLog(prev => [
+          ...prev,
+          { speaker: "You (Nurse)", text: "Vaya a correr bajo la lluvia sin abrigo para refrescarse." },
+          { speaker: "Doña Elena", text: "¡Con 39 de fiebre me dará una pulmonía! Voy a buscar a otro profesional..." }
+        ]);
+        setClinicFinished(true);
+        setClinicSuccess(false);
+      }
+    }
+  };
+
+  // 8. Routine Handlers (102)
+  const handleRoutineChoice = (choiceIdx, step) => {
+    if (step === 1) {
+      if (choiceIdx === 0) {
+        setRoutineLog(prev => [
+          ...prev,
+          { speaker: "Reloj Alarma", text: "¡Bip bip bip! Son las 7:00 AM." },
+          { speaker: "You", text: "Primero, nosotros nos despertamos y nos levantamos de la cama de inmediato." },
+          { speaker: "Narrator", text: "¡Bien hecho! Ya están de pie con energía. Ahora toca el aseo personal." }
+        ]);
+        setRoutineStep(2);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setRoutineLog(prev => [
+          ...prev,
+          { speaker: "You", text: "Primero, ellos se duermen en la cocina con los zapatos puestos." },
+          { speaker: "Narrator", text: "Dormir en la cocina con zapatos te hará llegar tarde a la entrevista..." }
+        ]);
+        setRoutineFinished(true);
+        setRoutineSuccess(false);
+      }
+    } else if (step === 2) {
+      if (choiceIdx === 0) {
+        setRoutineLog(prev => [
+          ...prev,
+          { speaker: "You", text: "En el baño, me ducho con agua tibia, me lavo la cara y me cepillo los dientes con pasta dental." },
+          { speaker: "Narrator", text: "¡Impecable! Dientes limpios y aliento fresco. Hora de vestirse para la ocasión." }
+        ]);
+        setRoutineStep(3);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setRoutineLog(prev => [
+          ...prev,
+          { speaker: "You", text: "Te bañas a las diez de la noche en el balcón." },
+          { speaker: "Narrator", text: "¿Bañarse en el balcón de noche? Los vecinos llamaron a la policía..." }
+        ]);
+        setRoutineFinished(true);
+        setRoutineSuccess(false);
+      }
+    } else if (step === 3) {
+      if (choiceIdx === 0) {
+        setRoutineLog(prev => [
+          ...prev,
+          { speaker: "You", text: "Para la entrevista de trabajo, me peino el pelo frente al espejo y me pongo un traje elegante con camisa limpia." },
+          { speaker: "Narrator", text: "¡Excelente aspecto profesional! Fuiste a la entrevista y te contrataron en el acto." }
+        ]);
+        setRoutineStep(4);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setRoutineLog(prev => [
+          ...prev,
+          { speaker: "You", text: "Nos quitamos los pantalones y salimos corriendo a la calle." },
+          { speaker: "Narrator", text: "Ir a una entrevista sin ropa no suele impresionar a Recursos Humanos..." }
+        ]);
+        setRoutineFinished(true);
+        setRoutineSuccess(false);
+      }
+    } else if (step === 4) {
+      if (choiceIdx === 0) {
+        setRoutineLog(prev => [
+          ...prev,
+          { speaker: "You", text: "Por la noche, me quito la ropa de trabajo, me pongo el pijama y me acuesto en la cama para dormirme." },
+          { speaker: "Narrator", text: "¡Día perfecto y rutina reflexiva dominada! Descansa bien para tu nuevo empleo." },
+          { speaker: "System", text: "¡Rutina diaria completada con éxito!" }
+        ]);
+        setRoutineFinished(true);
+        setRoutineSuccess(true);
+        addXp(60);
+        addGold(15);
+        completeAdventure("routine");
+        if (mistakeCount === 0 && incrementBountyCount) {
+          incrementBountyCount("minigame");
+        }
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setRoutineLog(prev => [
+          ...prev,
+          { speaker: "You", text: "Me despierto para tomar cuatro cafés con azúcar a la medianoche." },
+          { speaker: "Narrator", text: "Con 4 cafés a medianoche no dormirás en toda la semana..." }
+        ]);
+        setRoutineFinished(true);
+        setRoutineSuccess(false);
+      }
+    }
+  };
+
+  // 9. Partner Past Tense Chat Handlers (102)
+  const handlePartnerChoice = (choiceIdx, step) => {
+    if (step === 1) {
+      if (choiceIdx === 0) {
+        setPartnerLog(prev => [
+          ...prev,
+          { speaker: "Mateo", text: "¡Hola mi amor! Qué alegría verte. ¿Cómo te fue hoy? Cuéntame, ¿adónde fuiste esta mañana?" },
+          { speaker: "You", text: "Esta mañana fui al centro comercial y compré la ropa que necesitábamos para las vacaciones." },
+          { speaker: "Mateo", text: "¡Qué maravilla! Yo estuve ocupadísimo en la oficina con varios reportes." }
+        ]);
+        setPartnerStep(2);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setPartnerLog(prev => [
+          ...prev,
+          { speaker: "You", text: "Voy a ir al centro el año que viene con un amigo imaginario." },
+          { speaker: "Mateo", text: "¿El año que viene? Te pregunté qué hiciste hoy, cariño..." }
+        ]);
+        setPartnerFinished(true);
+        setPartnerSuccess(false);
+      }
+    } else if (step === 2) {
+      if (choiceIdx === 0) {
+        setPartnerLog(prev => [
+          ...prev,
+          { speaker: "Mateo", text: "Oye, ¿pudiste pasar por el banco antes de que cerrara a las tres?" },
+          { speaker: "You", text: "Sí, pude llegar a tiempo y pagué las facturas pendientes con mi tarjeta de débito." },
+          { speaker: "Mateo", text: "¡Uf, qué tranquilidad! Eres increíble organizando todo." }
+        ]);
+        setPartnerStep(3);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setPartnerLog(prev => [
+          ...prev,
+          { speaker: "You", text: "No puedo porque el banco cerró hace tres semanas." },
+          { speaker: "Mateo", text: "¿Tres semanas? ¡Pero si fuimos el martes pasado! ¿Estás bromeando?" }
+        ]);
+        setPartnerFinished(true);
+        setPartnerSuccess(false);
+      }
+    } else if (step === 3) {
+      if (choiceIdx === 0) {
+        setPartnerLog(prev => [
+          ...prev,
+          { speaker: "Mateo", text: "Por cierto, ¿supiste lo que pasó con el coche? Escuché un ruido en el motor." },
+          { speaker: "You", text: "Sí, lo supe. Llamé al mecánico de confianza y él me dijo que lo revisará mañana por la mañana." },
+          { speaker: "Mateo", text: "¡Menos mal! Me preocupaba quedarnos sin auto para el viaje." }
+        ]);
+        setPartnerStep(4);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setPartnerLog(prev => [
+          ...prev,
+          { speaker: "You", text: "Sé que el coche prefiere volar a la luna." },
+          { speaker: "Mateo", text: "¿Volar a la luna? Creo que el cansancio te está afectando la imaginación..." }
+        ]);
+        setPartnerFinished(true);
+        setPartnerSuccess(false);
+      }
+    } else if (step === 4) {
+      if (choiceIdx === 0) {
+        setPartnerLog(prev => [
+          ...prev,
+          { speaker: "Mateo", text: "Ya preparé una cena deliciosa de pasta con verduras para los dos. ¿Nos sentamos a la mesa?" },
+          { speaker: "You", text: "¡Qué delicia! Cenamos juntos y descansamos, que hoy tuvimos un día largo y muy productivo." },
+          { speaker: "Mateo", text: "¡Salud por nosotros y por un gran día juntos!" },
+          { speaker: "System", text: "¡Conversación en pretérito completada con éxito!" }
+        ]);
+        setPartnerFinished(true);
+        setPartnerSuccess(true);
+        addXp(65);
+        addGold(15);
+        completeAdventure("partner");
+        if (mistakeCount === 0 && incrementBountyCount) {
+          incrementBountyCount("minigame");
+        }
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setPartnerLog(prev => [
+          ...prev,
+          { speaker: "You", text: "No voy a cenar porque comí tierra en el parque con las ardillas." },
+          { speaker: "Mateo", text: "¿Comiste tierra...? Definitivamente mañana llamamos a un doctor." }
+        ]);
+        setPartnerFinished(true);
+        setPartnerSuccess(false);
+      }
+    }
+  };
+
+  // 10. Narfy 102 Big Day Handlers (102)
+  const handleNarfy102Choice = (choiceIdx, step) => {
+    if (step === 1) {
+      if (choiceIdx === 0) {
+        setNarfy102Action("walk");
+        setNarfy102Log(prev => [
+          ...prev,
+          { speaker: "Historia", text: "Ayer fue un día soleado y Narfy tuvo una aventura inolvidable." },
+          { speaker: "You", text: "Por la mañana, Narfy se despertó, se levantó de su camita y caminó hacia la puerta moviendo la cola." },
+          { speaker: "Narfy", text: "🐾 ¡Guau! (Narfy camina emocionado esperando su paseo)" }
+        ]);
+        setNarfy102Step(2);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setNarfy102Log(prev => [
+          ...prev,
+          { speaker: "You", text: "Narfy manejó un coche deportivo por la autopista." },
+          { speaker: "Narrator", text: "Narfy es un perro inteligente, pero sus patitas no alcanzan los pedales..." }
+        ]);
+        setNarfy102Finished(true);
+        setNarfy102Success(false);
+      }
+    } else if (step === 2) {
+      if (choiceIdx === 0) {
+        setNarfy102Action("run");
+        setNarfy102Log(prev => [
+          ...prev,
+          { speaker: "You", text: "En el parque, Narfy corrió a toda velocidad tras su pelota amarilla y jugó felizmente con otros perros." },
+          { speaker: "Narfy", text: "🐾 ¡Guau guau! (Narfy corre con el viento en las orejas)" }
+        ]);
+        setNarfy102Step(3);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setNarfy102Log(prev => [
+          ...prev,
+          { speaker: "You", text: "Narfy leyó un periódico financiero en la banca." },
+          { speaker: "Narrator", text: "Narfy prefiere morder el periódico en vez de leer sobre la bolsa..." }
+        ]);
+        setNarfy102Finished(true);
+        setNarfy102Success(false);
+      }
+    } else if (step === 3) {
+      if (choiceIdx === 0) {
+        setNarfy102Action("eat");
+        setNarfy102Log(prev => [
+          ...prev,
+          { speaker: "You", text: "Al mediodía, Narfy se sentó con atención, olió la comida y comió su galleta de pollo favorita." },
+          { speaker: "Narfy", text: "🐾 *Ñam ñam* (Narfy mastica felizmente su premio crujiente)" }
+        ]);
+        setNarfy102Step(4);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setNarfy102Log(prev => [
+          ...prev,
+          { speaker: "You", text: "Narfy cocinó espaguetis con albóndigas en una olla." },
+          { speaker: "Narrator", text: "La cocina quedó hecha un desastre y no hay espaguetis por ninguna parte." }
+        ]);
+        setNarfy102Finished(true);
+        setNarfy102Success(false);
+      }
+    } else if (step === 4) {
+      if (choiceIdx === 0) {
+        setNarfy102Action("speak");
+        setNarfy102Log(prev => [
+          ...prev,
+          { speaker: "You", text: "De repente, una ardilla rápida subió a un árbol. Narfy la miró fijamente y le ladró con entusiasmo." },
+          { speaker: "Narfy", text: "🐾 ¡GUAU, GUAU! (Narfy defiende valientemente su territorio)" }
+        ]);
+        setNarfy102Step(5);
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setNarfy102Log(prev => [
+          ...prev,
+          { speaker: "You", text: "Narfy le pidió un préstamo bancario a la ardilla." },
+          { speaker: "Narrator", text: "Las ardillas solo pagan en bellotas, no en dólares..." }
+        ]);
+        setNarfy102Finished(true);
+        setNarfy102Success(false);
+      }
+    } else if (step === 5) {
+      if (choiceIdx === 0) {
+        setNarfy102Action("sleep");
+        setNarfy102Log(prev => [
+          ...prev,
+          { speaker: "You", text: "Por la noche regresamos a casa. Narfy bebió agua fresca, se acostó en su manta suave y se durmió profundamente." },
+          { speaker: "Narfy", text: "🐾 Zzz... (Narfy sueña felizmente con pelotas y prados verdes)" },
+          { speaker: "System", text: "¡Completaste el gran día de Narfy con éxito!" }
+        ]);
+        setNarfy102Finished(true);
+        setNarfy102Success(true);
+        addXp(75);
+        addGold(20);
+        completeAdventure("narfy102");
+        if (mistakeCount === 0 && incrementBountyCount) {
+          incrementBountyCount("minigame");
+        }
+      } else {
+        setMistakeCount(prev => prev + 1);
+        setNarfy102Log(prev => [
+          ...prev,
+          { speaker: "You", text: "Narfy salió a una fiesta de baile hasta las seis de la mañana." },
+          { speaker: "Narrator", text: "Narfy es un cachorro de día, los clubes nocturnos no aceptan caninos..." }
+        ]);
+        setNarfy102Finished(true);
+        setNarfy102Success(false);
+      }
+    }
+  };
+
   return (
     <div className="view-container">
       <div className="view-header">
@@ -547,31 +1016,76 @@ export default function MiniGames({ state, addXp, addGold, completeAdventure, in
       <div className="games-layout">
         {/* Left selector */}
         <div className="game-list-panel">
-          {ADVENTURES.map(adv => {
-            const isCompleted = state.completedAdventures.includes(adv.id);
-            const isActive = activeGame === adv.id;
+          {/* Category Filter Tabs */}
+          <div style={{ display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.25)', padding: '4px', borderRadius: '10px', marginBottom: '12px' }}>
+            <button 
+              type="button"
+              className={`btn btn-sm ${categoryFilter === '102' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ flex: 1, fontSize: '0.75rem', padding: '6px 4px' }}
+              onClick={() => setCategoryFilter('102')}
+            >
+              🌟 102 Nuevos
+            </button>
+            <button 
+              type="button"
+              className={`btn btn-sm ${categoryFilter === '101' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ flex: 1, fontSize: '0.75rem', padding: '6px 4px' }}
+              onClick={() => setCategoryFilter('101')}
+            >
+              📚 101 Clásicos
+            </button>
+            <button 
+              type="button"
+              className={`btn btn-sm ${categoryFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ flex: '0 0 auto', fontSize: '0.75rem', padding: '6px 8px' }}
+              onClick={() => setCategoryFilter('all')}
+            >
+              Todos
+            </button>
+          </div>
 
-            return (
-              <div 
-                key={adv.id} 
-                className={`glass-panel game-select-card ${isActive ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveGame(adv.id);
-                  setMistakeCount(0);
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{adv.icon} {adv.title}</span>
-                  {isCompleted && (
-                    <span style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 'bold', border: '1px solid rgba(16,185,129,0.3)', padding: '1px 5px', borderRadius: '6px', background: 'rgba(16,185,129,0.05)' }}>
-                      Done
-                    </span>
-                  )}
+          {ADVENTURES
+            .filter(adv => categoryFilter === 'all' || adv.level === categoryFilter)
+            .map(adv => {
+              const isCompleted = state.completedAdventures.includes(adv.id);
+              const isActive = activeGame === adv.id;
+
+              return (
+                <div 
+                  key={adv.id} 
+                  className={`glass-panel game-select-card ${isActive ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveGame(adv.id);
+                    setMistakeCount(0);
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>{adv.icon} {adv.title}</span>
+                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexShrink: 0 }}>
+                      <span 
+                        style={{ 
+                          fontSize: '0.65rem', 
+                          fontWeight: 'bold', 
+                          padding: '1px 6px', 
+                          borderRadius: '6px', 
+                          background: adv.level === '102' ? 'rgba(250, 204, 21, 0.15)' : 'rgba(255,255,255,0.06)', 
+                          color: adv.level === '102' ? 'var(--gold)' : 'var(--text-muted)',
+                          border: adv.level === '102' ? '1px solid rgba(250, 204, 21, 0.3)' : '1px solid rgba(255,255,255,0.1)'
+                        }}
+                      >
+                        {adv.level}
+                      </span>
+                      {isCompleted && (
+                        <span style={{ color: 'var(--accent)', fontSize: '0.65rem', fontWeight: 'bold', border: '1px solid rgba(16,185,129,0.3)', padding: '1px 5px', borderRadius: '6px', background: 'rgba(16,185,129,0.05)' }}>
+                          Done
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.3' }}>{adv.desc}</p>
                 </div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.3' }}>{adv.desc}</p>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
 
         {/* Right Active Game Console */}
@@ -1056,6 +1570,447 @@ export default function MiniGames({ state, addXp, addGold, completeAdventure, in
                     </>
                   )}
                   <button className="btn btn-secondary" onClick={restartMedical}>Try Again</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 7. CLINIC TRIAGE ADVENTURE (102) */}
+          {activeGame === "clinic" && (
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px' }}>
+                <span style={{ fontWeight: 'bold' }}>🏥 Clínica Comunitaria: Triaje Médico</span>
+                <span style={{ color: 'var(--gold)', fontWeight: 'bold' }}>Paciente: {Math.min(4, clinicStep)} / 4</span>
+              </div>
+
+              {!clinicFinished ? (
+                <>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Objective: Listen to each patient's ailment and choose the medically correct treatment in Spanish. (Mistakes: {mistakeCount})
+                  </p>
+
+                  <div style={{ flex: 1, background: 'rgba(0,0,0,0.15)', padding: '16px', borderRadius: '12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '220px' }}>
+                    {clinicLog.length === 0 ? (
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                        Entra el primer paciente a la sala de triaje con dolor visible...
+                      </span>
+                    ) : (
+                      clinicLog.map((log, idx) => (
+                        <div key={idx} style={{ fontSize: '0.85rem' }}>
+                          <strong style={{ color: log.speaker.includes('You') ? 'var(--primary)' : 'var(--gold)' }}>{log.speaker}:</strong> {log.text}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="game-choices-container">
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                      ¿Qué tratamiento o cuidado médico indicas?
+                    </span>
+                    
+                    {clinicStep === 1 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleClinicChoice(0, 1)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Vamos a hacer una radiografía y ponerle un yeso para inmovilizar la fractura."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleClinicChoice(1, 1)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Tómese un helado de chocolate y camine 5 kilómetros a casa."
+                        </button>
+                      </>
+                    )}
+
+                    {clinicStep === 2 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleClinicChoice(0, 2)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Le daré un analgésico para calmar el dolor y la enviaré de inmediato al dentista."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleClinicChoice(1, 2)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Vamos a operarle la rodilla izquierda ahora mismo."
+                        </button>
+                      </>
+                    )}
+
+                    {clinicStep === 3 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleClinicChoice(0, 3)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Vamos a enfriar la zona con agua fría, aplicar pomada para quemaduras y cubrirla con una gasa esterilizada."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleClinicChoice(1, 3)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Ponga la mano en el horno caliente durante diez minutos."
+                        </button>
+                      </>
+                    )}
+
+                    {clinicStep === 4 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleClinicChoice(0, 4)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "El doctor le recetará un antibiótico adecuado y debe guardar reposo en cama con abundantes líquidos."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleClinicChoice(1, 4)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Vaya a correr bajo la lluvia sin abrigo para refrescarse."
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', margin: 'auto' }}>
+                  {clinicSuccess ? (
+                    <>
+                      <Trophy size={48} color="var(--gold)" style={{ margin: '0 auto 12px', animation: 'float 3s ease-in-out infinite' }} />
+                      <h3 style={{ fontSize: '1.4rem', color: 'var(--accent)', marginBottom: '8px' }}>¡Triaje Médico Exitoso!</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px', maxWidth: '380px' }}>
+                        Atendiste a todos los pacientes con precisión: fracturas, odontología, quemaduras e infecciones.
+                        {mistakeCount === 0 ? " ¡Victoria Impecable sin errores (+60 XP / +15 G)!" : ` Completado con ${mistakeCount} errores (+60 XP / +15 G).`}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ fontSize: '3rem' }}>🚑</span>
+                      <h3 style={{ fontSize: '1.4rem', color: 'var(--danger)', marginBottom: '8px', marginTop: '12px' }}>Tratamiento Erróneo</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px', maxWidth: '350px' }}>
+                        Prescribiste un tratamiento equivocado al paciente. Revisa el vocabulario de salud de la Unidad 2 e inténtalo de nuevo.
+                      </p>
+                    </>
+                  )}
+                  <button className="btn btn-secondary" onClick={restartClinic}>Intentar de nuevo</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 8. ROUTINE ADVENTURE (102) */}
+          {activeGame === "routine" && (
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px' }}>
+                <span style={{ fontWeight: 'bold' }}>🪞 Rutina Diaria: Mañana y Noche</span>
+                <span style={{ color: 'var(--gold)', fontWeight: 'bold' }}>Paso: {Math.min(4, routineStep)} / 4</span>
+              </div>
+
+              {!routineFinished ? (
+                <>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Objective: Select the correct reflexive verb actions (despertarse, ducharse, vestirse, acostarse) for morning prep and night rest. (Mistakes: {mistakeCount})
+                  </p>
+
+                  <div style={{ flex: 1, background: 'rgba(0,0,0,0.15)', padding: '16px', borderRadius: '12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '220px' }}>
+                    {routineLog.length === 0 ? (
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                        Comienza el día a las 7:00 AM. Tienes una entrevista de trabajo importante...
+                      </span>
+                    ) : (
+                      routineLog.map((log, idx) => (
+                        <div key={idx} style={{ fontSize: '0.85rem' }}>
+                          <strong style={{ color: log.speaker === 'You' ? 'var(--primary)' : 'var(--gold)' }}>{log.speaker}:</strong> {log.text}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="game-choices-container">
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                      Elige la acción reflexiva correcta:
+                    </span>
+                    
+                    {routineStep === 1 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleRoutineChoice(0, 1)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Primero, nosotros nos despertamos y nos levantamos de la cama de inmediato."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleRoutineChoice(1, 1)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Primero, ellos se duermen en la cocina con los zapatos puestos."
+                        </button>
+                      </>
+                    )}
+
+                    {routineStep === 2 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleRoutineChoice(0, 2)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "En el baño, me ducho con agua tibia, me lavo la cara y me cepillo los dientes con pasta dental."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleRoutineChoice(1, 2)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Te bañas a las diez de la noche en el balcón."
+                        </button>
+                      </>
+                    )}
+
+                    {routineStep === 3 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleRoutineChoice(0, 3)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Para la entrevista de trabajo, me peino el pelo frente al espejo y me pongo un traje elegante con camisa limpia."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleRoutineChoice(1, 3)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Nos quitamos los pantalones y salimos corriendo a la calle."
+                        </button>
+                      </>
+                    )}
+
+                    {routineStep === 4 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleRoutineChoice(0, 4)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Por la noche, me quito la ropa de trabajo, me pongo el pijama y me acuesto en la cama para dormirme."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleRoutineChoice(1, 4)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Me despierto para tomar cuatro cafés con azúcar a la medianoche."
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', margin: 'auto' }}>
+                  {routineSuccess ? (
+                    <>
+                      <Trophy size={48} color="var(--gold)" style={{ margin: '0 auto 12px', animation: 'float 3s ease-in-out infinite' }} />
+                      <h3 style={{ fontSize: '1.4rem', color: 'var(--accent)', marginBottom: '8px' }}>¡Rutina Diaria Impecable!</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px', maxWidth: '380px' }}>
+                        Completaste todas las acciones reflexivas de aseo, vestimenta y descanso correctamente.
+                        {mistakeCount === 0 ? " ¡Victoria Impecable (+60 XP / +15 G)!" : ` Completado con ${mistakeCount} errores (+60 XP / +15 G).`}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ fontSize: '3rem' }}>⏰</span>
+                      <h3 style={{ fontSize: '1.4rem', color: 'var(--danger)', marginBottom: '8px', marginTop: '12px' }}>Rutina Desordenada</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px', maxWidth: '350px' }}>
+                        Usaste una forma reflexiva o acción incoherente. Revisa los verbos reflexivos de la Unidad 2 e inténtalo de nuevo.
+                      </p>
+                    </>
+                  )}
+                  <button className="btn btn-secondary" onClick={restartRoutine}>Intentar de nuevo</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 9. PARTNER PAST TENSE CHAT (102) */}
+          {activeGame === "partner" && (
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px' }}>
+                <span style={{ fontWeight: 'bold' }}>💬 Charla de Pareja: ¿Qué Hiciste Hoy?</span>
+                <span style={{ color: 'var(--gold)', fontWeight: 'bold' }}>Conversación: {Math.min(4, partnerStep)} / 4</span>
+              </div>
+
+              {!partnerFinished ? (
+                <>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Objective: Recount your day to your partner Mateo using Preterite past tense verbs (fui, compré, pude, pagué, supe, tuvimos). (Mistakes: {mistakeCount})
+                  </p>
+
+                  <div style={{ flex: 1, background: 'rgba(0,0,0,0.15)', padding: '16px', borderRadius: '12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '220px' }}>
+                    {partnerLog.length === 0 ? (
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                        Llegas a casa por la noche. Tu pareja Mateo te recibe con una sonrisa: "¡Hola mi amor! ¿Cómo te fue hoy?"
+                      </span>
+                    ) : (
+                      partnerLog.map((log, idx) => (
+                        <div key={idx} style={{ fontSize: '0.85rem' }}>
+                          <strong style={{ color: log.speaker === 'You' ? 'var(--primary)' : 'var(--gold)' }}>{log.speaker}:</strong> {log.text}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="game-choices-container">
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                      ¿Cómo respondes en tiempo pretérito?
+                    </span>
+                    
+                    {partnerStep === 1 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handlePartnerChoice(0, 1)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Esta mañana fui al centro comercial y compré la ropa que necesitábamos para las vacaciones."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handlePartnerChoice(1, 1)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Voy a ir al centro el año que viene con un amigo imaginario."
+                        </button>
+                      </>
+                    )}
+
+                    {partnerStep === 2 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handlePartnerChoice(0, 2)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Sí, pude llegar a tiempo y pagué las facturas pendientes con mi tarjeta de débito."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handlePartnerChoice(1, 2)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "No puedo porque el banco cerró hace tres semanas."
+                        </button>
+                      </>
+                    )}
+
+                    {partnerStep === 3 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handlePartnerChoice(0, 3)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Sí, lo supe. Llamé al mecánico de confianza y él me dijo que lo revisará mañana por la mañana."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handlePartnerChoice(1, 3)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Sé que el coche prefiere volar a la luna."
+                        </button>
+                      </>
+                    )}
+
+                    {partnerStep === 4 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handlePartnerChoice(0, 4)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "¡Qué delicia! Cenamos juntos y descansamos, que hoy tuvimos un día largo y muy productivo."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handlePartnerChoice(1, 4)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "No voy a cenar porque comí tierra en el parque con las ardillas."
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', margin: 'auto' }}>
+                  {partnerSuccess ? (
+                    <>
+                      <Trophy size={48} color="var(--gold)" style={{ margin: '0 auto 12px', animation: 'float 3s ease-in-out infinite' }} />
+                      <h3 style={{ fontSize: '1.4rem', color: 'var(--accent)', marginBottom: '8px' }}>¡Gran Conversación en Pretérito!</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px', maxWidth: '380px' }}>
+                        Compartiste todas tus vivencias del día empleando verbos regulares e irregulares en pretérito con soltura.
+                        {mistakeCount === 0 ? " ¡Victoria Impecable (+65 XP / +15 G)!" : ` Completado con ${mistakeCount} errores (+65 XP / +15 G).`}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ fontSize: '3rem' }}>💔</span>
+                      <h3 style={{ fontSize: '1.4rem', color: 'var(--danger)', marginBottom: '8px', marginTop: '12px' }}>Conversación Confusa</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px', maxWidth: '350px' }}>
+                        Usaste un tiempo verbal incorrecto o diste una respuesta sin sentido. Repasa el pretérito de las Unidades 3 y 4.
+                      </p>
+                    </>
+                  )}
+                  <button className="btn btn-secondary" onClick={restartPartner}>Intentar de nuevo</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 10. NARFY 102 BIG DAY ADVENTURE (102) */}
+          {activeGame === "narfy102" && (
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px' }}>
+                <span style={{ fontWeight: 'bold' }}>🐕 El Gran Día de Narfy (Pretérito y Aventuras)</span>
+                <span style={{ color: 'var(--gold)', fontWeight: 'bold' }}>Momento: {Math.min(5, narfy102Step)} / 5</span>
+              </div>
+
+              {!narfy102Finished ? (
+                <>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Objective: Recount Narfy's big day out in the Preterite tense (despertó, corrió, comió, ladró, durmió). Watch Narfy animate in real time! (Mistakes: {mistakeCount})
+                  </p>
+
+                  {/* Animated Narfy Sprite Display */}
+                  <div className="game-graphics-box" style={{ background: 'rgba(0,0,0,0.15)', borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                    <NarfySprite action={narfy102Action} />
+                    <span style={{ fontSize: '0.75rem', color: 'var(--gold)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Estado de Narfy: {narfy102Action}
+                    </span>
+                  </div>
+
+                  <div style={{ flex: 1, background: 'rgba(0,0,0,0.15)', padding: '16px', borderRadius: '12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '180px' }}>
+                    {narfy102Log.length === 0 ? (
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                        Es de noche y Narfy descansa junto a ti. Recuerdas lo bien que lo pasó ayer...
+                      </span>
+                    ) : (
+                      narfy102Log.map((log, idx) => (
+                        <div key={idx} style={{ fontSize: '0.85rem' }}>
+                          <strong style={{ color: log.speaker === 'You' ? 'var(--primary)' : log.speaker === 'Narfy' ? 'var(--gold)' : 'var(--text-secondary)' }}>
+                            {log.speaker}:
+                          </strong> {log.text}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="game-choices-container">
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                      ¿Qué hizo Narfy a continuación?
+                    </span>
+                    
+                    {narfy102Step === 1 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleNarfy102Choice(0, 1)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Por la mañana, Narfy se despertó, se levantó de su camita y caminó hacia la puerta moviendo la cola."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleNarfy102Choice(1, 1)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Narfy manejó un coche deportivo por la autopista."
+                        </button>
+                      </>
+                    )}
+
+                    {narfy102Step === 2 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleNarfy102Choice(0, 2)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "En el parque, Narfy corrió a toda velocidad tras su pelota amarilla y jugó felizmente con otros perros."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleNarfy102Choice(1, 2)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Narfy leyó un periódico financiero en la banca."
+                        </button>
+                      </>
+                    )}
+
+                    {narfy102Step === 3 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleNarfy102Choice(0, 3)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Al mediodía, Narfy se sentó con atención, olió la comida y comió su galleta de pollo favorita."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleNarfy102Choice(1, 3)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Narfy cocinó espaguetis con albóndigas en una olla."
+                        </button>
+                      </>
+                    )}
+
+                    {narfy102Step === 4 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleNarfy102Choice(0, 4)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "De repente, una ardilla rápida subió a un árbol. Narfy la miró fijamente y le ladró con entusiasmo."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleNarfy102Choice(1, 4)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Narfy le pidió un préstamo bancario a la ardilla."
+                        </button>
+                      </>
+                    )}
+
+                    {narfy102Step === 5 && (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => handleNarfy102Choice(0, 5)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          1. "Por la noche regresamos a casa. Narfy bebió agua fresca, se acostó en su manta suave y se durmió profundamente."
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => handleNarfy102Choice(1, 5)} style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                          2. "Narfy salió a una fiesta de baile hasta las seis de la mañana."
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', margin: 'auto' }}>
+                  {narfy102Success ? (
+                    <>
+                      <div className="game-graphics-box" style={{ background: 'rgba(0,0,0,0.1)', borderRadius: '16px', padding: '16px', display: 'inline-block', marginBottom: '16px' }}>
+                        <NarfySprite action="sleep" />
+                      </div>
+                      <h3 style={{ fontSize: '1.4rem', color: 'var(--accent)', marginBottom: '8px' }}>¡El Gran Día de Narfy Completado!</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px', maxWidth: '380px' }}>
+                        Reviviste la jornada de Narfy narrando en tiempo pretérito y observando todas sus animaciones: caminó, corrió, comió, ladró y durmió.
+                        {mistakeCount === 0 ? " ¡Victoria Impecable con Narfy (+75 XP / +20 G)!" : ` Completado con ${mistakeCount} errores (+75 XP / +20 G).`}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="game-graphics-box" style={{ background: 'rgba(0,0,0,0.1)', borderRadius: '16px', padding: '16px', display: 'inline-block', marginBottom: '16px' }}>
+                        <NarfySprite action="sit" />
+                      </div>
+                      <h3 style={{ fontSize: '1.4rem', color: 'var(--danger)', marginBottom: '8px', marginTop: '12px' }}>Aventura Canina Confusa</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px', maxWidth: '350px' }}>
+                        Esa acción no corresponde a lo que haría Narfy. ¡Vuelve a intentarlo para que Narfy disfrute su día!
+                      </p>
+                    </>
+                  )}
+                  <button className="btn btn-secondary" onClick={restartNarfy102}>Intentar de nuevo</button>
                 </div>
               )}
             </div>

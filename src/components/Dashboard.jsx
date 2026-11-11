@@ -9,8 +9,7 @@ import {
   Coins, 
   Gamepad2, 
   Settings, 
-  Heart,
-  Plus
+  Heart
 } from 'lucide-react';
 import NarfySprite from './NarfySprite';
 
@@ -191,7 +190,7 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
             </div>
             <div>
               <h3 className="menu-card-title">Aventuras (Text RPG)</h3>
-              <p className="menu-card-desc">Embark on story-based text games: market shopping, meeting Nat, and dog training.</p>
+              <p className="menu-card-desc">Story adventures: Clinic triage, daily routines, partner chats, Narfy's day, plus 101 classics!</p>
             </div>
           </div>
 

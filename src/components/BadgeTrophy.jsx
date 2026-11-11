@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, ArrowLeft, Shield, Sparkles } from 'lucide-react';
+import { Trophy, ArrowLeft } from 'lucide-react';
 
 const BADGES_LIST = [
   {
@@ -78,6 +78,30 @@ const BADGES_LIST = [
     id: "dog_trainer",
     name: "Entrenador de Narfy (Dog Whisperer)",
     desc: "Successfully train Narfy using all 5 correct commands.",
+    icon: "🐕"
+  },
+  {
+    id: "triage_master",
+    name: "Médico de Triaje (Clinic Hero)",
+    desc: "Successfully triage and treat all clinic patients in the 102 Clinic Adventure.",
+    icon: "🏥"
+  },
+  {
+    id: "routine_champion",
+    name: "Amo de la Rutina (Routine Master)",
+    desc: "Master morning and evening reflexive routines in the 102 Routine Adventure.",
+    icon: "🪞"
+  },
+  {
+    id: "storyteller",
+    name: "Narrador del Pasado (Past Storyteller)",
+    desc: "Recount your day in the Preterite tense in the 102 Partner Chat Adventure.",
+    icon: "💬"
+  },
+  {
+    id: "narfy_best_friend",
+    name: "Mejor Amigo de Narfy (Narfy's Best Friend)",
+    desc: "Relive Narfy's big day out in the past tense in the 102 Narfy Adventure.",
     icon: "🐕"
   }
 ];

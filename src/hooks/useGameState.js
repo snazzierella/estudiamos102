@@ -314,6 +314,18 @@ export function useGameState() {
       if (adventureId === "narfy" && !newBadges.includes("dog_trainer")) {
         newBadges.push("dog_trainer");
       }
+      if (adventureId === "clinic" && !newBadges.includes("triage_master")) {
+        newBadges.push("triage_master");
+      }
+      if (adventureId === "routine" && !newBadges.includes("routine_champion")) {
+        newBadges.push("routine_champion");
+      }
+      if (adventureId === "partner" && !newBadges.includes("storyteller")) {
+        newBadges.push("storyteller");
+      }
+      if (adventureId === "narfy102" && !newBadges.includes("narfy_best_friend")) {
+        newBadges.push("narfy_best_friend");
+      }
 
       return {
         ...prev,

@@ -468,7 +468,7 @@ export default function StudyQuest({
   // -------------------------------------------------------------
   // QUEST CAMPAIGN CORE LOGIC
   // -------------------------------------------------------------
-  const buildProgressiveQuizStep = (item, L) => {
+  const buildProgressiveQuizStep = (item, L, allowConjugation = false) => {
     const isVerb = isVerbItem(item);
     const isSentence = item.category === "Sentences";
     
@@ -490,14 +490,17 @@ export default function StudyQuest({
 
     let format = "mc"; // "mc", "conjugation", "typing"
     
+    // Only allow conjugation if this verb has been introduced and seen in prior flashcards/study
+    const canConjugate = isVerb && allowConjugation;
+
     if (L <= 5) {
       format = "mc";
     } else if (L <= 10) {
-      format = Math.random() > 0.7 ? (isVerb ? "conjugation" : "typing") : "mc";
+      format = Math.random() > 0.7 ? (canConjugate ? "conjugation" : "typing") : "mc";
     } else if (L <= 15) {
-      format = Math.random() > 0.4 ? (isVerb ? "conjugation" : "typing") : "mc";
+      format = Math.random() > 0.4 ? (canConjugate ? "conjugation" : "typing") : "mc";
     } else {
-      format = Math.random() > 0.3 ? (isVerb ? "conjugation" : "typing") : "mc";
+      format = Math.random() > 0.3 ? (canConjugate ? "conjugation" : "typing") : "mc";
     }
 
     if (format === "conjugation") {
@@ -750,7 +753,11 @@ export default function StudyQuest({
       quizItems = [...filledCurrent, ...reviewQuizItems];
     }
 
-    const quizSteps = quizItems.map(item => buildProgressiveQuizStep(item, levelVal));
+    const isWordKnownForConjugation = (word) => {
+      return (state.stageFlashcardsSeen || []).includes(word) || (state.wordsAnsweredCorrectly || []).includes(word);
+    };
+
+    const quizSteps = quizItems.map(item => buildProgressiveQuizStep(item, levelVal, isWordKnownForConjugation(item.spanish)));
     const shuffledQuizSteps = [...quizSteps].sort(() => Math.random() - 0.5);
 
     // CRITICAL: Present all flashcard learning introductions FIRST.
@@ -762,7 +769,7 @@ export default function StudyQuest({
       while (finalQuestions.length < 20) {
         const needed = 20 - finalQuestions.length;
         const extra = [...stageQuizPool].sort(() => Math.random() - 0.5).slice(0, needed);
-        const extraSteps = extra.map(item => buildProgressiveQuizStep(item, levelVal));
+        const extraSteps = extra.map(item => buildProgressiveQuizStep(item, levelVal, isWordKnownForConjugation(item.spanish)));
         finalQuestions = [...finalQuestions, ...extraSteps];
       }
     } else if (finalQuestions.length > 20) {

@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import vocabularyData from '../data/vocabulary.json';
 import { STAGES, formatEnglishPrompt } from '../utils/difficultyMapper';
-import { generateConjugationQuestion, generateFillInTheBlank, conjugate } from '../utils/conjugationHelper';
+import { 
+  generateConjugationQuestion, 
+  generateFillInTheBlank, 
+  conjugate,
+  isVerbItem,
+  parseVerb
+} from '../utils/conjugationHelper';
 import { 
   Swords, 
   ArrowLeft, 
@@ -68,10 +74,20 @@ export default function StudyQuest({
   const [comboCount, setComboCount] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
   const [codexVerb, setCodexVerb] = useState(null);
+  const [codexTense, setCodexTense] = useState("present");
   const [isListening, setIsListening] = useState(false);
   
   const questInputRef = useRef(null);
   const practiceInputRef = useRef(null);
+
+  const openCodex = (verbItemOrString) => {
+    const verbStr = typeof verbItemOrString === 'string' ? verbItemOrString : (verbItemOrString?.spanish || "");
+    setCodexVerb(verbStr);
+    const isPreterite = typeof verbItemOrString === 'object' && verbItemOrString !== null
+      ? (verbItemOrString.subcategory?.includes("Pretérito") || verbItemOrString.unit?.includes("Unit 3") || verbItemOrString.unit?.includes("Unit 4") || verbItemOrString.english?.toLowerCase().includes("preterite") || verbItemOrString.english?.toLowerCase().includes("(past)"))
+      : /fui|hice|tuve|estuve|pude|puse|supe|vine|dije|traje|di|vi/i.test(verbStr);
+    setCodexTense(isPreterite ? "preterite" : "present");
+  };
 
   // -------------------------------------------------------------
   // STATE FOR FREE PRACTICE
@@ -86,6 +102,7 @@ export default function StudyQuest({
   const [practiceQuizStarted, setPracticeQuizStarted] = useState(false);
   const [practiceQuizFinished, setPracticeQuizFinished] = useState(false);
   const [practiceQuizMode, setPracticeQuizMode] = useState("translation"); // "translation" or "conjugation"
+  const [practiceTense, setPracticeTense] = useState("auto"); // "auto", "present", "preterite", "both"
   const [practiceQuestions, setPracticeQuestions] = useState([]);
   const [practiceScore, setPracticeScore] = useState(0);
   const [practiceAnswered, setPracticeAnswered] = useState(false);
@@ -452,7 +469,7 @@ export default function StudyQuest({
   // QUEST CAMPAIGN CORE LOGIC
   // -------------------------------------------------------------
   const buildProgressiveQuizStep = (item, L) => {
-    const isVerb = item.category === "Verbs" && item.subcategory !== "Verbs Structured Like Gustar";
+    const isVerb = isVerbItem(item);
     const isSentence = item.category === "Sentences";
     
     if (isSentence) {
@@ -476,15 +493,32 @@ export default function StudyQuest({
     if (L <= 5) {
       format = "mc";
     } else if (L <= 10) {
-      format = Math.random() > 0.75 ? (isVerb && !state.excludeVosotros ? "conjugation" : "typing") : "mc";
+      format = Math.random() > 0.7 ? (isVerb ? "conjugation" : "typing") : "mc";
     } else if (L <= 15) {
-      format = Math.random() > 0.5 ? (isVerb && !state.excludeVosotros ? "conjugation" : "typing") : "mc";
+      format = Math.random() > 0.4 ? (isVerb ? "conjugation" : "typing") : "mc";
     } else {
-      format = Math.random() > 0.3 ? (isVerb && !state.excludeVosotros ? "conjugation" : "typing") : "mc";
+      format = Math.random() > 0.3 ? (isVerb ? "conjugation" : "typing") : "mc";
     }
 
     if (format === "conjugation") {
-      const qSpec = generateConjugationQuestion(item, { excludeVosotros: state.excludeVosotros });
+      let stageTense = "present";
+      if (
+        state.questStage >= 3 ||
+        item.unit?.includes("Unit 3") || 
+        item.unit?.includes("Unit 4") || 
+        item.category === "Unidad 3" || 
+        item.category === "Unidad 4" || 
+        item.subcategory?.includes("Pretérito") ||
+        item.english?.toLowerCase().includes("preterite") ||
+        item.english?.toLowerCase().includes("(past)")
+      ) {
+        stageTense = "preterite";
+      }
+
+      const qSpec = generateConjugationQuestion(item, { 
+        tense: stageTense,
+        excludeVosotros: state.excludeVosotros 
+      });
       if (qSpec) {
         return {
           item,
@@ -493,6 +527,9 @@ export default function StudyQuest({
           questionWord: qSpec.verb,
           meaning: qSpec.meaning,
           pronoun: qSpec.pronoun,
+          tense: qSpec.tense,
+          tenseLabel: qSpec.tenseLabel,
+          isReflexive: qSpec.isReflexive,
           correct: qSpec.correct,
           choices: qSpec.choices
         };
@@ -1080,7 +1117,15 @@ export default function StudyQuest({
     initAudio();
     if (practiceCards.length === 0) return;
 
-    const shuffled = [...practiceCards].sort(() => Math.random() - 0.5);
+    let pool = practiceCards;
+    if (practiceQuizMode === "conjugation") {
+      const verbPool = practiceCards.filter(item => isVerbItem(item));
+      if (verbPool.length > 0) {
+        pool = verbPool;
+      }
+    }
+
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
     const chosen = shuffled.slice(0, 10);
 
     const questions = chosen.map(item => {
@@ -1099,11 +1144,33 @@ export default function StudyQuest({
         }
       }
 
-      const isVerb = item.category === "Verbs" && item.subcategory !== "Verbs Structured Like Gustar";
+      const isVerb = isVerbItem(item);
       const wantsConjugation = isVerb && practiceQuizMode === "conjugation";
 
       if (wantsConjugation) {
-        const qSpec = generateConjugationQuestion(item, { excludeVosotros: state.excludeVosotros });
+        let chosenTense = practiceTense;
+        if (chosenTense === "both") {
+          chosenTense = Math.random() > 0.5 ? "present" : "preterite";
+        } else if (chosenTense === "auto") {
+          if (
+            item.unit?.includes("Unit 3") || 
+            item.unit?.includes("Unit 4") || 
+            item.category === "Unidad 3" || 
+            item.category === "Unidad 4" || 
+            item.subcategory?.includes("Pretérito") ||
+            item.english?.toLowerCase().includes("preterite") ||
+            item.english?.toLowerCase().includes("(past)")
+          ) {
+            chosenTense = "preterite";
+          } else {
+            chosenTense = "present";
+          }
+        }
+
+        const qSpec = generateConjugationQuestion(item, { 
+          tense: chosenTense,
+          excludeVosotros: state.excludeVosotros 
+        });
         if (qSpec) {
           return {
             item,
@@ -1111,6 +1178,9 @@ export default function StudyQuest({
             questionWord: qSpec.verb,
             meaning: qSpec.meaning,
             pronoun: qSpec.pronoun,
+            tense: qSpec.tense,
+            tenseLabel: qSpec.tenseLabel,
+            isReflexive: qSpec.isReflexive,
             correct: qSpec.correct,
             choices: qSpec.choices
           };
@@ -1498,11 +1568,11 @@ export default function StudyQuest({
                     <span className="flashcard-category">Preview New Word (+2 XP)</span>
                     <h3 className="flashcard-term" style={{ fontSize: '2rem' }}>{currentQuestQ.item.spanish}</h3>
                     
-                    {currentQuestQ.item?.category === "Verbs" && (
+                    {isVerbItem(currentQuestQ.item) && (
                       <button 
                         type="button"
                         className="btn btn-secondary btn-sm"
-                        onClick={(e) => { e.stopPropagation(); setCodexVerb(currentQuestQ.item.spanish); }}
+                        onClick={(e) => { e.stopPropagation(); openCodex(currentQuestQ.item); }}
                         style={{ position: 'absolute', top: '16px', right: '16px', padding: '6px 12px', fontSize: '0.75rem', gap: '4px' }}
                       >
                         📖 Codex
@@ -1539,6 +1609,16 @@ export default function StudyQuest({
                 {currentQuestQ.isConjugation ? (
                   <>
                     <div className="quiz-question-lbl">Conjugate the verb for this pronoun:</div>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+                      <span className="badge badge-accent" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
+                        {currentQuestQ.tenseLabel || "Presente"}
+                      </span>
+                      {currentQuestQ.isReflexive && (
+                        <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
+                          Reflexivo (me, te, se, nos, os, se)
+                        </span>
+                      )}
+                    </div>
                     <h3 className="quiz-word" style={{ color: 'var(--primary)' }}>{currentQuestQ.questionWord}</h3>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQuestQ.meaning})</p>
                     <div style={{ display: 'inline-block', background: 'rgba(250, 204, 21, 0.1)', padding: '6px 14px', borderRadius: '16px', color: 'var(--gold)', fontWeight: 'bold', fontSize: '0.9rem' }}>
@@ -1560,11 +1640,11 @@ export default function StudyQuest({
                   </>
                 )}
                 
-                {currentQuestQ.item?.category === "Verbs" && (
+                {isVerbItem(currentQuestQ.item) && (
                   <button 
                     type="button"
                     className="btn btn-secondary btn-sm"
-                    onClick={() => setCodexVerb(currentQuestQ.item.spanish)}
+                    onClick={() => openCodex(currentQuestQ.item)}
                     style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                   >
                     📖 Ver Conjugaciones
@@ -1740,11 +1820,11 @@ export default function StudyQuest({
                       </span>
                       <h3 className="flashcard-term">{practiceCards[practiceCurrentIdx].spanish}</h3>
                       
-                      {practiceCards[practiceCurrentIdx]?.category === "Verbs" && (
+                      {isVerbItem(practiceCards[practiceCurrentIdx]) && (
                         <button 
                           type="button"
                           className="btn btn-secondary btn-sm"
-                          onClick={(e) => { e.stopPropagation(); setCodexVerb(practiceCards[practiceCurrentIdx].spanish); }}
+                          onClick={(e) => { e.stopPropagation(); openCodex(practiceCards[practiceCurrentIdx]); }}
                           style={{ position: 'absolute', top: '16px', right: '16px', padding: '6px 12px', fontSize: '0.75rem', gap: '4px' }}
                         >
                           📖 Codex
@@ -1826,17 +1906,59 @@ export default function StudyQuest({
                   💡 Tip: First time studying this topic? Switch to <strong>Flashcards</strong> above to learn the words first!
                 </p>
 
-                {selectedCategory === "Verbs" && selectedSubcategory !== "Verbs Structured Like Gustar" && (
-                  <div className="form-group" style={{ maxWidth: '280px', margin: '0 auto 20px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
-                    <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Quiz Type</label>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className={`btn ${practiceQuizMode === 'translation' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }} onClick={() => setPracticeQuizMode("translation")}>
-                        Translation
-                      </button>
-                      <button className={`btn ${practiceQuizMode === 'conjugation' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }} onClick={() => setPracticeQuizMode("conjugation")}>
-                        Conjugation
-                      </button>
+                {practiceCards.some(item => isVerbItem(item)) && selectedSubcategory !== "Verbs Structured Like Gustar" && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '380px', margin: '0 auto 20px' }}>
+                    <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+                      <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Quiz Type</label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className={`btn ${practiceQuizMode === 'translation' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }} onClick={() => setPracticeQuizMode("translation")}>
+                          Translation
+                        </button>
+                        <button className={`btn ${practiceQuizMode === 'conjugation' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }} onClick={() => setPracticeQuizMode("conjugation")}>
+                          ⚡ Conjugation
+                        </button>
+                      </div>
                     </div>
+
+                    {practiceQuizMode === 'conjugation' && (
+                      <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)', animation: 'pop-in 0.2s ease-out' }}>
+                        <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Tense Mode</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+                          <button 
+                            type="button"
+                            className={`btn btn-sm ${practiceTense === 'auto' ? 'btn-primary' : 'btn-secondary'}`} 
+                            style={{ fontSize: '0.75rem', padding: '6px' }} 
+                            onClick={() => setPracticeTense("auto")}
+                          >
+                            ⚡ Auto (By Unit)
+                          </button>
+                          <button 
+                            type="button"
+                            className={`btn btn-sm ${practiceTense === 'present' ? 'btn-primary' : 'btn-secondary'}`} 
+                            style={{ fontSize: '0.75rem', padding: '6px' }} 
+                            onClick={() => setPracticeTense("present")}
+                          >
+                            Presente
+                          </button>
+                          <button 
+                            type="button"
+                            className={`btn btn-sm ${practiceTense === 'preterite' ? 'btn-primary' : 'btn-secondary'}`} 
+                            style={{ fontSize: '0.75rem', padding: '6px' }} 
+                            onClick={() => setPracticeTense("preterite")}
+                          >
+                            Pretérito (Past)
+                          </button>
+                          <button 
+                            type="button"
+                            className={`btn btn-sm ${practiceTense === 'both' ? 'btn-primary' : 'btn-secondary'}`} 
+                            style={{ fontSize: '0.75rem', padding: '6px' }} 
+                            onClick={() => setPracticeTense("both")}
+                          >
+                            Mixto (Both)
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1905,6 +2027,16 @@ export default function StudyQuest({
               {practiceQuestions[practiceCurrentIdx]?.isConjugation ? (
                 <div className="quiz-question-card">
                   <div className="quiz-question-lbl">Conjugate the verb for this pronoun:</div>
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+                    <span className="badge badge-accent" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
+                      {practiceQuestions[practiceCurrentIdx].tenseLabel || "Presente"}
+                    </span>
+                    {practiceQuestions[practiceCurrentIdx].isReflexive && (
+                      <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
+                        Reflexivo (me, te, se, nos, os, se)
+                      </span>
+                    )}
+                  </div>
                   <h3 className="quiz-word" style={{ color: 'var(--primary)', fontSize: '2.4rem' }}>{practiceQuestions[practiceCurrentIdx].questionWord}</h3>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({practiceQuestions[practiceCurrentIdx].meaning})</p>
                   <div style={{ display: 'inline-block', background: 'rgba(250, 204, 21, 0.1)', padding: '6px 14px', borderRadius: '16px', color: 'var(--gold)', fontWeight: 'bold', fontSize: '0.9rem' }}>
@@ -1914,7 +2046,7 @@ export default function StudyQuest({
                   <button 
                     type="button"
                     className="btn btn-secondary btn-sm"
-                    onClick={() => setCodexVerb(practiceQuestions[practiceCurrentIdx].item.spanish)}
+                    onClick={() => openCodex(practiceQuestions[practiceCurrentIdx].item)}
                     style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                   >
                     📖 Ver Conjugaciones
@@ -1933,11 +2065,11 @@ export default function StudyQuest({
                   </div>
                   <h3 className="quiz-word">{practiceQuestions[practiceCurrentIdx]?.questionWord}</h3>
                   
-                  {practiceQuestions[practiceCurrentIdx]?.item?.category === "Verbs" && (
+                  {isVerbItem(practiceQuestions[practiceCurrentIdx]?.item) && (
                     <button 
                       type="button"
                       className="btn btn-secondary btn-sm"
-                      onClick={() => setCodexVerb(practiceQuestions[practiceCurrentIdx].item.spanish)}
+                      onClick={() => openCodex(practiceQuestions[practiceCurrentIdx].item)}
                       style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                     >
                       📖 Ver Conjugaciones
@@ -2075,6 +2207,16 @@ export default function StudyQuest({
                   {currentQ.isConjugation ? (
                     <>
                       <div className="quiz-question-lbl">Conjugate the verb for this pronoun:</div>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+                        <span className="badge badge-accent" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
+                          {currentQ.tenseLabel || "Presente"}
+                        </span>
+                        {currentQ.isReflexive && (
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
+                            Reflexivo (me, te, se, nos, os, se)
+                          </span>
+                        )}
+                      </div>
                       <h3 className="quiz-word" style={{ color: 'var(--primary)' }}>{currentQ.questionWord}</h3>
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQ.meaning})</p>
                       <div style={{ display: 'inline-block', background: 'rgba(250, 204, 21, 0.1)', padding: '6px 14px', borderRadius: '16px', color: 'var(--gold)', fontWeight: 'bold', fontSize: '0.9rem' }}>
@@ -2216,19 +2358,69 @@ export default function StudyQuest({
           ------------------------------------------------------------- */}
       {codexVerb && (
         <div className="modal-overlay" style={{ zIndex: 9999 }}>
-          <div className="glass-panel modal-content" style={{ animation: 'pop-in 0.3s ease-out', maxWidth: '400px', width: '90%' }}>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--primary)', marginBottom: '4px' }}>
-              📖 Codex de Conjugación
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-              Present tense forms for verb: <strong>"{codexVerb}"</strong>
-            </p>
+          <div className="glass-panel modal-content" style={{ animation: 'pop-in 0.3s ease-out', maxWidth: '440px', width: '92%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+              <div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '2px' }}>
+                  📖 Codex de Conjugación
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong>
+                </p>
+              </div>
+              <button 
+                className="btn btn-secondary btn-sm" 
+                onClick={() => setCodexVerb(null)}
+                style={{ padding: '4px 10px', fontSize: '0.8rem' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Dual Tense Switcher Tabs */}
+            <div style={{ display: 'flex', gap: '8px', margin: '14px 0 12px', background: 'rgba(0,0,0,0.25)', padding: '4px', borderRadius: '10px' }}>
+              <button
+                type="button"
+                className={`btn btn-sm ${codexTense === 'present' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ flex: 1, fontSize: '0.8rem', padding: '7px 10px', borderRadius: '8px' }}
+                onClick={() => setCodexTense('present')}
+              >
+                Presente
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${codexTense === 'preterite' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ flex: 1, fontSize: '0.8rem', padding: '7px 10px', borderRadius: '8px' }}
+                onClick={() => setCodexTense('preterite')}
+              >
+                Pretérito (Past Tense)
+              </button>
+            </div>
+
+            {/* Reflexive Verb Banner */}
+            {parseVerb(codexVerb).isReflexive && (
+              <div style={{ 
+                background: 'rgba(168, 85, 247, 0.12)', 
+                color: '#c084fc', 
+                border: '1px solid rgba(168, 85, 247, 0.3)', 
+                borderRadius: '8px', 
+                padding: '7px 12px', 
+                fontSize: '0.78rem', 
+                marginBottom: '12px', 
+                textAlign: 'center', 
+                fontWeight: 600 
+              }}>
+                ✨ Verbo Reflexivo (me, te, se, nos, os, se)
+              </div>
+            )}
             
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <th style={{ padding: '8px', color: 'var(--text-secondary)' }}>Pronombre</th>
-                  <th style={{ padding: '8px', color: 'var(--primary)', fontWeight: 'bold' }}>Forma</th>
+                  <th style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>Pronombre</th>
+                  <th style={{ padding: '8px 10px', color: 'var(--primary)', fontWeight: 'bold' }}>
+                    {codexTense === 'preterite' ? 'Forma Pretérito' : 'Forma Presente'}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -2240,13 +2432,20 @@ export default function StudyQuest({
                   { pronoun: "vosotros / vosotras", translation: "you all (Spain)" },
                   { pronoun: "ellos / ellas / ustedes", translation: "they/you all" }
                 ].map((p, idx) => {
-                  const conjugated = conjugate(codexVerb, idx);
+                  const conjugated = conjugate(codexVerb, idx, codexTense);
+                  const isVosotros = idx === 4;
                   return (
-                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <td style={{ padding: '8px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                    <tr 
+                      key={idx} 
+                      style={{ 
+                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        opacity: isVosotros && state.excludeVosotros ? 0.6 : 1
+                      }}
+                    >
+                      <td style={{ padding: '8px 10px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                         {p.pronoun} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({p.translation})</span>
                       </td>
-                      <td style={{ padding: '8px', color: 'var(--text-primary)', fontWeight: 600 }}>
+                      <td style={{ padding: '8px 10px', color: 'var(--text-primary)', fontWeight: 600 }}>
                         {conjugated}
                       </td>
                     </tr>
@@ -2255,7 +2454,7 @@ export default function StudyQuest({
               </tbody>
             </table>
             
-            <button className="btn btn-secondary" onClick={() => setCodexVerb(null)} style={{ marginTop: '20px', width: '100%' }}>
+            <button className="btn btn-secondary" onClick={() => setCodexVerb(null)} style={{ marginTop: '18px', width: '100%' }}>
               Cerrar Codex
             </button>
           </div>

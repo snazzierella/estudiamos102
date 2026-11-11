@@ -1,6 +1,7 @@
-// Spanish 101 Present Tense Conjugation Helper
+// Spanish 101 & 102 Conjugation & Grammar Helper
+// Supports Present and Preterite (Past Tense) indicative and Reflexive Verbs
 
-const PRONOUNS = [
+export const PRONOUNS = [
   { label: "yo (I)", idx: 0 },
   { label: "tú (you, informal)", idx: 1 },
   { label: "él / ella / usted (he/she/you, formal)", idx: 2 },
@@ -9,7 +10,13 @@ const PRONOUNS = [
   { label: "ellos / ellas / ustedes (they/you all)", idx: 5 }
 ];
 
-const IRREGULAR_VERBS = {
+export const REFLEXIVE_PRONOUNS = ["me", "te", "se", "nos", "os", "se"];
+
+// -------------------------------------------------------------
+// PRESENT TENSE IRREGULARS & STEM CHANGERS
+// -------------------------------------------------------------
+export const PRESENT_IRREGULARS = {
+  // Core irregulars
   "ser": ["soy", "eres", "es", "somos", "sois", "son"],
   "estar": ["estoy", "estás", "está", "estamos", "estáis", "están"],
   "ir": ["voy", "vas", "va", "vamos", "vais", "van"],
@@ -36,9 +43,10 @@ const IRREGULAR_VERBS = {
   "poder": ["puedo", "puedes", "puede", "podemos", "podéis", "pueden"],
   "devolver": ["devuelvo", "devuelves", "devuelve", "devolvemos", "devolvéis", "devuelven"],
   "recordar": ["recuerdo", "recuerdas", "recuerda", "recordamos", "recordáis", "recuerdan"],
-  "dormir": ["duermo", "duermas", "duerma", "dormimos", "dormís", "duermen"],
+  "dormir": ["duermo", "duermes", "duerme", "dormimos", "dormís", "duermen"],
   "volver": ["vuelvo", "vuelves", "vuelve", "volvemos", "volvéis", "vuelven"],
   "encontrar": ["encuentro", "encuentras", "encuentra", "encontramos", "encontráis", "encuentran"],
+  "acostar": ["acuesto", "acuestas", "acuesta", "acostamos", "acostáis", "acuestan"],
 
   // Stem changers (e -> ie)
   "cerrar": ["cierro", "cierras", "cierra", "cerramos", "cerráis", "cierran"],
@@ -47,6 +55,8 @@ const IRREGULAR_VERBS = {
   "querer": ["quiero", "quieres", "quiere", "queremos", "queréis", "quieren"],
   "empezar": ["empiezo", "empiezas", "empieza", "empezamos", "empezáis", "empiezan"],
   "sentir": ["siento", "sientes", "siente", "sentimos", "sentís", "sienten"],
+  "sentar": ["siento", "sientas", "sienta", "sentamos", "sentáis", "sientan"],
+  "despertar": ["despierto", "despiertas", "despierta", "despertamos", "despertáis", "despiertan"],
   "entender": ["entiendo", "entiendes", "entiende", "entendemos", "entendéis", "entienden"],
   "pensar": ["pienso", "piensas", "piensa", "pensamos", "pensáis", "piensan"],
   "perder": ["pierdo", "pierdes", "pierde", "perdemos", "perdéis", "pierden"],
@@ -56,95 +66,268 @@ const IRREGULAR_VERBS = {
   "servir": ["sirvo", "sirves", "sirve", "servimos", "servís", "sirven"],
   "reír": ["río", "ríes", "ríe", "reímos", "reís", "ríen"],
   "sonreír": ["sonrío", "sonríes", "sonríe", "sonreímos", "sonreís", "sonríen"],
-  "repetir": ["repito", "repites", "repite", "repetimos", "repetís", "repiten"]
+  "repetir": ["repito", "repites", "repite", "repetimos", "repetís", "repiten"],
+  "vestir": ["visto", "vistes", "viste", "vestimos", "vestís", "visten"],
+  "desvestir": ["desvisto", "desvistes", "desviste", "desvestimos", "desvestís", "desvisten"],
+  "medir": ["mido", "mides", "mide", "medimos", "medís", "miden"]
+};
+
+// -------------------------------------------------------------
+// PRETERITE (PAST TENSE) IRREGULARS & STEM CHANGERS
+// -------------------------------------------------------------
+export const PRETERITE_IRREGULARS = {
+  // Core irregular stems (Unit 4)
+  "ser": ["fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron"],
+  "ir": ["fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron"],
+  "hacer": ["hice", "hiciste", "hizo", "hicimos", "hicisteis", "hicieron"],
+  "tener": ["tuve", "tuviste", "tuvo", "tuvimos", "tuvisteis", "tuvieron"],
+  "estar": ["estuve", "estuviste", "estuvo", "estuvimos", "estuvisteis", "estuvieron"],
+  "poder": ["pude", "pudiste", "pudo", "pudimos", "pudisteis", "pudieron"],
+  "poner": ["puse", "pusiste", "puso", "pusimos", "pusisteis", "pusieron"],
+  "saber": ["supe", "supiste", "supo", "supimos", "supisteis", "supieron"],
+  "venir": ["vine", "viniste", "vino", "vinimos", "vinisteis", "vinieron"],
+  "decir": ["dije", "dijiste", "dijo", "dijimos", "dijisteis", "dijeron"],
+  "traer": ["traje", "trajiste", "trajo", "trajimos", "trajisteis", "trajeron"],
+  "dar": ["di", "diste", "dio", "dimos", "disteis", "dieron"],
+  "ver": ["vi", "viste", "vio", "vimos", "visteis", "vieron"],
+  "querer": ["quise", "quisiste", "quiso", "quisimos", "quisisteis", "quisieron"],
+  "haber": ["hube", "hubiste", "hubo", "hubimos", "hubisteis", "hubieron"],
+
+  // Preterite 3rd-person stem changers (e->i, o->u in Unit 3/4)
+  "pedir": ["pedí", "pediste", "pidió", "pedimos", "pedisteis", "pidieron"],
+  "servir": ["serví", "serviste", "sirvió", "servimos", "servisteis", "sirvieron"],
+  "dormir": ["dormí", "dormiste", "durmió", "dormimos", "dormisteis", "durmieron"],
+  "preferir": ["preferí", "preferiste", "prefirió", "preferimos", "preferisteis", "prefirieron"],
+  "repetir": ["repetí", "repetiste", "repitió", "repetimos", "repetisteis", "repitieron"],
+  "seguir": ["seguí", "seguiste", "siguió", "seguimos", "seguisteis", "siguieron"],
+  "sentir": ["sentí", "sentiste", "sintió", "sentimos", "sentisteis", "sintieron"],
+  "vestir": ["vestí", "vestiste", "vistió", "vestimos", "vestisteis", "vistieron"],
+  "desvestir": ["desvestí", "desvestiste", "desvistió", "desvestimos", "desvestisteis", "desvistieron"],
+  "medir": ["medí", "mediste", "midió", "medimos", "medisteis", "midieron"],
+  "morir": ["morí", "moriste", "murió", "morimos", "moristeis", "murieron"],
+
+  // Orthographic spelling changers in yo form (-car, -gar, -zar in Unit 3)
+  "buscar": ["busqué", "buscaste", "buscó", "buscamos", "buscasteis", "buscaron"],
+  "tocar": ["toqué", "tocaste", "tocó", "tocamos", "tocasteis", "tocaron"],
+  "practicar": ["practiqué", "practicaste", "practicó", "practicamos", "practicasteis", "practicaron"],
+  "sacar": ["saqué", "sacaste", "sacó", "sacamos", "sacasteis", "sacaron"],
+  "pagar": ["pagué", "pagaste", "pagó", "pagamos", "pagasteis", "pagaron"],
+  "llegar": ["llegué", "llegaste", "llegó", "llegamos", "llegasteis", "llegaron"],
+  "jugar": ["jugué", "jugaste", "jugó", "jugamos", "jugasteis", "jugaron"],
+  "almorzar": ["almorcé", "almorzaste", "almorzó", "almorzamos", "almorzasteis", "almorzaron"],
+  "empezar": ["empecé", "empezaste", "empezó", "empezamos", "empezasteis", "empezaron"],
+  "comenzar": ["comencé", "comenzaste", "comenzó", "comenzamos", "comenzasteis", "comenzaron"]
 };
 
 // Endings arrays for regular verbs
-const AR_ENDINGS = ["o", "as", "a", "amos", "áis", "an"];
-const ER_ENDINGS = ["o", "es", "e", "emos", "éis", "en"];
-const IR_ENDINGS = ["o", "es", "e", "imos", "ís", "en"];
+const PRES_AR_ENDINGS = ["o", "as", "a", "amos", "áis", "an"];
+const PRES_ER_ENDINGS = ["o", "es", "e", "emos", "éis", "en"];
+const PRES_IR_ENDINGS = ["o", "es", "e", "imos", "ís", "en"];
 
-export function conjugate(verb, pronounIdx) {
-  const cleanVerb = verb.trim().toLowerCase();
+const PRET_AR_ENDINGS = ["é", "aste", "ó", "amos", "asteis", "aron"];
+const PRET_ER_IR_ENDINGS = ["í", "iste", "ió", "imos", "isteis", "ieron"];
+
+/**
+ * Parses raw verb inputs (including reflexives, slash variants, and multi-word phrases)
+ */
+export function parseVerb(rawVerb) {
+  let cleaned = (rawVerb || "").trim().toLowerCase();
   
-  // 1. Check irregulars dictionary
-  if (IRREGULAR_VERBS[cleanVerb]) {
-    return IRREGULAR_VERBS[cleanVerb][pronounIdx];
+  // Handle slash formats like "lavé / lavaste / lavó"
+  if (cleaned.includes("/")) {
+    const parts = cleaned.split("/").map(p => p.trim());
+    // Guess base infinitive based on the first form
+    const first = parts[0];
+    if (first === "fui") return { base: "ir", isReflexive: false, suffix: "" };
+    if (first === "hice") return { base: "hacer", isReflexive: false, suffix: "" };
+    if (first === "tuve") return { base: "tener", isReflexive: false, suffix: "" };
+    if (first === "estuve") return { base: "estar", isReflexive: false, suffix: "" };
+    if (first === "pude") return { base: "poder", isReflexive: false, suffix: "" };
+    if (first === "puse") return { base: "poner", isReflexive: false, suffix: "" };
+    if (first === "supe") return { base: "saber", isReflexive: false, suffix: "" };
+    if (first === "vine") return { base: "venir", isReflexive: false, suffix: "" };
+    if (first === "dije") return { base: "decir", isReflexive: false, suffix: "" };
+    if (first === "traje") return { base: "traer", isReflexive: false, suffix: "" };
+    if (first === "di") return { base: "dar", isReflexive: false, suffix: "" };
+    if (first === "vi") return { base: "ver", isReflexive: false, suffix: "" };
+    if (first === "lavé") return { base: "lavar", isReflexive: false, suffix: "" };
+    if (first === "barrí") return { base: "barrer", isReflexive: false, suffix: "" };
+    if (first === "sacudí") return { base: "sacudir", isReflexive: false, suffix: "" };
+    if (first === "compré") return { base: "comprar", isReflexive: false, suffix: "" };
+    if (first === "pagué") return { base: "pagar", isReflexive: false, suffix: "" };
+    if (first === "busqué") return { base: "buscar", isReflexive: false, suffix: "" };
+    if (first === "pidió") return { base: "pedir", isReflexive: false, suffix: "" };
+    if (first === "sirvió") return { base: "servir", isReflexive: false, suffix: "" };
+    if (first === "durmió") return { base: "dormir", isReflexive: false, suffix: "" };
+    if (first === "prefirió") return { base: "preferir", isReflexive: false, suffix: "" };
+    if (first === "midió") return { base: "medir", isReflexive: false, suffix: "" };
+    if (first === "repitió") return { base: "repetir", isReflexive: false, suffix: "" };
+    if (first === "siguió") return { base: "seguir", isReflexive: false, suffix: "" };
+    return { base: first, isReflexive: false, suffix: "" };
   }
 
-  // 2. Perform regular conjugation
-  const stem = cleanVerb.slice(0, -2);
-  const ending = cleanVerb.slice(-2);
+  const tokens = cleaned.split(/\s+/);
+  let mainWord = tokens[0];
+  const suffix = tokens.length > 1 ? " " + tokens.slice(1).join(" ") : "";
+  let isReflexive = false;
 
-  if (ending === "ar") {
-    return stem + AR_ENDINGS[pronounIdx];
-  } else if (ending === "er") {
-    return stem + ER_ENDINGS[pronounIdx];
-  } else if (ending === "ir") {
-    return stem + IR_ENDINGS[pronounIdx];
+  if (mainWord.endsWith("se")) {
+    isReflexive = true;
+    mainWord = mainWord.slice(0, -2);
   }
 
-  return cleanVerb; // fallback
+  return { base: mainWord, isReflexive, suffix };
 }
 
-export function generateConjugationQuestion(verbItem, options = {}) {
-  const verb = verbItem.spanish.trim().toLowerCase();
+/**
+ * Checks if a vocabulary item represents a verb (101 verbs, reflexives, preterites)
+ */
+export function isVerbItem(item) {
+  if (!item || !item.spanish) return false;
+  if (item.category === "Verbs" && item.subcategory !== "Verbs Structured Like Gustar") return true;
+  if (item.subcategory?.includes("Verbos Reflexivos") || item.subcategory?.includes("Pretérito")) return true;
   
-  // Skip gustar-type verbs since they conjugate differently
+  const parsed = parseVerb(item.spanish);
+  if (parsed.isReflexive) return true;
+  if (parsed.base.endsWith("ar") || parsed.base.endsWith("er") || parsed.base.endsWith("ir")) {
+    return !item.spanish.toLowerCase().startsWith("el ") && !item.spanish.toLowerCase().startsWith("la ");
+  }
+  return false;
+}
+
+/**
+ * Conjugates any Spanish 101 or 102 verb in Present or Preterite (Past Tense),
+ * automatically prepending reflexive pronouns (me, te, se, nos, os, se) for reflexive verbs.
+ */
+export function conjugate(rawVerb, pronounIdx, tense = "present") {
+  const { base, isReflexive, suffix } = parseVerb(rawVerb);
+  let conjugatedBase = "";
+
+  if (tense === "preterite" || tense === "past") {
+    if (PRETERITE_IRREGULARS[base]) {
+      conjugatedBase = PRETERITE_IRREGULARS[base][pronounIdx];
+    } else {
+      const stem = base.slice(0, -2);
+      const ending = base.slice(-2);
+      if (ending === "ar") {
+        conjugatedBase = stem + PRET_AR_ENDINGS[pronounIdx];
+      } else if (ending === "er" || ending === "ir") {
+        conjugatedBase = stem + PRET_ER_IR_ENDINGS[pronounIdx];
+      } else {
+        conjugatedBase = base;
+      }
+    }
+  } else {
+    // Present tense
+    if (PRESENT_IRREGULARS[base]) {
+      conjugatedBase = PRESENT_IRREGULARS[base][pronounIdx];
+    } else {
+      const stem = base.slice(0, -2);
+      const ending = base.slice(-2);
+      if (ending === "ar") {
+        conjugatedBase = stem + PRES_AR_ENDINGS[pronounIdx];
+      } else if (ending === "er") {
+        conjugatedBase = stem + PRES_ER_ENDINGS[pronounIdx];
+      } else if (ending === "ir") {
+        conjugatedBase = stem + PRES_IR_ENDINGS[pronounIdx];
+      } else {
+        conjugatedBase = base;
+      }
+    }
+  }
+
+  if (isReflexive) {
+    const refPronoun = REFLEXIVE_PRONOUNS[pronounIdx] || "se";
+    return `${refPronoun} ${conjugatedBase}${suffix}`;
+  }
+
+  return `${conjugatedBase}${suffix}`;
+}
+
+/**
+ * Generates an interactive conjugation question for a given verb item.
+ * Automatically handles reflexive pronouns and preterite past tense.
+ */
+export function generateConjugationQuestion(verbItem, options = {}) {
+  const { base, isReflexive, suffix } = parseVerb(verbItem.spanish);
+
+  // Skip gustar-type verbs since they conjugate indirectly
   if (verbItem.subcategory === "Verbs Structured Like Gustar") {
     return null;
   }
 
-  // Filter pronouns based on options
+  // Determine target tense: check options first, then infer from subcategory
+  let targetTense = options.tense || "present";
+  if (!options.tense) {
+    if (verbItem.subcategory?.includes("Pretérito") || verbItem.english?.toLowerCase().includes("preterite") || verbItem.english?.toLowerCase().includes("(past)")) {
+      targetTense = "preterite";
+    }
+  }
+
+  const tenseLabel = targetTense === "preterite" ? "Pretérito (Past Tense)" : "Presente";
+
+  // Filter pronouns based on vosotros preference
   const allowedPronouns = options.excludeVosotros 
     ? PRONOUNS.filter(p => p.idx !== 4) 
     : PRONOUNS;
 
-  // Pick a random pronoun
   const randPronoun = allowedPronouns[Math.floor(Math.random() * allowedPronouns.length)];
-  const correctForm = conjugate(verb, randPronoun.idx);
+  const correctForm = conjugate(verbItem.spanish, randPronoun.idx, targetTense);
 
-  // Generate 3 distractors
+  // Generate 3 plausible distractors
   const distractors = new Set();
   
-  // Distractor source 1: Other endings of the same verb
+  // Distractor source 1: Other pronoun forms of the same verb and tense
   for (let i = 0; i < 6; i++) {
     if (i !== randPronoun.idx && !(options.excludeVosotros && i === 4)) {
-      distractors.add(conjugate(verb, i));
+      distractors.add(conjugate(verbItem.spanish, i, targetTense));
     }
   }
 
-  // Distractor source 2: If we don't have enough, pull endings from a generic verb type
-  const genericEndings = verb.endsWith("ar") ? AR_ENDINGS : (verb.endsWith("er") ? ER_ENDINGS : IR_ENDINGS);
-  const stem = verb.slice(0, -2);
-  genericEndings.forEach((end, idx) => {
-    if (!(options.excludeVosotros && idx === 4)) {
-      distractors.add(stem + end);
+  // Distractor source 2: Forms from the alternate tense (e.g. Present vs Preterite confusion)
+  const alternateTense = targetTense === "preterite" ? "present" : "preterite";
+  for (let i = 0; i < 6; i++) {
+    if (!(options.excludeVosotros && i === 4)) {
+      distractors.add(conjugate(verbItem.spanish, i, alternateTense));
     }
-  });
+  }
 
-  // Convert to array, filter out correct answer
+  // Distractor source 3: Wrong reflexive pronouns for reflexives
+  if (isReflexive) {
+    const wrongReflexive = REFLEXIVE_PRONOUNS[(randPronoun.idx + 2) % 6];
+    distractors.add(`${wrongReflexive} ${conjugate(base, randPronoun.idx, targetTense)}${suffix}`);
+  }
+
   let distractorsArray = Array.from(distractors).filter(form => form !== correctForm);
-
-  // Shuffe and select top 3
   distractorsArray = distractorsArray.sort(() => Math.random() - 0.5).slice(0, 3);
 
-  // Combine and shuffle choices
   const choices = [correctForm, ...distractorsArray].sort(() => Math.random() - 0.5);
 
+  let displayVerb = verbItem.spanish;
+  if (isReflexive) {
+    displayVerb = `${verbItem.spanish} (Verbo Reflexivo)`;
+  }
+
   return {
-    verb: verbItem.spanish,
+    verb: displayVerb,
     meaning: verbItem.english,
     pronoun: randPronoun.label,
+    tense: targetTense,
+    tenseLabel: tenseLabel,
+    isReflexive,
     correct: correctForm,
     choices: choices
   };
 }
 
+// -------------------------------------------------------------
+// FILL IN THE BLANK SENTENCE PRACTICE
+// -------------------------------------------------------------
 export function generateFillInTheBlank(sentenceItem) {
-  const sentence = sentenceItem.spanish.trim();
+  const sentence = (sentenceItem.spanish || "").trim();
   
   const BLANK_SPECS = {
+    // Spanish 101 Present Tense Sentences
     "la mujer come una manzana roja": {
       blanked: "la mujer [_____] una manzana roja",
       correct: "come",

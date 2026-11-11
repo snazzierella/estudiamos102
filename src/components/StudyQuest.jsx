@@ -8,6 +8,7 @@ import {
   isVerbItem,
   parseVerb,
   isGustarVerb,
+  isReciprocalVerb,
   INDIRECT_OBJECT_PRONOUNS
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
@@ -445,24 +446,21 @@ export default function StudyQuest({
   // QUEST CAMPAIGN CORE LOGIC
   // -------------------------------------------------------------
   const buildProgressiveQuizStep = (item, L, allowConjugation = false) => {
-    const isVerb = isVerbItem(item);
-    const isSentence = item.category === "Sentences";
-    
-    if (isSentence) {
-      const fillSpec = generateFillInTheBlank(item);
-      if (fillSpec) {
-        return {
-          item,
-          isCardIntro: false,
-          isConjugation: false,
-          isFillInTheBlank: true,
-          questionWord: fillSpec.sentence,
-          meaning: fillSpec.meaning,
-          correct: fillSpec.correct,
-          choices: fillSpec.choices
-        };
-      }
+    const fillSpec = generateFillInTheBlank(item);
+    if (fillSpec) {
+      return {
+        item,
+        isCardIntro: false,
+        isConjugation: false,
+        isFillInTheBlank: true,
+        questionWord: fillSpec.sentence,
+        meaning: fillSpec.meaning,
+        correct: fillSpec.correct,
+        choices: fillSpec.choices
+      };
     }
+
+    const isVerb = isVerbItem(item);
 
     let format = "mc"; // "mc", "conjugation", "typing"
     
@@ -503,6 +501,8 @@ export default function StudyQuest({
           item,
           isCardIntro: false,
           isConjugation: true,
+          isGustar: qSpec.isGustar,
+          isReciprocal: qSpec.isReciprocal,
           questionWord: qSpec.verb,
           meaning: qSpec.meaning,
           pronoun: qSpec.pronoun,
@@ -1216,6 +1216,7 @@ export default function StudyQuest({
               isCardIntro: false,
               isConjugation: true,
               isGustar: qSpec.isGustar,
+              isReciprocal: qSpec.isReciprocal,
               questionWord: qSpec.verb,
               meaning: qSpec.meaning,
               pronoun: qSpec.pronoun,
@@ -1273,20 +1274,18 @@ export default function StudyQuest({
       const chosen = shuffled.slice(0, 10);
 
       questions = chosen.map(item => {
-        if (item.category === "Sentences") {
-          const fillSpec = generateFillInTheBlank(item);
-          if (fillSpec) {
-            return {
-              item,
-              isCardIntro: false,
-              isConjugation: false,
-              isFillInTheBlank: true,
-              questionWord: fillSpec.sentence,
-              meaning: fillSpec.meaning,
-              correct: fillSpec.correct,
-              choices: fillSpec.choices
-            };
-          }
+        const fillSpec = generateFillInTheBlank(item);
+        if (fillSpec) {
+          return {
+            item,
+            isCardIntro: false,
+            isConjugation: false,
+            isFillInTheBlank: true,
+            questionWord: fillSpec.sentence,
+            meaning: fillSpec.meaning,
+            correct: fillSpec.correct,
+            choices: fillSpec.choices
+          };
         }
 
         const isVerb = isVerbItem(item);
@@ -1322,6 +1321,7 @@ export default function StudyQuest({
               isCardIntro: false,
               isConjugation: true,
               isGustar: qSpec.isGustar,
+              isReciprocal: qSpec.isReciprocal,
               questionWord: qSpec.verb,
               meaning: qSpec.meaning,
               pronoun: qSpec.pronoun,
@@ -1765,11 +1765,15 @@ export default function StudyQuest({
                       <span className="badge badge-accent" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
                         {currentQuestQ.tenseLabel || "Presente"}
                       </span>
-                      {currentQuestQ.isReflexive && (
+                      {currentQuestQ.isReciprocal ? (
+                        <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
+                          🤝 Acción Recíproca ("Each Other")
+                        </span>
+                      ) : currentQuestQ.isReflexive ? (
                         <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
                           Reflexivo (me, te, se, nos, os, se)
                         </span>
-                      )}
+                      ) : null}
                     </div>
                     <h3 className="quiz-word" style={{ color: 'var(--primary)' }}>{currentQuestQ.questionWord}</h3>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQuestQ.meaning})</p>
@@ -2259,11 +2263,15 @@ export default function StudyQuest({
                     <span className="badge badge-accent" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
                       {practiceQuestions[practiceCurrentIdx].tenseLabel || "Presente"}
                     </span>
-                    {practiceQuestions[practiceCurrentIdx].isReflexive && (
+                    {practiceQuestions[practiceCurrentIdx].isReciprocal ? (
+                      <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
+                        🤝 Acción Recíproca ("Each Other")
+                      </span>
+                    ) : practiceQuestions[practiceCurrentIdx].isReflexive ? (
                       <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
                         Reflexivo (me, te, se, nos, os, se)
                       </span>
-                    )}
+                    ) : null}
                     {practiceQuestions[practiceCurrentIdx].isGustar && (
                       <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.15)', color: 'var(--gold)', borderColor: 'rgba(234, 179, 8, 0.3)' }}>
                         ✨ Tipo Gustar (gusta vs gustan)
@@ -2450,11 +2458,15 @@ export default function StudyQuest({
                         <span className="badge badge-accent" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
                           {currentQ.tenseLabel || "Presente"}
                         </span>
-                        {currentQ.isReflexive && (
+                        {currentQ.isReciprocal ? (
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
+                            🤝 Acción Recíproca ("Each Other")
+                          </span>
+                        ) : currentQ.isReflexive ? (
                           <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
                             Reflexivo (me, te, se, nos, os, se)
                           </span>
-                        )}
+                        ) : null}
                       </div>
                       <h3 className="quiz-word" style={{ color: 'var(--primary)' }}>{currentQ.questionWord}</h3>
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQ.meaning})</p>
@@ -2636,8 +2648,22 @@ export default function StudyQuest({
               </button>
             </div>
 
-            {/* Reflexive Verb Banner */}
-            {parseVerb(codexVerb).isReflexive && (
+            {/* Reflexive or Reciprocal Verb Banner */}
+            {isReciprocalVerb(codexVerb) ? (
+              <div style={{ 
+                background: 'rgba(236, 72, 153, 0.12)', 
+                color: '#f472b6', 
+                border: '1px solid rgba(236, 72, 153, 0.3)', 
+                borderRadius: '8px', 
+                padding: '7px 12px', 
+                fontSize: '0.78rem', 
+                marginBottom: '12px', 
+                textAlign: 'center', 
+                fontWeight: 600 
+              }}>
+                🤝 Verbo Recíproco (Acción Mutua: "Each Other")
+              </div>
+            ) : parseVerb(codexVerb).isReflexive ? (
               <div style={{ 
                 background: 'rgba(168, 85, 247, 0.12)', 
                 color: '#c084fc', 
@@ -2651,7 +2677,7 @@ export default function StudyQuest({
               }}>
                 ✨ Verbo Reflexivo (me, te, se, nos, os, se)
               </div>
-            )}
+            ) : null}
             
             {isGustarVerb(codexVerb) ? (
               <div>
@@ -2725,6 +2751,98 @@ export default function StudyQuest({
                     })}
                   </tbody>
                 </table>
+              </div>
+            ) : isReciprocalVerb(codexVerb) ? (
+              <div>
+                <div style={{ 
+                  background: 'rgba(236, 72, 153, 0.12)', 
+                  border: '1px solid rgba(236, 72, 153, 0.35)', 
+                  borderRadius: '10px', 
+                  padding: '10px 12px', 
+                  fontSize: '0.82rem', 
+                  marginBottom: '14px', 
+                  color: '#fbcfe8',
+                  lineHeight: '1.45'
+                }}>
+                  🤝 <strong>¡Regla de los Verbos Recíprocos! (Acción Mutua: "Each Other")</strong>
+                  <br />
+                  Las acciones recíprocas describen acciones que dos o más personas se hacen <strong>mutuamente</strong>.
+                  <br />
+                  Por definición, <strong>solo se conjugan en las personas del PLURAL</strong>:
+                </div>
+
+                {/* Plural Conjugation Table */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left', marginBottom: '14px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                      <th style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>Pronombre Plural</th>
+                      <th style={{ padding: '8px 10px', color: '#f472b6', fontWeight: 'bold' }}>
+                        {codexTense === 'preterite' ? 'Forma Pretérito (Acción mutua pasada)' : 'Forma Presente (Acción mutua)'}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { pronoun: "nosotros / nosotras", translation: "we — each other", idx: 3 },
+                      { pronoun: "vosotros / vosotras", translation: "you all — each other (Spain)", idx: 4 },
+                      { pronoun: "ellos / ellas / ustedes", translation: "they / you all — each other", idx: 5 }
+                    ].map((p) => {
+                      const conjugated = conjugate(codexVerb, p.idx, codexTense);
+                      const isVosotros = p.idx === 4;
+                      return (
+                        <tr 
+                          key={p.idx} 
+                          style={{ 
+                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                            opacity: isVosotros && state.excludeVosotros ? 0.6 : 1
+                          }}
+                        >
+                          <td style={{ padding: '8px 10px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                            {p.pronoun} <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>({p.translation})</span>
+                          </td>
+                          <td style={{ padding: '8px 10px', color: 'var(--text-primary)', fontWeight: 600 }}>
+                            <span style={{ color: '#f472b6' }}>{conjugated}</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+
+                {/* Direct Object Callout */}
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
+                  padding: '12px',
+                  fontSize: '0.82rem',
+                  lineHeight: '1.5'
+                }}>
+                  <h4 style={{ color: 'var(--gold)', fontSize: '0.88rem', margin: '0 0 6px 0', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    ❓ ¿Por qué no existe "yo me beso"? (El Objeto Directo)
+                  </h4>
+                  <p style={{ color: 'var(--text-secondary)', margin: '0 0 10px 0' }}>
+                    Decir <em>"me beso"</em> significaría literalmente <em>"I kiss myself"</em>. Para una acción individual hacia otra persona, el verbo ya no es recíproco ni reflexivo: es un verbo transitivo que toma un <strong>Objeto Directo</strong>:
+                  </p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                      <strong style={{ color: 'var(--primary)' }}>1. Con "a" personal:</strong> <em>Yo beso <u>a mi abuela</u>.</em> / <em>Tú ayudas <u>a tus compañeros</u>.</em>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                      <strong style={{ color: 'var(--accent)' }}>2. Con Pronombre de Objeto Directo:</strong> <em>Yo <u>la</u> beso.</em> / <em>Él <u>me</u> besa.</em> 
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>
+                        (En <em>"Él me besa"</em>, <em>me</em> es el objeto directo [a mí], no un pronombre reflexivo)
+                      </span>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                      <strong style={{ color: 'var(--gold)' }}>3. Con partes del cuerpo o ropa:</strong> <em>Me lavo <u>las manos</u>.</em> / <em>Se cepilla <u>los dientes</u>.</em>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>
+                        (Aquí <em>las manos</em> y <em>los dientes</em> son el objeto directo)
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>

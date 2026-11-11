@@ -69,7 +69,9 @@ export const PRESENT_IRREGULARS = {
   "repetir": ["repito", "repites", "repite", "repetimos", "repetís", "repiten"],
   "vestir": ["visto", "vistes", "viste", "vestimos", "vestís", "visten"],
   "desvestir": ["desvisto", "desvistes", "desviste", "desvestimos", "desvestís", "desvisten"],
-  "medir": ["mido", "mides", "mide", "medimos", "medís", "miden"]
+  "medir": ["mido", "mides", "mide", "medimos", "medís", "miden"],
+  "despedir": ["despido", "despides", "despide", "despedimos", "despedís", "despiden"],
+  "reunir": ["reúno", "reúnes", "reúne", "reunimos", "reunís", "reúnen"]
 };
 
 // -------------------------------------------------------------
@@ -105,8 +107,11 @@ export const PRETERITE_IRREGULARS = {
   "desvestir": ["desvestí", "desvestiste", "desvistió", "desvestimos", "desvestisteis", "desvistieron"],
   "medir": ["medí", "mediste", "midió", "medimos", "medisteis", "midieron"],
   "morir": ["morí", "moriste", "murió", "morimos", "moristeis", "murieron"],
+  "despedir": ["despedí", "despediste", "despidió", "despedimos", "despedisteis", "despidieron"],
+  "reunir": ["reuní", "reuniste", "reunió", "reunimos", "reunisteis", "reunieron"],
 
   // Orthographic spelling changers in yo form (-car, -gar, -zar in Unit 3)
+  "abrazar": ["abracé", "abrazaste", "abrazó", "abrazamos", "abrazasteis", "abrazaron"],
   "buscar": ["busqué", "buscaste", "buscó", "buscamos", "buscasteis", "buscaron"],
   "tocar": ["toqué", "tocaste", "tocó", "tocamos", "tocasteis", "tocaron"],
   "practicar": ["practiqué", "practicaste", "practicó", "practicamos", "practicasteis", "practicaron"],
@@ -245,13 +250,83 @@ export function isGustarVerb(itemOrStr) {
   return GUSTAR_VERBS.includes(base);
 }
 
+// -------------------------------------------------------------
+// RECIPROCAL VERBS (Acciones Mutuas: "Each Other")
+// In Spanish, reciprocal verbs describe mutual actions between two or more
+// people. They ONLY exist in plural forms (nosotros, vosotros, ellos/ellas/ustedes).
+// Singular forms (e.g., "yo me beso") are unnatural and require a Direct Object.
+// -------------------------------------------------------------
+export const RECIPROCAL_VERBS = [
+  "abrazarse",
+  "ayudarse",
+  "besarse",
+  "conocerse",
+  "despedirse",
+  "divorciarse",
+  "mirarse",
+  "pelearse",
+  "reunirse",
+  "turnarse",
+  "saludarse",
+  "escribirse",
+  "hablarse",
+  "abrazar",
+  "ayudar",
+  "besar",
+  "conocer",
+  "despedir",
+  "divorciar",
+  "pelear",
+  "reunir",
+  "turnar",
+  "saludar",
+  "escribir"
+];
+
+export function isReciprocalVerb(itemOrStr) {
+  if (!itemOrStr) return false;
+  if (typeof itemOrStr === "object") {
+    // Exclude reflexive actions with specific object or prepositional phrase like "mirarse en el espejo"
+    if (itemOrStr.spanish?.includes("en el espejo") || itemOrStr.english?.toLowerCase().includes("oneself")) {
+      return false;
+    }
+    if (itemOrStr.subcategory?.includes("Recíproco")) {
+      const parsed = parseVerb(itemOrStr.spanish);
+      if (RECIPROCAL_VERBS.includes(parsed.base) || RECIPROCAL_VERBS.includes(itemOrStr.spanish.toLowerCase().trim())) {
+        return true;
+      }
+      if (itemOrStr.english?.toLowerCase().includes("each other") || itemOrStr.english?.toLowerCase().includes("one another")) {
+        return true;
+      }
+      return false;
+    }
+    if (itemOrStr.english?.toLowerCase().includes("each other") || itemOrStr.english?.toLowerCase().includes("one another")) {
+      return true;
+    }
+    const parsed = parseVerb(itemOrStr.spanish);
+    return RECIPROCAL_VERBS.includes(parsed.base) || RECIPROCAL_VERBS.includes(itemOrStr.spanish.toLowerCase().trim());
+  }
+
+  const str = String(itemOrStr).toLowerCase().trim();
+  if (str.includes("en el espejo")) return false;
+  const parsed = parseVerb(str);
+  return RECIPROCAL_VERBS.includes(parsed.base) || RECIPROCAL_VERBS.includes(str);
+}
+
 /**
- * Checks if a vocabulary item represents a verb (101 verbs, reflexives, preterites)
+ * Checks if a vocabulary item represents a verb (101 verbs, reflexives, preterites, reciprocals)
  */
 export function isVerbItem(item) {
   if (!item || !item.spanish) return false;
   if (item.category === "Verbs") return true;
-  if (item.subcategory?.includes("Verbos Reflexivos") || item.subcategory?.includes("Pretérito")) return true;
+  if (
+    item.subcategory?.includes("Verbos Reflexivos") || 
+    item.subcategory?.includes("Pretérito") ||
+    item.subcategory?.includes("Recíproco") ||
+    isReciprocalVerb(item)
+  ) {
+    return true;
+  }
   
   const parsed = parseVerb(item.spanish);
   if (parsed.isReflexive) return true;
@@ -443,57 +518,93 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     };
   }
 
+  const isReciprocal = isReciprocalVerb(verbItem);
   const { base, isReflexive, suffix } = parseVerb(verbItem.spanish);
 
-  // Filter pronouns based on vosotros preference
-  const allowedPronouns = options.excludeVosotros 
+  // Filter pronouns based on vosotros preference and reciprocal constraints
+  let allowedPronouns = options.excludeVosotros 
     ? PRONOUNS.filter(p => p.idx !== 4) 
     : PRONOUNS;
+
+  if (isReciprocal) {
+    // Reciprocal actions describe mutual interactions ("each other"),
+    // which strictly requires two or more subjects (plural pronouns only: nosotros, vosotros, ellos).
+    // Singular forms like "yo me beso" ("I kiss myself") are unnatural and avoided.
+    allowedPronouns = allowedPronouns.filter(p => p.idx === 3 || p.idx === 4 || p.idx === 5);
+  }
 
   const randPronoun = allowedPronouns[Math.floor(Math.random() * allowedPronouns.length)];
   const correctForm = conjugate(verbItem.spanish, randPronoun.idx, targetTense);
 
+  let pronounLabel = randPronoun.label;
+  if (isReciprocal) {
+    if (randPronoun.idx === 3) pronounLabel = "nosotros / nosotras (we — each other)";
+    else if (randPronoun.idx === 4) pronounLabel = "vosotros / vosotras (you all — each other, Spain)";
+    else if (randPronoun.idx === 5) pronounLabel = "ellos / ellas / ustedes (they/you all — each other)";
+  }
+
   // Generate 3 plausible distractors
   const distractors = new Set();
-  
-  // Distractor source 1: Other pronoun forms of the same verb and tense
-  for (let i = 0; i < 6; i++) {
-    if (i !== randPronoun.idx && !(options.excludeVosotros && i === 4)) {
-      distractors.add(conjugate(verbItem.spanish, i, targetTense));
-    }
-  }
-
-  // Distractor source 2: Forms from the alternate tense (e.g. Present vs Preterite confusion)
   const alternateTense = targetTense === "preterite" ? "present" : "preterite";
-  for (let i = 0; i < 6; i++) {
-    if (!(options.excludeVosotros && i === 4)) {
-      distractors.add(conjugate(verbItem.spanish, i, alternateTense));
+
+  if (isReciprocal) {
+    // Only plural distractors (nosotros, vosotros, ellos)
+    const pluralIndices = options.excludeVosotros ? [3, 5] : [3, 4, 5];
+    for (const pIdx of pluralIndices) {
+      if (pIdx !== randPronoun.idx) {
+        distractors.add(conjugate(verbItem.spanish, pIdx, targetTense));
+      }
+    }
+    for (const pIdx of pluralIndices) {
+      distractors.add(conjugate(verbItem.spanish, pIdx, alternateTense));
+    }
+    // Plural wrong reciprocal pronoun (e.g. "se besamos" or "nos besan")
+    const wrongReflexive = randPronoun.idx === 3 ? "se" : "nos";
+    distractors.add(`${wrongReflexive} ${conjugate(base, randPronoun.idx, targetTense)}${suffix}`);
+    // Bare plural verb without reciprocal pronoun
+    distractors.add(`${conjugate(base, randPronoun.idx, targetTense)}${suffix}`);
+  } else {
+    // Distractor source 1: Other pronoun forms of the same verb and tense
+    for (let i = 0; i < 6; i++) {
+      if (i !== randPronoun.idx && !(options.excludeVosotros && i === 4)) {
+        distractors.add(conjugate(verbItem.spanish, i, targetTense));
+      }
+    }
+
+    // Distractor source 2: Forms from the alternate tense (e.g. Present vs Preterite confusion)
+    for (let i = 0; i < 6; i++) {
+      if (!(options.excludeVosotros && i === 4)) {
+        distractors.add(conjugate(verbItem.spanish, i, alternateTense));
+      }
+    }
+
+    // Distractor source 3: Wrong reflexive pronouns for reflexives
+    if (isReflexive) {
+      const wrongReflexive = REFLEXIVE_PRONOUNS[(randPronoun.idx + 2) % 6];
+      distractors.add(`${wrongReflexive} ${conjugate(base, randPronoun.idx, targetTense)}${suffix}`);
     }
   }
 
-  // Distractor source 3: Wrong reflexive pronouns for reflexives
-  if (isReflexive) {
-    const wrongReflexive = REFLEXIVE_PRONOUNS[(randPronoun.idx + 2) % 6];
-    distractors.add(`${wrongReflexive} ${conjugate(base, randPronoun.idx, targetTense)}${suffix}`);
-  }
-
-  let distractorsArray = Array.from(distractors).filter(form => form !== correctForm);
+  let distractorsArray = Array.from(distractors).filter(form => form && form !== correctForm);
   distractorsArray = distractorsArray.sort(() => Math.random() - 0.5).slice(0, 3);
 
   const choices = [correctForm, ...distractorsArray].sort(() => Math.random() - 0.5);
 
   let displayVerb = verbItem.spanish;
-  if (isReflexive) {
+  if (isReciprocal) {
+    displayVerb = `${verbItem.spanish} (Acción Recíproca: "each other")`;
+  } else if (isReflexive) {
     displayVerb = `${verbItem.spanish} (Verbo Reflexivo)`;
   }
 
   return {
     verb: displayVerb,
     meaning: verbItem.english,
-    pronoun: randPronoun.label,
+    pronoun: pronounLabel,
     tense: targetTense,
     tenseLabel: tenseLabel,
     isReflexive,
+    isReciprocal,
     isGustar: false,
     questionWord: displayVerb,
     correct: correctForm,
@@ -634,6 +745,68 @@ export function generateFillInTheBlank(sentenceItem) {
       correct: "duerme",
       choices: ["duermo", "duermes", "duerme", "dormimos"],
       type: "verb"
+    },
+
+    // Spanish 102 Reciprocal and Direct Object Sentences
+    "los dos amigos se abrazan cuando se ven": {
+      blanked: "los dos amigos [_____] cuando se ven",
+      correct: "se abrazan",
+      choices: ["se abrazan", "nos abrazamos", "me abrazo", "se abraza"],
+      type: "verb"
+    },
+    "nosotros nos ayudamos con la tarea de español": {
+      blanked: "nosotros [_____] con la tarea de español",
+      correct: "nos ayudamos",
+      choices: ["nos ayudamos", "se ayudan", "me ayudo", "ayudamos"],
+      type: "verb"
+    },
+    "ellos se besan antes de salir": {
+      blanked: "ellos [_____] antes de salir",
+      correct: "se besan",
+      choices: ["se besan", "nos besamos", "me beso", "te besas"],
+      type: "verb"
+    },
+    "mis padres se conocieron en la universidad": {
+      blanked: "mis padres [_____] en la universidad",
+      correct: "se conocieron",
+      choices: ["se conocieron", "nos conocimos", "me conocí", "se conocen"],
+      type: "verb"
+    },
+    "yo me lavo las manos antes de comer": {
+      blanked: "yo [_____] las manos antes de comer",
+      correct: "me lavo",
+      choices: ["me lavo", "te lavas", "se lava", "nos lavamos"],
+      type: "verb"
+    },
+    "yo me lavo las manos antes de comer (obj)": {
+      blanked: "yo me lavo [_____] antes de comer",
+      correct: "las manos",
+      choices: ["las manos", "los dientes", "la chaqueta", "el pelo"],
+      type: "noun"
+    },
+    "él se cepilla los dientes después de cenar": {
+      blanked: "él [_____] los dientes después de cenar",
+      correct: "se cepilla",
+      choices: ["se cepilla", "me cepillo", "te cepillas", "se cepillan"],
+      type: "verb"
+    },
+    "ella se pone la chaqueta porque hace frío": {
+      blanked: "ella [_____] la chaqueta porque hace frío",
+      correct: "se pone",
+      choices: ["se pone", "me pongo", "te pones", "se ponen"],
+      type: "verb"
+    },
+    "yo beso a mi madre todas las mañanas": {
+      blanked: "yo beso [_____] mi madre todas las mañanas",
+      correct: "a",
+      choices: ["a", "de", "en", "con"],
+      type: "preposition"
+    },
+    "nosotros ayudamos a nuestros amigos": {
+      blanked: "nosotros ayudamos [_____] nuestros amigos",
+      correct: "a",
+      choices: ["a", "de", "con", "por"],
+      type: "preposition"
     }
   };
 
@@ -642,6 +815,8 @@ export function generateFillInTheBlank(sentenceItem) {
     targetKey = "la mujer come una manzana roja (adj)";
   } else if (sentence === "el muchacho tiene un perro negro" && Math.random() > 0.5) {
     targetKey = "el muchacho tiene un perro negro (adj)";
+  } else if (sentence === "yo me lavo las manos antes de comer" && Math.random() > 0.5) {
+    targetKey = "yo me lavo las manos antes de comer (obj)";
   }
 
   const spec = BLANK_SPECS[targetKey];

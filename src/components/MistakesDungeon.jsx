@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import vocabularyData from '../data/vocabulary.json';
-import { generateConjugationQuestion } from '../utils/conjugationHelper';
+import { generateConjugationQuestion, isPreteriteTense } from '../utils/conjugationHelper';
 import { formatEnglishPrompt } from '../utils/difficultyMapper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { ArrowLeft, Trophy, Volume2 } from 'lucide-react';
@@ -106,6 +106,11 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
         setQuestion({
           item,
           isConjugation: true,
+          isGustar: qSpec.isGustar,
+          isReciprocal: qSpec.isReciprocal,
+          isReflexive: qSpec.isReflexive,
+          tense: qSpec.tense,
+          tenseLabel: qSpec.tenseLabel,
           questionWord: qSpec.verb,
           meaning: qSpec.meaning,
           pronoun: qSpec.pronoun,
@@ -394,30 +399,108 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
         </div>
 
         {/* Ghost visual box */}
-        <div style={{ background: 'rgba(0,0,0,0.15)', padding: '24px', borderRadius: '16px', textAlign: 'center', marginBottom: '24px', border: '1px solid rgba(255,255,255,0.02)' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '10px', animation: 'float 2.5s ease-in-out infinite' }}>👻</div>
-          <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: '4px' }}>
-            {isConjugation ? "Present Conjugation" : (isTyping ? "Write Translation" : "Translate Word")}
-          </div>
-          
-          {isConjugation ? (
-            <div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Conjugate: <strong>{currentQ.questionWord}</strong> ({currentQ.meaning})</div>
-              <div style={{ fontSize: '1.8rem', fontFamily: 'var(--font-display)', color: 'var(--primary)', fontWeight: '800', marginTop: '6px' }}>{currentQ.pronoun} [______]</div>
+        {(() => {
+          const isPret = isConjugation && isPreteriteTense(currentQ);
+          return (
+            <div style={{ 
+              background: 'rgba(0,0,0,0.15)', 
+              padding: '24px', 
+              borderRadius: '16px', 
+              textAlign: 'center', 
+              marginBottom: '24px', 
+              borderTop: isConjugation
+                ? (isPret ? '4px solid #f97316' : '4px solid #10b981')
+                : '1px solid rgba(255,255,255,0.02)',
+              borderLeft: '1px solid rgba(255,255,255,0.02)',
+              borderRight: '1px solid rgba(255,255,255,0.02)',
+              borderBottom: '1px solid rgba(255,255,255,0.02)',
+              boxShadow: isConjugation
+                ? (isPret ? '0 0 20px rgba(249, 115, 22, 0.2)' : '0 0 20px rgba(16, 185, 129, 0.2)')
+                : 'none'
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '10px', animation: 'float 2.5s ease-in-out infinite' }}>👻</div>
+              
+              {isConjugation ? (
+                <div>
+                  {/* Glowing High-Noticeability Tense Banner */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '5px 14px',
+                      borderRadius: '18px',
+                      background: isPret 
+                        ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15))' 
+                        : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
+                      border: isPret ? '2px solid #f97316' : '2px solid #10b981',
+                      color: isPret ? '#fed7aa' : '#a7f3d0',
+                      fontWeight: '800',
+                      fontSize: '0.85rem',
+                      letterSpacing: '0.04em',
+                      boxShadow: isPret ? '0 0 12px rgba(249, 115, 22, 0.35)' : '0 0 12px rgba(16, 185, 129, 0.35)',
+                      textTransform: 'uppercase'
+                    }}>
+                      <span>{isPret ? '⏳' : '⚡'}</span>
+                      <span>TIEMPO: <strong>{isPret ? 'PRETÉRITO (PAST TENSE)' : 'PRESENTE (PRESENT TENSE)'}</strong></span>
+                    </div>
+                  </div>
+
+                  <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    Conjugate in <strong style={{ color: isPret ? '#fb923c' : '#34d399', textDecoration: 'underline' }}>
+                      {isPret ? 'PAST TENSE (Pretérito)' : 'PRESENT TENSE (Presente)'}
+                    </strong>:
+                  </div>
+
+                  <div style={{ fontSize: '1.2rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>
+                    {currentQ.questionWord} <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic', fontWeight: 'normal' }}>({currentQ.meaning})</span>
+                  </div>
+
+                  <div style={{ 
+                    fontSize: '1.6rem', 
+                    fontFamily: 'var(--font-display)', 
+                    color: 'var(--primary)', 
+                    fontWeight: '800', 
+                    marginTop: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px'
+                  }}>
+                    <span>{currentQ.pronoun} [______]</span>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      background: isPret ? '#f97316' : '#10b981',
+                      color: '#ffffff',
+                      fontWeight: '800',
+                      letterSpacing: '0.04em'
+                    }}>
+                      {isPret ? 'PASADO' : 'PRESENTE'}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: '4px' }}>
+                    {isTyping ? "Write Translation" : "Translate Word"}
+                  </div>
+                  <div>
+                    <div className="quiz-word" style={{ fontSize: '2rem' }}>{currentQ.questionWord}</div>
+                    <button 
+                      onClick={() => speakSpanish(currentItem.spanish)}
+                      style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '8px' }}
+                      title="Speak Pronunciation"
+                    >
+                      <Volume2 size={14} /> Pronounce
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
-          ) : (
-            <div>
-              <div className="quiz-word" style={{ fontSize: '2rem' }}>{currentQ.questionWord}</div>
-              <button 
-                onClick={() => speakSpanish(currentItem.spanish)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '8px' }}
-                title="Speak Pronunciation"
-              >
-                <Volume2 size={14} /> Pronounce
-              </button>
-            </div>
-          )}
-        </div>
+          );
+        })()}
 
         {/* Input/Choices Area */}
         {isTyping ? (
@@ -491,7 +574,7 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
               {selectedChoice === question.correct || (isTyping && compareAnswers(question.correct, typedAnswer)) ? (
                 <span>✨ ¡Excelente! Correct answer: <strong>{question.correct}</strong></span>
               ) : (
-                <span>⚠️ Incorrect! Correct form: <strong>{question.correct}</strong></span>
+                <span>⚠️ Incorrect! Correct {isConjugation ? `form (${isPreteriteTense(question) ? 'Pretérito / Past' : 'Presente'}):` : 'translation:'} <strong>{question.correct}</strong></span>
               )}
             </div>
 

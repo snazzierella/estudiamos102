@@ -9,6 +9,7 @@ import {
   parseVerb,
   isGustarVerb,
   isReciprocalVerb,
+  isPreteriteTense,
   INDIRECT_OBJECT_PRONOUNS
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
@@ -1759,14 +1760,46 @@ export default function StudyQuest({
             </div>
           ) : (
             <div>
-              <div className="quiz-question-card">
+              <div 
+                className="quiz-question-card"
+                style={currentQuestQ.isConjugation ? {
+                  borderTop: isPreteriteTense(currentQuestQ) ? '4px solid #f97316' : '4px solid #10b981',
+                  boxShadow: isPreteriteTense(currentQuestQ) ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
+                } : undefined}
+              >
                 {currentQuestQ.isConjugation ? (
                   <>
-                    <div className="quiz-question-lbl">Conjugate the verb for this pronoun:</div>
+                    {/* High-Noticeability Tense Banner */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '6px 16px',
+                        borderRadius: '20px',
+                        background: isPreteriteTense(currentQuestQ) 
+                          ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15))' 
+                          : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
+                        border: isPreteriteTense(currentQuestQ) ? '2px solid #f97316' : '2px solid #10b981',
+                        color: isPreteriteTense(currentQuestQ) ? '#fed7aa' : '#a7f3d0',
+                        fontWeight: '800',
+                        fontSize: '0.88rem',
+                        letterSpacing: '0.04em',
+                        boxShadow: isPreteriteTense(currentQuestQ) ? '0 0 14px rgba(249, 115, 22, 0.35)' : '0 0 14px rgba(16, 185, 129, 0.35)',
+                        textTransform: 'uppercase'
+                      }}>
+                        <span>{isPreteriteTense(currentQuestQ) ? '⏳' : '⚡'}</span>
+                        <span>TIEMPO: <strong>{isPreteriteTense(currentQuestQ) ? 'PRETÉRITO (PAST TENSE)' : 'PRESENTE (PRESENT TENSE)'}</strong></span>
+                      </div>
+                    </div>
+
+                    <div className="quiz-question-lbl" style={{ marginBottom: '8px' }}>
+                      Conjugate in <strong style={{ color: isPreteriteTense(currentQuestQ) ? '#fb923c' : '#34d399', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+                        {isPreteriteTense(currentQuestQ) ? 'PAST TENSE (Pretérito)' : 'PRESENT TENSE (Presente)'}
+                      </strong> for:
+                    </div>
+
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                      <span className="badge badge-accent" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
-                        {currentQuestQ.tenseLabel || "Presente"}
-                      </span>
                       {currentQuestQ.isReciprocal ? (
                         <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
                           🤝 Acción Recíproca ("Each Other")
@@ -1777,10 +1810,33 @@ export default function StudyQuest({
                         </span>
                       ) : null}
                     </div>
+
                     <h3 className="quiz-word" style={{ color: 'var(--primary)' }}>{currentQuestQ.questionWord}</h3>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQuestQ.meaning})</p>
-                    <div style={{ display: 'inline-block', background: 'rgba(250, 204, 21, 0.1)', padding: '6px 14px', borderRadius: '16px', color: 'var(--gold)', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                      Pronoun: {currentQuestQ.pronoun}
+                    
+                    <div style={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      gap: '8px',
+                      background: 'rgba(250, 204, 21, 0.1)', 
+                      padding: '6px 14px', 
+                      borderRadius: '16px', 
+                      color: 'var(--gold)', 
+                      fontWeight: 'bold', 
+                      fontSize: '0.9rem' 
+                    }}>
+                      <span>Pronoun: {currentQuestQ.pronoun}</span>
+                      <span style={{
+                        fontSize: '0.7rem',
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        background: isPreteriteTense(currentQuestQ) ? '#f97316' : '#10b981',
+                        color: '#ffffff',
+                        fontWeight: '800',
+                        letterSpacing: '0.04em'
+                      }}>
+                        {isPreteriteTense(currentQuestQ) ? 'PASADO' : 'PRESENTE'}
+                      </span>
                     </div>
                   </>
                 ) : currentQuestQ.isFillInTheBlank ? (
@@ -1899,7 +1955,11 @@ export default function StudyQuest({
                 >
                   {isQuestUserCorrect 
                     ? `¡Correcto! ${comboCount >= 3 ? `Combo Streak ${comboCount}! ` : ''}` 
-                    : `Incorrecto! Correct translation: "${currentQuestQ.correct}"`
+                    : currentQuestQ.isConjugation
+                      ? `Incorrecto. Correct form (${isPreteriteTense(currentQuestQ) ? 'Pretérito / Past' : 'Presente'}): "${currentQuestQ.correct}"`
+                      : currentQuestQ.isFillInTheBlank
+                        ? `Incorrecto. Correct word: "${currentQuestQ.correct}"`
+                        : `Incorrecto! Correct translation: "${currentQuestQ.correct}"`
                   }
                   <button className="btn btn-primary" onClick={handleQuestNext} style={{ width: '100%', marginTop: '16px' }}>
                     {questCurrentIdx === questQuestions.length - 1 ? "Finish Quest" : "Next Challenge"} <ArrowRight size={16} />
@@ -2110,35 +2170,63 @@ export default function StudyQuest({
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
                           <button 
                             type="button"
-                            className={`btn btn-sm ${practiceTense === 'auto' ? 'btn-primary' : 'btn-secondary'}`} 
-                            style={{ fontSize: '0.75rem', padding: '6px' }} 
+                            className="btn btn-sm"
+                            style={{ 
+                              fontSize: '0.75rem', 
+                              padding: '6px',
+                              background: practiceTense === 'auto' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                              color: practiceTense === 'auto' ? '#fff' : 'var(--text-secondary)',
+                              borderColor: practiceTense === 'auto' ? 'var(--primary)' : 'transparent'
+                            }} 
                             onClick={() => setPracticeTense("auto")}
                           >
-                            ⚡ Auto (By Unit)
+                            🎯 Auto (By Unit)
                           </button>
                           <button 
                             type="button"
-                            className={`btn btn-sm ${practiceTense === 'present' ? 'btn-primary' : 'btn-secondary'}`} 
-                            style={{ fontSize: '0.75rem', padding: '6px' }} 
+                            className="btn btn-sm"
+                            style={{ 
+                              fontSize: '0.75rem', 
+                              padding: '6px',
+                              background: practiceTense === 'present' ? '#10b981' : 'rgba(255,255,255,0.05)',
+                              color: practiceTense === 'present' ? '#fff' : 'var(--text-secondary)',
+                              borderColor: practiceTense === 'present' ? '#34d399' : 'transparent',
+                              boxShadow: practiceTense === 'present' ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none',
+                              fontWeight: practiceTense === 'present' ? 'bold' : 'normal'
+                            }} 
                             onClick={() => setPracticeTense("present")}
                           >
-                            Presente
+                            ⚡ Presente
                           </button>
                           <button 
                             type="button"
-                            className={`btn btn-sm ${practiceTense === 'preterite' ? 'btn-primary' : 'btn-secondary'}`} 
-                            style={{ fontSize: '0.75rem', padding: '6px' }} 
+                            className="btn btn-sm"
+                            style={{ 
+                              fontSize: '0.75rem', 
+                              padding: '6px',
+                              background: practiceTense === 'preterite' ? '#f97316' : 'rgba(255,255,255,0.05)',
+                              color: practiceTense === 'preterite' ? '#fff' : 'var(--text-secondary)',
+                              borderColor: practiceTense === 'preterite' ? '#fb923c' : 'transparent',
+                              boxShadow: practiceTense === 'preterite' ? '0 0 10px rgba(249, 115, 22, 0.4)' : 'none',
+                              fontWeight: practiceTense === 'preterite' ? 'bold' : 'normal'
+                            }} 
                             onClick={() => setPracticeTense("preterite")}
                           >
-                            Pretérito (Past)
+                            ⏳ Pretérito (Past)
                           </button>
                           <button 
                             type="button"
-                            className={`btn btn-sm ${practiceTense === 'both' ? 'btn-primary' : 'btn-secondary'}`} 
-                            style={{ fontSize: '0.75rem', padding: '6px' }} 
+                            className="btn btn-sm"
+                            style={{ 
+                              fontSize: '0.75rem', 
+                              padding: '6px',
+                              background: practiceTense === 'both' ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
+                              color: practiceTense === 'both' ? '#fff' : 'var(--text-secondary)',
+                              borderColor: practiceTense === 'both' ? 'var(--accent)' : 'transparent'
+                            }} 
                             onClick={() => setPracticeTense("both")}
                           >
-                            Mixto (Both)
+                            🔀 Mixto (Both)
                           </button>
                         </div>
                       </div>
@@ -2260,50 +2348,118 @@ export default function StudyQuest({
                   </button>
                 </div>
               ) : practiceQuestions[practiceCurrentIdx]?.isConjugation ? (
-                <div className="quiz-question-card">
-                  <div className="quiz-question-lbl">
-                    {practiceQuestions[practiceCurrentIdx]?.isGustar 
-                      ? "Elige la forma correcta de gustar (singular vs plural):"
-                      : "Conjugate the verb for this pronoun:"}
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                    <span className="badge badge-accent" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
-                      {practiceQuestions[practiceCurrentIdx].tenseLabel || "Presente"}
-                    </span>
-                    {practiceQuestions[practiceCurrentIdx].isReciprocal ? (
-                      <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
-                        🤝 Acción Recíproca ("Each Other")
-                      </span>
-                    ) : practiceQuestions[practiceCurrentIdx].isReflexive ? (
-                      <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
-                        Reflexivo (me, te, se, nos, os, se)
-                      </span>
-                    ) : null}
-                    {practiceQuestions[practiceCurrentIdx].isGustar && (
-                      <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.15)', color: 'var(--gold)', borderColor: 'rgba(234, 179, 8, 0.3)' }}>
-                        ✨ Tipo Gustar (gusta vs gustan)
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="quiz-word" style={{ color: 'var(--primary)', fontSize: practiceQuestions[practiceCurrentIdx]?.isGustar ? '1.8rem' : '2.4rem' }}>
-                    {practiceQuestions[practiceCurrentIdx].questionWord}
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>
-                    ({practiceQuestions[practiceCurrentIdx].meaning})
-                  </p>
-                  <div style={{ display: 'inline-block', background: 'rgba(250, 204, 21, 0.1)', padding: '6px 14px', borderRadius: '16px', color: 'var(--gold)', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                    {practiceQuestions[practiceCurrentIdx]?.isGustar ? practiceQuestions[practiceCurrentIdx].pronoun : `Pronoun: ${practiceQuestions[practiceCurrentIdx].pronoun}`}
-                  </div>
-                  
-                  <button 
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => openCodex(practiceQuestions[practiceCurrentIdx].item)}
-                    style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
-                  >
-                    📖 Ver Conjugaciones
-                  </button>
-                </div>
+                (() => {
+                  const currQ = practiceQuestions[practiceCurrentIdx];
+                  const isPret = isPreteriteTense(currQ);
+
+                  return (
+                    <div 
+                      className="quiz-question-card"
+                      style={{
+                        borderTop: isPret ? '4px solid #f97316' : '4px solid #10b981',
+                        boxShadow: isPret ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
+                      }}
+                    >
+                      {/* High-Noticeability Tense Banner */}
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                        <div style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '6px 16px',
+                          borderRadius: '20px',
+                          background: isPret 
+                            ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15))' 
+                            : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
+                          border: isPret ? '2px solid #f97316' : '2px solid #10b981',
+                          color: isPret ? '#fed7aa' : '#a7f3d0',
+                          fontWeight: '800',
+                          fontSize: '0.88rem',
+                          letterSpacing: '0.04em',
+                          boxShadow: isPret ? '0 0 14px rgba(249, 115, 22, 0.35)' : '0 0 14px rgba(16, 185, 129, 0.35)',
+                          textTransform: 'uppercase'
+                        }}>
+                          <span>{isPret ? '⏳' : '⚡'}</span>
+                          <span>TIEMPO: <strong>{isPret ? 'PRETÉRITO (PAST TENSE)' : 'PRESENTE (PRESENT TENSE)'}</strong></span>
+                        </div>
+                      </div>
+
+                      <div className="quiz-question-lbl" style={{ marginBottom: '8px' }}>
+                        {currQ?.isGustar ? (
+                          <>
+                            Elige la forma de gustar en <strong style={{ color: isPret ? '#fb923c' : '#34d399', textDecoration: 'underline' }}>
+                              {isPret ? 'PRETÉRITO (gustó vs gustaron)' : 'PRESENTE (gusta vs gustan)'}
+                            </strong>:
+                          </>
+                        ) : (
+                          <>
+                            Conjugate in <strong style={{ color: isPret ? '#fb923c' : '#34d399', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+                              {isPret ? 'PAST TENSE (Pretérito)' : 'PRESENT TENSE (Presente)'}
+                            </strong> for:
+                          </>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+                        {currQ.isReciprocal ? (
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
+                            🤝 Acción Recíproca ("Each Other")
+                          </span>
+                        ) : currQ.isReflexive ? (
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
+                            Reflexivo (me, te, se, nos, os, se)
+                          </span>
+                        ) : null}
+                        {currQ.isGustar && (
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.15)', color: 'var(--gold)', borderColor: 'rgba(234, 179, 8, 0.3)' }}>
+                            ✨ Tipo Gustar ({isPret ? 'gustó vs gustaron' : 'gusta vs gustan'})
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="quiz-word" style={{ color: 'var(--primary)', fontSize: currQ?.isGustar ? '1.8rem' : '2.4rem' }}>
+                        {currQ.questionWord}
+                      </h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>
+                        ({currQ.meaning})
+                      </p>
+
+                      <div style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        background: 'rgba(250, 204, 21, 0.1)', 
+                        padding: '6px 14px', 
+                        borderRadius: '16px', 
+                        color: 'var(--gold)', 
+                        fontWeight: 'bold', 
+                        fontSize: '0.9rem' 
+                      }}>
+                        <span>{currQ?.isGustar ? currQ.pronoun : `Pronoun: ${currQ.pronoun}`}</span>
+                        <span style={{
+                          fontSize: '0.7rem',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          background: isPret ? '#f97316' : '#10b981',
+                          color: '#ffffff',
+                          fontWeight: '800',
+                          letterSpacing: '0.04em'
+                        }}>
+                          {isPret ? 'PASADO' : 'PRESENTE'}
+                        </span>
+                      </div>
+                      
+                      <button 
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => openCodex(currQ.item)}
+                        style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
+                      >
+                        📖 Ver Conjugaciones
+                      </button>
+                    </div>
+                  );
+                })()
               ) : practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank ? (
                 <div className="quiz-question-card">
                   <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
@@ -2421,7 +2577,9 @@ export default function StudyQuest({
                 >
                   {isPracticeUserCorrect 
                     ? "¡Correcto! +10 XP | +1 Gold" 
-                    : `Incorrecto! Correct Answer: "${practiceQuestions[practiceCurrentIdx].correct}"`
+                    : practiceQuestions[practiceCurrentIdx]?.isConjugation
+                      ? `Incorrecto! Correct form (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito / Past' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                      : `Incorrecto! Correct Answer: "${practiceQuestions[practiceCurrentIdx].correct}"`
                   }
                   <button className="btn btn-primary" onClick={handlePracticeNext} style={{ width: '100%', marginTop: '16px' }}>
                     Next Question <ArrowRight size={16} />
@@ -2464,14 +2622,46 @@ export default function StudyQuest({
 
             return (
               <div>
-                <div className="quiz-question-card">
+                <div 
+                  className="quiz-question-card"
+                  style={currentQ.isConjugation ? {
+                    borderTop: isPreteriteTense(currentQ) ? '4px solid #f97316' : '4px solid #10b981',
+                    boxShadow: isPreteriteTense(currentQ) ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
+                  } : undefined}
+                >
                   {currentQ.isConjugation ? (
                     <>
-                      <div className="quiz-question-lbl">Conjugate the verb for this pronoun:</div>
+                      {/* High-Noticeability Tense Banner */}
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                        <div style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '6px 16px',
+                          borderRadius: '20px',
+                          background: isPreteriteTense(currentQ) 
+                            ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15))' 
+                            : 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15))',
+                          border: isPreteriteTense(currentQ) ? '2px solid #f97316' : '2px solid #10b981',
+                          color: isPreteriteTense(currentQ) ? '#fed7aa' : '#a7f3d0',
+                          fontWeight: '800',
+                          fontSize: '0.88rem',
+                          letterSpacing: '0.04em',
+                          boxShadow: isPreteriteTense(currentQ) ? '0 0 14px rgba(249, 115, 22, 0.35)' : '0 0 14px rgba(16, 185, 129, 0.35)',
+                          textTransform: 'uppercase'
+                        }}>
+                          <span>{isPreteriteTense(currentQ) ? '⏳' : '⚡'}</span>
+                          <span>TIEMPO: <strong>{isPreteriteTense(currentQ) ? 'PRETÉRITO (PAST TENSE)' : 'PRESENTE (PRESENT TENSE)'}</strong></span>
+                        </div>
+                      </div>
+
+                      <div className="quiz-question-lbl" style={{ marginBottom: '8px' }}>
+                        Conjugate in <strong style={{ color: isPreteriteTense(currentQ) ? '#fb923c' : '#34d399', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+                          {isPreteriteTense(currentQ) ? 'PAST TENSE (Pretérito)' : 'PRESENT TENSE (Presente)'}
+                        </strong> for:
+                      </div>
+
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                        <span className="badge badge-accent" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px' }}>
-                          {currentQ.tenseLabel || "Presente"}
-                        </span>
                         {currentQ.isReciprocal ? (
                           <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
                             🤝 Acción Recíproca ("Each Other")
@@ -2482,10 +2672,33 @@ export default function StudyQuest({
                           </span>
                         ) : null}
                       </div>
+
                       <h3 className="quiz-word" style={{ color: 'var(--primary)' }}>{currentQ.questionWord}</h3>
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '12px' }}>({currentQ.meaning})</p>
-                      <div style={{ display: 'inline-block', background: 'rgba(250, 204, 21, 0.1)', padding: '6px 14px', borderRadius: '16px', color: 'var(--gold)', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                        Pronoun: {currentQ.pronoun}
+                      
+                      <div style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        background: 'rgba(250, 204, 21, 0.1)', 
+                        padding: '6px 14px', 
+                        borderRadius: '16px', 
+                        color: 'var(--gold)', 
+                        fontWeight: 'bold', 
+                        fontSize: '0.9rem' 
+                      }}>
+                        <span>Pronoun: {currentQ.pronoun}</span>
+                        <span style={{
+                          fontSize: '0.7rem',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          background: isPreteriteTense(currentQ) ? '#f97316' : '#10b981',
+                          color: '#ffffff',
+                          fontWeight: '800',
+                          letterSpacing: '0.04em'
+                        }}>
+                          {isPreteriteTense(currentQ) ? 'PASADO' : 'PRESENTE'}
+                        </span>
                       </div>
                     </>
                   ) : currentQ.isFillInTheBlank ? (
@@ -2608,7 +2821,9 @@ export default function StudyQuest({
                       >
                         {isRedemptionCorrect
                           ? "¡Correcto!" 
-                          : `Incorrecto. Correct answer: "${currentQ.correct}"`
+                          : currentQ.isConjugation
+                            ? `Incorrecto. Correct form (${isPreteriteTense(currentQ) ? 'Pretérito / Past' : 'Presente'}): "${currentQ.correct}"`
+                            : `Incorrecto. Correct answer: "${currentQ.correct}"`
                         }
                         <button className="btn btn-primary" onClick={handleRedemptionNext} style={{ width: '100%', marginTop: '16px' }}>
                           Next Question <ArrowRight size={16} />
@@ -2648,22 +2863,42 @@ export default function StudyQuest({
             </div>
 
             {/* Dual Tense Switcher Tabs */}
-            <div style={{ display: 'flex', gap: '8px', margin: '14px 0 12px', background: 'rgba(0,0,0,0.25)', padding: '4px', borderRadius: '10px' }}>
+            <div style={{ display: 'flex', gap: '8px', margin: '14px 0 12px', background: 'rgba(0,0,0,0.25)', padding: '5px', borderRadius: '12px' }}>
               <button
                 type="button"
-                className={`btn btn-sm ${codexTense === 'present' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ flex: 1, fontSize: '0.8rem', padding: '7px 10px', borderRadius: '8px' }}
+                className="btn btn-sm"
+                style={{ 
+                  flex: 1, 
+                  fontSize: '0.82rem', 
+                  padding: '8px 12px', 
+                  borderRadius: '9px',
+                  background: codexTense === 'present' ? '#10b981' : 'rgba(255,255,255,0.05)',
+                  color: codexTense === 'present' ? '#ffffff' : 'var(--text-secondary)',
+                  border: codexTense === 'present' ? '2px solid #34d399' : '1px solid transparent',
+                  boxShadow: codexTense === 'present' ? '0 0 12px rgba(16, 185, 129, 0.4)' : 'none',
+                  fontWeight: codexTense === 'present' ? '800' : '500'
+                }}
                 onClick={() => setCodexTense('present')}
               >
-                Presente
+                ⚡ Presente
               </button>
               <button
                 type="button"
-                className={`btn btn-sm ${codexTense === 'preterite' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ flex: 1, fontSize: '0.8rem', padding: '7px 10px', borderRadius: '8px' }}
+                className="btn btn-sm"
+                style={{ 
+                  flex: 1, 
+                  fontSize: '0.82rem', 
+                  padding: '8px 12px', 
+                  borderRadius: '9px',
+                  background: codexTense === 'preterite' ? '#f97316' : 'rgba(255,255,255,0.05)',
+                  color: codexTense === 'preterite' ? '#ffffff' : 'var(--text-secondary)',
+                  border: codexTense === 'preterite' ? '2px solid #fb923c' : '1px solid transparent',
+                  boxShadow: codexTense === 'preterite' ? '0 0 12px rgba(249, 115, 22, 0.4)' : 'none',
+                  fontWeight: codexTense === 'preterite' ? '800' : '500'
+                }}
                 onClick={() => setCodexTense('preterite')}
               >
-                Pretérito (Past Tense)
+                ⏳ Pretérito (Past)
               </button>
             </div>
 

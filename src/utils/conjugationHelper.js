@@ -337,6 +337,20 @@ export function isVerbItem(item) {
 }
 
 /**
+ * Determines whether a question or item targets Pretérito (Past Tense).
+ */
+export function isPreteriteTense(questionOrItem) {
+  if (!questionOrItem) return false;
+  if (questionOrItem.tense === "preterite" || questionOrItem.tense === "past") return true;
+  if (typeof questionOrItem.tenseLabel === "string" && questionOrItem.tenseLabel.includes("Pretérito")) return true;
+  if (questionOrItem.item) {
+    if (questionOrItem.item.subcategory?.includes("Pretérito")) return true;
+    if (questionOrItem.item.english?.toLowerCase().includes("preterite") || questionOrItem.item.english?.toLowerCase().includes("(past)")) return true;
+  }
+  return false;
+}
+
+/**
  * Conjugates any Spanish 101 or 102 verb in Present or Preterite (Past Tense).
  * Automatically prepending reflexive pronouns (me, te, se, nos, os, se) for reflexive verbs.
  * For gustar and gustar-like verbs, returns indirect object pronoun + gusta / gustan.

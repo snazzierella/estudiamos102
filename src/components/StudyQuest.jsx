@@ -84,6 +84,12 @@ export default function StudyQuest({
   const [codexTense, setCodexTense] = useState("present");
   const [isListening, setIsListening] = useState(false);
   
+  // Hint reveal tracking for hintless lesson achievements
+  const [hintsUsedInSession, setHintsUsedInSession] = useState(0);
+  const [questHintRevealed, setQuestHintRevealed] = useState(false);
+  const [practiceHintRevealed, setPracticeHintRevealed] = useState(false);
+  const [redemptionHintRevealed, setRedemptionHintRevealed] = useState(false);
+  
   const questInputRef = useRef(null);
   const practiceInputRef = useRef(null);
 
@@ -231,6 +237,7 @@ export default function StudyQuest({
       setRedemptionScore(0);
       setRedemptionFailed(false);
       setRedemptionSuccess(false);
+      setRedemptionHintRevealed(false);
       setComboCount(0);
     }
   }, [state.fainted, questStarted]);
@@ -811,6 +818,8 @@ export default function StudyQuest({
     setQuestQuestions(finalQuestions);
     setQuestCurrentIdx(0);
     setQuestScore(0);
+    setHintsUsedInSession(0);
+    setQuestHintRevealed(false);
     setQuestFinished(false);
     setQuestStarted(true);
     setQuestAnswered(false);
@@ -1031,6 +1040,7 @@ export default function StudyQuest({
     if (questCurrentIdx < questQuestions.length - 1) {
       setQuestCurrentIdx(prev => prev + 1);
       setQuestFlipped(false);
+      setQuestHintRevealed(false);
     } else {
       finishQuestSession();
     }
@@ -1138,6 +1148,7 @@ export default function StudyQuest({
     setQuestSelected(null);
     setQuestAnswered(false);
     setTypedAnswer("");
+    setQuestHintRevealed(false);
     
     if (questCurrentIdx < questQuestions.length - 1) {
       setQuestCurrentIdx(prev => prev + 1);
@@ -1206,6 +1217,7 @@ export default function StudyQuest({
     setRedemptionSelected(null);
     setRedemptionAnswered(false);
     setRedemptionTyped("");
+    setRedemptionHintRevealed(false);
 
     if (redemptionCurrentIdx < redemptionQuestions.length - 1) {
       setRedemptionCurrentIdx(prev => prev + 1);
@@ -1222,6 +1234,7 @@ export default function StudyQuest({
     setRedemptionScore(0);
     setRedemptionFailed(false);
     setRedemptionSuccess(false);
+    setRedemptionHintRevealed(false);
   };
 
   const handleCancelRedemption = () => {
@@ -1253,9 +1266,11 @@ export default function StudyQuest({
     let totalGoldEarned = baseGoldReward;
     let totalXpEarned = baseXpReward;
 
+    const usedHints = hintsUsedInSession > 0;
+
     if (state.isReviewReady) {
       const passingRequired = Math.ceil(quizQuestionsCount * 0.8); // 80% Boss Review Gate
-      const success = passStageReview(questScore, quizQuestionsCount);
+      const success = passStageReview(questScore, quizQuestionsCount, usedHints);
       recordQuizPerformance(questScore, quizQuestionsCount);
       if (success) {
         if (comboMultiplier > 1.0) {
@@ -1266,13 +1281,14 @@ export default function StudyQuest({
           totalGoldEarned += extraGold;
           totalXpEarned += extraXp;
         }
-        setQuestSuccessMsg(`¡Excelente! You passed the Review Gate with ${questScore}/${quizQuestionsCount} (${Math.round((questScore/quizQuestionsCount)*100)}%)! Gained ${totalGoldEarned} G & ${totalXpEarned} XP! Next stage unlocked! (Streak Combo Multiplier: ${comboMultiplier}x)`);
+        const hintlessMsg = !usedHints ? " 🧠 ¡Maestría Sin Pistas! (Sin pistas utilizadas - ¡Logro conseguido!)" : "";
+        setQuestSuccessMsg(`¡Excelente! You passed the Review Gate with ${questScore}/${quizQuestionsCount} (${Math.round((questScore/quizQuestionsCount)*100)}%)! Gained ${totalGoldEarned} G & ${totalXpEarned} XP! Next stage unlocked! (Streak Combo Multiplier: ${comboMultiplier}x)${hintlessMsg}`);
       } else {
         setQuestFailMsg(`Gate Failed! Boss reviews require 80% score or higher (${passingRequired}/${quizQuestionsCount}). Please practice and try again.`);
       }
     } else {
       const passingRequired = Math.ceil(quizQuestionsCount * 0.6);
-      const success = advanceQuest(questScore, quizQuestionsCount);
+      const success = advanceQuest(questScore, quizQuestionsCount, usedHints);
       recordQuizPerformance(questScore, quizQuestionsCount);
       if (success) {
         if (comboMultiplier > 1.0) {
@@ -1283,7 +1299,8 @@ export default function StudyQuest({
           totalGoldEarned += extraGold;
           totalXpEarned += extraXp;
         }
-        setQuestSuccessMsg(`Quest Level Cleared! You scored ${questScore}/${quizQuestionsCount} correct! Gained ${totalGoldEarned} G & ${totalXpEarned} XP. (Streak Combo Multiplier: ${comboMultiplier}x)`);
+        const hintlessMsg = !usedHints ? " 🧠 ¡Maestría Sin Pistas! (Sin pistas utilizadas)" : "";
+        setQuestSuccessMsg(`Quest Level Cleared! You scored ${questScore}/${quizQuestionsCount} correct! Gained ${totalGoldEarned} G & ${totalXpEarned} XP. (Streak Combo Multiplier: ${comboMultiplier}x)${hintlessMsg}`);
       } else {
         setQuestFailMsg(`Quest Failed! You missed 40% or more (Score: ${questScore}/${quizQuestionsCount}, Required: ${passingRequired}/${quizQuestionsCount}).`);
       }
@@ -1570,6 +1587,7 @@ export default function StudyQuest({
     setPracticeAnswered(false);
     setPracticeSelected(null);
     setPracticeTyped("");
+    setPracticeHintRevealed(false);
     setPracticeFlipped(false);
     setPracticeQuizFinished(false);
     setPracticeQuizStarted(true);
@@ -1579,6 +1597,7 @@ export default function StudyQuest({
     setPracticeSelected(null);
     setPracticeAnswered(false);
     setPracticeTyped("");
+    setPracticeHintRevealed(false);
 
     if (practiceCurrentIdx < practiceQuestions.length - 1) {
       setPracticeCurrentIdx(prev => prev + 1);
@@ -1703,6 +1722,27 @@ export default function StudyQuest({
               <p style={{ fontSize: '0.95rem', color: '#e2e8f0', maxWidth: '500px', margin: '0 auto 16px', lineHeight: '1.4' }}>
                 {questSuccessMsg || questFailMsg}
               </p>
+              
+              {questSuccessMsg && hintsUsedInSession === 0 && (
+                <div style={{
+                  margin: '0 auto 16px',
+                  padding: '8px 18px',
+                  borderRadius: '20px',
+                  background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(16, 185, 129, 0.15))',
+                  border: '1px solid rgba(251, 191, 36, 0.4)',
+                  color: '#fef08a',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 0 16px rgba(251, 191, 36, 0.15)'
+                }}>
+                  <span>🧠</span>
+                  <span>¡Victoria Sin Pistas! (Completed without hints!)</span>
+                  <span>✨</span>
+                </div>
+              )}
               
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', width: 'fit-content', margin: '0 auto 20px', border: '1px solid var(--card-border)', display: 'flex', gap: '20px' }}>
                 <div>
@@ -1848,7 +1888,43 @@ export default function StudyQuest({
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
               Quest Stage {state.questStage} | Level {state.isReviewReady ? 'Review Gate' : state.questLevel}
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {hintsUsedInSession === 0 ? (
+                <span 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px', 
+                    fontSize: '0.75rem', 
+                    color: '#10b981', 
+                    background: 'rgba(16, 185, 129, 0.1)', 
+                    border: '1px solid rgba(16, 185, 129, 0.25)', 
+                    padding: '2px 8px', 
+                    borderRadius: '12px', 
+                    fontWeight: 600 
+                  }} 
+                  title="No hints used! Finish this lesson hintless to earn achievements."
+                >
+                  🧠 Sin pistas
+                </span>
+              ) : (
+                <span 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px', 
+                    fontSize: '0.75rem', 
+                    color: 'var(--text-muted)', 
+                    background: 'rgba(255, 255, 255, 0.05)', 
+                    border: '1px solid rgba(255, 255, 255, 0.1)', 
+                    padding: '2px 8px', 
+                    borderRadius: '12px' 
+                  }} 
+                  title={`${hintsUsedInSession} hint(s) revealed`}
+                >
+                  💡 {hintsUsedInSession}
+                </span>
+              )}
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', color: 'var(--danger)', fontWeight: 'bold' }}>
                 <Heart size={14} fill="var(--danger)" /> {state.hp} HP
               </span>
@@ -2039,10 +2115,49 @@ export default function StudyQuest({
                     <>
                       <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
                       <h3 className="quiz-word" style={{ color: 'var(--accent)' }}>{currentQuestQ.questionWord}</h3>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: currentQuestQ.hint ? '8px' : '12px' }}>({currentQuestQ.meaning})</p>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '8px' }}>({currentQuestQ.meaning})</p>
                       {currentQuestQ.hint && (
-                        <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '5px 12px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.78rem', marginBottom: '12px', maxWidth: '90%' }}>
-                          💡 <strong>Pista:</strong> {currentQuestQ.hint}
+                        <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
+                          {!questHintRevealed ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setQuestHintRevealed(true);
+                                setHintsUsedInSession(prev => prev + 1);
+                              }}
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.06)',
+                                border: '1px solid rgba(255, 255, 255, 0.18)',
+                                color: 'var(--text-secondary)',
+                                borderRadius: '20px',
+                                padding: '4px 14px',
+                                fontSize: '0.78rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                transition: 'all 0.2s ease',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
+                                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                                e.currentTarget.style.color = '#93c5fd';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+                                e.currentTarget.style.color = 'var(--text-secondary)';
+                              }}
+                            >
+                              <span>💡</span>
+                              <span>Ver Pista (Show Hint)</span>
+                            </button>
+                          ) : (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '6px 14px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.8rem', maxWidth: '90%', animation: 'fadeIn 0.2s ease' }}>
+                              <span>💡</span>
+                              <span><strong>Pista:</strong> {currentQuestQ.hint}</span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </>
@@ -2076,6 +2191,7 @@ export default function StudyQuest({
                     answered={questAnswered}
                     userCorrect={isQuestUserCorrect}
                     showSubmitButton={true}
+                    onHintRevealed={() => setHintsUsedInSession(prev => prev + 1)}
                   />
                 </div>
               ) : currentQuestQ.isConjugation || currentQuestQ.isFillInTheBlank || currentQuestQ.type !== 2 ? (
@@ -2686,12 +2802,48 @@ export default function StudyQuest({
                 <div className="quiz-question-card">
                   <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
                   <h3 className="quiz-word" style={{ color: 'var(--accent)', fontSize: '2rem' }}>{practiceQuestions[practiceCurrentIdx].questionWord}</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: practiceQuestions[practiceCurrentIdx]?.hint ? '8px' : '12px' }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '8px' }}>
                     ({practiceQuestions[practiceCurrentIdx].meaning})
                   </p>
                   {practiceQuestions[practiceCurrentIdx]?.hint && (
-                    <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '5px 12px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.78rem', marginBottom: '12px', maxWidth: '90%' }}>
-                      💡 <strong>Pista:</strong> {practiceQuestions[practiceCurrentIdx].hint}
+                    <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
+                      {!practiceHintRevealed ? (
+                        <button
+                          type="button"
+                          onClick={() => setPracticeHintRevealed(true)}
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.06)',
+                            border: '1px solid rgba(255, 255, 255, 0.18)',
+                            color: 'var(--text-secondary)',
+                            borderRadius: '20px',
+                            padding: '4px 14px',
+                            fontSize: '0.78rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
+                            e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                            e.currentTarget.style.color = '#93c5fd';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+                            e.currentTarget.style.color = 'var(--text-secondary)';
+                          }}
+                        >
+                          <span>💡</span>
+                          <span>Ver Pista (Show Hint)</span>
+                        </button>
+                      ) : (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '6px 14px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.8rem', maxWidth: '90%', animation: 'fadeIn 0.2s ease' }}>
+                          <span>💡</span>
+                          <span><strong>Pista:</strong> {practiceQuestions[practiceCurrentIdx].hint}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -2940,10 +3092,46 @@ export default function StudyQuest({
                     <>
                       <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
                       <h3 className="quiz-word" style={{ color: 'var(--accent)' }}>{currentQ.questionWord}</h3>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: currentQ.hint ? '8px' : '12px' }}>({currentQ.meaning})</p>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '8px' }}>({currentQ.meaning})</p>
                       {currentQ.hint && (
-                        <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '5px 12px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.78rem', marginBottom: '12px', maxWidth: '90%' }}>
-                          💡 <strong>Pista:</strong> {currentQ.hint}
+                        <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
+                          {!redemptionHintRevealed ? (
+                            <button
+                              type="button"
+                              onClick={() => setRedemptionHintRevealed(true)}
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.06)',
+                                border: '1px solid rgba(255, 255, 255, 0.18)',
+                                color: 'var(--text-secondary)',
+                                borderRadius: '20px',
+                                padding: '4px 14px',
+                                fontSize: '0.78rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                transition: 'all 0.2s ease',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
+                                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                                e.currentTarget.style.color = '#93c5fd';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+                                e.currentTarget.style.color = 'var(--text-secondary)';
+                              }}
+                            >
+                              <span>💡</span>
+                              <span>Ver Pista (Show Hint)</span>
+                            </button>
+                          ) : (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '6px 14px', borderRadius: '12px', color: '#93c5fd', fontSize: '0.8rem', maxWidth: '90%', animation: 'fadeIn 0.2s ease' }}>
+                              <span>💡</span>
+                              <span><strong>Pista:</strong> {currentQ.hint}</span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </>

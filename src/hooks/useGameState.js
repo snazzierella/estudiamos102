@@ -22,6 +22,7 @@ const INITIAL_STATE = {
   lastActiveDate: "",
   hasCompletedPlacement: false,
   badges: [],
+  hintlessLessonsCount: 0,
   inventory: {
     redPotion: 0,
     goldenElixir: 0,
@@ -93,7 +94,8 @@ export function useGameState() {
           ...parsed,
           excludeVosotros,
           stageFlashcardsSeen,
-          wordsAnsweredCorrectly
+          wordsAnsweredCorrectly,
+          hintlessLessonsCount: parsed.hintlessLessonsCount || 0
         };
       }
     } catch (e) {
@@ -518,7 +520,7 @@ export function useGameState() {
     });
   };
 
-  const advanceQuest = (score, totalQuizzes = 20) => {
+  const advanceQuest = (score, totalQuizzes = 20, usedHints = false) => {
     const requiredScore = Math.ceil(totalQuizzes * 0.6); // 60% pass threshold (missing 40% or more fails)
     if (score < requiredScore) return false;
     
@@ -573,6 +575,18 @@ export function useGameState() {
         leveledBadges.push("level_10");
       }
 
+      // Check hintless lesson achievements
+      let nextHintlessCount = prev.hintlessLessonsCount || 0;
+      if (!usedHints) {
+        nextHintlessCount += 1;
+        if (!leveledBadges.includes("hintless_scholar")) {
+          leveledBadges.push("hintless_scholar");
+        }
+        if (nextHintlessCount >= 5 && !leveledBadges.includes("hintless_master")) {
+          leveledBadges.push("hintless_master");
+        }
+      }
+
       // Increment daily bounty for completing a campaign level
       let newDailyBounties = { ...prev.dailyBounties };
       newDailyBounties.questCount = (newDailyBounties.questCount || 0) + 1;
@@ -586,6 +600,7 @@ export function useGameState() {
         level: newLevel,
         hp: newHp,
         badges: leveledBadges,
+        hintlessLessonsCount: nextHintlessCount,
         dailyBounties: newDailyBounties,
         _levelUpFlag: isLevelUp ? Date.now() : prev._levelUpFlag
       };
@@ -593,7 +608,7 @@ export function useGameState() {
     return true;
   };
 
-  const passStageReview = (score, totalQuizzes = 20) => {
+  const passStageReview = (score, totalQuizzes = 20, usedHints = false) => {
     // 80% pass threshold for stage reviews (Boss battles)
     const requiredScore = Math.ceil(totalQuizzes * 0.8);
     if (score < requiredScore) return false;
@@ -647,6 +662,21 @@ export function useGameState() {
         newBadges.push("level_10");
       }
 
+      // Check hintless lesson achievements
+      let nextHintlessCount = prev.hintlessLessonsCount || 0;
+      if (!usedHints) {
+        nextHintlessCount += 1;
+        if (!newBadges.includes("hintless_scholar")) {
+          newBadges.push("hintless_scholar");
+        }
+        if (nextHintlessCount >= 5 && !newBadges.includes("hintless_master")) {
+          newBadges.push("hintless_master");
+        }
+        if (!newBadges.includes("hintless_boss")) {
+          newBadges.push("hintless_boss");
+        }
+      }
+
       // Increment daily bounty
       let newDailyBounties = { ...prev.dailyBounties };
       newDailyBounties.questCount = (newDailyBounties.questCount || 0) + 1;
@@ -666,6 +696,7 @@ export function useGameState() {
         level: newLevel,
         hp: newHp,
         badges: newBadges,
+        hintlessLessonsCount: nextHintlessCount,
         stageFlashcardsSeen: updatedSeen,
         wordsAnsweredCorrectly: updatedAnswered,
         dailyBounties: newDailyBounties,

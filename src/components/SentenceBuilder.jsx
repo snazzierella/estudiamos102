@@ -7,12 +7,14 @@ export default function SentenceBuilder({
   onAnswer, 
   answered, 
   userCorrect, 
-  showSubmitButton = true 
+  showSubmitButton = true,
+  onHintRevealed
 }) {
   const [placedTokens, setPlacedTokens] = useState([]);
   const [bankTokens, setBankTokens] = useState([]);
   const [draggedToken, setDraggedToken] = useState(null);
   const [dragOverIdx, setDragOverIdx] = useState(null);
+  const [showHint, setShowHint] = useState(false);
 
   // Initialize or reset when question changes
   useEffect(() => {
@@ -21,6 +23,7 @@ export default function SentenceBuilder({
       setPlacedTokens([]);
       setDraggedToken(null);
       setDragOverIdx(null);
+      setShowHint(false);
     }
   }, [question]);
 
@@ -134,8 +137,62 @@ export default function SentenceBuilder({
           &ldquo;{question.prompt}&rdquo;
         </h3>
         {question.hint && (
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginTop: '6px' }}>
-            💡 {question.hint}
+          <div style={{ marginTop: '8px', minHeight: '32px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            {!showHint ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowHint(true);
+                  onHintRevealed?.();
+                }}
+                className="hint-toggle-btn"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  color: 'var(--text-secondary)',
+                  borderRadius: '20px',
+                  padding: '4px 14px',
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
+                  e.currentTarget.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+                  e.currentTarget.style.color = '#fbbf24';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }}
+              >
+                <span>💡</span>
+                <span>Ver Pista (Show Hint)</span>
+              </button>
+            ) : (
+              <div 
+                style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '8px',
+                  background: 'rgba(251, 191, 36, 0.12)', 
+                  border: '1px solid rgba(251, 191, 36, 0.3)', 
+                  padding: '6px 14px', 
+                  borderRadius: '12px', 
+                  color: '#fbbf24', 
+                  fontSize: '0.8rem',
+                  maxWidth: '92%',
+                  animation: 'fadeIn 0.2s ease'
+                }}
+              >
+                <span>💡</span>
+                <span><strong>Pista:</strong> {question.hint}</span>
+              </div>
+            )}
           </div>
         )}
       </div>

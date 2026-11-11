@@ -103,6 +103,30 @@ const BADGES_LIST = [
     name: "Mejor Amigo de Narfy (Narfy's Best Friend)",
     desc: "Relive Narfy's big day out in the past tense in the 102 Narfy Adventure.",
     icon: "🐕"
+  },
+  {
+    id: "hintless_scholar",
+    name: "Sin Pistas (Independent Mind)",
+    desc: "Complete a campaign lesson without revealing any hints.",
+    icon: "🧠"
+  },
+  {
+    id: "hintless_master",
+    name: "Maestro Autónomo (Self-Reliant Master)",
+    desc: "Complete 5 campaign lessons without revealing any hints.",
+    icon: "✨"
+  },
+  {
+    id: "hintless_boss",
+    name: "Conquistador Puro (Pure Conqueror)",
+    desc: "Pass a Unit Review Gate (Boss) without revealing any hints.",
+    icon: "🏆"
+  },
+  {
+    id: "game_beaten",
+    name: "Maestro de Estudiamos 102 (Game Champion)",
+    desc: "Complete all campaign stages and reviews.",
+    icon: "👑"
   }
 ];
 

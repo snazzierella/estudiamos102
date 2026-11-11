@@ -8,7 +8,8 @@ import AiChat from './components/AiChat';
 import MiniGames from './components/MiniGames';
 import BadgeTrophy from './components/BadgeTrophy';
 import MistakesDungeon from './components/MistakesDungeon';
-import { Settings, RefreshCw, Mail } from 'lucide-react';
+import { Settings, RefreshCw, Mail, Volume2, Sparkles } from 'lucide-react';
+import { subscribeToVoices, formatVoiceLabel, speakSpanish } from './utils/speechHelper';
 import './App.css';
 
 export default function App() {
@@ -42,7 +43,10 @@ export default function App() {
     feedNarfy,
     playWithNarfy,
     updateWordMastery,
-    setDifficultyMode
+    setDifficultyMode,
+    setTtsVoice,
+    setTtsRate,
+    setUseGeminiTts
   } = useGameState();
 
   const [view, setView] = useState('dashboard');
@@ -51,6 +55,14 @@ export default function App() {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [prevLevel, setPrevLevel] = useState(state.level);
   const [tempKey, setTempKey] = useState(state.apiKeys.gemini || "");
+  const [availableVoices, setAvailableVoices] = useState([]);
+
+  // Subscribe to loaded system/browser voices
+  useEffect(() => {
+    return subscribeToVoices(voices => {
+      setAvailableVoices(voices);
+    });
+  }, []);
 
   // Update streak and run initial configurations on mount
   useEffect(() => {
@@ -320,6 +332,80 @@ export default function App() {
                 {state.difficultyMode === 'standard' && "Standard: 15 HP damage on mistakes."}
                 {state.difficultyMode === 'hardcore' && "Hardcore: 30 HP damage. Fainting resets quest level. 2x XP/Gold rewards!"}
               </span>
+            </div>
+
+            {/* Voice & Pronunciation settings */}
+            <div className="form-group" style={{ marginTop: '14px', background: 'rgba(255,255,255,0.02)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
+              <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Volume2 size={16} color="var(--primary)" /> Pronunciación y Voz (Text-to-Speech)
+              </label>
+
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  Voz en Español:
+                </label>
+                <select
+                  className="form-input"
+                  value={state.ttsVoice || ""}
+                  onChange={(e) => setTtsVoice(e.target.value)}
+                  style={{ fontSize: '0.8rem', padding: '6px 10px', width: '100%' }}
+                >
+                  <option value="">Auto (Voz natural más recomendada de tu sistema)</option>
+                  {availableVoices.map((v) => (
+                    <option key={v.name} value={v.name}>
+                      {formatVoiceLabel(v)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  Velocidad:
+                </label>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  {[0.85, 0.95, 1.0, 1.1].map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      className={`btn ${(state.ttsRate ?? 0.95) === r ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => setTtsRate(r)}
+                      style={{ flex: 1, fontSize: '0.75rem', padding: '4px 6px' }}
+                    >
+                      {r}x {r === 0.95 ? "(Opt)" : ""}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {Boolean(state.apiKeys.gemini) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', padding: '8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                  <input
+                    type="checkbox"
+                    id="useGeminiTts"
+                    checked={Boolean(state.useGeminiTts)}
+                    onChange={(e) => setUseGeminiTts(e.target.checked)}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                  />
+                  <div>
+                    <label htmlFor="useGeminiTts" style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Sparkles size={13} /> Gemini Studio AI Voice (Voz humana)
+                    </label>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>
+                      Genera pronunciación ultra-realista con modelo neuronal de Google Gemini.
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => speakSpanish("¡Hola! Me llamo Elena. Bienvenidos a Estudiamos 102. Vamos a aprender español juntos.", { state })}
+                style={{ width: '100%', fontSize: '0.8rem', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              >
+                <Volume2 size={15} color="var(--primary)" /> 🔊 Probar Pronunciación (Audition Voice)
+              </button>
             </div>
 
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '14px', marginTop: '14px' }}>

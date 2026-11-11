@@ -66,7 +66,10 @@ const INITIAL_STATE = {
     }
   },
   wordMastery: {},
-  difficultyMode: "standard"
+  difficultyMode: "standard",
+  ttsVoice: "",
+  ttsRate: 0.95,
+  useGeminiTts: false
 };
 
 export function useGameState() {
@@ -892,6 +895,18 @@ export function useGameState() {
     });
   };
 
+  const setTtsVoice = (voiceName) => {
+    setState(prev => ({ ...prev, ttsVoice: voiceName }));
+  };
+
+  const setTtsRate = (rate) => {
+    setState(prev => ({ ...prev, ttsRate: rate }));
+  };
+
+  const setUseGeminiTts = (val) => {
+    setState(prev => ({ ...prev, useGeminiTts: val }));
+  };
+
   return {
     state,
     addXp,
@@ -924,5 +939,8 @@ export function useGameState() {
     playWithNarfy,
     updateWordMastery,
     setDifficultyMode,
+    setTtsVoice,
+    setTtsRate,
+    setUseGeminiTts,
   };
 }

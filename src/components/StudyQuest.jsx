@@ -10,6 +10,7 @@ import {
   isGustarVerb,
   INDIRECT_OBJECT_PRONOUNS
 } from '../utils/conjugationHelper';
+import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { 
   Swords, 
   ArrowLeft, 
@@ -347,34 +348,7 @@ export default function StudyQuest({
 
   const speakSpanish = (text) => {
     if (!speechAvailable) return;
-    try {
-      window.speechSynthesis.cancel();
-      let clean = text
-        .split("/")[0]
-        .split(" o ")[0]
-        .replace(/\(.*?\)/g, "")
-        .replace(/[¿¡!?]/g, "")
-        .trim();
-
-      if (!clean) return;
-
-      const utterance = new SpeechSynthesisUtterance(clean);
-      utterance.lang = 'es-MX';
-
-      const voices = window.speechSynthesis.getVoices();
-      const spanishVoice = voices.find(v => v.lang.toLowerCase() === 'es-mx') ||
-                           voices.find(v => v.lang.toLowerCase() === 'es-es') ||
-                           voices.find(v => v.lang.toLowerCase().includes('es'));
-      if (spanishVoice) {
-        utterance.voice = spanishVoice;
-        utterance.lang = spanishVoice.lang;
-      }
-
-      utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn("TTS Error:", e);
-    }
+    speakSpanishUtil(text, { state });
   };
 
   const SYNONYM_GROUPS = [

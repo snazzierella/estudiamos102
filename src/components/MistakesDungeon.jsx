@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import vocabularyData from '../data/vocabulary.json';
 import { generateConjugationQuestion } from '../utils/conjugationHelper';
 import { formatEnglishPrompt } from '../utils/difficultyMapper';
-import { ArrowLeft, Trophy, ShieldAlert, Volume2 } from 'lucide-react';
+import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
+import { ArrowLeft, Trophy, Volume2 } from 'lucide-react';
 
 export default function MistakesDungeon({ state, takeDamage, heal, removeMistake, addXp, addGold, setView }) {
   const [activeMistakes, setActiveMistakes] = useState([]);
@@ -87,25 +88,7 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
   };
 
   const speakSpanish = (text) => {
-    if (!('speechSynthesis' in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      let clean = text.split("/")[0].split(" o ")[0].replace(/\(.*?\)/g, "").replace(/[¿¡!?]/g, "").trim();
-      if (!clean) return;
-      const utterance = new SpeechSynthesisUtterance(clean);
-      utterance.lang = 'es-MX';
-      const voices = window.speechSynthesis.getVoices();
-      const spanishVoice = voices.find(v => v.lang.toLowerCase() === 'es-mx') ||
-                           voices.find(v => v.lang.toLowerCase() === 'es-es') ||
-                           voices.find(v => v.lang.toLowerCase().includes('es'));
-      if (spanishVoice) {
-        utterance.voice = spanishVoice;
-      }
-      utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn("TTS Error:", e);
-    }
+    speakSpanishUtil(text, { state });
   };
 
   const buildDungeonQuestion = (item) => {

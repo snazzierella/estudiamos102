@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import vocabularyData from '../data/vocabulary.json';
+import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { Settings, Send, ArrowLeft, Volume2, Key, Info, Sparkles } from 'lucide-react';
 
 // Extract unique Spanish words to highlight them and feed to LLM
@@ -325,27 +326,7 @@ export default function AiChat({ state, setApiKey, setView, incrementBountyCount
   };
 
   const speakMessage = (text) => {
-    if ('speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'es-MX';
-
-        const voices = window.speechSynthesis.getVoices();
-        const spanishVoice = voices.find(v => v.lang.toLowerCase() === 'es-mx') ||
-                             voices.find(v => v.lang.toLowerCase() === 'es-es') ||
-                             voices.find(v => v.lang.toLowerCase().includes('es'));
-        if (spanishVoice) {
-          utterance.voice = spanishVoice;
-          utterance.lang = spanishVoice.lang;
-        }
-
-        utterance.rate = 0.88;
-        window.speechSynthesis.speak(utterance);
-      } catch (e) {
-        console.warn("AI Chat Speech Error:", e);
-      }
-    }
+    speakSpanishUtil(text, { state });
   };
 
   const submitUserMessage = async (userText) => {

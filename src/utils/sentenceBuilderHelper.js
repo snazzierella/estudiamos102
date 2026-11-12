@@ -300,6 +300,66 @@ export const SENTENCE_POOLS = {
       hint: "Pronoun before modal verb: 'se quieren besar'. Keep the second verb as plain infinitive 'besar' (never *se quieren besarse)!"
     },
     {
+      spanish: "Los dos amigos se van a abrazar en el aeropuerto",
+      english: "The two friends are going to hug each other at the airport",
+      distractors: ["abrazarse", "nos", "vamos"],
+      hint: "Front pronoun: 'se van a abrazar'. Keep the infinitive plain 'abrazar' since 'se' is already before 'van'!"
+    },
+    {
+      spanish: "Nosotros nos vamos a abrazar con alegría",
+      english: "We are going to hug each other with joy",
+      distractors: ["se", "abrazarse", "abrazarme"],
+      hint: "Nosotros uses 'nos' before the verb: 'nos vamos a abrazar'. Never use 'se' or duplicate the pronoun!"
+    },
+    {
+      spanish: "Nosotros vamos a abrazarnos con alegría",
+      english: "We are going to hug each other with joy",
+      distractors: ["se", "abrazarse", "abrazar"],
+      hint: "Attach pronoun 'nos' to the infinitive: 'abrazarnos' (or say 'nos vamos a abrazar')."
+    },
+    {
+      spanish: "Los dos estudiantes se van a conocer hoy",
+      english: "The two students are going to meet each other today",
+      distractors: ["conocerse", "nos", "vamos"],
+      hint: "With pronoun before 'van', use plain infinitive: 'se van a conocer' (not *se van a conocerse)."
+    },
+    {
+      spanish: "Nosotros nos tenemos que ayudar con la tarea",
+      english: "We have to help each other with the homework",
+      distractors: ["se", "ayudarnos", "ayuda"],
+      hint: "Pronoun before modal: 'nos tenemos que ayudar'. Don't repeat 'nos' at the end!"
+    },
+    {
+      spanish: "Nosotros tenemos que ayudarnos con la tarea",
+      english: "We have to help each other with the homework",
+      distractors: ["se", "ayudar", "nosotros"],
+      hint: "Attach pronoun to infinitive: 'ayudarnos' (or say 'nos tenemos que ayudar')."
+    },
+    {
+      spanish: "Los amigos se van a despedir en la estación",
+      english: "The friends are going to say goodbye to each other at the station",
+      distractors: ["despedirse", "nos", "vamos"],
+      hint: "Pronoun in front: 'se van a despedir'. Avoid double pronoun *se van a despedirse!"
+    },
+    {
+      spanish: "Nosotros nos vamos a reunir en la cafetería",
+      english: "We are going to meet up in the cafeteria",
+      distractors: ["se", "reunirse", "reúnen"],
+      hint: "Reciprocal for nosotros uses 'nos': 'nos vamos a reunir' or 'vamos a reunirnos'."
+    },
+    {
+      spanish: "Yo me voy a acostar temprano esta noche",
+      english: "I am going to go to bed early tonight",
+      distractors: ["te", "acostarme", "acuesto"],
+      hint: "With pronoun before 'voy', keep infinitive plain: 'me voy a acostar' (or 'voy a acostarme')."
+    },
+    {
+      spanish: "Tú te tienes que lavar las manos antes de comer",
+      english: "You have to wash your hands before eating",
+      distractors: ["se", "lavarte", "lavas"],
+      hint: "Front pronoun: 'te tienes que lavar'. Don't double the pronoun (*te tienes que lavarte)!"
+    },
+    {
       spanish: "Yo estudio español por dos horas todos los días",
       english: "I study Spanish for two hours every day",
       distractors: ["para", "estudia", "las"],

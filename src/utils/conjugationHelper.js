@@ -998,6 +998,222 @@ export const BLANK_SPECS = {
       tense: "present",
       hint: "Con 'nos debemos...', el pronombre 'nos' ya está al principio. Usa el infinitivo simple: ayudar (no *nos debemos ayudarnos)."
     },
+    "los dos amigos se van a abrazar en el aeropuerto": {
+      blanked: "los dos amigos [_____] a abrazar en el aeropuerto",
+      correct: "se van",
+      choices: ["se van", "van", "se va", "nos vamos"],
+      type: "verb",
+      targetVerb: "abrazarse",
+      tense: "present",
+      hint: "Pronombre 'se' antes de 'van': se van a abrazar."
+    },
+    "los dos amigos se van a abrazar en el aeropuerto (inf)": {
+      blanked: "los dos amigos se van a [_____] en el aeropuerto",
+      correct: "abrazar",
+      choices: ["abrazar", "abrazarse", "abrazan", "abrazaron"],
+      type: "verb",
+      targetVerb: "abrazarse",
+      tense: "present",
+      hint: "El pronombre 'se' ya está antes de 'van' (se van a...). El infinitivo va solo: abrazar (¡nunca *se van a abrazarse)!"
+    },
+    "nosotros nos vamos a abrazar con alegría": {
+      blanked: "nosotros [_____] a abrazar con alegría",
+      correct: "nos vamos",
+      choices: ["nos vamos", "vamos", "se van", "me voy"],
+      type: "verb",
+      targetVerb: "abrazarse",
+      tense: "present",
+      hint: "Pronombre 'nos' para nosotros antes del verbo: nos vamos a abrazar."
+    },
+    "nosotros nos vamos a abrazar con alegría (inf)": {
+      blanked: "nosotros nos vamos a [_____] con alegría",
+      correct: "abrazar",
+      choices: ["abrazar", "abrazarnos", "abrazan", "abrazarse"],
+      type: "verb",
+      targetVerb: "abrazarse",
+      tense: "present",
+      hint: "El pronombre 'nos' ya está antes de 'vamos'. El infinitivo va solo: abrazar (¡nunca *nos vamos a abrazarnos)!"
+    },
+    "nosotros vamos a abrazarnos con alegría": {
+      blanked: "nosotros vamos a [_____] con alegría",
+      correct: "abrazarnos",
+      choices: ["abrazarnos", "abrazar", "abrazarse", "nos abrazamos"],
+      type: "verb",
+      targetVerb: "abrazarse",
+      tense: "present",
+      hint: "Sin pronombre antes de 'vamos', se une 'nos' al infinitivo: abrazarnos (nunca 'se' con nosotros)."
+    },
+    "los dos estudiantes se van a conocer hoy": {
+      blanked: "los dos estudiantes [_____] a conocer hoy",
+      correct: "se van",
+      choices: ["se van", "van", "se va", "nos vamos"],
+      type: "verb",
+      targetVerb: "conocerse",
+      tense: "present",
+      hint: "Pronombre 'se' antes de 'van': se van a conocer."
+    },
+    "los dos estudiantes se van a conocer hoy (inf)": {
+      blanked: "los dos estudiantes se van a [_____] hoy",
+      correct: "conocer",
+      choices: ["conocer", "conocerse", "conocen", "conocieron"],
+      type: "verb",
+      targetVerb: "conocerse",
+      tense: "present",
+      hint: "El pronombre 'se' ya está antes de 'van'. Usa el infinitivo simple: conocer."
+    },
+    "nosotros nos queremos conocer mejor": {
+      blanked: "nosotros [_____] conocer mejor",
+      correct: "nos queremos",
+      choices: ["nos queremos", "queremos", "se quieren", "me quiero"],
+      type: "verb",
+      targetVerb: "conocerse",
+      tense: "present",
+      hint: "Pronombre 'nos' colocado antes del verbo querer: nos queremos conocer."
+    },
+    "nosotros nos queremos conocer mejor (inf)": {
+      blanked: "nosotros nos queremos [_____] mejor",
+      correct: "conocer",
+      choices: ["conocer", "conocernos", "conocen", "conocerse"],
+      type: "verb",
+      targetVerb: "conocerse",
+      tense: "present",
+      hint: "El pronombre 'nos' ya está antes de 'queremos'. Usa el infinitivo simple: conocer."
+    },
+    "nosotros queremos conocernos mejor": {
+      blanked: "nosotros queremos [_____] mejor",
+      correct: "conocernos",
+      choices: ["conocernos", "conocer", "conocerse", "nos conocemos"],
+      type: "verb",
+      targetVerb: "conocerse",
+      tense: "present",
+      hint: "Une 'nos' al final del infinitivo: conocernos."
+    },
+    "los amigos se van a despedir en la estación": {
+      blanked: "los amigos [_____] a despedir en la estación",
+      correct: "se van",
+      choices: ["se van", "van", "se va", "nos vamos"],
+      type: "verb",
+      targetVerb: "despedirse",
+      tense: "present",
+      hint: "Pronombre 'se' antes de 'van': se van a despedir."
+    },
+    "los amigos se van a despedir en la estación (inf)": {
+      blanked: "los amigos se van a [_____] en la estación",
+      correct: "despedir",
+      choices: ["despedir", "despedirse", "despiden", "se despiden"],
+      type: "verb",
+      targetVerb: "despedirse",
+      tense: "present",
+      hint: "El pronombre 'se' ya está antes de 'van'. Usa el infinitivo simple: despedir."
+    },
+    "los amigos van a despedirse en la estación": {
+      blanked: "los amigos van a [_____] en la estación",
+      correct: "despedirse",
+      choices: ["despedirse", "despedir", "se despiden", "despiden"],
+      type: "verb",
+      targetVerb: "despedirse",
+      tense: "present",
+      hint: "Sin pronombre antes del verbo, se une 'se' al infinitivo: despedirse."
+    },
+    "nosotros nos tenemos que despedir ahora": {
+      blanked: "nosotros nos tenemos que [_____] ahora",
+      correct: "despedir",
+      choices: ["despedir", "despedirnos", "despedirse", "nos despedimos"],
+      type: "verb",
+      targetVerb: "despedirse",
+      tense: "present",
+      hint: "El pronombre 'nos' ya está antes de 'tenemos'. Usa el infinitivo simple: despedir."
+    },
+    "nosotros tenemos que despedirnos ahora": {
+      blanked: "nosotros tenemos que [_____] ahora",
+      correct: "despedirnos",
+      choices: ["despedirnos", "despedir", "despedirse", "nos despedimos"],
+      type: "verb",
+      targetVerb: "despedirse",
+      tense: "present",
+      hint: "Une 'nos' al final del infinitivo: despedirnos."
+    },
+    "nosotros nos vamos a reunir en la cafetería": {
+      blanked: "nosotros [_____] a reunir en la cafetería",
+      correct: "nos vamos",
+      choices: ["nos vamos", "vamos", "se van", "me voy"],
+      type: "verb",
+      targetVerb: "reunirse",
+      tense: "present",
+      hint: "Pronombre 'nos' antes de 'vamos': nos vamos a reunir."
+    },
+    "nosotros nos vamos a reunir en la cafetería (inf)": {
+      blanked: "nosotros nos vamos a [_____] en la cafetería",
+      correct: "reunir",
+      choices: ["reunir", "reunirnos", "reúnen", "reunirse"],
+      type: "verb",
+      targetVerb: "reunirse",
+      tense: "present",
+      hint: "El pronombre 'nos' ya está al frente: 'nos vamos a...'. Usa el infinitivo simple: reunir."
+    },
+    "nosotros vamos a reunirnos en la cafetería": {
+      blanked: "nosotros vamos a [_____] en la cafetería",
+      correct: "reunirnos",
+      choices: ["reunirnos", "reunir", "reunirse", "nos reunimos"],
+      type: "verb",
+      targetVerb: "reunirse",
+      tense: "present",
+      hint: "Une el pronombre 'nos' al infinitivo: reunirnos."
+    },
+    "nosotros nos tenemos que ayudar con la tarea": {
+      blanked: "nosotros nos tenemos que [_____] con la tarea",
+      correct: "ayudar",
+      choices: ["ayudar", "ayudarnos", "ayudan", "ayudarse"],
+      type: "verb",
+      targetVerb: "ayudarse",
+      tense: "present",
+      hint: "El pronombre 'nos' ya está antes de 'tenemos'. Usa el infinitivo simple: ayudar."
+    },
+    "nosotros tenemos que ayudarnos con la tarea": {
+      blanked: "nosotros tenemos que [_____] con la tarea",
+      correct: "ayudarnos",
+      choices: ["ayudarnos", "ayudar", "ayudarse", "nos ayudamos"],
+      type: "verb",
+      targetVerb: "ayudarse",
+      tense: "present",
+      hint: "Une el pronombre 'nos' al infinitivo: ayudarnos."
+    },
+    "yo me voy a acostar temprano esta noche": {
+      blanked: "yo me voy a [_____] temprano esta noche",
+      correct: "acostar",
+      choices: ["acostar", "acostarme", "acuesto", "acostarse"],
+      type: "verb",
+      targetVerb: "acostarse",
+      tense: "present",
+      hint: "El pronombre 'me' ya está antes de 'voy'. Usa el infinitivo simple: acostar (no dupliques *me voy a acostarme)."
+    },
+    "yo voy a acostarme temprano esta noche": {
+      blanked: "yo voy a [_____] temprano esta noche",
+      correct: "acostarme",
+      choices: ["acostarme", "acostar", "me acuesto", "acostarse"],
+      type: "verb",
+      targetVerb: "acostarse",
+      tense: "present",
+      hint: "Une 'me' al final del infinitivo: acostarme."
+    },
+    "tú te tienes que lavar las manos antes de comer": {
+      blanked: "tú te tienes que [_____] las manos antes de comer",
+      correct: "lavar",
+      choices: ["lavar", "lavarte", "lavas", "lavarse"],
+      type: "verb",
+      targetVerb: "lavarse",
+      tense: "present",
+      hint: "El pronombre 'te' ya está antes de 'tienes'. Usa el infinitivo simple: lavar."
+    },
+    "tú tienes que lavarte las manos antes de comer": {
+      blanked: "tú tienes que [_____] las manos antes de comer",
+      correct: "lavarte",
+      choices: ["lavarte", "lavar", "te lavas", "lavarse"],
+      type: "verb",
+      targetVerb: "lavarse",
+      tense: "present",
+      hint: "Une 'te' al final del infinitivo: lavarte."
+    },
     "los amigos se despiden en la estación": {
       blanked: "los amigos [_____] en la estación",
       correct: "se despiden",
@@ -1462,6 +1678,18 @@ export function generateFillInTheBlank(sentenceItem) {
     targetKey = "nosotros nos vamos a besar antes de salir (inf)";
   } else if (targetKey === "los novios se van a besar en el altar" && Math.random() > 0.5) {
     targetKey = "los novios se van a besar en el altar (inf)";
+  } else if (targetKey === "los dos amigos se van a abrazar en el aeropuerto" && Math.random() > 0.5) {
+    targetKey = "los dos amigos se van a abrazar en el aeropuerto (inf)";
+  } else if (targetKey === "nosotros nos vamos a abrazar con alegría" && Math.random() > 0.5) {
+    targetKey = "nosotros nos vamos a abrazar con alegría (inf)";
+  } else if (targetKey === "los dos estudiantes se van a conocer hoy" && Math.random() > 0.5) {
+    targetKey = "los dos estudiantes se van a conocer hoy (inf)";
+  } else if (targetKey === "nosotros nos queremos conocer mejor" && Math.random() > 0.5) {
+    targetKey = "nosotros nos queremos conocer mejor (inf)";
+  } else if (targetKey === "los amigos se van a despedir en la estación" && Math.random() > 0.5) {
+    targetKey = "los amigos se van a despedir en la estación (inf)";
+  } else if (targetKey === "nosotros nos vamos a reunir en la cafetería" && Math.random() > 0.5) {
+    targetKey = "nosotros nos vamos a reunir en la cafetería (inf)";
   }
 
   let spec = BLANK_SPECS[targetKey];

@@ -320,27 +320,6 @@ export default function App() {
             <div style={{ fontSize: '0.85rem', color: '#ff7a00', fontWeight: 'bold' }}>
               🔥 {state.streak} days
             </div>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => { setSaveStatus(null); setShowSettings(true); }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                fontSize: '0.78rem',
-                padding: '5px 11px',
-                borderRadius: '20px',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--card-border)',
-                background: 'rgba(255, 255, 255, 0.04)',
-                cursor: 'pointer'
-              }}
-              title="Guardar partida, exportar / importar y configurar"
-            >
-              <Save size={13} color="var(--primary)" />
-              <span>Guardar</span>
-            </button>
             <a 
               href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback"
               className="btn btn-secondary btn-sm"
@@ -361,31 +340,7 @@ export default function App() {
               <span>Feedback</span>
             </a>
           </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => { setSaveStatus(null); setShowSettings(true); }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                fontSize: '0.78rem',
-                padding: '5px 12px',
-                borderRadius: '20px',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--card-border)',
-                background: 'rgba(255, 255, 255, 0.04)',
-                cursor: 'pointer'
-              }}
-              title="Cargar partida o configurar"
-            >
-              <Upload size={13} color="var(--primary)" />
-              <span>Cargar Partida</span>
-            </button>
-          </div>
-        )}
+        ) : null}
       </header>
 
       {/* Main Screen Content */}

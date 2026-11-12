@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGameState } from './hooks/useGameState';
 import Dashboard from './components/Dashboard';
 import PlacementTest from './components/PlacementTest';
@@ -8,7 +8,7 @@ import AiChat from './components/AiChat';
 import MiniGames from './components/MiniGames';
 import BadgeTrophy from './components/BadgeTrophy';
 import MistakesDungeon from './components/MistakesDungeon';
-import { Settings, RefreshCw, Mail, Volume2, Sparkles, X } from 'lucide-react';
+import { Settings, RefreshCw, Mail, Volume2, Sparkles, X, Download, Upload, Copy, Check, FileText, Save } from 'lucide-react';
 import { subscribeToVoices, formatVoiceLabel, speakSpanish } from './utils/speechHelper';
 import './App.css';
 
@@ -49,7 +49,9 @@ export default function App() {
     setTtsRate,
     setUseGeminiTts,
     toggleTranslateInstructions,
-    setTranslateInstructions
+    setTranslateInstructions,
+    exportSaveData,
+    importSaveData,
   } = useGameState();
 
   const [view, setView] = useState('dashboard');
@@ -59,6 +61,107 @@ export default function App() {
   const [prevLevel, setPrevLevel] = useState(state.level);
   const [tempKey, setTempKey] = useState(state.apiKeys.gemini || "");
   const [availableVoices, setAvailableVoices] = useState([]);
+
+  // Save / Load import-export state
+  const [saveStatus, setSaveStatus] = useState(null); // { type: 'success' | 'error', message: string }
+  const [copiedSave, setCopiedSave] = useState(false);
+  const [showPasteImport, setShowPasteImport] = useState(false);
+  const [pastedSaveText, setPastedSaveText] = useState("");
+  const fileInputRef = useRef(null);
+
+  const handleExportDownload = () => {
+    try {
+      const saveObj = exportSaveData();
+      const jsonStr = JSON.stringify(saveObj, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `estudiamos102_save_lvl${state.level}_stage${state.questStage}_${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setSaveStatus({ type: 'success', message: '¡Archivo de guardado descargado exitosamente!' });
+    } catch (e) {
+      console.error("Export download error:", e);
+      setSaveStatus({ type: 'error', message: 'Error al exportar el archivo de guardado.' });
+    }
+  };
+
+  const handleExportCopy = async () => {
+    try {
+      const saveObj = exportSaveData();
+      const jsonStr = JSON.stringify(saveObj, null, 2);
+      await navigator.clipboard.writeText(jsonStr);
+      setCopiedSave(true);
+      setSaveStatus({ type: 'success', message: '¡Código de guardado copiado al portapapeles!' });
+      setTimeout(() => setCopiedSave(false), 2500);
+    } catch (e) {
+      console.error("Export copy error:", e);
+      setSaveStatus({ type: 'error', message: 'No se pudo copiar automáticamente. Puedes descargar el archivo .json.' });
+    }
+  };
+
+  const handleFileImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (state.hasCompletedPlacement && (state.level > 1 || state.xp > 0 || state.questStage > 1)) {
+      if (!window.confirm("¿Deseas restaurar esta partida? Esto reemplazará tu progreso actual con los datos del archivo.")) {
+        e.target.value = '';
+        return;
+      }
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target.result;
+        const res = importSaveData(text);
+        if (res.success) {
+          if (res.level) setPrevLevel(res.level);
+          setSaveStatus({ type: 'success', message: res.message });
+          setView('dashboard');
+        } else {
+          setSaveStatus({ type: 'error', message: res.error });
+        }
+      } catch (err) {
+        console.error("File read error:", err);
+        setSaveStatus({ type: 'error', message: 'Error al procesar el archivo seleccionado.' });
+      }
+    };
+    reader.onerror = () => {
+      setSaveStatus({ type: 'error', message: 'Error al cargar el archivo del dispositivo.' });
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const handlePasteImport = () => {
+    if (!pastedSaveText.trim()) {
+      setSaveStatus({ type: 'error', message: 'Por favor pega el código JSON de tu partida antes de restaurar.' });
+      return;
+    }
+
+    if (state.hasCompletedPlacement && (state.level > 1 || state.xp > 0 || state.questStage > 1)) {
+      if (!window.confirm("¿Deseas restaurar esta partida? Esto reemplazará tu progreso actual con el código pegado.")) {
+        return;
+      }
+    }
+
+    const res = importSaveData(pastedSaveText.trim());
+    if (res.success) {
+      if (res.level) setPrevLevel(res.level);
+      setSaveStatus({ type: 'success', message: res.message });
+      setPastedSaveText("");
+      setShowPasteImport(false);
+      setView('dashboard');
+    } else {
+      setSaveStatus({ type: 'error', message: res.error });
+    }
+  };
 
   // Subscribe to loaded system/browser voices
   useEffect(() => {
@@ -113,7 +216,7 @@ export default function App() {
   // Determine active view. Force placement test if not completed
   const getActiveView = () => {
     if (!state.hasCompletedPlacement) {
-      return <PlacementTest completePlacement={completePlacement} />;
+      return <PlacementTest completePlacement={completePlacement} onOpenSettings={() => { setSaveStatus(null); setShowSettings(true); }} />;
     }
 
     switch (view) {
@@ -188,7 +291,7 @@ export default function App() {
             playWithNarfy={playWithNarfy}
             setView={setView}
             setStudyQuestTab={setStudyQuestTab}
-            onOpenSettings={() => setShowSettings(true)}
+            onOpenSettings={() => { setSaveStatus(null); setShowSettings(true); }}
           />
         );
     }
@@ -206,8 +309,8 @@ export default function App() {
           </div>
         </div>
 
-        {state.hasCompletedPlacement && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        {state.hasCompletedPlacement ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               Lvl <strong>{state.level}</strong>
             </div>
@@ -217,6 +320,27 @@ export default function App() {
             <div style={{ fontSize: '0.85rem', color: '#ff7a00', fontWeight: 'bold' }}>
               🔥 {state.streak} days
             </div>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => { setSaveStatus(null); setShowSettings(true); }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.78rem',
+                padding: '5px 11px',
+                borderRadius: '20px',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--card-border)',
+                background: 'rgba(255, 255, 255, 0.04)',
+                cursor: 'pointer'
+              }}
+              title="Guardar partida, exportar / importar y configurar"
+            >
+              <Save size={13} color="var(--primary)" />
+              <span>Guardar</span>
+            </button>
             <a 
               href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback"
               className="btn btn-secondary btn-sm"
@@ -236,6 +360,30 @@ export default function App() {
               <Mail size={13} color="var(--primary)" />
               <span>Feedback</span>
             </a>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => { setSaveStatus(null); setShowSettings(true); }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.78rem',
+                padding: '5px 12px',
+                borderRadius: '20px',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--card-border)',
+                background: 'rgba(255, 255, 255, 0.04)',
+                cursor: 'pointer'
+              }}
+              title="Cargar partida o configurar"
+            >
+              <Upload size={13} color="var(--primary)" />
+              <span>Cargar Partida</span>
+            </button>
           </div>
         )}
       </header>
@@ -506,6 +654,146 @@ export default function App() {
                 >
                   <Mail size={14} color="var(--primary)" /> Enviar correo a jsorba@mail.pima.edu
                 </a>
+              </div>
+
+              {/* Save & Backup Section */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.82rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Save size={15} color="var(--primary)" /> Guardar y Restaurar (Save & Backup)
+                  </label>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    Lvl {state.level} • {state.gold} G • Etapa {state.questStage}
+                  </span>
+                </div>
+
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '10px', lineHeight: 1.35 }}>
+                  Exporta tu archivo de guardado para respaldar tu progreso o transferirlo a otro navegador o dispositivo.
+                </span>
+
+                {saveStatus && (
+                  <div style={{
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    marginBottom: '10px',
+                    background: saveStatus.type === 'success' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                    border: saveStatus.type === 'success' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                    color: saveStatus.type === 'success' ? '#10b981' : '#ef4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '8px'
+                  }}>
+                    <span>{saveStatus.message}</span>
+                    <button 
+                      type="button" 
+                      onClick={() => setSaveStatus(null)}
+                      style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.8rem', padding: 0 }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
+                {/* Export Buttons */}
+                <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleExportDownload}
+                    style={{ flex: 1, fontSize: '0.75rem', padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                    title="Descargar archivo .json con tu progreso"
+                  >
+                    <Download size={13} /> Exportar (.json)
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handleExportCopy}
+                    style={{ fontSize: '0.75rem', padding: '6px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
+                    title="Copiar código JSON al portapapeles"
+                  >
+                    {copiedSave ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
+                    <span>{copiedSave ? "¡Copiado!" : "Copiar"}</span>
+                  </button>
+                </div>
+
+                {/* Import Buttons */}
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".json,application/json"
+                    onChange={handleFileImport}
+                    style={{ display: 'none' }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ flex: 1, fontSize: '0.75rem', padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                    title="Cargar archivo .json desde tu dispositivo"
+                  >
+                    <Upload size={13} color="var(--primary)" /> Importar Archivo
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowPasteImport(!showPasteImport)}
+                    style={{ fontSize: '0.75rem', padding: '6px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
+                    title="Pegar código JSON de guardado"
+                  >
+                    <FileText size={13} />
+                    <span>Pegar</span>
+                  </button>
+                </div>
+
+                {/* Collapsible Paste Box */}
+                {showPasteImport && (
+                  <div style={{ marginTop: '10px', padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                      Pega aquí el código JSON de tu partida:
+                    </label>
+                    <textarea
+                      value={pastedSaveText}
+                      onChange={(e) => setPastedSaveText(e.target.value)}
+                      placeholder='{"app":"estudiamos_102","data":{...}}'
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        fontSize: '0.72rem',
+                        fontFamily: 'monospace',
+                        background: 'rgba(0,0,0,0.4)',
+                        border: '1px solid rgba(255,255,255,0.15)',
+                        borderRadius: '6px',
+                        color: 'var(--text-primary)',
+                        padding: '6px',
+                        resize: 'vertical'
+                      }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', marginTop: '6px' }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => { setShowPasteImport(false); setPastedSaveText(""); }}
+                        style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={handlePasteImport}
+                        style={{ fontSize: '0.72rem', padding: '4px 10px' }}
+                      >
+                        Restaurar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Danger Zone */}

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import vocabularyData from '../data/vocabulary.json';
 import { formatEnglishPrompt } from '../utils/difficultyMapper';
-import { Swords, ArrowRight, Trophy } from 'lucide-react';
+import { Swords, ArrowRight, Trophy, Upload } from 'lucide-react';
 import { generateConjugationQuestion } from '../utils/conjugationHelper';
 import { generateSentenceBuilderQuestion } from '../utils/sentenceBuilderHelper';
 import SentenceBuilder from './SentenceBuilder';
 
-export default function PlacementTest({ completePlacement }) {
+export default function PlacementTest({ completePlacement, onOpenSettings }) {
   const [started, setStarted] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0); // 0 to 15
   const [questionsList, setQuestionsList] = useState([]);
@@ -217,6 +217,16 @@ export default function PlacementTest({ completePlacement }) {
           <button className="btn btn-secondary" onClick={() => completePlacement(0, 1)} style={{ padding: '12px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--card-border)' }}>
             Skip & Start from Beginning (Stage 1)
           </button>
+          {onOpenSettings && (
+            <button 
+              type="button" 
+              className="btn btn-secondary" 
+              onClick={onOpenSettings} 
+              style={{ padding: '11px', fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}
+            >
+              <Upload size={14} color="var(--primary)" /> Restaurar Partida Existente (Import Save)
+            </button>
+          )}
         </div>
       </div>
     );

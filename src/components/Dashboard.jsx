@@ -10,7 +10,8 @@ import {
   Gamepad2, 
   Settings, 
   Heart,
-  Mail
+  Mail,
+  Save
 } from 'lucide-react';
 import NarfySprite from './NarfySprite';
 
@@ -51,9 +52,24 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem' }}>¡Hola, Aventurero!</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Welcome back. What is your goal today?</p>
           </div>
-          <button className="btn btn-secondary" onClick={onOpenSettings}>
-            <Settings size={18} /> Settings
-          </button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button 
+              className="btn btn-secondary" 
+              onClick={onOpenSettings}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              title="Guardar o exportar archivo de tu partida"
+            >
+              <Save size={16} color="var(--primary)" /> Guardar Partida
+            </button>
+            <button 
+              className="btn btn-secondary" 
+              onClick={onOpenSettings} 
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              title="Configuración del juego"
+            >
+              <Settings size={16} /> Configuración
+            </button>
+          </div>
         </div>
 
         {state.fainted && (

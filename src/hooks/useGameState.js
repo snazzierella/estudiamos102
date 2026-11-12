@@ -1050,6 +1050,108 @@ export function useGameState() {
     setState(prev => ({ ...prev, useGeminiTts: val }));
   };
 
+  const exportSaveData = () => {
+    return {
+      app: 'estudiamos_102',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      summary: {
+        level: state.level,
+        xp: state.xp,
+        gold: state.gold,
+        streak: state.streak,
+        stage: state.questStage,
+        completedLevels: state.completedLevels?.length || 0,
+        badges: state.badges?.length || 0
+      },
+      data: state
+    };
+  };
+
+  const importSaveData = (importedData) => {
+    try {
+      let rawState = importedData;
+      if (typeof importedData === 'string') {
+        rawState = JSON.parse(importedData);
+      }
+      if (rawState && rawState.data && typeof rawState.data === 'object') {
+        rawState = rawState.data;
+      }
+
+      if (!rawState || typeof rawState !== 'object') {
+        return { success: false, error: 'Formato de archivo inválido. (Invalid save format)' };
+      }
+
+      if (
+        typeof rawState.level !== 'number' &&
+        typeof rawState.questStage !== 'number' &&
+        typeof rawState.hasCompletedPlacement !== 'boolean'
+      ) {
+        return { success: false, error: 'El archivo no parece ser un guardado válido de Estudiamos 102. (Unrecognized save file)' };
+      }
+
+      const unit1Words = getStageWords(1);
+      let stageFlashcardsSeen = [...new Set([...(rawState.stageFlashcardsSeen || []), ...unit1Words])];
+      let wordsAnsweredCorrectly = Array.isArray(rawState.wordsAnsweredCorrectly) ? rawState.wordsAnsweredCorrectly : [];
+      const questStage = Number(rawState.questStage) || 1;
+      if (questStage > 1) {
+        wordsAnsweredCorrectly = [...new Set([...wordsAnsweredCorrectly, ...unit1Words])];
+      }
+
+      const level = Math.max(1, Number(rawState.level) || 1);
+      const gold = Math.max(0, Number(rawState.gold) || 0);
+
+      const merged = {
+        ...INITIAL_STATE,
+        ...rawState,
+        level,
+        xp: Math.max(0, Number(rawState.xp) || 0),
+        hp: Math.min(100, Math.max(0, typeof rawState.hp === 'number' ? rawState.hp : 100)),
+        gold,
+        streak: Math.max(0, Number(rawState.streak) || 0),
+        questStage,
+        questLevel: Math.max(1, Number(rawState.questLevel) || 1),
+        stageFlashcardsSeen,
+        wordsAnsweredCorrectly,
+        completedLevels: Array.isArray(rawState.completedLevels) ? rawState.completedLevels : [],
+        levelRecords: (rawState.levelRecords && typeof rawState.levelRecords === 'object') ? rawState.levelRecords : {},
+        inventory: {
+          ...INITIAL_STATE.inventory,
+          ...(rawState.inventory || {})
+        },
+        equipped: {
+          ...INITIAL_STATE.equipped,
+          ...(rawState.equipped || {})
+        },
+        dailyBounties: {
+          ...INITIAL_STATE.dailyBounties,
+          ...(rawState.dailyBounties || {})
+        },
+        apiKeys: {
+          ...INITIAL_STATE.apiKeys,
+          ...(rawState.apiKeys || {})
+        },
+        badges: Array.isArray(rawState.badges) ? rawState.badges : [],
+        mistakes: Array.isArray(rawState.mistakes) ? rawState.mistakes : [],
+        wordMastery: (rawState.wordMastery && typeof rawState.wordMastery === 'object') ? rawState.wordMastery : {},
+        hasCompletedPlacement: Boolean(rawState.hasCompletedPlacement),
+        excludeVosotros: rawState._hasSetVosotros ? Boolean(rawState.excludeVosotros) : true,
+        translateInstructions: Boolean(rawState.translateInstructions)
+      };
+
+      setState(merged);
+      localStorage.setItem('estudiamos_102_state', JSON.stringify(merged));
+      return {
+        success: true,
+        level,
+        message: `¡Partida restaurada con éxito! Nivel ${level}, ${gold} Oro, Etapa ${questStage}.`
+      };
+    } catch (err) {
+      console.error("Error importing save data:", err);
+      return { success: false, error: err.message || "Error al procesar el archivo de guardado." };
+    }
+  };
+
   return {
     state,
     addXp,
@@ -1088,5 +1190,7 @@ export function useGameState() {
     setUseGeminiTts,
     toggleTranslateInstructions,
     setTranslateInstructions,
+    exportSaveData,
+    importSaveData,
   };
 }

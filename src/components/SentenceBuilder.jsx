@@ -405,7 +405,7 @@ export default function SentenceBuilder({
               <span>
                 {translateInstructions 
                   ? "¡Excelente! Frase construida a la perfección. (Excellent! Sentence constructed perfectly.)"
-                  : "¡Excelente! Frase construida a la perfección."}
+                  : "Correct! Sentence constructed perfectly."}
               </span>
             </div>
           ) : (
@@ -415,11 +415,11 @@ export default function SentenceBuilder({
                 <span>
                   {translateInstructions 
                     ? "Orden incorrecto (Incorrect word order)" 
-                    : "Orden incorrecto"}
+                    : "Incorrect word order"}
                 </span>
               </div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                {translateInstructions ? "Frase correcta (Correct sentence):" : "Frase correcta:"}{' '}
+                {translateInstructions ? "Frase correcta (Correct sentence):" : "Correct sentence:"}{' '}
                 <strong style={{ color: '#ffffff' }}>&ldquo;{question.targetSentence}&rdquo;</strong>
               </div>
             </div>
@@ -435,7 +435,7 @@ export default function SentenceBuilder({
               color: '#bae6fd',
               lineHeight: '1.4'
             }}>
-              <strong style={{ color: '#38bdf8' }}>Estructura gramatical:</strong> {question.syntaxBreakdown}
+              <strong style={{ color: '#38bdf8' }}>Grammar Structure:</strong> {question.syntaxBreakdown}
             </div>
           )}
         </div>

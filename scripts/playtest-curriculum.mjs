@@ -90,9 +90,7 @@ for (const [unitStr, pool] of Object.entries(SENTENCE_POOLS)) {
       assert(sSpec.bankTokens && sSpec.bankTokens.length >= sSpec.targetTokens.length, `Bank tokens smaller than target: "${sItem.spanish}"`);
       assert(sSpec.distractors && sSpec.distractors.length >= 1, `Sentence missing distractors: "${sItem.spanish}"`, sSpec);
       assert(sSpec.meaning && sSpec.meaning.length > 0, `Sentence missing english meaning: "${sItem.spanish}"`);
-      if (unit >= 3) {
-        assert(sSpec.syntaxBreakdown && sSpec.syntaxBreakdown.length > 5, `Sentence missing valid syntax breakdown: "${sItem.spanish}"`);
-      }
+      assert(sSpec.syntaxBreakdown && sSpec.syntaxBreakdown.length > 5, `Sentence missing valid syntax breakdown in Unit ${unit}: "${sItem.spanish}"`);
 
       // Verify no distractor duplicates a target token
       const targetLower = new Set(sSpec.targetTokens.map(t => t.text.toLowerCase().replace(/[.,!?:;]/g, '')));

@@ -18,6 +18,7 @@ import {
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { generateSentenceBuilderQuestion, SENTENCE_POOLS } from '../utils/sentenceBuilderHelper';
+import { CONTRAST_CODEX_TABS, CONTRAST_TABS_CONTENT } from '../utils/codexData';
 import SentenceBuilder from './SentenceBuilder';
 import { 
   Swords, 
@@ -105,6 +106,7 @@ export default function StudyQuest({
   const [codexTense, setCodexTense] = useState("present");
   const [objectPronounTab, setObjectPronounTab] = useState("direct");
   const [contrastCodexTab, setContrastCodexTab] = useState("por_para");
+  const [codexLang, setCodexLang] = useState("en"); // 'en' (default) or 'es'
   const [isListening, setIsListening] = useState(false);
   
   // Hint reveal tracking for hintless lesson achievements
@@ -3857,26 +3859,16 @@ export default function StudyQuest({
                   style={{ animation: 'pop-in 0.3s ease-out' }}
                 >
                   {isQuestUserCorrect 
-                    ? `¡Correcto! ${comboCount >= 3 ? `Combo Streak ${comboCount}! ` : ''}` 
+                    ? `Correct! ${comboCount >= 3 ? `Combo Streak ${comboCount}! ` : ''}` 
                     : currentQuestQ.isContrastDecision
-                      ? (translateInstructions 
-                          ? `Incorrecto (Incorrect). Opción correcta (Correct option): "${currentQuestQ.correct}"`
-                          : `Incorrecto. Opción correcta: "${currentQuestQ.correct}"`)
+                      ? `Incorrect. Correct option: "${currentQuestQ.correct}"`
                       : currentQuestQ.isSentenceBuilder
-                        ? (translateInstructions 
-                            ? `Incorrecto (Incorrect). Frase correcta (Correct sentence): "${currentQuestQ.correct}"`
-                            : `Incorrecto. Frase correcta: "${currentQuestQ.correct}"`)
+                        ? `Incorrect. Correct sentence: "${currentQuestQ.correct}"`
                         : currentQuestQ.isConjugation
-                          ? (translateInstructions 
-                              ? `Incorrecto (Incorrect). Forma correcta para "${currentQuestQ.subjectPronoun || 'sujeto'}" (${isPreteriteTense(currentQuestQ) ? 'Pretérito' : 'Presente'}): "${currentQuestQ.correct}"`
-                              : `Incorrecto. Forma correcta para "${currentQuestQ.subjectPronoun || 'sujeto'}" (${isPreteriteTense(currentQuestQ) ? 'Pretérito' : 'Presente'}): "${currentQuestQ.correct}"`)
+                          ? `Incorrect. Correct form for "${currentQuestQ.subjectPronoun || 'subject'}" (${isPreteriteTense(currentQuestQ) ? 'Preterite' : 'Present'}): "${currentQuestQ.correct}"`
                           : currentQuestQ.isFillInTheBlank
-                            ? (translateInstructions 
-                                ? `Incorrecto (Incorrect). Palabra correcta (Correct word): "${currentQuestQ.correct}"`
-                                : `Incorrecto. Palabra correcta: "${currentQuestQ.correct}"`)
-                            : (translateInstructions 
-                                ? `Incorrecto (Incorrect). Traducción correcta (Correct translation): "${currentQuestQ.correct}"`
-                                : `Incorrecto! Traducción correcta: "${currentQuestQ.correct}"`)
+                            ? `Incorrect. Correct word: "${currentQuestQ.correct}"`
+                            : `Incorrect! Correct translation: "${currentQuestQ.correct}"`
                   }
 
                   {currentQuestQ.ruleExplanation && (
@@ -3891,7 +3883,7 @@ export default function StudyQuest({
                       textAlign: 'left',
                       lineHeight: 1.4
                     }}>
-                      <strong>💡 {translateInstructions ? "Regla Gramatical (Grammar Rule):" : "Regla Gramatical:"}</strong> {currentQuestQ.ruleExplanation}
+                      <strong>💡 Grammar Rule:</strong> {currentQuestQ.ruleExplanation}
                     </div>
                   )}
                   
@@ -4609,25 +4601,17 @@ export default function StudyQuest({
                   style={{ animation: 'pop-in 0.3s ease-out' }}
                 >
                   {isPracticeUserCorrect 
-                    ? (translateInstructions ? "¡Correcto! (Correct!) +10 XP | +1 Gold" : "¡Correcto! +10 XP | +1 Gold") 
+                    ? "Correct! +10 XP | +1 Gold" 
                     : practiceQuestions[practiceCurrentIdx]?.isContrastDecision
-                      ? (translateInstructions 
-                          ? `Incorrecto (Incorrect). Opción correcta (Correct option): "${practiceQuestions[practiceCurrentIdx].correct}"`
-                          : `Incorrecto! Opción correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`)
+                      ? `Incorrect! Correct option: "${practiceQuestions[practiceCurrentIdx].correct}"`
                       : practiceQuestions[practiceCurrentIdx]?.isSentenceBuilder
-                        ? (translateInstructions 
-                            ? `Incorrecto (Incorrect). Frase correcta (Correct sentence): "${practiceQuestions[practiceCurrentIdx].correct}"`
-                            : `Incorrecto! Frase correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`)
+                        ? `Incorrect! Correct sentence: "${practiceQuestions[practiceCurrentIdx].correct}"`
                         : practiceQuestions[practiceCurrentIdx]?.isConjugation
-                          ? (translateInstructions 
-                              ? `Incorrecto (Incorrect). Forma correcta para "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'sujeto'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
-                              : `Incorrecto! Forma correcta para "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'sujeto'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`)
-                          : (translateInstructions 
-                              ? `Incorrecto (Incorrect). Respuesta correcta (Correct answer): "${practiceQuestions[practiceCurrentIdx].correct}"`
-                              : `Incorrecto! Respuesta correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`)
+                          ? `Incorrect! Correct form for "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'subject'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Preterite' : 'Present'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                          : `Incorrect! Correct answer: "${practiceQuestions[practiceCurrentIdx].correct}"`
                   }
                   <button className="btn btn-primary" onClick={handlePracticeNext} style={{ width: '100%', marginTop: '16px' }}>
-                    {translateInstructions ? "Siguiente Pregunta (Next Question)" : "Siguiente Pregunta"} <ArrowRight size={16} />
+                    Next Question <ArrowRight size={16} />
                   </button>
                 </div>
               )}
@@ -4934,14 +4918,14 @@ export default function StudyQuest({
                         style={{ animation: 'pop-in 0.3s ease-out' }}
                       >
                         {isRedemptionCorrect
-                          ? "¡Correcto!" 
+                          ? "Correct!" 
                           : currentQ.isContrastDecision
-                            ? `Incorrecto. Opción correcta: "${currentQ.correct}"`
+                            ? `Incorrect. Correct option: "${currentQ.correct}"`
                             : currentQ.isSentenceBuilder
-                              ? `Incorrecto. Frase correcta: "${currentQ.correct}"`
+                              ? `Incorrect. Correct sentence: "${currentQ.correct}"`
                               : currentQ.isConjugation
-                                ? `Incorrecto. Correct form for "${currentQ.subjectPronoun || 'subject'}" (${isPreteriteTense(currentQ) ? 'Pretérito' : 'Presente'}): "${currentQ.correct}"`
-                                : `Incorrecto. Correct answer: "${currentQ.correct}"`
+                                ? `Incorrect. Correct form for "${currentQ.subjectPronoun || 'subject'}" (${isPreteriteTense(currentQ) ? 'Preterite' : 'Present'}): "${currentQ.correct}"`
+                                : `Incorrect. Correct answer: "${currentQ.correct}"`
                         }
 
                         {currentQ.ruleExplanation && (
@@ -4956,7 +4940,7 @@ export default function StudyQuest({
                             textAlign: 'left',
                             lineHeight: 1.4
                           }}>
-                            <strong>💡 Regla Gramatical:</strong> {currentQ.ruleExplanation}
+                            <strong>💡 Grammar Rule:</strong> {currentQ.ruleExplanation}
                           </div>
                         )}
                         <button className="btn btn-primary" onClick={handleRedemptionNext} style={{ width: '100%', marginTop: '16px' }}>
@@ -4982,19 +4966,19 @@ export default function StudyQuest({
               <div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '2px' }}>
                   {codexVerb === 'guia_contrastes' 
-                    ? '⚖️ Guía de Contrastes / Which One to Use When' 
+                    ? (codexLang === 'en' ? '⚖️ Grammar Contrasts Guide (Which One to Use When)' : '⚖️ Guía de Contrastes / Cuándo Usar Cuál')
                     : codexVerb === 'pronombres_objeto' 
-                      ? '📖 Codex Gramatical' 
-                      : '📖 Codex de Conjugación'}
+                      ? (codexLang === 'en' ? '📖 Object Pronouns Codex' : '📖 Codex de Pronombres de Objeto')
+                      : (codexLang === 'en' ? '📖 Verb Conjugation Codex' : '📖 Codex de Conjugación')}
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                   {codexVerb === 'guia_contrastes'
-                    ? (translateInstructions 
-                        ? "Reglas contrastivas de decisión: matrices comparativas y ejemplos de Español 102." 
+                    ? (codexLang === 'en' 
+                        ? "Contrastive decision rules, comparison matrices, and Spanish 102 examples." 
                         : "Reglas contrastivas de decisión: matrices comparativas y ejemplos de Español 102.")
                     : codexVerb === 'pronombres_objeto'
-                      ? (translateInstructions ? "Pronombres de Objeto Directo, Indirecto y Dobles (Object Pronouns)" : "Pronombres de Objeto: Directo, Indirecto y Dobles")
-                      : <>Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong></>}
+                      ? (codexLang === 'en' ? "Direct (DOP), Indirect (IOP), and Double Object Pronouns (se lo/la)." : "Pronombres de Objeto Directo, Indirecto y Dobles")
+                      : (codexLang === 'en' ? <>Verb: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong></> : <>Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong></>)}
                 </p>
               </div>
               <button 
@@ -5006,8 +4990,63 @@ export default function StudyQuest({
               </button>
             </div>
 
+            {/* Dedicated Language Setting Box in Codex */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '10px',
+              padding: '8px 12px',
+              margin: '6px 0 12px',
+              fontSize: '0.82rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+                <span>🌐 <strong>{codexLang === 'en' ? "Explanation Language:" : "Idioma de Explicaciones:"}</strong></span>
+              </div>
+              <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.35)', borderRadius: '8px', padding: '2px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <button
+                  type="button"
+                  onClick={() => setCodexLang('en')}
+                  style={{
+                    padding: '4px 10px',
+                    fontSize: '0.75rem',
+                    borderRadius: '6px',
+                    background: codexLang === 'en' ? '#3b82f6' : 'transparent',
+                    color: codexLang === 'en' ? '#ffffff' : 'var(--text-secondary)',
+                    border: 'none',
+                    fontWeight: codexLang === 'en' ? '700' : '500',
+                    cursor: 'pointer',
+                    boxShadow: codexLang === 'en' ? '0 0 8px rgba(59, 130, 246, 0.5)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  🇺🇸 English (Default)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCodexLang('es')}
+                  style={{
+                    padding: '4px 10px',
+                    fontSize: '0.75rem',
+                    borderRadius: '6px',
+                    background: codexLang === 'es' ? '#8b5cf6' : 'transparent',
+                    color: codexLang === 'es' ? '#ffffff' : 'var(--text-secondary)',
+                    border: 'none',
+                    fontWeight: codexLang === 'es' ? '700' : '500',
+                    cursor: 'pointer',
+                    boxShadow: codexLang === 'es' ? '0 0 8px rgba(139, 92, 246, 0.5)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  🇪🇸 Español
+                </button>
+              </div>
+            </div>
+
             {/* Top Codex Mode Switcher (Guía de Contrastes / Pronombres / Conjugación) */}
-            <div style={{ display: 'flex', gap: '6px', margin: '10px 0 14px', background: 'rgba(0,0,0,0.3)', padding: '5px', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', gap: '6px', margin: '0 0 14px', background: 'rgba(0,0,0,0.3)', padding: '5px', borderRadius: '12px' }}>
               <button
                 type="button"
                 className="btn btn-sm"
@@ -5024,7 +5063,7 @@ export default function StudyQuest({
                 }}
                 onClick={() => setCodexVerb("guia_contrastes")}
               >
-                ⚖️ Guía de Contrastes
+                {codexLang === 'en' ? '⚖️ Contrast Guide' : '⚖️ Guía de Contrastes'}
               </button>
               <button
                 type="button"
@@ -5042,7 +5081,7 @@ export default function StudyQuest({
                 }}
                 onClick={() => setCodexVerb("pronombres_objeto")}
               >
-                🎯 Pronombres
+                {codexLang === 'en' ? '🎯 Pronouns' : '🎯 Pronombres'}
               </button>
               <button
                 type="button"
@@ -5064,7 +5103,7 @@ export default function StudyQuest({
                   }
                 }}
               >
-                📖 Conjugación
+                {codexLang === 'en' ? '📖 Conjugation' : '📖 Conjugación'}
               </button>
             </div>
 
@@ -5087,7 +5126,7 @@ export default function StudyQuest({
                   }}
                   onClick={() => setCodexTense('present')}
                 >
-                  ⚡ Presente
+                  {codexLang === 'en' ? '⚡ Present Tense' : '⚡ Presente'}
                 </button>
                 <button
                   type="button"
@@ -5105,7 +5144,7 @@ export default function StudyQuest({
                   }}
                   onClick={() => setCodexTense('preterite')}
                 >
-                  ⏳ Pretérito (Past)
+                  {codexLang === 'en' ? '⏳ Preterite Tense' : '⏳ Pretérito (Past)'}
                 </button>
               </div>
             )}
@@ -5124,7 +5163,7 @@ export default function StudyQuest({
                   textAlign: 'center', 
                   fontWeight: 600 
                 }}>
-                  🤝 Verbo Recíproco (Acción Mutua: "Each Other")
+                  {codexLang === 'en' ? '🤝 Reciprocal Verb (Mutual Action: "Each Other")' : '🤝 Verbo Recíproco (Acción Mutua: "Each Other")'}
                 </div>
               ) : parseVerb(codexVerb).isReflexive ? (
                 <div style={{ 
@@ -5138,7 +5177,7 @@ export default function StudyQuest({
                   textAlign: 'center', 
                   fontWeight: 600 
                 }}>
-                  ✨ Verbo Reflexivo (me, te, se, nos, os, se)
+                  {codexLang === 'en' ? '✨ Reflexive Verb (me, te, se, nos, os, se)' : '✨ Verbo Reflexivo (me, te, se, nos, os, se)'}
                 </div>
               ) : null
             )}
@@ -5147,16 +5186,7 @@ export default function StudyQuest({
               <div>
                 {/* Horizontal scrollable subtabs */}
                 <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '14px', scrollbarWidth: 'thin' }}>
-                  {[
-                    { id: 'por_para', label: '⏳ Por vs Para' },
-                    { id: 'to_become', label: '🔄 To Become' },
-                    { id: 'to_realize', label: '💡 To Realize' },
-                    { id: 'personal_a', label: '👤 Personal "a"' },
-                    { id: 'reciprocal_reflexive', label: '🤝 Recíproco vs Reflexivo' },
-                    { id: 'saber_conocer_ser_estar', label: '🔍 Saber & Ser' },
-                    { id: 'preterite_families', label: '📦 Pretérito' },
-                    { id: 'devolver_volver', label: '🔄 Devolver vs Volver' }
-                  ].map(tab => (
+                  {CONTRAST_CODEX_TABS.map(tab => (
                     <button
                       key={tab.id}
                       type="button"
@@ -5174,311 +5204,128 @@ export default function StudyQuest({
                       }}
                       onClick={() => setContrastCodexTab(tab.id)}
                     >
-                      {tab.label}
+                      {codexLang === 'en' ? tab.labelEn : tab.labelEs}
                     </button>
                   ))}
                 </div>
 
-                {/* Subtab 1: POR VS PARA */}
-                {contrastCodexTab === 'por_para' && (
-                  <div>
-                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
-                      ⏳ <strong>Por vs Para (Lección 3.3)</strong>
-                      <br />
-                      <strong>POR</strong> mira hacia la causa o el trayecto (motivo, duración, medio, intercambio). <strong>PARA</strong> mira hacia la meta o el futuro (destino, destinatario, fecha límite, propósito + infinitivo).
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Uso / Regla</th>
-                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Preposición</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo Clave</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[
-                          { uso: "Causa o motivo ('because of')", prep: "por", ex: "No fuimos por la lluvia." },
-                          { uso: "Duración de tiempo", prep: "por", ex: "Estudié por dos horas." },
-                          { uso: "Medio de transporte o comunicación", prep: "por", ex: "Mando la carta por correo / por tren." },
-                          { uso: "Intercambio o precio", prep: "por", ex: "Pagué 20 dólares por el libro." },
-                          { uso: "Movimiento por / a través de ('through')", prep: "por", ex: "Paseamos por el parque." },
-                          { uso: "Expresiones fijas comunes", prep: "por", ex: "Por favor, por fin, por ejemplo." },
-                          { uso: "Destino o dirección física", prep: "para", ex: "Salimos para Madrid mañana." },
-                          { uso: "Destinatario ('for whom')", prep: "para", ex: "Este regalo es para ti." },
-                          { uso: "Propósito u objetivo (+ infinitivo)", prep: "para", ex: "Estudio para aprender español." },
-                          { uso: "Fecha límite ('deadline')", prep: "para", ex: "La tarea es para el viernes." },
-                          { uso: "Opinión personal / Estándar", prep: "para", ex: "Para mí, es muy importante." }
-                        ].map((r, i) => (
-                          <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: r.prep === 'por' ? 'rgba(59, 130, 246, 0.04)' : 'rgba(16, 185, 129, 0.04)' }}>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{r.uso}</td>
-                            <td style={{ padding: '6px 8px', color: r.prep === 'por' ? '#60a5fa' : '#34d399', fontWeight: 700 }}>{r.prep}</td>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                {(() => {
+                  const content = CONTRAST_TABS_CONTENT[contrastCodexTab];
+                  if (!content) return null;
+                  const isEn = codexLang === 'en';
+                  return (
+                    <div>
+                      {/* Banner */}
+                      <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
+                        {isEn ? content.bannerEn : content.bannerEs}
+                      </div>
+
+                      {/* Table */}
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                            {(isEn ? content.headersEn : content.headersEs).map((h, i) => (
+                              <th key={i} style={{ padding: '6px 8px', color: i === 1 ? '#c4b5fd' : 'var(--text-secondary)', fontWeight: i === 1 ? 'bold' : 'normal' }}>
+                                {h}
+                              </th>
+                            ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                      💡 <em>Regla Mnemotécnica:</em> <strong>POR</strong> = Motivo / Trayecto / Intercambio. <strong>PARA</strong> = Destino / Plazo / Propósito.
-                    </div>
-                  </div>
-                )}
+                        </thead>
+                        <tbody>
+                          {content.rows.map((r, i) => {
+                            if (contrastCodexTab === 'por_para') {
+                              return (
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: r.prep === 'por' ? 'rgba(59, 130, 246, 0.04)' : 'rgba(16, 185, 129, 0.04)' }}>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{isEn ? r.ruleEn : r.ruleEs}</td>
+                                  <td style={{ padding: '6px 8px', color: r.prep === 'por' ? '#60a5fa' : '#34d399', fontWeight: 700 }}>{r.prep}</td>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                                </tr>
+                              );
+                            }
+                            if (contrastCodexTab === 'to_become') {
+                              return (
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                  <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{r.verb}</td>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{isEn ? r.typeEn : r.typeEs}</td>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-muted)' }}>{isEn ? r.effortEn : r.effortEs}</td>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                                </tr>
+                              );
+                            }
+                            if (contrastCodexTab === 'to_realize') {
+                              return (
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: r.isGood ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)' }}>
+                                  <td style={{ padding: '8px', color: r.isGood ? '#34d399' : '#f87171', fontWeight: 700 }}>{r.expr}</td>
+                                  <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>{isEn ? r.meaningEn : r.meaningEs}</td>
+                                  <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                                </tr>
+                              );
+                            }
+                            if (contrastCodexTab === 'personal_a') {
+                              return (
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: r.isYes ? 'rgba(16, 185, 129, 0.04)' : 'rgba(239, 68, 68, 0.04)' }}>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{isEn ? r.sitEn : r.sitEs}</td>
+                                  <td style={{ padding: '6px 8px', color: r.isYes ? '#34d399' : '#f87171', fontWeight: 700 }}>{r.takes}</td>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                                </tr>
+                              );
+                            }
+                            if (contrastCodexTab === 'reciprocal_reflexive') {
+                              return (
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                  <td style={{ padding: '8px', color: i === 0 ? '#c084fc' : '#f472b6', fontWeight: 700 }}>{r.type}</td>
+                                  <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>{isEn ? r.targetEn : r.targetEs}</td>
+                                  <td style={{ padding: '8px', color: 'var(--text-muted)' }}>{r.pron}</td>
+                                  <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                                </tr>
+                              );
+                            }
+                            if (contrastCodexTab === 'saber_conocer_ser_estar') {
+                              return (
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                  <td style={{ padding: '8px', color: '#60a5fa', fontWeight: 700 }}>{r.pair}</td>
+                                  <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>{isEn ? r.useEn : r.useEs}</td>
+                                  <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.pret}</td>
+                                </tr>
+                              );
+                            }
+                            if (contrastCodexTab === 'preterite_families') {
+                              return (
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                  <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{r.fam}</td>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{isEn ? r.ruleEn : r.ruleEs}</td>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                                </tr>
+                              );
+                            }
+                            if (contrastCodexTab === 'devolver_volver') {
+                              return (
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                  <td style={{ padding: '8px', color: i === 0 ? '#60a5fa' : '#34d399', fontWeight: 700 }}>{r.verb}</td>
+                                  <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>{isEn ? r.meanEn : r.meanEs}</td>
+                                  <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                                </tr>
+                              );
+                            }
+                            return null;
+                          })}
+                        </tbody>
+                      </table>
 
-                {/* Subtab 2: TO BECOME */}
-                {contrastCodexTab === 'to_become' && (
-                  <div>
-                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
-                      🔄 <strong>"To Become" en Español (Lección 4.4)</strong>
-                      <br />
-                      En inglés solo se usa "to become", pero en español se elige según la velocidad, el esfuerzo y la permanencia.
+                      {/* Footer Tip or Warning */}
+                      {content.tipEn && (
+                        <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                          {isEn ? content.tipEn : content.tipEs}
+                        </div>
+                      )}
+                      {content.warningEn && (
+                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#fca5a5', marginBottom: '12px', whiteSpace: 'pre-line' }}>
+                          {isEn ? content.warningEn : content.warningEs}
+                        </div>
+                      )}
                     </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Verbo</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Tipo de Cambio</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Esfuerzo</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo Clave</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[
-                          { verbo: "Ponerse + adjetivo", tipo: "Emoción / estado físico o ánimo pasajero", esfuerzo: "Involuntario, rápido", ex: "Se puso furioso / rojo / triste." },
-                          { verbo: "Volverse + adjetivo", tipo: "Transformación radical de personalidad", esfuerzo: "Profundo, drástico", ex: "Se volvió loco / rebelde / muy desconfiado." },
-                          { verbo: "Hacerse + sust./adj.", tipo: "Profesión, estatus, ideología, religión", esfuerzo: "Consciente, con tiempo y estudio", ex: "Se hizo médica / abogado / vegetariano." },
-                          { verbo: "Llegar a ser + sust.", tipo: "Culminación de una carrera exitosa", esfuerzo: "Meta final tras largo esfuerzo", ex: "Llegó a ser presidente de la empresa." }
-                        ].map((r, i) => (
-                          <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{r.verbo}</td>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{r.tipo}</td>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-muted)' }}>{r.esfuerzo}</td>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                      💡 <em>Regla de Oro:</em> Emoción rápida = <strong>Ponerse</strong>. Cambio radical de conducta = <strong>Volverse</strong>. Título o carrera universitaria = <strong>Hacerse</strong>.
-                    </div>
-                  </div>
-                )}
-
-                {/* Subtab 3: TO REALIZE */}
-                {contrastCodexTab === 'to_realize' && (
-                  <div>
-                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
-                      💡 <strong>"To Realize" vs "Realizar" (Lección 4.4 - ¡Falso Cognado!)</strong>
-                      <br />
-                      ¡Peligro de cognado falso! En español, <em>realizar</em> NUNCA significa percatarse mentalmente.
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Expresión</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Significado Real</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo Correcto</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(16, 185, 129, 0.05)' }}>
-                          <td style={{ padding: '8px', color: '#34d399', fontWeight: 700 }}>Darse cuenta de (que...)</td>
-                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>To become aware / realize mentally</td>
-                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Me di cuenta de que no tenía mi pasaporte."</td>
-                        </tr>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(239, 68, 68, 0.05)' }}>
-                          <td style={{ padding: '8px', color: '#f87171', fontWeight: 700 }}>Realizar (¡Falso Cognado!)</td>
-                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>To achieve, carry out, fulfill a project or dream</td>
-                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"El arquitecto realizó su gran proyecto."</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#fca5a5' }}>
-                      ❌ <strong>Nunca digas:</strong> "Yo realicé que tenía tarea."<br />
-                      ✅ <strong>Siempre di:</strong> "Me di cuenta de que tenía tarea."
-                    </div>
-                  </div>
-                )}
-
-                {/* Subtab 4: PERSONAL "A" */}
-                {contrastCodexTab === 'personal_a' && (
-                  <div>
-                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
-                      👤 <strong>La "A" Personal (Lección 2.2 y 3.1)</strong>
-                      <br />
-                      Se usa obligatoriamente cuando el objeto directo del verbo es una persona específica o una mascota querida.
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Situación</th>
-                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>¿Lleva "a"?</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo Clave</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[
-                          { sit: "Persona humana específica y conocida", lleva: "SÍ", ex: "Visito a mi abuela en el hospital." },
-                          { sit: "Mascota o animal doméstico querido", lleva: "SÍ", ex: "Paseo a mi perro por el parque." },
-                          { sit: "Cosa u objeto inanimado", lleva: "NO", ex: "Compré el boleto de avión." },
-                          { sit: "Persona no específica / desconocida", lleva: "NO", ex: "Busco un recepcionista bilingüe." },
-                          { sit: "Con el verbo tener (posesión ordinaria)", lleva: "NO", ex: "Tengo dos hermanos y un gato." }
-                        ].map((r, i) => (
-                          <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: r.lleva === 'SÍ' ? 'rgba(16, 185, 129, 0.04)' : 'rgba(239, 68, 68, 0.04)' }}>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{r.sit}</td>
-                            <td style={{ padding: '6px 8px', color: r.lleva === 'SÍ' ? '#34d399' : '#f87171', fontWeight: 700 }}>{r.lleva}</td>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                      💡 <em>Recuerda:</em> <strong>a + el = al</strong> (*Llamo al doctor*).
-                    </div>
-                  </div>
-                )}
-
-                {/* Subtab 5: RECIPROCAL VS REFLEXIVE */}
-                {contrastCodexTab === 'reciprocal_reflexive' && (
-                  <div>
-                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
-                      🤝 <strong>Recíproco vs Reflexivo (Lección 2.3)</strong>
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Tipo</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>¿Quién recibe la acción?</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Pronombres</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(168, 85, 247, 0.05)' }}>
-                          <td style={{ padding: '8px', color: '#c084fc', fontWeight: 700 }}>Reflexivo</td>
-                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>El propio sujeto (a sí mismo)</td>
-                          <td style={{ padding: '8px', color: 'var(--text-muted)' }}>me, te, se, nos, os, se</td>
-                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Juan se mira en el espejo."</td>
-                        </tr>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(236, 72, 153, 0.05)' }}>
-                          <td style={{ padding: '8px', color: '#f472b6', fontWeight: 700 }}>Recíproco</td>
-                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Mutuamente el uno al otro ("each other")</td>
-                          <td style={{ padding: '8px', color: 'var(--text-muted)' }}>¡SOLO plural! nos, os, se</td>
-                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Juan y Elena se miran el uno al otro."</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                      💡 <em>Pista Clave:</em> Los verbos recíprocos SIEMPRE requieren sujetos plurales (*nosotros*, *vosotros*, *ellos/ellas/ustedes*).
-                    </div>
-                  </div>
-                )}
-
-                {/* Subtab 6: SABER/CONOCER & SER/ESTAR */}
-                {contrastCodexTab === 'saber_conocer_ser_estar' && (
-                  <div>
-                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
-                      🔍 <strong>Saber vs Conocer & Ser vs Estar (Repaso y 2.1)</strong>
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Par</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Uso Fundamental</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>En Pretérito (Significado Especial)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                          <td style={{ padding: '8px', color: '#60a5fa', fontWeight: 700 }}>Saber</td>
-                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Datos, hechos, información, cómo hacer algo (+ inf.)</td>
-                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Supe la noticia ayer" (I found out / learned)</td>
-                        </tr>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                          <td style={{ padding: '8px', color: '#38bdf8', fontWeight: 700 }}>Conocer</td>
-                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Personas (con 'a'), lugares, familiaridad</td>
-                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Conocí a María anoche" (I met for the first time)</td>
-                        </tr>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                          <td style={{ padding: '8px', color: '#34d399', fontWeight: 700 }}>Ser (DOCTOR)</td>
-                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Descripción, Ocupación, Característica, Hora, Origen, Material</td>
-                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Fue una fiesta divertida"</td>
-                        </tr>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                          <td style={{ padding: '8px', color: '#f59e0b', fontWeight: 700 }}>Estar (PLACE)</td>
-                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Posición, Ubicación, Acción (-ndo), Condición, Emoción</td>
-                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Estuve en el hotel tres días"</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                {/* Subtab 7: PRETERITE FAMILIES */}
-                {contrastCodexTab === 'preterite_families' && (
-                  <div>
-                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
-                      📦 <strong>Familias de Verbos en el Pretérito (Lecciones 2.1, 3.2, 3.4, 4.1, 4.2)</strong>
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Familia</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Regla Específica</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplos</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[
-                          { fam: "Regulares", regla: "-ar (-é, -aste, -ó, -amos, -aron) vs -er/-ir (-í, -iste, -ió, -imos, -ieron)", ex: "habló, comió, vivió" },
-                          { fam: "Cambios de Raíz (Sandal)", regla: "¡SOLO verbos -ir! ¡SOLO en 3ª persona (él/ellos)! (e->i, o->u)", ex: "pidió/pidieron, durmió/durmieron, sirvió" },
-                          { fam: "Ortográficos (yo)", regla: "-car -> qué, -gar -> gué, -zar -> cé", ex: "busqué, pagué, crucé, regué" },
-                          { fam: "Cambio i -> y", regla: "Doble vocal en 3ª persona", ex: "leyó/leyeron, creyó, oyó, destruyó" },
-                          { fam: "Radicales U-stem", regla: "Raíz irregular SIN acentos (-e, -iste, -o, -imos, -ieron)", ex: "estuve, tuve, anduve, puse, pude, supe" },
-                          { fam: "Radicales I-stem", regla: "hacer (hice/hizo), querer (quise), venir (vine)", ex: "hice, hizo, quiso, vino" },
-                          { fam: "Radicales J-stem", regla: "Terminan en -eron en ellos (sin 'i')", ex: "dije/dijeron, traje/trajeron, conduje/condujeron" }
-                        ].map((r, i) => (
-                          <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{r.fam}</td>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{r.regla}</td>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#fca5a5' }}>
-                      ⚠️ <strong>Regla Crítica:</strong> Los verbos <em>-ar</em> y <em>-er</em> (como <em>volver</em>, <em>devolver</em>, <em>entender</em>) <strong>NUNCA</strong> tienen cambio de raíz en pretérito (*ellos devolvieron*, *él entendió*).
-                    </div>
-                  </div>
-                )}
-
-                {/* Subtab 8: DEVOLVER VS VOLVER */}
-                {contrastCodexTab === 'devolver_volver' && (
-                  <div>
-                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
-                      🔄 <strong>Devolver vs Volver (Lección 3.3)</strong>
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Verbo</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Significado</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo Clave</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(59, 130, 246, 0.05)' }}>
-                          <td style={{ padding: '8px', color: '#60a5fa', fontWeight: 700 }}>Devolver</td>
-                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Regresar un objeto o dinero a su tienda o lugar</td>
-                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Tengo que devolver estos pantalones a la tienda."</td>
-                        </tr>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(16, 185, 129, 0.05)' }}>
-                          <td style={{ padding: '8px', color: '#34d399', fontWeight: 700 }}>Volver</td>
-                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Regresar una persona físicamente</td>
-                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Nosotros volvimos de las vacaciones ayer."</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             ) : codexVerb === 'pronombres_objeto' ? (
               <div>
@@ -5500,7 +5347,7 @@ export default function StudyQuest({
                     }}
                     onClick={() => setObjectPronounTab('direct')}
                   >
-                    🎯 Directo (DOP)
+                    {codexLang === 'en' ? '🎯 Direct (DOP)' : '🎯 Directo (DOP)'}
                   </button>
                   <button
                     type="button"
@@ -5518,7 +5365,7 @@ export default function StudyQuest({
                     }}
                     onClick={() => setObjectPronounTab('indirect')}
                   >
-                    📬 Indirecto (IOP)
+                    {codexLang === 'en' ? '📬 Indirect (IOP)' : '📬 Indirecto (IOP)'}
                   </button>
                   <button
                     type="button"
@@ -5536,7 +5383,7 @@ export default function StudyQuest({
                     }}
                     onClick={() => setObjectPronounTab('double')}
                   >
-                    🔄 Doble (se lo/la)
+                    {codexLang === 'en' ? '🔄 Double (se lo/la)' : '🔄 Doble (se lo/la)'}
                   </button>
                 </div>
 
@@ -5553,90 +5400,101 @@ export default function StudyQuest({
                       color: '#93c5fd',
                       lineHeight: '1.45'
                     }}>
-                      🎯 <strong>{translateInstructions ? "Pronombres de Objeto Directo (Direct Object Pronouns - DOP)" : "Pronombres de Objeto Directo (DOP)"}</strong>
-                      <br />
-                      {translateInstructions 
-                        ? "Reemplazan directamente a la persona o cosa sobre la que recae la acción (Answers 'What?' or 'Whom?'):" 
-                        : "Reemplazan al sustantivo que recibe directamente la acción del verbo (responden a ¿Qué? o ¿A quién?):"}
+                      {codexLang === 'en' ? (
+                        <>
+                          🎯 <strong>Direct Object Pronouns (DOP)</strong>
+                          <br />
+                          Directly replace the person or thing that receives the action of the verb (answers <em>What?</em> or <em>Whom?</em>):
+                        </>
+                      ) : (
+                        <>
+                          🎯 <strong>Pronombres de Objeto Directo (DOP)</strong>
+                          <br />
+                          Reemplazan al sustantivo que recibe directamente la acción del verbo (responden a <em>¿Qué?</em> o <em>¿A quién?</em>):
+                        </>
+                      )}
                     </div>
 
-                {/* Direct Object Pronouns Table */}
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left', marginBottom: '14px' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                      <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Sustantivo / Persona</th>
-                      <th style={{ padding: '6px 8px', color: '#60a5fa', fontWeight: 'bold' }}>Pronombre OD</th>
-                      <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { person: "yo (me)", dop: "me", example: "Él me llamó" },
-                      { person: "tú (you inf.)", dop: "te", example: "Yo te escucho" },
-                      { person: "él / ella / ud. / masc. sing. (el pasaporte)", dop: "lo", example: "Yo lo tengo" },
-                      { person: "ella / ud. / fem. sing. (la maleta)", dop: "la", example: "Yo la compré" },
-                      { person: "nosotros / nosotras (us)", dop: "nos", example: "Nos ayuda" },
-                      { person: "vosotros / vosotras (Spain)", dop: "os", example: "Os vi", isVosotros: true },
-                      { person: "ellos / uds. / masc. pl. (los boletos)", dop: "los", example: "Los guardamos" },
-                      { person: "ellas / uds. / fem. pl. (las llaves)", dop: "las", example: "Las encontré" }
-                    ].map((row, idx) => (
-                      <tr 
-                        key={idx} 
-                        style={{ 
-                          borderBottom: '1px solid rgba(255,255,255,0.05)',
-                          opacity: row.isVosotros && state.excludeVosotros ? 0.6 : 1
-                        }}
-                      >
-                        <td style={{ padding: '6px 8px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{row.person}</td>
-                        <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{row.dop}</td>
-                        <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontSize: '0.8rem' }}><em>{row.example}</em></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    {/* Direct Object Pronouns Table */}
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left', marginBottom: '14px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{codexLang === 'en' ? 'Noun / Person' : 'Sustantivo / Persona'}</th>
+                          <th style={{ padding: '6px 8px', color: '#60a5fa', fontWeight: 'bold' }}>{codexLang === 'en' ? 'DO Pronoun' : 'Pronombre OD'}</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{codexLang === 'en' ? 'Example' : 'Ejemplo'}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { person: "yo (me)", dop: "me", example: codexLang === 'en' ? "Él me llamó (He called me)" : "Él me llamó" },
+                          { person: "tú (you inf.)", dop: "te", example: codexLang === 'en' ? "Yo te escucho (I listen to you)" : "Yo te escucho" },
+                          { person: "él / ella / ud. / masc. sing. (el pasaporte)", dop: "lo", example: codexLang === 'en' ? "Yo lo tengo (I have it)" : "Yo lo tengo" },
+                          { person: "ella / ud. / fem. sing. (la maleta)", dop: "la", example: codexLang === 'en' ? "Yo la compré (I bought it)" : "Yo la compré" },
+                          { person: "nosotros / nosotras (us)", dop: "nos", example: codexLang === 'en' ? "Nos ayuda (He helps us)" : "Nos ayuda" },
+                          { person: "vosotros / vosotras (Spain)", dop: "os", example: codexLang === 'en' ? "Os vi (I saw you all)" : "Os vi", isVosotros: true },
+                          { person: "ellos / uds. / masc. pl. (los boletos)", dop: "los", example: codexLang === 'en' ? "Los guardamos (We keep them)" : "Los guardamos" },
+                          { person: "ellas / uds. / fem. pl. (las llaves)", dop: "las", example: codexLang === 'en' ? "Las encontré (I found them)" : "Las encontré" }
+                        ].map((row, idx) => (
+                          <tr 
+                            key={idx} 
+                            style={{ 
+                              borderBottom: '1px solid rgba(255,255,255,0.05)',
+                              opacity: row.isVosotros && state.excludeVosotros ? 0.6 : 1
+                            }}
+                          >
+                            <td style={{ padding: '6px 8px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{row.person}</td>
+                            <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{row.dop}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontSize: '0.8rem' }}><em>{row.example}</em></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
 
-                {/* Placement Rules Callout */}
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '10px',
-                  padding: '12px',
-                  fontSize: '0.82rem',
-                  lineHeight: '1.5',
-                  marginBottom: '12px'
-                }}>
-                  <h4 style={{ color: 'var(--gold)', fontSize: '0.88rem', margin: '0 0 6px 0', fontWeight: 700 }}>
-                    🔄 {translateInstructions ? "Reglas de Colocación (Placement Rules)" : "Reglas de Colocación"}
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                      <strong style={{ color: '#93c5fd' }}>1. Un solo verbo conjugado:</strong>
-                      <br />
-                      El pronombre va <u>antes</u> del verbo:
-                      <br />
-                      <em>¿Tienes el pasaporte? — Sí, yo <u>lo</u> tengo en la mochila.</em>
-                      <br />
-                      <em>¿Compraste la maleta? — Sí, yo <u>la</u> compré ayer.</em>
+                    {/* Placement Rules Callout */}
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '10px',
+                      padding: '12px',
+                      fontSize: '0.82rem',
+                      lineHeight: '1.5',
+                      marginBottom: '12px'
+                    }}>
+                      <h4 style={{ color: 'var(--gold)', fontSize: '0.88rem', margin: '0 0 6px 0', fontWeight: 700 }}>
+                        {codexLang === 'en' ? '🔄 Placement Rules' : '🔄 Reglas de Colocación'}
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#93c5fd' }}>
+                            {codexLang === 'en' ? '1. Single conjugated verb:' : '1. Un solo verbo conjugado:'}
+                          </strong>
+                          <br />
+                          {codexLang === 'en' ? 'The pronoun goes before the verb:' : 'El pronombre va antes del verbo:'}
+                          <br />
+                          <em>¿Tienes el pasaporte? — Sí, yo <u>lo</u> tengo en la mochila.</em>
+                          <br />
+                          <em>¿Compraste la maleta? — Sí, yo <u>la</u> compré ayer.</em>
+                        </div>
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#93c5fd' }}>
+                            {codexLang === 'en' ? '2. Two verbs (ir a + inf / querer / poder / necesitar):' : '2. Dos verbos (ir a + inf / querer / poder / necesitar):'}
+                          </strong>
+                          <br />
+                          {codexLang === 'en' ? 'You have two correct positions!' : '¡Tienes dos posiciones correctas!'}
+                          <br />
+                          • <strong>{codexLang === 'en' ? 'Before' : 'Antes'}</strong> {codexLang === 'en' ? 'the conjugated verb:' : 'del verbo conjugado:'} <em>Nosotros <u>los</u> vamos a guardar.</em>
+                          <br />
+                          • <strong>{codexLang === 'en' ? 'Attached' : 'Unido'}</strong> {codexLang === 'en' ? 'to the end of the infinitive:' : 'al final del infinitivo:'} <em>Nosotros vamos a guardar<u>los</u>.</em>
+                        </div>
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#f87171' }}>{codexLang === 'en' ? '⚠️ Common mistakes:' : '⚠️ Errores comunes:'}</strong>
+                          <br />
+                          ❌ <em>Voy lo a guardar</em> {codexLang === 'en' ? '(Never put the pronoun in the middle!)' : '(¡Nunca pongas el pronombre en medio!)'}
+                          <br />
+                          ❌ <em>Lo voy a guardarlo</em> {codexLang === 'en' ? '(Never duplicate the pronoun!)' : '(¡Nunca dupliques el pronombre!)'}
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                      <strong style={{ color: '#93c5fd' }}>2. Dos verbos (ir a + inf / querer / poder / necesitar):</strong>
-                      <br />
-                      ¡Tienes dos posiciones correctas!
-                      <br />
-                      • <strong>Antes</strong> del verbo conjugado: <em>Nosotros <u>los</u> vamos a guardar.</em>
-                      <br />
-                      • <strong>Unido</strong> al final del infinitivo: <em>Nosotros vamos a guardar<u>los</u>.</em>
-                    </div>
-                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                      <strong style={{ color: '#f87171' }}>⚠️ Errores comunes:</strong>
-                      <br />
-                      ❌ <em>Voy lo a guardar</em> (¡Nunca pongas el pronombre en medio!)
-                      <br />
-                      ❌ <em>Lo voy a guardarlo</em> (¡Nunca dupliques el pronombre!)
-                    </div>
-                  </div>
-                </div>
-
                   </div>
                 )}
 
@@ -5653,30 +5511,38 @@ export default function StudyQuest({
                       color: '#c084fc',
                       lineHeight: '1.45'
                     }}>
-                      📬 <strong>{translateInstructions ? "Pronombres de Objeto Indirecto (Indirect Object Pronouns - IOP)" : "Pronombres de Objeto Indirecto (IOP)"}</strong>
-                      <br />
-                      {translateInstructions 
-                        ? "Indican a quién beneficia/perjudica la acción o quién recibe algo (Answers 'To whom?' or 'For whom?'):" 
-                        : "Indican a quién beneficia o perjudica la acción, o quién recibe algo (responden a ¿A quién? o ¿Para quién?):"}
+                      {codexLang === 'en' ? (
+                        <>
+                          📬 <strong>Indirect Object Pronouns (IOP)</strong>
+                          <br />
+                          Indicate who benefits or is affected by the action, or who receives something (answers <em>To whom?</em> or <em>For whom?</em>):
+                        </>
+                      ) : (
+                        <>
+                          📬 <strong>Pronombres de Objeto Indirecto (IOP)</strong>
+                          <br />
+                          Indican a quién beneficia o perjudica la acción, o quién recibe algo (responden a <em>¿A quién?</em> o <em>¿Para quién?</em>):
+                        </>
+                      )}
                     </div>
 
                     {/* Indirect Object Pronouns Table */}
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left', marginBottom: '14px' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Persona</th>
-                          <th style={{ padding: '6px 8px', color: '#c084fc', fontWeight: 'bold' }}>Pronombre OI</th>
-                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{codexLang === 'en' ? 'Person' : 'Persona'}</th>
+                          <th style={{ padding: '6px 8px', color: '#c084fc', fontWeight: 'bold' }}>{codexLang === 'en' ? 'IO Pronoun' : 'Pronombre OI'}</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{codexLang === 'en' ? 'Example' : 'Ejemplo'}</th>
                         </tr>
                       </thead>
                       <tbody>
                         {[
-                          { person: "yo (to/for me)", iop: "me", example: "Él me dio un regalo" },
-                          { person: "tú (to/for you inf.)", iop: "te", example: "Te dije la verdad" },
-                          { person: "él / ella / usted (to/for him/her)", iop: "le", example: "Le di las maletas al botones" },
-                          { person: "nosotros / nosotras (to/for us)", iop: "nos", example: "Nos mandaron los pasajes" },
-                          { person: "vosotros / vosotras (Spain)", iop: "os", example: "Os presté el mapa", isVosotros: true },
-                          { person: "ellos / ellas / ustedes (to/for them)", iop: "les", example: "Les pidió un taxi a los turistas" }
+                          { person: "yo (to/for me)", iop: "me", example: codexLang === 'en' ? "Él me dio un regalo (He gave me a gift)" : "Él me dio un regalo" },
+                          { person: "tú (to/for you inf.)", iop: "te", example: codexLang === 'en' ? "Te dije la verdad (I told you the truth)" : "Te dije la verdad" },
+                          { person: "él / ella / usted (to/for him/her)", iop: "le", example: codexLang === 'en' ? "Le di las maletas al botones (I gave the bags to the bellhop)" : "Le di las maletas al botones" },
+                          { person: "nosotros / nosotras (to/for us)", iop: "nos", example: codexLang === 'en' ? "Nos mandaron los pasajes (They sent us the tickets)" : "Nos mandaron los pasajes" },
+                          { person: "vosotros / vosotras (Spain)", iop: "os", example: codexLang === 'en' ? "Os presté el mapa (I lent you all the map)" : "Os presté el mapa", isVosotros: true },
+                          { person: "ellos / ellas / ustedes (to/for them)", iop: "les", example: codexLang === 'en' ? "Les pidió un taxi a los turistas (He called a taxi for the tourists)" : "Les pidió un taxi a los turistas" }
                         ].map((row, idx) => (
                           <tr 
                             key={idx} 
@@ -5704,13 +5570,17 @@ export default function StudyQuest({
                       marginBottom: '12px'
                     }}>
                       <h4 style={{ color: 'var(--gold)', fontSize: '0.88rem', margin: '0 0 6px 0', fontWeight: 700 }}>
-                        💡 {translateInstructions ? "Reglas Clave del Objeto Indirecto" : "Reglas Clave del Objeto Indirecto"}
+                        {codexLang === 'en' ? '💡 Key Indirect Object Rules' : '💡 Reglas Clave del Objeto Indirecto'}
                       </h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                          <strong style={{ color: '#c084fc' }}>1. Redundancia obligatoria con "a + persona":</strong>
+                          <strong style={{ color: '#c084fc' }}>
+                            {codexLang === 'en' ? '1. Mandatory redundancy with "a + person":' : '1. Redundancia obligatoria con "a + persona":'}
+                          </strong>
                           <br />
-                          En español, el pronombre (<strong>le / les / nos</strong>) se usa casi siempre, aunque se mencione el nombre de la persona:
+                          {codexLang === 'en' 
+                            ? 'In Spanish, the pronoun (le / les / nos) is almost always required, even when the person or noun is explicitly named:'
+                            : 'En español, el pronombre (le / les / nos) se usa casi siempre, aunque se mencione el nombre de la persona:'}
                           <br />
                           <em>Yo <u>le</u> di la tarjeta de embarque <u>al agente</u>.</em>
                           <br />
@@ -5719,11 +5589,13 @@ export default function StudyQuest({
                           <em>El botones <u>les</u> subió las maletas <u>a los huéspedes</u>.</em>
                         </div>
                         <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                          <strong style={{ color: '#c084fc' }}>2. Dos verbos (ir a + inf / querer / poder):</strong>
+                          <strong style={{ color: '#c084fc' }}>
+                            {codexLang === 'en' ? '2. Two verbs (ir a + inf / querer / poder):' : '2. Dos verbos (ir a + inf / querer / poder):'}
+                          </strong>
                           <br />
-                          • <strong>Antes</strong> del verbo conjugado: <em>Ella <u>me</u> va a mostrar las fotos.</em>
+                          • <strong>{codexLang === 'en' ? 'Before' : 'Antes'}</strong> {codexLang === 'en' ? 'the conjugated verb:' : 'del verbo conjugado:'} <em>Ella <u>me</u> va a mostrar las fotos.</em>
                           <br />
-                          • <strong>Unido</strong> al final del infinitivo: <em>Ella va a mostrar<u>me</u> las fotos.</em>
+                          • <strong>{codexLang === 'en' ? 'Attached' : 'Unido'}</strong> {codexLang === 'en' ? 'to the end of the infinitive:' : 'al final del infinitivo:'} <em>Ella va a mostrar<u>me</u> las fotos.</em>
                         </div>
                       </div>
                     </div>
@@ -5743,11 +5615,19 @@ export default function StudyQuest({
                       color: '#fde047',
                       lineHeight: '1.45'
                     }}>
-                      🔄 <strong>{translateInstructions ? "Pronombres Dobles de Objeto (Double Object Pronouns)" : "Pronombres Dobles de Objeto"}</strong>
-                      <br />
-                      {translateInstructions 
-                        ? "Cuando se combinan el Objeto Indirecto (persona) y el Objeto Directo (cosa) en la misma frase:" 
-                        : "Cuando combinamos el Objeto Indirecto (persona) y el Objeto Directo (cosa) en la misma oración:"}
+                      {codexLang === 'en' ? (
+                        <>
+                          🔄 <strong>Double Object Pronouns</strong>
+                          <br />
+                          When combining the Indirect Object (person receiving) and the Direct Object (thing) in the same sentence:
+                        </>
+                      ) : (
+                        <>
+                          🔄 <strong>Pronombres Dobles de Objeto</strong>
+                          <br />
+                          Cuando combinamos el Objeto Indirecto (persona) y el Objeto Directo (cosa) en la misma oración:
+                        </>
+                      )}
                     </div>
 
                     <div style={{
@@ -5761,9 +5641,13 @@ export default function StudyQuest({
                     }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ background: 'rgba(0,0,0,0.25)', padding: '8px 10px', borderRadius: '6px' }}>
-                          <strong style={{ color: '#fbbf24' }}>1. Orden Inmutable: Indirecto Primero, Directo Segundo (I.D.)</strong>
+                          <strong style={{ color: '#fbbf24' }}>
+                            {codexLang === 'en' ? '1. Immutable Order: Indirect First, Direct Second (I.D.)' : '1. Orden Inmutable: Indirecto Primero, Directo Segundo (I.D.)'}
+                          </strong>
                           <br />
-                          Mnemotecnia: <em>"La gente va antes que las cosas"</em> (o tu <strong>ID</strong>).
+                          {codexLang === 'en' 
+                            ? <>Mnemonic: <em>"People come before things"</em> (or your <strong>ID</strong> card).</>
+                            : <>Mnemotecnia: <em>"La gente va antes que las cosas"</em> (o tu <strong>ID</strong>).</>}
                           <br />
                           • <em>¿Me prestas el libro? — Sí, <u>te</u> (IOP) <u>lo</u> (DOP) presto.</em>
                           <br />
@@ -5771,11 +5655,13 @@ export default function StudyQuest({
                         </div>
 
                         <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '8px 10px', borderRadius: '6px' }}>
-                          <strong style={{ color: '#f87171' }}>2. ¡La Regla de Oro! LE / LES se convierte en SE:</strong>
+                          <strong style={{ color: '#f87171' }}>
+                            {codexLang === 'en' ? '2. Golden Rule! LE / LES turns into SE:' : '2. ¡La Regla de Oro! LE / LES se convierte en SE:'}
+                          </strong>
                           <br />
-                          En español, dos pronombres seguidos que empiezan con "L" chocan fonéticamente (no decimos <em>*le lo</em> ni <em>*les la</em>).
-                          <br />
-                          El pronombre indirecto <strong>le / les</strong> cambia obligatoriamente a <strong>se</strong>:
+                          {codexLang === 'en' 
+                            ? <>In Spanish, two consecutive pronouns starting with "L" clash phonetically (we never say <em>*le lo</em> or <em>*les la</em>). The indirect pronoun <strong>le / les</strong> must change to <strong>se</strong>:</>
+                            : <>En español, dos pronombres seguidos que empiezan con "L" chocan fonéticamente (no decimos <em>*le lo</em> ni <em>*les la</em>). El pronombre indirecto <strong>le / les</strong> cambia obligatoriamente a <strong>se</strong>:</>}
                           <br />
                           ❌ <em>Le lo compré</em> ➔ ✅ <strong>Se lo compré</strong>.
                           <br />
@@ -5785,11 +5671,13 @@ export default function StudyQuest({
                         </div>
 
                         <div style={{ background: 'rgba(0,0,0,0.25)', padding: '8px 10px', borderRadius: '6px' }}>
-                          <strong style={{ color: '#fbbf24' }}>3. Dos verbos (con acento escrito al final):</strong>
+                          <strong style={{ color: '#fbbf24' }}>
+                            {codexLang === 'en' ? '3. Two verbs (written accent added at end):' : '3. Dos verbos (con acento escrito al final):'}
+                          </strong>
                           <br />
-                          • <strong>Antes</strong> del verbo conjugado: <em>Ella <u>se lo</u> va a decir.</em>
+                          • <strong>{codexLang === 'en' ? 'Before' : 'Antes'}</strong> {codexLang === 'en' ? 'the conjugated verb:' : 'del verbo conjugado:'} <em>Ella <u>se lo</u> va a decir.</em>
                           <br />
-                          • <strong>Unidos</strong> al final: <em>Ella va a decír<u>selo</u>.</em> (¡Requiere tilde para mantener la pronunciación original!).
+                          • <strong>{codexLang === 'en' ? 'Attached' : 'Unidos'}</strong> {codexLang === 'en' ? 'at the end:' : 'al final:'} <em>Ella va a decír<u>selo</u>.</em> {codexLang === 'en' ? '(Requires an accent mark to maintain original stress!)' : '(¡Requiere tilde para mantener la pronunciación original!)'}
                         </div>
                       </div>
                     </div>
@@ -5806,11 +5694,13 @@ export default function StudyQuest({
                   lineHeight: '1.45',
                   marginTop: '10px'
                 }}>
-                  <strong style={{ color: '#c084fc' }}>💡 {translateInstructions ? "¿Objeto Directo o Indirecto? (Direct vs Indirect):" : "¿Objeto Directo o Indirecto?:"}</strong>
+                  <strong style={{ color: '#c084fc' }}>
+                    {codexLang === 'en' ? '💡 Direct vs Indirect Object Summary:' : '💡 ¿Objeto Directo o Indirecto?:'}
+                  </strong>
                   <br />
-                  • <strong>Directo (lo/la/los/las):</strong> ¿Qué o a quién? <em>(Veo el hotel → <u>Lo</u> veo)</em>.
+                  • <strong>{codexLang === 'en' ? 'Direct (lo/la/los/las):' : 'Directo (lo/la/los/las):'}</strong> {codexLang === 'en' ? 'What or whom receives the action?' : '¿Qué o a quién?'} <em>({codexLang === 'en' ? 'I see the hotel → Lo veo' : 'Veo el hotel → Lo veo'})</em>.
                   <br />
-                  • <strong>Indirecto (me/te/le/nos/os/les):</strong> ¿A quién le beneficia? <em>(<u>Le</u> di la llave al cliente)</em>.
+                  • <strong>{codexLang === 'en' ? 'Indirect (me/te/le/nos/os/les):' : 'Indirecto (me/te/le/nos/os/les):'}</strong> {codexLang === 'en' ? 'Who benefits or receives?' : '¿A quién le beneficia?'} <em>({codexLang === 'en' ? 'I gave the key to the guest → Le di la llave al cliente' : 'Le di la llave al cliente'})</em>.
                 </div>
               </div>
             ) : isGustarVerb(codexVerb) ? (
@@ -5825,40 +5715,62 @@ export default function StudyQuest({
                   color: '#fef08a',
                   lineHeight: '1.4'
                 }}>
-                  ⚠️ <strong>¡Regla de Oro!</strong> El verbo <em>gustar</em> <strong>NO</strong> se conjuga por la persona que siente el gusto (nunca se dice <em>"yo gusto"</em> para <em>I like</em>).
-                  <br />
-                  Solo tiene <strong>DOS formas</strong>:
-                  <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
-                    <li><strong>Singular:</strong> para cosas singulares o verbos infinitivos.</li>
-                    <li><strong>Plural:</strong> para cosas o sustantivos en plural.</li>
-                  </ul>
+                  {codexLang === 'en' ? (
+                    <>
+                      ⚠️ <strong>Golden Rule!</strong> The verb <em>gustar</em> is <strong>NOT</strong> conjugated by the person who likes something (never say <em>"yo gusto"</em> for <em>"I like"</em>).
+                      <br />
+                      It only has <strong>TWO forms</strong>:
+                      <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+                        <li><strong>Singular:</strong> for singular things or infinitive verbs.</li>
+                        <li><strong>Plural:</strong> for plural things or nouns.</li>
+                      </ul>
+                    </>
+                  ) : (
+                    <>
+                      ⚠️ <strong>¡Regla de Oro!</strong> El verbo <em>gustar</em> <strong>NO</strong> se conjuga por la persona que siente el gusto (nunca se dice <em>"yo gusto"</em> para <em>I like</em>).
+                      <br />
+                      Solo tiene <strong>DOS formas</strong>:
+                      <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+                        <li><strong>Singular:</strong> para cosas singulares o verbos infinitivos.</li>
+                        <li><strong>Plural:</strong> para cosas o sustantivos en plural.</li>
+                      </ul>
+                    </>
+                  )}
                 </div>
 
                 {/* 2 Forms display */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px', textAlign: 'center' }}>
                   <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px 8px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>Cosa Singular o Verbo</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>
+                      {codexLang === 'en' ? 'Singular Thing or Verb' : 'Cosa Singular o Verbo'}
+                    </span>
                     <strong style={{ fontSize: '1.4rem', color: 'var(--primary)', display: 'block', margin: '4px 0' }}>
                       {codexTense === 'preterite' ? 'gustó' : 'gusta'}
                     </strong>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                      {codexTense === 'preterite' ? 'ej: Me gustó la fiesta' : 'ej: Me gusta el café / bailar'}
+                      {codexTense === 'preterite' 
+                        ? (codexLang === 'en' ? 'e.g. Me gustó la fiesta' : 'ej: Me gustó la fiesta') 
+                        : (codexLang === 'en' ? 'e.g. Me gusta el café / bailar' : 'ej: Me gusta el café / bailar')}
                     </span>
                   </div>
                   <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px 8px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>Cosas Plurales</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>
+                      {codexLang === 'en' ? 'Plural Things' : 'Cosas Plurales'}
+                    </span>
                     <strong style={{ fontSize: '1.4rem', color: 'var(--accent)', display: 'block', margin: '4px 0' }}>
                       {codexTense === 'preterite' ? 'gustaron' : 'gustan'}
                     </strong>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                      {codexTense === 'preterite' ? 'ej: Me gustaron las fotos' : 'ej: Nos gustan los libros'}
+                      {codexTense === 'preterite' 
+                        ? (codexLang === 'en' ? 'e.g. Me gustaron las fotos' : 'ej: Me gustaron las fotos') 
+                        : (codexLang === 'en' ? 'e.g. Nos gustan los libros' : 'ej: Nos gustan los libros')}
                     </span>
                   </div>
                 </div>
 
                 {/* Pronouns list */}
                 <h4 style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px', fontWeight: 700 }}>
-                  Pronombres de Objeto Indirecto (¿A quién le gusta?):
+                  {codexLang === 'en' ? 'Indirect Object Pronouns (Who likes it?):' : 'Pronombres de Objeto Indirecto (¿A quién le gusta?):'}
                 </h4>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left', marginBottom: '10px' }}>
                   <tbody>
@@ -5898,20 +5810,34 @@ export default function StudyQuest({
                   color: '#fbcfe8',
                   lineHeight: '1.45'
                 }}>
-                  🤝 <strong>¡Regla de los Verbos Recíprocos! (Acción Mutua: "Each Other")</strong>
-                  <br />
-                  Las acciones recíprocas describen acciones que dos o más personas se hacen <strong>mutuamente</strong>.
-                  <br />
-                  Por definición, <strong>solo se conjugan en las personas del PLURAL</strong>:
+                  {codexLang === 'en' ? (
+                    <>
+                      🤝 <strong>Reciprocal Verbs Rule! (Mutual Action: "Each Other")</strong>
+                      <br />
+                      Reciprocal actions describe actions that two or more people perform on <strong>one another</strong>.
+                      <br />
+                      By definition, they are <strong>only conjugated in PLURAL persons</strong>:
+                    </>
+                  ) : (
+                    <>
+                      🤝 <strong>¡Regla de los Verbos Recíprocos! (Acción Mutua: "Each Other")</strong>
+                      <br />
+                      Las acciones recíprocas describen acciones que dos o más personas se hacen <strong>mutuamente</strong>.
+                      <br />
+                      Por definición, <strong>solo se conjugan en las personas del PLURAL</strong>:
+                    </>
+                  )}
                 </div>
 
                 {/* Plural Conjugation Table */}
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left', marginBottom: '14px' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                      <th style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>Pronombre Plural</th>
+                      <th style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>{codexLang === 'en' ? 'Plural Pronoun' : 'Pronombre Plural'}</th>
                       <th style={{ padding: '8px 10px', color: '#f472b6', fontWeight: 'bold' }}>
-                        {codexTense === 'preterite' ? 'Forma Pretérito (Acción mutua pasada)' : 'Forma Presente (Acción mutua)'}
+                        {codexTense === 'preterite' 
+                          ? (codexLang === 'en' ? 'Preterite Form (Past mutual action)' : 'Forma Pretérito (Acción mutua pasada)') 
+                          : (codexLang === 'en' ? 'Present Form (Mutual action)' : 'Forma Presente (Acción mutua)')}
                       </th>
                     </tr>
                   </thead>
@@ -5953,26 +5879,39 @@ export default function StudyQuest({
                   lineHeight: '1.5'
                 }}>
                   <h4 style={{ color: 'var(--gold)', fontSize: '0.88rem', margin: '0 0 6px 0', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    ❓ ¿Por qué no existe "yo me beso"? (El Objeto Directo)
+                    {codexLang === 'en' ? '❓ Why does "yo me beso" not exist? (The Direct Object)' : '❓ ¿Por qué no existe "yo me beso"? (El Objeto Directo)'}
                   </h4>
                   <p style={{ color: 'var(--text-secondary)', margin: '0 0 10px 0' }}>
-                    Decir <em>"me beso"</em> significaría literalmente <em>"I kiss myself"</em>. Para una acción individual hacia otra persona, el verbo ya no es recíproco ni reflexivo: es un verbo transitivo que toma un <strong>Objeto Directo</strong>:
+                    {codexLang === 'en' 
+                      ? <>Saying <em>"me beso"</em> would literally mean <em>"I kiss myself"</em>. For an individual action directed towards another person, the verb is neither reciprocal nor reflexive: it is a transitive verb that takes a <strong>Direct Object</strong>:</>
+                      : <>Decir <em>"me beso"</em> significaría literalmente <em>"I kiss myself"</em>. Para una acción individual hacia otra persona, el verbo ya no es recíproco ni reflexivo: es un verbo transitivo que toma un <strong>Objeto Directo</strong>:</>}
                   </p>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                      <strong style={{ color: 'var(--primary)' }}>1. Con "a" personal:</strong> <em>Yo beso <u>a mi abuela</u>.</em> / <em>Tú ayudas <u>a tus compañeros</u>.</em>
+                      <strong style={{ color: 'var(--primary)' }}>
+                        {codexLang === 'en' ? '1. With Personal "a":' : '1. Con "a" personal:'}
+                      </strong>{' '}
+                      <em>Yo beso <u>a mi abuela</u>.</em> / <em>Tú ayudas <u>a tus compañeros</u>.</em>
                     </div>
                     <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                      <strong style={{ color: 'var(--accent)' }}>2. Con Pronombre de Objeto Directo:</strong> <em>Yo <u>la</u> beso.</em> / <em>Él <u>me</u> besa.</em> 
+                      <strong style={{ color: 'var(--accent)' }}>
+                        {codexLang === 'en' ? '2. With Direct Object Pronoun:' : '2. Con Pronombre de Objeto Directo:'}
+                      </strong>{' '}
+                      <em>Yo <u>la</u> beso.</em> / <em>Él <u>me</u> besa.</em> 
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>
-                        (En <em>"Él me besa"</em>, <em>me</em> es el objeto directo [a mí], no un pronombre reflexivo)
+                        {codexLang === 'en' 
+                          ? '(In "Él me besa", "me" is the direct object [he kisses me], not a reflexive pronoun)' 
+                          : '(En "Él me besa", me es el objeto directo [a mí], no un pronombre reflexivo)'}
                       </span>
                     </div>
                     <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                      <strong style={{ color: 'var(--gold)' }}>3. Con partes del cuerpo o ropa:</strong> <em>Me lavo <u>las manos</u>.</em> / <em>Se cepilla <u>los dientes</u>.</em>
+                      <strong style={{ color: 'var(--gold)' }}>
+                        {codexLang === 'en' ? '3. With Body Parts or Clothing:' : '3. Con partes del cuerpo o ropa:'}
+                      </strong>{' '}
+                      <em>Me lavo <u>las manos</u>.</em> / <em>Se cepilla <u>los dientes</u>.</em>
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>
-                        (Aquí <em>las manos</em> y <em>los dientes</em> son el objeto directo)
+                        {codexLang === 'en' ? '(Here "las manos" and "los dientes" are the direct object)' : '(Aquí las manos y los dientes son el objeto directo)'}
                       </span>
                     </div>
                   </div>
@@ -5989,10 +5928,12 @@ export default function StudyQuest({
                   lineHeight: '1.5'
                 }}>
                   <h4 style={{ color: '#60a5fa', fontSize: '0.88rem', margin: '0 0 6px 0', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    🔄 ¿Cuándo usar "-rse" (infinitivo) vs "se ...n" (conjugado)?
+                    {codexLang === 'en' ? '🔄 When to use "-rse" (infinitive) vs "se ...n" (conjugated)?' : '🔄 ¿Cuándo usar "-rse" (infinitivo) vs "se ...n" (conjugado)?'}
                   </h4>
                   <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0' }}>
-                    ¡Ambas formas son correctas y esenciales en español! La elección depende de la estructura de la frase:
+                    {codexLang === 'en' 
+                      ? 'Both forms are correct and essential in Spanish! The choice depends on sentence structure:' 
+                      : '¡Ambas formas son correctas y esenciales en español! La elección depende de la estructura de la frase:'}
                   </p>
                   
                   {(() => {
@@ -6002,33 +5943,47 @@ export default function StudyQuest({
                     return (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                          <strong style={{ color: '#93c5fd' }}>1. Verbo Principal Conjugado ({theyForm}):</strong>
+                          <strong style={{ color: '#93c5fd' }}>
+                            {codexLang === 'en' ? `1. Main Conjugated Verb (${theyForm}):` : `1. Verbo Principal Conjugado (${theyForm}):`}
+                          </strong>
                           <br />
-                          {translateInstructions ? "Cuando el verbo es la acción directa de la oración (Main conjugated verb):" : "Cuando el verbo es la acción directa de la oración:"}
+                          {codexLang === 'en' ? 'When the verb is the direct action of the sentence:' : 'Cuando el verbo es la acción directa de la oración:'}
                           <br />
                           <em>Los dos amigos <u>{theyForm}</u> todos los días.</em>
                         </div>
                         <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                          <strong style={{ color: '#93c5fd' }}>2. Con Verbo Auxiliar o Perífrasis ({infSe}):</strong>
+                          <strong style={{ color: '#93c5fd' }}>
+                            {codexLang === 'en' ? `2. With Auxiliary Verb or Verbal Periphrasis (${infSe}):` : `2. Con Verbo Auxiliar o Perífrasis (${infSe}):`}
+                          </strong>
                           <br />
-                          {translateInstructions ? "Con verbos como ir a, querer, poder, deber (verb + attached infinitive):" : "Cuando sigue a verbos como ir a, querer, preferir, poder, deber, el pronombre se une al infinitivo:"}
+                          {codexLang === 'en' 
+                            ? 'When following verbs like ir a, querer, preferir, poder, deber, the pronoun attaches to the infinitive:' 
+                            : 'Cuando sigue a verbos como ir a, querer, preferir, poder, deber, el pronombre se une al infinitivo:'}
                           <br />
                           <em>Ellos van a <u>{infSe}</u>.</em> / <em>Ellos quieren <u>{infSe}</u>.</em>
                           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>
-                            (También se puede colocar antes del primer verbo: <em>"Se van a {cleanBase}"</em>)
+                            {codexLang === 'en' 
+                              ? `(Can also be placed before the first verb: "Se van a ${cleanBase}")` 
+                              : `(También se puede colocar antes del primer verbo: "Se van a ${cleanBase}")`}
                           </span>
                         </div>
                         <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                          <strong style={{ color: '#93c5fd' }}>3. Después de Preposiciones ({infSe}):</strong>
+                          <strong style={{ color: '#93c5fd' }}>
+                            {codexLang === 'en' ? `3. After Prepositions (${infSe}):` : `3. Después de Preposiciones (${infSe}):`}
+                          </strong>
                           <br />
-                          {translateInstructions ? "Después de preposiciones (antes de, después de, para):" : "En español, después de una preposición el verbo SIEMPRE va en infinitivo con el pronombre unido:"}
+                          {codexLang === 'en' 
+                            ? 'In Spanish, after a preposition the verb is ALWAYS in the infinitive with the pronoun attached:' 
+                            : 'En español, después de una preposición el verbo SIEMPRE va en infinitivo con el pronombre unido:'}
                           <br />
                           <em>Antes de <u>{infSe}</u>, hablaron un momento.</em>
                           <br />
                           <em>Corrieron para <u>{infSe}</u> con alegría.</em>
                         </div>
                         <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                          <strong style={{ color: '#93c5fd' }}>4. Con Gustar / Encantar y Frases Impersonales:</strong>
+                          <strong style={{ color: '#93c5fd' }}>
+                            {codexLang === 'en' ? `4. With Gustar / Encantar and Impersonal Phrases:` : `4. Con Gustar / Encantar y Frases Impersonales:`}
+                          </strong>
                           <br />
                           <em>A ellos les gusta <u>{infSe}</u>.</em> / <em>Es importante <u>{infSe}</u>.</em>
                         </div>
@@ -6041,9 +5996,9 @@ export default function StudyQuest({
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <th style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>Pronombre</th>
+                    <th style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>{codexLang === 'en' ? 'Pronoun' : 'Pronombre'}</th>
                     <th style={{ padding: '8px 10px', color: 'var(--primary)', fontWeight: 'bold' }}>
-                      {codexTense === 'preterite' ? 'Forma Pretérito' : 'Forma Presente'}
+                      {codexTense === 'preterite' ? (codexLang === 'en' ? 'Preterite Form' : 'Forma Pretérito') : (codexLang === 'en' ? 'Present Form' : 'Forma Presente')}
                     </th>
                   </tr>
                 </thead>
@@ -6080,7 +6035,7 @@ export default function StudyQuest({
             )}
             
             <button className="btn btn-secondary" onClick={() => setCodexVerb(null)} style={{ marginTop: '18px', width: '100%' }}>
-              Cerrar Codex
+              {codexLang === 'en' ? 'Close Codex' : 'Cerrar Codex'}
             </button>
           </div>
         </div>

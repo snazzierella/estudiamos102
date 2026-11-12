@@ -1935,7 +1935,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I do not know the correct answer to the question.",
       choices: ["sé", "conozco", "sabe", "conocemos"],
       correct: "sé",
-      ruleExplanation: "Usa 'saber' para hechos, datos o información concreta. La forma irregular en 'yo' es 'sé'."
+      ruleExplanation: "Use 'saber' for facts, data, or concrete information. The irregular 'yo' form is 'sé'.",
+      ruleExplanationEs: "Usa 'saber' para hechos, datos o información concreta. La forma irregular en 'yo' es 'sé'."
     },
     {
       contrastPair: "Saber vs Conocer",
@@ -1943,7 +1944,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "We know the new female math teacher.",
       choices: ["conocemos", "sabemos", "conozco", "saben"],
       correct: "conocemos",
-      ruleExplanation: "Usa 'conocer' (+ 'a' personal) para indicar familiaridad o conocimiento de personas y lugares."
+      ruleExplanation: "Use 'conocer' (+ personal 'a') to express familiarity or acquaintance with people or places.",
+      ruleExplanationEs: "Usa 'conocer' (+ 'a' personal) para indicar familiaridad o conocimiento de personas y lugares."
     },
     {
       contrastPair: "Saber vs Conocer",
@@ -1951,7 +1953,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Do you know how to play the piano or the guitar?",
       choices: ["sabes", "conoces", "sabe", "conoce"],
       correct: "sabes",
-      ruleExplanation: "Usa 'saber' (+ infinitivo) para habilidades aprendidas ('to know how to do something')."
+      ruleExplanation: "Use 'saber' (+ infinitive) to express learned skills or abilities ('to know how to do something').",
+      ruleExplanationEs: "Usa 'saber' (+ infinitivo) para habilidades aprendidas ('to know how to do something')."
     },
     {
       contrastPair: "Ser vs Estar",
@@ -1959,7 +1962,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "My brother is a doctor at the general hospital.",
       choices: ["es", "está", "son", "están"],
       correct: "es",
-      ruleExplanation: "Usa 'ser' para profesiones, identidad y características esenciales."
+      ruleExplanation: "Use 'ser' for professions, identity, and essential characteristics.",
+      ruleExplanationEs: "Usa 'ser' para profesiones, identidad y características esenciales."
     },
     {
       contrastPair: "Ser vs Estar",
@@ -1967,7 +1971,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "The library is next to the student center.",
       choices: ["está", "es", "están", "son"],
       correct: "está",
-      ruleExplanation: "Usa 'estar' para ubicación geográfica y posición física, incluso de edificios permanentes."
+      ruleExplanation: "Use 'estar' for geographical location and physical position, even of permanent buildings.",
+      ruleExplanationEs: "Usa 'estar' para ubicación geográfica y posición física, incluso de edificios permanentes."
     },
     {
       contrastPair: "Ser vs Estar",
@@ -1975,7 +1980,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Today the students are very tired because of the exam.",
       choices: ["están", "son", "está", "es"],
       correct: "están",
-      ruleExplanation: "Usa 'estar' para estados temporales, físicos o emocionales cambiantes."
+      ruleExplanation: "Use 'estar' for temporary, physical, or changing emotional conditions and states.",
+      ruleExplanationEs: "Usa 'estar' para estados temporales, físicos o emocionales cambiantes."
     }
   ],
 
@@ -1987,7 +1993,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I studied Spanish for two hours last night in my room.",
       choices: ["por", "para"],
       correct: "por",
-      ruleExplanation: "Usa 'por' para expresar duración de tiempo (duration of time: 'for 2 hours')."
+      ruleExplanation: "Use 'por' to express duration of time ('for 2 hours').",
+      ruleExplanationEs: "Usa 'por' para expresar duración de tiempo ('for 2 hours')."
     },
     {
       contrastPair: "Por vs Para",
@@ -1995,7 +2002,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I have to hand in this essay by Friday at three.",
       choices: ["para", "por"],
       correct: "para",
-      ruleExplanation: "Usa 'para' para indicar una fecha límite o plazo específico (deadline: 'by/for Friday')."
+      ruleExplanation: "Use 'para' to indicate a specific deadline or due date ('by/for Friday').",
+      ruleExplanationEs: "Usa 'para' para indicar una fecha límite o plazo específico ('by/for Friday')."
     },
     {
       contrastPair: "Por vs Para",
@@ -2003,7 +2011,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I paid forty dollars for this wool jacket.",
       choices: ["por", "para"],
       correct: "por",
-      ruleExplanation: "Usa 'por' para indicar intercambios, precios o dinero pagado (exchange / price)."
+      ruleExplanation: "Use 'por' to indicate exchanges, price, or money paid ('in exchange for').",
+      ruleExplanationEs: "Usa 'por' para indicar intercambios, precios o dinero pagado (exchange / price)."
     },
     {
       contrastPair: "Por vs Para",
@@ -2011,7 +2020,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I bought this medicine at the pharmacy for my grandmother.",
       choices: ["para", "por"],
       correct: "para",
-      ruleExplanation: "Usa 'para' para indicar el receptor o beneficiario final de una acción (recipient / beneficiary)."
+      ruleExplanation: "Use 'para' to indicate the recipient or final beneficiary of an action ('for whom').",
+      ruleExplanationEs: "Usa 'para' para indicar el receptor o beneficiario final de una acción (recipient / beneficiary)."
     },
     {
       contrastPair: "Por vs Para",
@@ -2019,7 +2029,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I exercise every morning in order to have good health.",
       choices: ["para", "por"],
       correct: "para",
-      ruleExplanation: "Usa 'para' (+ infinitivo) para expresar propósito o meta ('in order to' / purpose)."
+      ruleExplanation: "Use 'para' (+ infinitive) to express purpose or goal ('in order to').",
+      ruleExplanationEs: "Usa 'para' (+ infinitivo) para expresar propósito o meta ('in order to' / purpose)."
     },
     {
       contrastPair: "Por vs Para",
@@ -2027,7 +2038,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "The ambulance arrived at the hospital via/through the central highway.",
       choices: ["por", "para"],
       correct: "por",
-      ruleExplanation: "Usa 'por' para indicar la ruta, vía o medio de transporte/comunicación ('through / by')."
+      ruleExplanation: "Use 'por' to indicate the route, path, or means of transportation/communication ('through / by').",
+      ruleExplanationEs: "Usa 'por' para indicar la ruta, vía o medio de transporte/comunicación ('through / by')."
     },
     {
       contrastPair: "Por vs Para",
@@ -2035,7 +2047,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "The high-speed train departs for Seville at ten.",
       choices: ["para", "por"],
       correct: "para",
-      ruleExplanation: "Usa 'para' para indicar el destino final de un viaje (destination: 'bound for')."
+      ruleExplanation: "Use 'para' to indicate the final physical destination of travel ('headed for / bound for').",
+      ruleExplanationEs: "Usa 'para' para indicar el destino final de un viaje (destination: 'bound for')."
     },
     {
       contrastPair: "Por vs Para",
@@ -2043,7 +2056,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I have a high fever and headache, that is why I am not going to work.",
       choices: ["por", "para"],
       correct: "por",
-      ruleExplanation: "La locución fija es 'por eso' (that's why / therefore)."
+      ruleExplanation: "The fixed idiom is 'por eso' ('that is why / therefore').",
+      ruleExplanationEs: "La locución fija es 'por eso' (that's why / therefore)."
     },
     {
       contrastPair: "Por vs Para",
@@ -2051,7 +2065,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "After waiting at the clinic, at last the doctor saw me.",
       choices: ["por", "para"],
       correct: "por",
-      ruleExplanation: "La expresión fija es 'por fin' (at last / finally)."
+      ruleExplanation: "The fixed expression is 'por fin' ('at last / finally').",
+      ruleExplanationEs: "La expresión fija es 'por fin' (at last / finally)."
     },
     {
       contrastPair: "Por vs Para",
@@ -2059,7 +2074,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I carry pills in my bag, just in case my allergies act up.",
       choices: ["por", "para"],
       correct: "por",
-      ruleExplanation: "La locución idiomática es 'por si acaso' (just in case)."
+      ruleExplanation: "The idiomatic phrase is 'por si acaso' ('just in case').",
+      ruleExplanationEs: "La locución idiomática es 'por si acaso' (just in case)."
     },
     {
       contrastPair: "Por vs Para",
@@ -2067,7 +2083,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "To begin with, you should rest and drink plenty of warm water.",
       choices: ["Para", "Por"],
       correct: "Para",
-      ruleExplanation: "La locución fija es 'Para empezar' (to begin with / for starters)."
+      ruleExplanation: "The fixed phrase is 'Para empezar' ('to begin with / for starters').",
+      ruleExplanationEs: "La locución fija es 'Para empezar' (to begin with / for starters)."
     },
     {
       contrastPair: "Por vs Para",
@@ -2075,7 +2092,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "My brother does not like going to the dentist at all.",
       choices: ["para", "por"],
       correct: "para",
-      ruleExplanation: "La locución enfática negativa es 'para nada' (not at all)."
+      ruleExplanation: "The emphatic negative idiom is 'para nada' ('not at all').",
+      ruleExplanationEs: "La locución enfática negativa es 'para nada' (not at all)."
     },
     {
       contrastPair: "Por vs Para",
@@ -2083,7 +2101,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "This hot chamomile tea is for me.",
       choices: ["para", "por"],
       correct: "para",
-      ruleExplanation: "Usa 'para' con pronombres preposicionales para indicar el destinatario ('para mí' con tilde)."
+      ruleExplanation: "Use 'para' with prepositional pronouns to indicate the recipient/opinion ('para mí' with accent).",
+      ruleExplanationEs: "Usa 'para' con pronombres preposicionales para indicar el destinatario ('para mí' con tilde)."
     },
     {
       contrastPair: "Recíproco vs Reflexivo",
@@ -2091,7 +2110,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "The two friends hugged each other upon saying goodbye.",
       choices: ["uno", "mismo", "propio", "otro"],
       correct: "uno",
-      ruleExplanation: "La frase 'el uno al otro' clarifica explícitamente que la acción es recíproca entre dos sujetos."
+      ruleExplanation: "The phrase 'el uno al otro' explicitly clarifies that the action is reciprocal between two subjects ('each other').",
+      ruleExplanationEs: "La frase 'el uno al otro' clarifica explícitamente que la acción es recíproca entre dos sujetos."
     },
     {
       contrastPair: "Recíproco vs Reflexivo",
@@ -2099,7 +2119,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "The patient looked at himself in the bathroom mirror.",
       choices: ["mismo", "uno", "otro", "propio"],
       correct: "mismo",
-      ruleExplanation: "La frase 'a sí mismo' clarifica que la acción es reflexiva (el sujeto actúa sobre sí mismo)."
+      ruleExplanation: "The phrase 'a sí mismo' clarifies that the action is reflexive (the subject acts on themselves).",
+      ruleExplanationEs: "La frase 'a sí mismo' clarifica que la acción es reflexiva (el sujeto actúa sobre sí mismo)."
     }
   ],
 
@@ -2111,7 +2132,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Did you wash the kitchen dishes? —Yes, I already washed them all.",
       choices: ["los", "les", "lo", "las"],
       correct: "los",
-      ruleExplanation: "'Los platos' es el objeto directo masculino plural; se reemplaza únicamente por 'los' (nunca 'les')."
+      ruleExplanation: "'Los platos' is masculine plural direct object; it is replaced exclusively by 'los' (never 'les').",
+      ruleExplanationEs: "'Los platos' es el objeto directo masculino plural; se reemplaza únicamente por 'los' (nunca 'les')."
     },
     {
       contrastPair: "Objeto Directo vs Indirecto",
@@ -2119,7 +2141,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Did you take out the trash to the bin? —Yes, my brother took it out last night.",
       choices: ["la", "le", "lo", "las"],
       correct: "la",
-      ruleExplanation: "'La basura' es objeto directo femenino singular; se reemplaza por 'la'."
+      ruleExplanation: "'La basura' is feminine singular direct object; it is replaced by 'la'.",
+      ruleExplanationEs: "'La basura' es objeto directo femenino singular; se reemplaza por 'la'."
     },
     {
       contrastPair: "Personal 'a'",
@@ -2127,7 +2150,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Yesterday my mother accompanied my grandmother to the supermarket.",
       choices: ["a", "— (sin preposición)", "con", "de"],
       correct: "a",
-      ruleExplanation: "Se requiere obligatoriamente la 'a' personal porque el objeto directo es una persona específica ('mi abuela')."
+      ruleExplanation: "The personal 'a' is strictly required because the direct object is a specific person ('mi abuela').",
+      ruleExplanationEs: "Se requiere obligatoriamente la 'a' personal porque el objeto directo es una persona específica ('mi abuela')."
     },
     {
       contrastPair: "Personal 'a'",
@@ -2135,7 +2159,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "We cleaned the cafeteria tables after eating.",
       choices: ["— (sin preposición)", "a", "al", "para"],
       correct: "— (sin preposición)",
-      ruleExplanation: "NO se usa la 'a' personal cuando el objeto directo es una cosa u objeto inanimado ('las mesas')."
+      ruleExplanation: "Do NOT use the personal 'a' when the direct object is an inanimate thing or object ('las mesas').",
+      ruleExplanationEs: "NO se usa la 'a' personal cuando el objeto directo es una cosa u objeto inanimado ('las mesas')."
     },
     {
       contrastPair: "Personal 'a'",
@@ -2143,7 +2168,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Aunt Rosa took her little dog Lucas to the veterinary clinic.",
       choices: ["a", "— (sin preposición)", "en", "por"],
       correct: "a",
-      ruleExplanation: "Se utiliza la 'a' personal cuando el animal doméstico es considerado parte afectiva de la familia."
+      ruleExplanation: "Use the personal 'a' when a household pet is treated as a beloved member of the family.",
+      ruleExplanationEs: "Se utiliza la 'a' personal cuando el animal doméstico es considerado parte afectiva de la familia."
     },
     {
       contrastPair: "Pretérito: Cambio de Raíz",
@@ -2151,7 +2177,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "In the elegant restaurant, the customer ordered salmon with vegetables.",
       choices: ["pidió", "pedió", "pide", "pediste"],
       correct: "pidió",
-      ruleExplanation: "Solo los verbos -ir tienen cambio de raíz en el pretérito (e -> i) en 3ª persona: pedir -> pidió (nunca 'pedió')."
+      ruleExplanation: "Only -ir verbs stem-change in the preterite (e -> i) in the 3rd person: pedir -> pidió (never 'pedió').",
+      ruleExplanationEs: "Solo los verbos -ir tienen cambio de raíz en el pretérito (e -> i) en 3ª persona: pedir -> pidió (nunca 'pedió')."
     },
     {
       contrastPair: "Pretérito: Cambio de Raíz",
@@ -2159,7 +2186,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "The waiters served the main dishes very quickly.",
       choices: ["sirvieron", "servieron", "sirven", "servieronse"],
       correct: "sirvieron",
-      ruleExplanation: "El verbo servir (-ir) cambia e -> i en 3ª persona plural del pretérito: sirvieron."
+      ruleExplanation: "The verb servir (-ir) changes e -> i in the 3rd person plural of the preterite: sirvieron.",
+      ruleExplanationEs: "El verbo servir (-ir) cambia e -> i en 3ª persona plural del pretérito: sirvieron."
     },
     {
       contrastPair: "Pretérito: Cambio de Raíz",
@@ -2167,7 +2195,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Last night my little brother slept ten straight hours in his bed.",
       choices: ["durmió", "dormió", "duerme", "dormiste"],
       correct: "durmió",
-      ruleExplanation: "Dormir cambia o -> u en la 3ª persona del singular del pretérito: durmió (nunca 'dormió')."
+      ruleExplanation: "Dormir changes o -> u in the 3rd person singular of the preterite: durmió (never 'dormió').",
+      ruleExplanationEs: "Dormir cambia o -> u en la 3ª persona del singular del pretérito: durmió (nunca 'dormió')."
     },
     {
       contrastPair: "Pretérito: Sin Cambio en -ar/-er",
@@ -2175,7 +2204,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "We return books today, but yesterday they returned their clothes at the store.",
       choices: ["devolvieron", "devuelvieron", "devolvó", "devuelven"],
       correct: "devolvieron",
-      ruleExplanation: "¡Regla clave! Los verbos -ar y -er con cambio en presente NUNCA tienen cambio de raíz en pretérito: devolvieron."
+      ruleExplanation: "Key rule! Verbs in -ar and -er with present tense stem changes NEVER change stems in the preterite: devolvieron.",
+      ruleExplanationEs: "¡Regla clave! Los verbos -ar y -er con cambio en presente NUNCA tienen cambio de raíz en pretérito: devolvieron."
     },
     {
       contrastPair: "Pretérito: Ortografía en Yo",
@@ -2183,7 +2213,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Yesterday I paid for the clothes in cash at the cash register.",
       choices: ["pagué", "pagé", "pagó", "pago"],
       correct: "pagué",
-      ruleExplanation: "Los verbos en -gar cambian g -> gu delante de 'e' en la forma yo del pretérito para mantener el sonido /g/: pagué."
+      ruleExplanation: "Verbs ending in -gar change g -> gu before 'e' in the 'yo' preterite form to maintain the hard /g/ sound: pagué.",
+      ruleExplanationEs: "Los verbos en -gar cambian g -> gu delante de 'e' en la forma yo del pretérito para mantener el sonido /g/: pagué."
     },
     {
       contrastPair: "Pretérito: Ortografía en Yo",
@@ -2191,7 +2222,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I looked for a mailbox to drop off the letter for half an hour.",
       choices: ["busqué", "buscé", "buscó", "busco"],
       correct: "busqué",
-      ruleExplanation: "Los verbos en -car cambian c -> qu en la forma yo del pretérito para mantener el sonido /k/: busqué."
+      ruleExplanation: "Verbs ending in -car change c -> qu in the 'yo' preterite form to maintain the /k/ sound: busqué.",
+      ruleExplanationEs: "Los verbos en -car cambian c -> qu en la forma yo del pretérito para mantener el sonido /k/: busqué."
     },
     {
       contrastPair: "Devolver vs Volver",
@@ -2199,7 +2231,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I have to return this tight shirt to the clothing store.",
       choices: ["devolver", "volver"],
       correct: "devolver",
-      ruleExplanation: "Usa 'devolver' para devolver un objeto o dinero a su lugar. Usa 'volver' para el regreso físico de una persona."
+      ruleExplanation: "Use 'devolver' to return an item or money to a place/store. Use 'volver' for a person returning physically.",
+      ruleExplanationEs: "Usa 'devolver' para devolver un objeto o dinero a su lugar. Usa 'volver' para el regreso físico de una persona."
     }
   ],
 
@@ -2211,7 +2244,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "When the receptionist lost the reservation, the guest became furious.",
       choices: ["puso", "volvió", "hizo", "llegó"],
       correct: "puso",
-      ruleExplanation: "Usa 'ponerse' para cambios de estado emocional o físico rápidos, pasajeros e involuntarios (sudden emotional change)."
+      ruleExplanation: "Use 'ponerse' for sudden, temporary, and involuntary changes in emotional or physical state.",
+      ruleExplanationEs: "Usa 'ponerse' para cambios de estado emocional o físico rápidos, pasajeros e involuntarios."
     },
     {
       contrastPair: "To Become (Ponerse vs Volverse vs Hacerse)",
@@ -2219,7 +2253,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "My dog becomes completely crazy when he hears loud thunder.",
       choices: ["vuelve", "pone", "hace", "llega"],
       correct: "vuelve",
-      ruleExplanation: "Usa 'volverse' para transformaciones extremas o cambios drásticos de conducta o estado mental."
+      ruleExplanation: "Use 'volverse' for radical transformations or drastic changes in behavior or mental disposition.",
+      ruleExplanationEs: "Usa 'volverse' para transformaciones extremas o cambios drásticos de conducta o estado mental."
     },
     {
       contrastPair: "To Become (Ponerse vs Volverse vs Hacerse)",
@@ -2227,7 +2262,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "After studying ten years in medical school, she became a surgeon.",
       choices: ["hizo", "puso", "volvió", "dio"],
       correct: "hizo",
-      ruleExplanation: "Usa 'hacerse' para cambios de profesión o estatus que requieren esfuerzo consciente, estudio y tiempo."
+      ruleExplanation: "Use 'hacerse' for changes in profession, religion, or status requiring conscious effort, study, and time.",
+      ruleExplanationEs: "Usa 'hacerse' para cambios de profesión o estatus que requieren esfuerzo consciente, estudio y tiempo."
     },
     {
       contrastPair: "To Realize (Darse cuenta vs Realizar)",
@@ -2235,7 +2271,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I only realized that I didn't have my passport upon arriving at the airport.",
       choices: ["di", "realicé", "hice", "puse"],
       correct: "di",
-      ruleExplanation: "Usa 'darse cuenta de' para percatarse o darse cuenta mentalmente de un hecho ('me di cuenta')."
+      ruleExplanation: "Use 'darse cuenta de' to mentally realize or become aware of a fact ('me di cuenta').",
+      ruleExplanationEs: "Usa 'darse cuenta de' para percatarse o darse cuenta mentalmente de un hecho ('me di cuenta')."
     },
     {
       contrastPair: "To Realize (Darse cuenta vs Realizar)",
@@ -2243,7 +2280,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "The architect fulfilled his great dream of building the eco-friendly hotel.",
       choices: ["realizó", "se dio cuenta de", "se puso", "se volvió"],
       correct: "realizó",
-      ruleExplanation: "¡Cognado falso! 'Realizar' significa cumplir, llevar a cabo o materializar un proyecto o sueño (to fulfill / achieve)."
+      ruleExplanation: "False cognate! 'Realizar' means to fulfill, carry out, or achieve a project or dream (to fulfill / achieve).",
+      ruleExplanationEs: "¡Cognado falso! 'Realizar' significa cumplir, llevar a cabo o materializar un proyecto o sueño (to fulfill / achieve)."
     },
     {
       contrastPair: "Pronombres Dobles (se lo / se la)",
@@ -2251,7 +2289,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Did you give the tickets to the tourist? —Yes, I already gave them to him at the counter.",
       choices: ["se los", "le los", "les los", "se las"],
       correct: "se los",
-      ruleExplanation: "Regla obligatoria: Cuando 'le' o 'les' se encuentra antes de 'lo/la/los/las', cambia por fonética a 'se' ('se los', jamás 'le los')."
+      ruleExplanation: "Mandatory rule: When 'le' or 'les' appears before 'lo/la/los/las', it changes phonetically to 'se' ('se los', never 'le los').",
+      ruleExplanationEs: "Regla obligatoria: Cuando 'le' o 'les' se encuentra antes de 'lo/la/los/las', cambia por fonética a 'se'."
     },
     {
       contrastPair: "Pronombres Dobles (se lo / se la)",
@@ -2259,7 +2298,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Can you show us the sculpture? —Yes, gladly I will show it to you (plural) right now.",
       choices: ["se la", "nos la", "le la", "os lo"],
       correct: "se la",
-      ruleExplanation: "'A ustedes' (indirecto le/les) cambia a 'se' antes del objeto directo 'la' ('se la muestro')."
+      ruleExplanation: "'A ustedes' (indirect pronoun le/les) changes to 'se' before the direct object 'la' ('se la muestro').",
+      ruleExplanationEs: "'A ustedes' (indirecto le/les) cambia a 'se' antes del objeto directo 'la' ('se la muestro')."
     },
     {
       contrastPair: "Posición de Pronombres",
@@ -2267,7 +2307,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Mom has my boarding pass and is going to give it to me at security.",
       choices: ["dármela", "darle la", "darsela", "me la dar"],
       correct: "dármela",
-      ruleExplanation: "Al adjuntar dos pronombres al final de un infinitivo, se conserva el orden Indirecto + Directo y se añade tilde: dármela."
+      ruleExplanation: "When attaching two pronouns to the end of an infinitive, keep Indirect + Direct order and add a written accent: dármela.",
+      ruleExplanationEs: "Al adjuntar dos pronombres al final de un infinitivo, se conserva el orden Indirecto + Directo y se añade tilde: dármela."
     },
     {
       contrastPair: "Pretérito Irregular Radical",
@@ -2275,7 +2316,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Yesterday we walked throughout the historic city for three hours.",
       choices: ["anduvimos", "andamos", "anduvisteis", "andaron"],
       correct: "anduvimos",
-      ruleExplanation: "El verbo andar tiene raíz irregular 'anduv-' en pretérito: anduvimos (sin tilde)."
+      ruleExplanation: "The verb andar has the irregular preterite stem 'anduv-': anduvimos (no written accent).",
+      ruleExplanationEs: "El verbo andar tiene raíz irregular 'anduv-' en pretérito: anduvimos (sin tilde)."
     },
     {
       contrastPair: "Pretérito Irregular Radical",
@@ -2283,7 +2325,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "The taxi driver drove very carefully toward the airport.",
       choices: ["condujo", "condució", "conduje", "condujeron"],
       correct: "condujo",
-      ruleExplanation: "Los verbos en -ducir tienen raíz en 'j' en el pretérito: condujo (3ª pers. sing. sin tilde)."
+      ruleExplanation: "Verbs ending in -ducir have 'j' stems in the preterite: condujo (3rd person singular, no written accent).",
+      ruleExplanationEs: "Los verbos en -ducir tienen raíz en 'j' en el pretérito: condujo (3ª pers. sing. sin tilde)."
     }
   ]
 };
@@ -2306,10 +2349,11 @@ export function generateContrastQuestion(stageVal, _levelVal) {
     questionWord: chosen.sentenceWithBlank,
     context: chosen.englishMeaning,
     meaning: chosen.englishMeaning,
-    prompt: "Selecciona la opción correcta según la regla de " + chosen.contrastPair + ":",
+    prompt: "Choose the correct option according to the rule of " + chosen.contrastPair + ":",
     correct: chosen.correct,
     choices: [...chosen.choices].sort(() => Math.random() - 0.5),
     ruleExplanation: chosen.ruleExplanation,
+    ruleExplanationEs: chosen.ruleExplanationEs || chosen.ruleExplanation,
     hint: chosen.ruleExplanation
   };
 }

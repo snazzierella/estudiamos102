@@ -332,7 +332,7 @@ export const SENTENCE_POOLS = {
     {
       spanish: "Nosotros tenemos que ayudarnos con la tarea",
       english: "We have to help each other with the homework",
-      distractors: ["se", "ayudar", "nosotros"],
+      distractors: ["se", "ayudar", "ellos"],
       hint: "Attach pronoun to infinitive: 'ayudarnos' (or say 'nos tenemos que ayudar')."
     },
     {
@@ -398,7 +398,7 @@ export const SENTENCE_POOLS = {
     {
       spanish: "Nosotros nos duchamos con agua caliente",
       english: "We shower with hot water",
-      distractors: ["se", "duchan", "duchamos"],
+      distractors: ["se", "duchan", "ducha"],
       hint: "Nosotros requires the reflexive pronoun 'nos'"
     },
     {
@@ -416,7 +416,7 @@ export const SENTENCE_POOLS = {
     {
       spanish: "Antes de acostarse los niños leen un cuento",
       english: "Before going to bed the children read a story",
-      distractors: ["acostarse", "se acuestan", "acostar"],
+      distractors: ["acostarme", "se acuestan", "acostar"],
       hint: "After a preposition (antes de), use infinitive with attached pronoun: acostarse"
     },
     {
@@ -434,7 +434,7 @@ export const SENTENCE_POOLS = {
     {
       spanish: "El médico dice que debes tomar esta medicina por cinco días",
       english: "The doctor says you must take this medicine for five days",
-      distractors: ["para", "dice", "este"],
+      distractors: ["para", "digo", "este"],
       hint: "Use 'por' to express duration of time"
     },
     {
@@ -470,13 +470,13 @@ export const SENTENCE_POOLS = {
     {
       spanish: "Los dos hermanos se abrazan con alegría en el aeropuerto",
       english: "The two brothers hug each other with joy at the airport",
-      distractors: ["abrazan", "abraza", "abrazarse"],
+      distractors: ["abrazamos", "abraza", "abrazarse"],
       hint: "Reciprocal verb 'abrazarse': plural brothers hug each other"
     },
     {
       spanish: "Nosotros nos vemos todos los días en la cafetería",
       english: "We see each other every day in the cafeteria",
-      distractors: ["se", "vemos", "ve"],
+      distractors: ["se", "ven", "ve"],
       hint: "Reciprocal action for we: 'nosotros nos vemos'"
     }
   ],
@@ -484,382 +484,725 @@ export const SENTENCE_POOLS = {
   // UNIT 3: De Compras, Ropa, Quehaceres y Verbos en Pretérito
   3: [
     {
-      spanish: "Ayer compré una camisa azul en la tienda",
-      english: "Yesterday I bought a blue shirt in the store",
-      distractors: ["compro", "compró", "un"],
-      hint: "Preterite yo form ending (-é) for -ar verbs"
+        "spanish": "Ayer compré una camisa azul en la tienda",
+        "english": "Yesterday I bought a blue shirt in the store",
+        "distractors": [
+            "compro",
+            "compró",
+            "el"
+        ],
+        "hint": "Preterite of regular -ar verb comprar for yo (-é): 'compré'",
+        "syntaxBreakdown": "[Adverbio de tiempo: Ayer] + [Verbo pretérito: compré] + [Objeto directo: una camisa azul] + [Lugar: en la tienda]"
     },
     {
-      spanish: "Nosotros lavamos los platos anoche",
-      english: "We washed the dishes last night",
-      distractors: ["lavo", "las", "lavaron"],
-      hint: "Past time marker 'anoche' with preterite 'lavamos'"
+        "spanish": "Nosotros lavamos los platos anoche",
+        "english": "We washed the dishes last night",
+        "distractors": [
+            "lavan",
+            "lavo",
+            "el"
+        ],
+        "hint": "Preterite of regular -ar verb lavar for nosotros (-amos): 'lavamos'",
+        "syntaxBreakdown": "[Sujeto: Nosotros] + [Verbo pretérito: lavamos] + [Objeto directo: los platos] + [Tiempo: anoche]"
     },
     {
-      spanish: "Ella fue al supermercado ayer por la tarde",
-      english: "She went to the supermarket yesterday afternoon",
-      distractors: ["va", "fueron", "el"],
-      hint: "Irregular preterite of ir: 'ella fue'"
+        "spanish": "Ella fue al supermercado ayer por la tarde",
+        "english": "She went to the supermarket yesterday afternoon",
+        "distractors": [
+            "va",
+            "fueron",
+            "el"
+        ],
+        "hint": "Irregular preterite of ir for ella: 'fue'",
+        "syntaxBreakdown": "[Sujeto: Ella] + [Verbo pretérito: fue] + [Destino: al supermercado] + [Tiempo: ayer por la tarde]"
     },
     {
-      spanish: "Mis amigos limpiaron la casa esta mañana",
-      english: "My friends cleaned the house this morning",
-      distractors: ["limpia", "limpió", "el"],
-      hint: "Preterite 3rd person plural (-aron)"
+        "spanish": "Mis amigos limpiaron la casa esta mañana",
+        "english": "My friends cleaned the house this morning",
+        "distractors": [
+            "limpia",
+            "limpió",
+            "el"
+        ],
+        "hint": "Preterite ending for ellos/ellas (-aron): 'limpiaron'",
+        "syntaxBreakdown": "[Sujeto: Mis amigos] + [Verbo pretérito: limpiaron] + [Objeto directo: la casa] + [Tiempo: esta mañana]"
     },
     {
-      spanish: "Tú pagaste la ropa con tarjeta de crédito",
-      english: "You paid for the clothes with a credit card",
-      distractors: ["pagó", "pagas", "el"],
-      hint: "Preterite tú form (-aste)"
+        "spanish": "Tú pagaste la ropa con tarjeta de crédito",
+        "english": "You paid for the clothes with a credit card",
+        "distractors": [
+            "pagas",
+            "pagó",
+            "por"
+        ],
+        "hint": "Preterite -ar verb ending for tú (-aste): 'pagaste'",
+        "syntaxBreakdown": "[Sujeto: Tú] + [Verbo pretérito: pagaste] + [Objeto directo: la ropa] + [Instrumento: con tarjeta de crédito]"
     },
     {
-      spanish: "Mi hermano pasó la aspiradora en la sala",
-      english: "My brother vacuumed in the living room",
-      distractors: ["pasa", "el", "pasaron"],
-      hint: "Preterite 3rd person singular (-ó)"
+        "spanish": "Ayer lavé los platos y los sequé",
+        "english": "Yesterday I washed the dishes and I dried them",
+        "distractors": [
+            "les",
+            "lo",
+            "las"
+        ],
+        "hint": "Use masculine plural direct object pronoun 'los' to replace 'los platos'",
+        "syntaxBreakdown": "[Tiempo: Ayer] + [Verbo 1: lavé los platos] + [Conjunción: y] + [Pronombre OD: los] + [Verbo 2: sequé]"
     },
     {
-      spanish: "Yo busqué los zapatos nuevos en el centro comercial",
-      english: "I looked for the new shoes at the mall",
-      distractors: ["buscó", "las", "busco"],
-      hint: "Preterite yo spelling change (c -> qu): 'busqué'"
+        "spanish": "Mi padre sacó la basura y la llevó al contenedor",
+        "english": "My father took out the trash and carried it to the bin",
+        "distractors": [
+            "le",
+            "lo",
+            "las"
+        ],
+        "hint": "Use feminine singular direct object pronoun 'la' to replace 'la basura'",
+        "syntaxBreakdown": "[Sujeto: Mi padre] + [Verbo 1: sacó la basura] + [Conjunción: y] + [Pronombre OD: la] + [Verbo 2: llevó al contenedor]"
     },
     {
-      spanish: "A ellos les gustó la comida del restaurante",
-      english: "They liked the restaurant food",
-      distractors: ["gustaron", "gusta", "la"],
-      hint: "Gustar in preterite for singular food: 'gustó'"
+        "spanish": "No debes barrer el piso ahora",
+        "english": "You should not sweep the floor now",
+        "distractors": [
+            "barres",
+            "barrió",
+            "lo"
+        ],
+        "hint": "Modal auxiliary deber followed by infinitive barrer",
+        "syntaxBreakdown": "[Negación: No] + [Verbo modal: debes] + [Infinitivo: barrer] + [Objeto directo: el piso] + [Tiempo: ahora]"
     },
     {
-      spanish: "Esta camisa de algodón cuesta treinta dólares",
-      english: "This cotton shirt costs thirty dollars",
-      distractors: ["cuestan", "este", "cuero"],
-      hint: "Demonstrative 'esta' for feminine camisa; costar (o -> ue)"
+        "spanish": "No lo debes barrer ahora",
+        "english": "You should not sweep it now",
+        "distractors": [
+            "la",
+            "le",
+            "los"
+        ],
+        "hint": "Direct object pronoun 'lo' placed before the conjugated verb 'debes'",
+        "syntaxBreakdown": "[Negación: No] + [Pronombre OD: lo] + [Verbo modal: debes] + [Infinitivo: barrer] + [Tiempo: ahora]"
     },
     {
-      spanish: "Ella se probó el vestido rojo en el vestidor",
-      english: "She tried on the red dress in the fitting room",
-      distractors: ["se prueba", "la", "un"],
-      hint: "Preterite of probarse for ella: 'se probó'"
+        "spanish": "No debes barrerlo ahora",
+        "english": "You should not sweep it now",
+        "distractors": [
+            "barrerla",
+            "barrerle",
+            "barrerlos"
+        ],
+        "hint": "Direct object pronoun '-lo' attached to the end of the infinitive 'barrer'",
+        "syntaxBreakdown": "[Negación: No] + [Verbo modal: debes] + [Infinitivo con OD adjunto: barrerlo] + [Tiempo: ahora]"
     },
     {
-      spanish: "Yo pagué en efectivo porque no tenía tarjeta",
-      english: "I paid in cash because I did not have a card",
-      distractors: ["pago", "pagó", "el"],
-      hint: "Preterite spelling change for pagar (g -> gu): 'pagué'"
+        "spanish": "Mamá dejó a los niños en la escuela esta mañana",
+        "english": "Mom dropped off the children at school this morning",
+        "distractors": [
+            "para",
+            "con",
+            "de"
+        ],
+        "hint": "Personal 'a' is required because the direct object is specific people ('a los niños')",
+        "syntaxBreakdown": "[Sujeto: Mamá] + [Verbo pretérito: dejó] + ['a' personal + OD: a los niños] + [Lugar: en la escuela] + [Tiempo: esta mañana]"
     },
     {
-      spanish: "Nosotros compramos unos pantalones negros de lana",
-      english: "We bought some black wool pants",
-      distractors: ["compro", "negro", "la"],
-      hint: "Preterite of comprar for nosotros: 'compramos'"
+        "spanish": "Tía Sara llevó a su gato al veterinario",
+        "english": "Aunt Sara took her cat to the vet",
+        "distractors": [
+            "para",
+            "con",
+            "en"
+        ],
+        "hint": "Personal 'a' is used because the family pet is treated like family",
+        "syntaxBreakdown": "[Sujeto: Tía Sara] + [Verbo pretérito: llevó] + ['a' personal + OD: a su gato] + [Destino: al veterinario]"
     },
     {
-      spanish: "El dependiente me mostró los zapatos de cuero elegante",
-      english: "The clerk showed me the elegant leather shoes",
-      distractors: ["muestra", "te", "los"],
-      hint: "Preterite 3rd-person singular: 'mostró'"
+        "spanish": "Yo acompañé a mi abuela al supermercado ayer",
+        "english": "I accompanied my grandmother to the supermarket yesterday",
+        "distractors": [
+            "para",
+            "de",
+            "con"
+        ],
+        "hint": "Personal 'a' is mandatory before human direct object 'mi abuela'",
+        "syntaxBreakdown": "[Sujeto: Yo] + [Verbo pretérito: acompañé] + ['a' personal + OD: a mi abuela] + [Destino: al supermercado] + [Tiempo: ayer]"
     },
     {
-      spanish: "La tienda de ropa tiene rebajas fantásticas este fin de semana",
-      english: "The clothing store has fantastic sales this weekend",
-      distractors: ["tienen", "esta", "fantástico"],
-      hint: "Agreement with feminine plural 'rebajas fantásticas'"
+        "spanish": "El camarero nos sirvió la comida caliente",
+        "english": "The waiter served us the hot food",
+        "distractors": [
+            "servió",
+            "sirve",
+            "les"
+        ],
+        "hint": "Preterite stem changer: servir changes e -> i in 3rd person singular: 'sirvió'",
+        "syntaxBreakdown": "[Sujeto: El camarero] + [Pronombre OI: nos] + [Pretérito con cambio de raíz: sirvió] + [Objeto directo: la comida caliente]"
     },
     {
-      spanish: "Tú encontraste una ganga increíble en el mercado",
-      english: "You found an incredible bargain at the market",
-      distractors: ["encuentras", "un", "increíbles"],
-      hint: "Preterite -ar ending for tú: 'encontraste'"
+        "spanish": "El cliente pidió salmón con verduras frescas",
+        "english": "The customer ordered salmon with fresh vegetables",
+        "distractors": [
+            "pedió",
+            "pide",
+            "pidieron"
+        ],
+        "hint": "Preterite stem changer: pedir changes e -> i in 3rd person singular: 'pidió' (never 'pedió')",
+        "syntaxBreakdown": "[Sujeto: El cliente] + [Pretérito con cambio de raíz: pidió] + [Objeto directo: salmón con verduras frescas]"
     },
     {
-      spanish: "Ayer mi hermana barrió el piso de la cocina",
-      english: "Yesterday my sister swept the kitchen floor",
-      distractors: ["barre", "el", "barrieron"],
-      hint: "Preterite -er verb ending for 3rd person singular (-ió)"
+        "spanish": "Las dependientas las midieron con la cinta métrica",
+        "english": "The store clerks measured them with the tape measure",
+        "distractors": [
+            "medieron",
+            "miden",
+            "los"
+        ],
+        "hint": "Preterite stem changer: medir changes e -> i in 3rd person plural: 'midieron'",
+        "syntaxBreakdown": "[Sujeto: Las dependientas] + [Pronombre OD: las] + [Pretérito con cambio: midieron] + [Instrumento: con la cinta métrica]"
     },
     {
-      spanish: "Nosotros arreglamos los dormitorios antes de la fiesta",
-      english: "We tidied the bedrooms before the party",
-      distractors: ["arregla", "el", "arreglaron"],
-      hint: "Preterite regular -ar ending for nosotros (-amos)"
+        "spanish": "Mi hermano pequeño durmió ocho horas anoche",
+        "english": "My little brother slept eight hours last night",
+        "distractors": [
+            "dormió",
+            "duerme",
+            "dormiste"
+        ],
+        "hint": "Preterite stem changer: dormir changes o -> u in 3rd person singular: 'durmió' (never 'dormió')",
+        "syntaxBreakdown": "[Sujeto: Mi hermano pequeño] + [Pretérito con cambio: durmió] + [Duración: ocho horas] + [Tiempo: anoche]"
     },
     {
-      spanish: "Mi padre sacó la basura anoche después de la cena",
-      english: "My father took out the trash last night after dinner",
-      distractors: ["saca", "la", "sacaron"],
-      hint: "Preterite 3rd person singular (-ó): 'sacó'"
+        "spanish": "Ella prefirió comprar la falda rebajada",
+        "english": "She preferred to buy the discounted skirt",
+        "distractors": [
+            "preferió",
+            "prefiere",
+            "el"
+        ],
+        "hint": "Preterite stem changer: preferir changes e -> i in 3rd person singular: 'prefirió'",
+        "syntaxBreakdown": "[Sujeto: Ella] + [Pretérito con cambio: prefirió] + [Infinitivo: comprar] + [Objeto directo: la falda rebajada]"
     },
     {
-      spanish: "Yo pasé la aspiradora por toda la casa ayer",
-      english: "I vacuumed throughout the whole house yesterday",
-      distractors: ["pasa", "para", "el"],
-      hint: "Preterite yo ending (-é): 'pasé'"
+        "spanish": "Yo busqué un buzón de correos en la calle",
+        "english": "I looked for a mailbox on the street",
+        "distractors": [
+            "buscé",
+            "buscó",
+            "el"
+        ],
+        "hint": "Orthographic yo spelling change in preterite: -car changes to -qué: 'busqué'",
+        "syntaxBreakdown": "[Sujeto: Yo] + [Pretérito ortográfico: busqué] + [Objeto directo: un buzón de correos] + [Lugar: en la calle]"
     },
     {
-      spanish: "Anoche comí pollo asado con verduras en el restaurante",
-      english: "Last night I ate roast chicken with vegetables at the restaurant",
-      distractors: ["como", "comió", "un"],
-      hint: "Preterite -er verb ending for yo (-í): 'comí'"
+        "spanish": "Ayer yo pagué la cuenta en efectivo",
+        "english": "Yesterday I paid the bill in cash",
+        "distractors": [
+            "pagé",
+            "pagó",
+            "por"
+        ],
+        "hint": "Orthographic yo spelling change in preterite: -gar changes to -gué: 'pagué'",
+        "syntaxBreakdown": "[Tiempo: Ayer] + [Sujeto: yo] + [Pretérito ortográfico: pagué] + [Objeto directo: la cuenta] + [Modo: en efectivo]"
     },
     {
-      spanish: "Ellos escribieron una carta formal para el profesor",
-      english: "They wrote a formal letter for the professor",
-      distractors: ["escriben", "escribió", "por"],
-      hint: "Preterite -ir verb ending for ellos (-ieron): 'escribieron'"
+        "spanish": "Yo crucé la calle con mucho cuidado",
+        "english": "I crossed the street very carefully",
+        "distractors": [
+            "cruzé",
+            "cruzó",
+            "el"
+        ],
+        "hint": "Orthographic yo spelling change in preterite: -zar changes to -cé: 'crucé'",
+        "syntaxBreakdown": "[Sujeto: Yo] + [Pretérito ortográfico: crucé] + [Objeto directo: la calle] + [Modo: con mucho cuidado]"
     },
     {
-      spanish: "Yo empecé a estudiar español hace tres meses",
-      english: "I began to study Spanish three months ago",
-      distractors: ["empiezo", "empezó", "en"],
-      hint: "Preterite spelling change (z -> c) for yo: 'empecé'"
+        "spanish": "Yo empecé a estudiar después de cenar",
+        "english": "I began to study after having dinner",
+        "distractors": [
+            "empezé",
+            "empezó",
+            "por"
+        ],
+        "hint": "Orthographic yo spelling change in preterite: empezar -> 'empecé a'",
+        "syntaxBreakdown": "[Sujeto: Yo] + [Pretérito ortográfico: empecé a] + [Infinitivo: estudiar] + [Tiempo: después de cenar]"
     },
     {
-      spanish: "Tú decidiste comprar el suéter verde y abrigado",
-      english: "You decided to buy the warm green sweater",
-      distractors: ["decides", "decidió", "la"],
-      hint: "Preterite -ir verb ending for tú (-iste): 'decidiste'"
+        "spanish": "Ella leyó el periódico de ayer por la mañana",
+        "english": "She read yesterday's newspaper in the morning",
+        "distractors": [
+            "leió",
+            "lee",
+            "un"
+        ],
+        "hint": "Intervocalic i -> y spelling change in preterite 3rd person: leer -> 'leyó'",
+        "syntaxBreakdown": "[Sujeto: Ella] + [Pretérito intervocal: leyó] + [Objeto directo: el periódico de ayer] + [Tiempo: por la mañana]"
     },
     {
-      spanish: "El sábado pasado bailamos salsa en la fiesta con amigos",
-      english: "Last Saturday we danced salsa at the party with friends",
-      distractors: ["bailan", "bailo", "el"],
-      hint: "Past time marker 'el sábado pasado' with preterite 'bailamos'"
+        "spanish": "Ellos creyeron las noticias de la televisión",
+        "english": "They believed the news on television",
+        "distractors": [
+            "creieron",
+            "creen",
+            "una"
+        ],
+        "hint": "Intervocalic i -> y in preterite 3rd person plural: creer -> 'creyeron'",
+        "syntaxBreakdown": "[Sujeto: Ellos] + [Pretérito intervocal: creyeron] + [Objeto directo: las noticias de la televisión]"
+    },
+    {
+        "spanish": "Nosotros oímos la música alegre en el pasillo",
+        "english": "We heard the cheerful music in the aisle",
+        "distractors": [
+            "oemos",
+            "oyen",
+            "un"
+        ],
+        "hint": "Preterite of oír for nosotros: 'oímos' (with accent mark on í)",
+        "syntaxBreakdown": "[Sujeto: Nosotros] + [Pretérito: oímos] + [Objeto directo: la música alegre] + [Lugar: en el pasillo]"
+    },
+    {
+        "spanish": "El cajero me dio el recibo y la vuelta",
+        "english": "The cashier gave me the receipt and the change",
+        "distractors": [
+            "da",
+            "le",
+            "los"
+        ],
+        "hint": "Irregular preterite dar for 3rd person singular: 'dio' (no accent mark)",
+        "syntaxBreakdown": "[Sujeto: El cajero] + [Pronombre OI: me] + [Pretérito irregular: dio] + [Objeto directo: el recibo y la vuelta]"
+    },
+    {
+        "spanish": "Ella se probó el vestido rojo en el probador",
+        "english": "She tried on the red dress in the fitting room",
+        "distractors": [
+            "se prueba",
+            "le",
+            "vestidor"
+        ],
+        "hint": "Reflexive preterite of probarse for ella: 'se probó'",
+        "syntaxBreakdown": "[Sujeto: Ella] + [Pronombre reflexivo: se] + [Pretérito: probó] + [Objeto directo: el vestido rojo] + [Lugar: en el probador]"
+    },
+    {
+        "spanish": "Compramos una docena de huevos en el pasillo central",
+        "english": "We bought a dozen eggs in the central aisle",
+        "distractors": [
+            "compran",
+            "medio",
+            "la"
+        ],
+        "hint": "Preterite nosotros form: 'compramos' with quantity 'una docena de'",
+        "syntaxBreakdown": "[Verbo pretérito: Compramos] + [Cantidad y OD: una docena de huevos] + [Lugar: en el pasillo central]"
+    },
+    {
+        "spanish": "El cliente pidió la entrega urgente del paquete",
+        "english": "The customer requested express delivery of the package",
+        "distractors": [
+            "pedió",
+            "pide",
+            "un"
+        ],
+        "hint": "Preterite stem changer: 'pidió' with store vocabulary 'la entrega urgente'",
+        "syntaxBreakdown": "[Sujeto: El cliente] + [Pretérito con cambio: pidió] + [Objeto directo: la entrega urgente del paquete]"
+    },
+    {
+        "spanish": "Separamos el reciclaje de la basura en la cocina",
+        "english": "We separated the recycling from the trash in the kitchen",
+        "distractors": [
+            "separan",
+            "por",
+            "un"
+        ],
+        "hint": "Preterite of separar for nosotros: 'separamos'",
+        "syntaxBreakdown": "[Verbo pretérito: Separamos] + [Objeto directo: el reciclaje de la basura] + [Lugar: en la cocina]"
+    },
+    {
+        "spanish": "Dejé los trajes limpios en la tintorería",
+        "english": "I dropped off the clean suits at the dry cleaners",
+        "distractors": [
+            "dejo",
+            "dejó",
+            "las"
+        ],
+        "hint": "Preterite of dejar for yo (-é): 'dejé'",
+        "syntaxBreakdown": "[Verbo pretérito: Dejé] + [Objeto directo: los trajes limpios] + [Lugar: en la tintorería]"
+    },
+    {
+        "spanish": "Esta camisa de algodón cuesta treinta dólares",
+        "english": "This cotton shirt costs thirty dollars",
+        "distractors": [
+            "costó",
+            "cuestan",
+            "el"
+        ],
+        "hint": "Stem-changing verb costar in present tense: 'cuesta'",
+        "syntaxBreakdown": "[Sujeto: Esta camisa de algodón] + [Verbo: cuesta] + [Precio: treinta dólares]"
+    },
+    {
+        "spanish": "Nosotros compramos unos pantalones negros de lana",
+        "english": "We bought some black wool pants",
+        "distractors": [
+            "compro",
+            "compraron",
+            "las"
+        ],
+        "hint": "Preterite of comprar for nosotros: 'compramos'",
+        "syntaxBreakdown": "[Sujeto: Nosotros] + [Verbo pretérito: compramos] + [Objeto directo: unos pantalones negros de lana]"
+    },
+    {
+        "spanish": "Ayer mi hermana barrió el piso de la cocina",
+        "english": "Yesterday my sister swept the kitchen floor",
+        "distractors": [
+            "barre",
+            "barrieron",
+            "un"
+        ],
+        "hint": "Preterite of regular -er verb barrer for ella (-ió): 'barrió'",
+        "syntaxBreakdown": "[Tiempo: Ayer] + [Sujeto: mi hermana] + [Verbo pretérito: barrió] + [Objeto directo: el piso de la cocina]"
+    },
+    {
+        "spanish": "Mi hermano pasó la aspiradora en la sala",
+        "english": "My brother vacuumed in the living room",
+        "distractors": [
+            "pasa",
+            "pasaron",
+            "el"
+        ],
+        "hint": "Preterite of pasar for él (-ó): 'pasó la aspiradora'",
+        "syntaxBreakdown": "[Sujeto: Mi hermano] + [Verbo pretérito: pasó] + [Objeto directo: la aspiradora] + [Lugar: en la sala]"
     }
-  ],
+],
 
   // UNIT 4: Viajes, Transporte, Hoteles y Pronombres Dobles
   4: [
     {
-      spanish: "Nosotros viajamos a México en avión",
-      english: "We traveled to Mexico by plane",
-      distractors: ["viajo", "viajaron", "por"],
-      hint: "Preterite travel verb with transport preposition 'en'"
+        "spanish": "Nosotros viajamos a México en avión",
+        "english": "We traveled to Mexico by plane",
+        "distractors": [
+            "viajo",
+            "viajaron",
+            "por"
+        ],
+        "hint": "Preterite travel verb with transport preposition 'en'",
+        "syntaxBreakdown": "[Sujeto: Nosotros] + [Verbo pretérito: viajamos] + [Destino: a México] + [Medio de transporte: en avión]"
     },
     {
-      spanish: "El pasajero mostró el pasaporte en el mostrador",
-      english: "The passenger showed the passport at the counter",
-      distractors: ["muestra", "la", "mostraron"],
-      hint: "Past action completed: 'mostró'"
+        "spanish": "El pasajero mostró el pasaporte en el mostrador",
+        "english": "The passenger showed the passport at the counter",
+        "distractors": [
+            "muestra",
+            "la",
+            "mostraron"
+        ],
+        "hint": "Past action completed: 'mostró'",
+        "syntaxBreakdown": "[Sujeto: El pasajero] + [Verbo pretérito: mostró] + [Objeto directo: el pasaporte] + [Lugar: en el mostrador]"
     },
     {
-      spanish: "Ellos hicieron las maletas antes del viaje",
-      english: "They packed the suitcases before the trip",
-      distractors: ["hace", "hizo", "los"],
-      hint: "Irregular preterite stem (hic-): 'hicieron'"
+        "spanish": "Ellos hicieron las maletas antes del viaje",
+        "english": "They packed the suitcases before the trip",
+        "distractors": [
+            "hace",
+            "hizo",
+            "los"
+        ],
+        "hint": "Irregular preterite stem (hic-): 'hicieron'",
+        "syntaxBreakdown": "[Sujeto: Ellos] + [Pretérito irregular: hicieron] + [Objeto directo: las maletas] + [Tiempo: antes del viaje]"
     },
     {
-      spanish: "Yo le di la tarjeta de embarque al agente",
-      english: "I gave the boarding pass to the agent",
-      distractors: ["les", "da", "el"],
-      hint: "Irregular preterite dar: 'yo di'"
+        "spanish": "Yo le di la tarjeta de embarque al agente",
+        "english": "I gave the boarding pass to the agent",
+        "distractors": [
+            "les",
+            "da",
+            "el"
+        ],
+        "hint": "Irregular preterite dar: 'yo di' with indirect pronoun 'le'",
+        "syntaxBreakdown": "[Sujeto: Yo] + [Pronombre OI: le] + [Pretérito irregular: di] + [Objeto directo: la tarjeta de embarque] + [Destinatario: al agente]"
     },
     {
-      spanish: "Nosotros nos quedamos en un hotel cómodo",
-      english: "We stayed in a comfortable hotel",
-      distractors: ["se", "quedan", "una"],
-      hint: "Reflexive preterite 'nosotros nos quedamos'"
+        "spanish": "El huésped se puso furioso con el retraso del vuelo",
+        "english": "The guest became furious with the flight delay",
+        "distractors": [
+            "volvió",
+            "hizo",
+            "pusieron"
+        ],
+        "hint": "Use 'ponerse' for sudden emotional change: 'se puso furioso'",
+        "syntaxBreakdown": "[Sujeto: El huésped] + [Pronombre reflexivo: se] + [Verbo de cambio: puso] + [Adjetivo de emoción: furioso] + [Causa: con el retraso del vuelo]"
     },
     {
-      spanish: "Tú encontraste tu asiento de ventanilla",
-      english: "You found your window seat",
-      distractors: ["encuentras", "pasillo", "la"],
-      hint: "Preterite 'encontraste'"
+        "spanish": "Él se pone rojo cuando habla en público",
+        "english": "He turns red when he speaks in public",
+        "distractors": [
+            "vuelve",
+            "hace",
+            "puso"
+        ],
+        "hint": "Use 'ponerse' for effortless, involuntary physical reactions (blushing / turning red)",
+        "syntaxBreakdown": "[Sujeto: Él] + [Pronombre reflexivo: se] + [Verbo de cambio: pone] + [Adjetivo: rojo] + [Condición: cuando habla en público]"
     },
     {
-      spanish: "El vuelo salió a tiempo esta tarde",
-      english: "The flight departed on time this afternoon",
-      distractors: ["sale", "salieron", "en"],
-      hint: "Preterite of salir for singular flight: 'salió'"
+        "spanish": "Mi perro se vuelve loco cuando escucha truenos",
+        "english": "My dog goes crazy when he hears thunder",
+        "distractors": [
+            "pone",
+            "hace",
+            "volvió"
+        ],
+        "hint": "Use 'volverse' for sudden, extreme involuntary behavioral or character transformations",
+        "syntaxBreakdown": "[Sujeto: Mi perro] + [Pronombre reflexivo: se] + [Verbo de transformación: vuelve] + [Adjetivo extremo: loco] + [Condición: cuando escucha truenos]"
     },
     {
-      spanish: "Ella me lo explicó con calma",
-      english: "She explained it to me calmly",
-      distractors: ["te", "la", "explica"],
-      hint: "Double object pronouns: Indirect (me) + Direct (lo)"
+        "spanish": "La madre se volvió un ogro con las malas noticias",
+        "english": "The mother turned into an ogre with the bad news",
+        "distractors": [
+            "puso",
+            "hizo",
+            "volverse"
+        ],
+        "hint": "Use 'volverse' (+ noun/extreme state) for drastic personality transformations",
+        "syntaxBreakdown": "[Sujeto: La madre] + [Pronombre reflexivo: se] + [Verbo de transformación: volvió] + [Sustantivo extremo: un ogro] + [Causa: con las malas noticias]"
     },
     {
-      spanish: "Nosotros pasamos por el control de seguridad del aeropuerto",
-      english: "We went through the airport security checkpoint",
-      distractors: ["pasa", "para", "los"],
-      hint: "Preterite travel verb with preposition 'por'"
+        "spanish": "Ella se hizo médica después de muchos años de estudio",
+        "english": "She became a doctor after many years of study",
+        "distractors": [
+            "puso",
+            "volvió",
+            "dio"
+        ],
+        "hint": "Use 'hacerse' for career or professional achievements requiring conscious effort and time",
+        "syntaxBreakdown": "[Sujeto: Ella] + [Pronombre reflexivo: se] + [Verbo de logro profesional: hizo] + [Profesión: médica] + [Tiempo y esfuerzo: después de muchos años de estudio]"
     },
     {
-      spanish: "El avión aterrizó en la pista a las cinco de la tarde",
-      english: "The plane landed on the runway at five in the afternoon",
-      distractors: ["aterriza", "el", "aterrizaron"],
-      hint: "Preterite singular: 'aterrizó'"
+        "spanish": "El arquitecto llegó a ser muy famoso en su tiempo",
+        "english": "The architect reached the status of being very famous in his time",
+        "distractors": [
+            "ponerse",
+            "volverse",
+            "hacerse"
+        ],
+        "hint": "Use 'llegar a ser' for long-term status achieved over an extended career",
+        "syntaxBreakdown": "[Sujeto: El arquitecto] + [Verbo compuesto de logro: llegó a ser] + [Adjetivo: muy famoso] + [Tiempo: en su tiempo]"
     },
     {
-      spanish: "Yo facturé mi equipaje antes de subir al avión",
-      english: "I checked my luggage before boarding the plane",
-      distractors: ["facturo", "facturó", "la"],
-      hint: "Preterite yo form (-é): 'facturé'"
+        "spanish": "Me di cuenta de que olvidé mi pasaporte en casa",
+        "english": "I realized that I forgot my passport at home",
+        "distractors": [
+            "realicé",
+            "puse",
+            "hice"
+        ],
+        "hint": "Use 'darse cuenta de que' for mental realization ('I realized that...')",
+        "syntaxBreakdown": "[Pronombre reflexivo: Me] + [Verbo: di cuenta de que] + [Cláusula subordinada: olvidé mi pasaporte en casa]"
     },
     {
-      spanish: "El agente de aduanas revisó nuestras maletas cuidadosamente",
-      english: "The customs agent inspected our suitcases carefully",
-      distractors: ["revisa", "nuestro", "los"],
-      hint: "Preterite 3rd-person singular: 'revisó'"
+        "spanish": "Ella solo se dio cuenta del error al llegar al aeropuerto",
+        "english": "She only realized the error upon arriving at the airport",
+        "distractors": [
+            "realizó",
+            "puso",
+            "hizo"
+        ],
+        "hint": "Use 'darse cuenta de' (+ sustantivo) to denote becoming aware of a fact or mistake",
+        "syntaxBreakdown": "[Sujeto: Ella] + [Adverbio: solo] + [Verbo de percatación: se dio cuenta del error] + [Tiempo: al llegar al aeropuerto]"
     },
     {
-      spanish: "Tú compraste un boleto de ida y vuelta para Madrid",
-      english: "You bought a round-trip ticket to Madrid",
-      distractors: ["compras", "una", "por"],
-      hint: "Preterite -ar ending for tú: 'compraste'"
+        "spanish": "El escritor realizó su sueño de publicar una novela",
+        "english": "The writer fulfilled his dream of publishing a novel",
+        "distractors": [
+            "se dio cuenta",
+            "se puso",
+            "se volvió"
+        ],
+        "hint": "¡Cognado falso! 'Realizar' means to fulfill or carry out a dream or project, NOT to realize mentally",
+        "syntaxBreakdown": "[Sujeto: El escritor] + [Verbo de cumplimiento: realizó] + [Objeto directo: su sueño de publicar una novela]"
     },
     {
-      spanish: "El recepcionista nos dio la llave de la habitación doble",
-      english: "The receptionist gave us the key to the double room",
-      distractors: ["da", "les", "el"],
-      hint: "Irregular preterite dar for 3rd person singular: 'dio'"
+        "spanish": "El botones se las subió a los huéspedes",
+        "english": "The bellhop took them up for the guests",
+        "distractors": [
+            "le las",
+            "les las",
+            "se los"
+        ],
+        "hint": "Double object rule: indirect 'les' changes to 'se' before direct object 'las': 'se las subió'",
+        "syntaxBreakdown": "[Sujeto: El botones] + [Pronombre OI cambiado: se] + [Pronombre OD: las] + [Verbo pretérito: subió] + [Destinatario aclarado: a los huéspedes]"
     },
     {
-      spanish: "Nosotros reservamos una habitación con vista al mar",
-      english: "We reserved a room with an ocean view",
-      distractors: ["reserva", "un", "reservaron"],
-      hint: "Preterite 'nosotros reservamos'"
+        "spanish": "El recepcionista nos los mandó por correo electrónico",
+        "english": "The receptionist sent them to us by email",
+        "distractors": [
+            "los nos",
+            "les los",
+            "se los"
+        ],
+        "hint": "Double object order: Indirect (nos) + Direct (los): 'nos los mandó'",
+        "syntaxBreakdown": "[Sujeto: El recepcionista] + [Pronombre OI: nos] + [Pronombre OD: los] + [Verbo pretérito: mandó] + [Medio: por correo electrónico]"
     },
     {
-      spanish: "El botones llevó las maletas pesadas en el ascensor",
-      english: "The bellhop carried the heavy suitcases in the elevator",
-      distractors: ["lleva", "pesado", "los"],
-      hint: "Preterite 3rd person singular: 'llevó'"
+        "spanish": "Tu padre sabe la noticia porque se la dije ayer",
+        "english": "Your father knows the news because I told it to him yesterday",
+        "distractors": [
+            "le la",
+            "la le",
+            "se lo"
+        ],
+        "hint": "Double object pronoun rule: indirect 'le' turns into 'se' before direct 'la': 'se la dije'",
+        "syntaxBreakdown": "[Cláusula 1: Tu padre sabe la noticia] + [Conector: porque] + [Pronombre OI: se] + [Pronombre OD: la] + [Verbo pretérito: dije] + [Tiempo: ayer]"
     },
     {
-      spanish: "Ayer yo no pude encontrar mi pasaporte en la mochila",
-      english: "Yesterday I could not find my passport in the backpack",
-      distractors: ["puedo", "pudo", "el"],
-      hint: "Irregular preterite stem pud- for yo: 'pude'"
+        "spanish": "Mamá va a dármela al entrar en el puesto de seguridad",
+        "english": "Mom is going to give it to me when entering the security checkpoint",
+        "distractors": [
+            "darsela",
+            "darle la",
+            "darla me"
+        ],
+        "hint": "Attach both pronouns to the infinitive maintaining Indirect + Direct order with accent: 'dármela'",
+        "syntaxBreakdown": "[Sujeto: Mamá] + [Perífrasis verbal: va a] + [Infinitivo con pronombres adjuntos: dármela] + [Tiempo: al entrar en el puesto de seguridad]"
     },
     {
-      spanish: "Ella tuvo que cancelar la reserva por mal tiempo",
-      english: "She had to cancel the reservation due to bad weather",
-      distractors: ["tiene", "para", "tuvieron"],
-      hint: "Irregular preterite stem tuv- for ella: 'tuvo'"
+        "spanish": "Ayer nosotros anduvimos por toda la ciudad histórica",
+        "english": "Yesterday we walked throughout the entire historic city",
+        "distractors": [
+            "andamos",
+            "andaron",
+            "para"
+        ],
+        "hint": "Irregular preterite stem anduv- for nosotros: 'anduvimos' (no accent)",
+        "syntaxBreakdown": "[Tiempo: Ayer] + [Sujeto: nosotros] + [Pretérito irregular: anduvimos] + [Lugar y ruta: por toda la ciudad histórica]"
     },
     {
-      spanish: "Nosotros estuvimos en España durante las vacaciones de verano",
-      english: "We were in Spain during the summer vacation",
-      distractors: ["estamos", "estuvo", "por"],
-      hint: "Irregular preterite stem estuv- for nosotros: 'estuvimos'"
+        "spanish": "El taxista condujo con cuidado hacia la estación de tren",
+        "english": "The taxi driver drove carefully toward the train station",
+        "distractors": [
+            "condució",
+            "conduje",
+            "condujeron"
+        ],
+        "hint": "Irregular j-stem preterite: conducir -> 'condujo' for 3rd person singular",
+        "syntaxBreakdown": "[Sujeto: El taxista] + [Pretérito irregular: condujo] + [Modo: con cuidado] + [Destino: hacia la estación de tren]"
     },
     {
-      spanish: "Ellos dijeron la verdad sobre el retraso del vuelo",
-      english: "They told the truth about the flight delay",
-      distractors: ["dicen", "dijo", "el"],
-      hint: "Irregular preterite stem dij- for ellos: 'dijeron'"
+        "spanish": "El conserje le pidió un taxi a la señora",
+        "english": "The concierge called a taxi for the lady",
+        "distractors": [
+            "les",
+            "lo",
+            "se"
+        ],
+        "hint": "Singular indirect object pronoun 'le' redundant with 'a la señora'",
+        "syntaxBreakdown": "[Sujeto: El conserje] + [Pronombre OI: le] + [Pretérito con cambio: pidió] + [Objeto directo: un taxi] + [Beneficiaria: a la señora]"
     },
     {
-      spanish: "Yo puse los boletos de tren encima del escritorio",
-      english: "I put the train tickets on top of the desk",
-      distractors: ["pongo", "puso", "las"],
-      hint: "Irregular preterite stem pus- for yo: 'puse'"
+        "spanish": "Nosotros trajimos las maletas a la habitación triple",
+        "english": "We brought the suitcases to the triple room",
+        "distractors": [
+            "traemos",
+            "trajeron",
+            "los"
+        ],
+        "hint": "Irregular preterite stem traj- for nosotros: 'trajimos'",
+        "syntaxBreakdown": "[Sujeto: Nosotros] + [Pretérito irregular: trajimos] + [Objeto directo: las maletas] + [Destino: a la habitación triple]"
     },
     {
-      spanish: "El camarero se la sirvió caliente a los clientes",
-      english: "The waiter served it hot to the customers",
-      distractors: ["le", "lo", "sirve"],
-      hint: "Double object pronoun: indirect 'le' changes to 'se' before 'la'"
+        "spanish": "El avión despegó a tiempo de la pista principal",
+        "english": "The airplane took off on time from the main runway",
+        "distractors": [
+            "despega",
+            "despegaron",
+            "en"
+        ],
+        "hint": "Preterite of despegar for 3rd person singular: 'despegó'",
+        "syntaxBreakdown": "[Sujeto: El avión] + [Verbo pretérito: despegó] + [Modo: a tiempo] + [Origen: de la pista principal]"
     },
     {
-      spanish: "Yo tengo el pasaporte y lo guardo en la mochila",
-      english: "I have the passport and I keep it in the backpack",
-      distractors: ["la", "le", "los"],
-      hint: "Use masculine singular direct object pronoun 'lo' to replace 'el pasaporte'"
+        "spanish": "Compré un billete de ida y vuelta para Madrid",
+        "english": "I bought a round-trip ticket for Madrid",
+        "distractors": [
+            "compras",
+            "una",
+            "por"
+        ],
+        "hint": "Preterite of comprar: 'compré' with destination 'para Madrid'",
+        "syntaxBreakdown": "[Verbo pretérito: Compré] + [Objeto directo: un billete de ida y vuelta] + [Destino: para Madrid]"
     },
     {
-      spanish: "Ella compró la maleta nueva y la llevó al aeropuerto",
-      english: "She bought the new suitcase and took it to the airport",
-      distractors: ["lo", "le", "las"],
-      hint: "Use feminine singular direct object pronoun 'la' to replace 'la maleta'"
+        "spanish": "Ayer yo no pude encontrar mi pasaporte en la mochila",
+        "english": "Yesterday I could not find my passport in the backpack",
+        "distractors": [
+            "puedo",
+            "pudo",
+            "el"
+        ],
+        "hint": "Irregular preterite stem pud- for yo: 'pude'",
+        "syntaxBreakdown": "[Tiempo: Ayer] + [Sujeto: yo] + [Negación: no] + [Pretérito irregular: pude] + [Infinitivo: encontrar] + [Objeto directo: mi pasaporte en la mochila]"
     },
     {
-      spanish: "Nosotros tenemos los boletos y los vamos a guardar",
-      english: "We have the tickets and we are going to keep them",
-      distractors: ["las", "les", "lo"],
-      hint: "Plural masculine direct object pronoun 'los' placed before 'vamos'"
+        "spanish": "Ella tuvo que cancelar la reserva por mal tiempo",
+        "english": "She had to cancel the reservation due to bad weather",
+        "distractors": [
+            "tiene",
+            "para",
+            "tuvieron"
+        ],
+        "hint": "Irregular preterite stem tuv- for ella: 'tuvo que cancelar'",
+        "syntaxBreakdown": "[Sujeto: Ella] + [Pretérito irregular: tuvo que] + [Infinitivo: cancelar] + [Objeto directo: la reserva] + [Causa con por: por mal tiempo]"
     },
     {
-      spanish: "Nosotros tenemos los boletos y vamos a guardarlos",
-      english: "We have the tickets and we are going to keep them",
-      distractors: ["guardarlas", "guardarle", "guardar"],
-      hint: "Direct object pronoun '-los' attached directly to the infinitive 'guardar'"
+        "spanish": "Nosotros estuvimos en España durante las vacaciones de verano",
+        "english": "We were in Spain during the summer vacation",
+        "distractors": [
+            "estamos",
+            "estuvo",
+            "por"
+        ],
+        "hint": "Irregular preterite stem estuv- for nosotros: 'estuvimos'",
+        "syntaxBreakdown": "[Sujeto: Nosotros] + [Pretérito irregular: estuvimos] + [Lugar: en España] + [Tiempo: durante las vacaciones de verano]"
     },
     {
-      spanish: "Tú perdiste las llaves pero las encontraste en el hotel",
-      english: "You lost the keys but you found them in the hotel",
-      distractors: ["los", "les", "la"],
-      hint: "Feminine plural direct object pronoun 'las' replacing 'las llaves'"
+        "spanish": "Ellos dijeron la verdad sobre el retraso del vuelo",
+        "english": "They told the truth about the flight delay",
+        "distractors": [
+            "dicen",
+            "dijo",
+            "un"
+        ],
+        "hint": "Irregular preterite stem dij- for ellos: 'dijeron' (drops i before eron)",
+        "syntaxBreakdown": "[Sujeto: Ellos] + [Pretérito irregular: dijeron] + [Objeto directo: la verdad sobre el retraso del vuelo]"
     },
     {
-      spanish: "El botones tiene el equipaje y lo sube en el ascensor",
-      english: "The bellhop has the luggage and takes it up in the elevator",
-      distractors: ["la", "le", "los"],
-      hint: "Masculine singular direct object pronoun 'lo' replacing 'el equipaje'"
+        "spanish": "Yo puse los boletos de tren encima del escritorio",
+        "english": "I put the train tickets on top of the desk",
+        "distractors": [
+            "pongo",
+            "puso",
+            "las"
+        ],
+        "hint": "Irregular preterite stem pus- for yo: 'puse'",
+        "syntaxBreakdown": "[Sujeto: Yo] + [Pretérito irregular: puse] + [Objeto directo: los boletos de tren] + [Lugar: encima del escritorio]"
     },
     {
-      spanish: "Nosotros queremos ver las fotos y las vamos a mirar",
-      english: "We want to see the photos and we are going to look at them",
-      distractors: ["los", "le", "la"],
-      hint: "Feminine plural direct object pronoun 'las' before the conjugated verb 'vamos'"
+        "spanish": "El recepcionista nos dio la llave de la habitación doble",
+        "english": "The receptionist gave us the key to the double room",
+        "distractors": [
+            "da",
+            "les",
+            "un"
+        ],
+        "hint": "Irregular preterite dar for 3rd person singular: 'dio'",
+        "syntaxBreakdown": "[Sujeto: El recepcionista] + [Pronombre OI: nos] + [Pretérito irregular: dio] + [Objeto directo: la llave de la habitación doble]"
     },
     {
-      spanish: "Nosotros queremos ver las fotos y vamos a mirarlas",
-      english: "We want to see the photos and we are going to look at them",
-      distractors: ["mirarlos", "mirarla", "mirar"],
-      hint: "Direct object pronoun '-las' attached directly to the infinitive 'mirar'"
-    },
-    {
-      spanish: "El profesor me llamó por teléfono para confirmar la reserva",
-      english: "The professor called me on the phone to confirm the reservation",
-      distractors: ["te", "le", "lo"],
-      hint: "Direct object pronoun 'me' (called me) placed before the conjugated verb 'llamó'"
-    },
-    {
-      spanish: "Nosotros buscamos el hotel en el mapa y lo encontramos",
-      english: "We searched for the hotel on the map and found it",
-      distractors: ["la", "los", "le"],
-      hint: "Masculine singular direct object pronoun 'lo' replacing 'el hotel'"
-    },
-    {
-      spanish: "Tú les dijiste la verdad a tus padres antes del viaje",
-      english: "You told the truth to your parents before the trip",
-      distractors: ["le", "los", "dices"],
-      hint: "Plural indirect object pronoun 'les' (to your parents) before 'dijiste'"
-    },
-    {
-      spanish: "El botones les subió las maletas pesadas a los turistas",
-      english: "The bellhop brought up the heavy suitcases for the tourists",
-      distractors: ["le", "los", "sube"],
-      hint: "Plural indirect object pronoun 'les' (for the tourists) before 'subió'"
-    },
-    {
-      spanish: "Mi hermano me mandó un mensaje de texto desde el aeropuerto",
-      english: "My brother sent me a text message from the airport",
-      distractors: ["te", "le", "lo"],
-      hint: "Indirect object pronoun 'me' (to me) before the conjugated verb 'mandó'"
-    },
-    {
-      spanish: "Nosotros le pedimos un taxi al recepcionista del hotel",
-      english: "We requested a taxi from the hotel receptionist",
-      distractors: ["les", "lo", "nos"],
-      hint: "Singular indirect object pronoun 'le' (to the receptionist) before 'pedimos'"
-    },
-    {
-      spanish: "Ella va a mostrarme las fotos de sus vacaciones en Madrid",
-      english: "She is going to show me the photos of her vacation in Madrid",
-      distractors: ["mostrarnos", "mostrarlas", "mostrar"],
-      hint: "Indirect object pronoun '-me' (to me) attached directly to the infinitive 'mostrar'"
-    },
-    {
-      spanish: "Ella me va a mostrar las fotos de sus vacaciones en Madrid",
-      english: "She is going to show me the photos of her vacation in Madrid",
-      distractors: ["te", "le", "lo"],
-      hint: "Indirect object pronoun 'me' (to me) placed before the conjugated verb 'va'"
+        "spanish": "El botones llevó las maletas pesadas en el ascensor",
+        "english": "The bellhop carried the heavy suitcases in the elevator",
+        "distractors": [
+            "lleva",
+            "pesado",
+            "los"
+        ],
+        "hint": "Preterite 3rd person singular: 'llevó'",
+        "syntaxBreakdown": "[Sujeto: El botones] + [Verbo pretérito: llevó] + [Objeto directo: las maletas pesadas] + [Lugar: en el ascensor]"
     }
-  ]
+]
 };
 
 /**
@@ -932,7 +1275,8 @@ export function generateSentenceBuilderQuestion(options = {}) {
     bankTokens: allBankTokens,
     distractors: rawDistractors,
     meaning: isTargetSpanish ? chosen.english : chosen.spanish,
-    hint: chosen.hint || "Arrange the words in the correct grammatical order."
+    hint: chosen.hint || "Arrange the words in the correct grammatical order.",
+    syntaxBreakdown: chosen.syntaxBreakdown || null
   };
 }
 

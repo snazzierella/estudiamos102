@@ -13,7 +13,8 @@ import {
   INDIRECT_OBJECT_PRONOUNS,
   isEligibleForFlashcard,
   isSentenceItem,
-  BLANK_SPECS
+  BLANK_SPECS,
+  generateContrastQuestion
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { generateSentenceBuilderQuestion, SENTENCE_POOLS } from '../utils/sentenceBuilderHelper';
@@ -59,10 +60,15 @@ export default function StudyQuest({
   setView, 
   defaultTab = "quest" 
 }) {
-  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [activeTab, setActiveTab] = useState(defaultTab === 'contrasts' ? 'quest' : defaultTab);
 
   useEffect(() => {
-    setActiveTab(defaultTab);
+    if (defaultTab === 'contrasts') {
+      setActiveTab('quest');
+      openCodex('guia_contrastes');
+    } else if (defaultTab) {
+      setActiveTab(defaultTab);
+    }
   }, [defaultTab]);
 
   // -------------------------------------------------------------
@@ -98,6 +104,7 @@ export default function StudyQuest({
   const [codexVerb, setCodexVerb] = useState(null);
   const [codexTense, setCodexTense] = useState("present");
   const [objectPronounTab, setObjectPronounTab] = useState("direct");
+  const [contrastCodexTab, setContrastCodexTab] = useState("por_para");
   const [isListening, setIsListening] = useState(false);
   
   // Hint reveal tracking for hintless lesson achievements
@@ -131,13 +138,13 @@ export default function StudyQuest({
 
   useEffect(() => {
     if (selectedStage === state.questStage) {
-      setSelectedLevel(state.isReviewReady ? 20 : (state.questLevel || 1));
+      setSelectedLevel(state.isReviewReady ? 25 : (state.questLevel || 1));
     }
     setCardTranslateOverride(null);
   }, [state.questLevel, state.isReviewReady, state.questStage, selectedStage]);
 
   const isEarlyBossLevel = (stageNum, levelNum) => {
-    return stageNum === state.questStage && levelNum === 20 && !state.isReviewReady;
+    return stageNum === state.questStage && levelNum === 25 && !state.isReviewReady;
   };
 
   const isLevelPassed = (stageNum, levelNum) => {
@@ -146,18 +153,18 @@ export default function StudyQuest({
     if (stageNum < state.questStage) return true;
     if (stageNum > state.questStage) return false;
     // For current stage:
-    if (state.isReviewReady) return levelNum < 20;
+    if (state.isReviewReady) return levelNum < 25;
     return levelNum < state.questLevel;
   };
 
   const isLevelCurrent = (stageNum, levelNum) => {
     if (stageNum !== state.questStage) return false;
-    if (state.isReviewReady) return levelNum === 20;
+    if (state.isReviewReady) return levelNum === 25;
     return levelNum === state.questLevel;
   };
 
   const isLevelLocked = (stageNum, levelNum) => {
-    // Early boss challenge (Level 20 on current stage) is never locked!
+    // Early boss challenge (Level 25 on current stage) is never locked!
     if (isEarlyBossLevel(stageNum, levelNum)) return false;
     return !isLevelPassed(stageNum, levelNum) && !isLevelCurrent(stageNum, levelNum);
   };
@@ -197,6 +204,57 @@ export default function StudyQuest({
     };
 
     const detectedTab = detectPronounTab(target);
+
+    // Contrast Guide shortcut & contrast topic detection
+    if (target === "guia_contrastes" || target === "contrastes" || target === "contrasts") {
+      setCodexVerb("guia_contrastes");
+      if (explicitTense) setContrastCodexTab(explicitTense);
+      return;
+    }
+
+    if (typeof target === 'string') {
+      const low = target.toLowerCase();
+      if (low.includes('por') && low.includes('para')) {
+        setCodexVerb("guia_contrastes");
+        setContrastCodexTab("por_para");
+        return;
+      }
+      if (low.includes('become') || low.includes('ponerse') || low.includes('volverse') || low.includes('hacerse')) {
+        setCodexVerb("guia_contrastes");
+        setContrastCodexTab("to_become");
+        return;
+      }
+      if (low.includes('realize') || low.includes('darse cuenta') || low.includes('realizar')) {
+        setCodexVerb("guia_contrastes");
+        setContrastCodexTab("to_realize");
+        return;
+      }
+      if (low.includes('personal') || low.includes('a personal')) {
+        setCodexVerb("guia_contrastes");
+        setContrastCodexTab("personal_a");
+        return;
+      }
+      if (low.includes('saber') || low.includes('conocer') || low.includes('ser vs estar') || low.includes('ser/estar')) {
+        setCodexVerb("guia_contrastes");
+        setContrastCodexTab("saber_conocer_ser_estar");
+        return;
+      }
+      if (low.includes('recíproco') || low.includes('reciproco') || low.includes('reflexiv')) {
+        setCodexVerb("guia_contrastes");
+        setContrastCodexTab("reciprocal_reflexive");
+        return;
+      }
+      if (low.includes('pretérito') || low.includes('preterito') || low.includes('cambio de raíz') || low.includes('radical') || low.includes('ortografía')) {
+        setCodexVerb("guia_contrastes");
+        setContrastCodexTab("preterite_families");
+        return;
+      }
+      if (low.includes('devolver') || low.includes('volver')) {
+        setCodexVerb("guia_contrastes");
+        setContrastCodexTab("devolver_volver");
+        return;
+      }
+    }
 
     // Direct object / indirect object pronoun shortcut
     if (target === "pronombres_objeto" || target === "pronoun") {
@@ -848,9 +906,9 @@ export default function StudyQuest({
     const activeStage = STAGES[stageVal];
     if (!activeStage) return;
 
-    let levelVal = targetLevel !== undefined ? targetLevel : (selectedLevel || (state.isReviewReady ? 20 : state.questLevel));
-    const isEarlyBoss = stageVal === state.questStage && levelVal === 20 && !state.isReviewReady;
-    const isReview = levelVal === 20;
+    let levelVal = targetLevel !== undefined ? targetLevel : (selectedLevel || (state.isReviewReady ? 25 : state.questLevel));
+    const isEarlyBoss = stageVal === state.questStage && levelVal === 25 && !state.isReviewReady;
+    const isReview = levelVal === 25;
     const isReplay = isLevelPassed(stageVal, levelVal);
 
     setActiveQuestStage(stageVal);
@@ -914,7 +972,7 @@ export default function StudyQuest({
       // 2. Fill in the Blank
       // 3. Sentence Construction (SentenceBuilder)
       // With Vocab Translation as a minor secondary component,
-      // and increasing difficulty across later levels (1-19 & Review Gate).
+      // and increasing difficulty across later levels (1-24 & Review Gate).
 
       let sentenceCount = 3;
       let fillCount = 6;
@@ -934,28 +992,34 @@ export default function StudyQuest({
         fillCount = 4;
         conjugationCount = 6;
         vocabCount = 0;
-      } else if (levelVal >= 16) {
-        // Levels 16-19: Late mastery
-        sentenceCount = 9;
+      } else if (levelVal >= 20) {
+        // Levels 20-24: Late synthesis mastery (100% active challenge)
+        sentenceCount = 10;
         fillCount = 4;
         conjugationCount = 6;
+        vocabCount = 0;
+      } else if (levelVal >= 16) {
+        // Levels 16-19: Advanced sentence building
+        sentenceCount = 8;
+        fillCount = 4;
+        conjugationCount = 7;
         vocabCount = 1;
       } else if (levelVal >= 11) {
         // Levels 11-15: Advanced syntax & agreement
-        sentenceCount = 7;
-        fillCount = 4;
+        sentenceCount = 6;
+        fillCount = 5;
         conjugationCount = 7;
         vocabCount = 2;
       } else if (levelVal >= 6) {
         // Levels 6-10: Stem-changers & irregular yo
-        sentenceCount = 5;
-        fillCount = 5;
+        sentenceCount = 4;
+        fillCount = 6;
         conjugationCount = 8;
         vocabCount = 2;
       } else {
         // Levels 1-5: Foundations & regular verbs
-        sentenceCount = 3;
-        fillCount = 6;
+        sentenceCount = 2;
+        fillCount = 7;
         conjugationCount = 8;
         vocabCount = 3;
       }
@@ -1285,8 +1349,27 @@ export default function StudyQuest({
 
       finalQuestions = combined30.slice(0, 30);
     } else {
-      // Unit 2+ progressive flow with gradual introduction of words
-      const targetCardCount = (isReview || isReplay) ? 0 : Math.max(1, 16 - Math.floor((levelVal - 1) * 0.85));
+      // Unit 2+ progressive flow with stage-calibrated flashcard tapering:
+      // In 25-level architecture:
+      // Stage 2 (147 words): Levels 1-19 introduce all 147 words ([10,10,10,10,9,9,9,8,8,8,8,7,7,7,6,6,5,5,5]). Levels 20-25 have strictly 0 flashcards.
+      // Stage 3 (83 words): Levels 1-14 introduce all 83 words ([9,9,8,8,7,7,6,6,5,5,4,4,3,2]). Levels 15-25 have strictly 0 flashcards.
+      // Stage 4 (104 words): Levels 1-16 introduce all 104 words ([9,9,8,8,8,7,7,7,6,6,6,5,5,5,4,4]). Levels 17-25 have strictly 0 flashcards.
+      let targetCardCount = 0;
+      if (!isReview && !isReplay) {
+        let taperSchedule = [];
+        if (stageVal === 2) {
+          taperSchedule = [10, 10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 6, 6, 6, 5, 5];
+        } else if (stageVal === 3) {
+          taperSchedule = [9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 2];
+        } else if (stageVal === 4) {
+          taperSchedule = [9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6, 5, 5, 5, 4, 4];
+        }
+        targetCardCount = taperSchedule[levelVal - 1] || 0;
+        // On level 19 (final vocab introduction level before synthesis), guarantee all remaining unseen words are consumed:
+        if (levelVal === 19 && unseenStageItems.length > 0) {
+          targetCardCount = Math.max(targetCardCount, unseenStageItems.length);
+        }
+      }
       const cardCount = Math.min(targetCardCount, unseenStageItems.length);
       const quizCount = 20 - cardCount;
 
@@ -1308,85 +1391,149 @@ export default function StudyQuest({
         isCardIntro: true
       }));
 
+      // STRICT PEDAGOGICAL GUARANTEE:
+      // A word MUST be seen in a flashcard (either in seenWords or in current selectedFlashcards)
+      // before it can EVER appear in a standalone quiz question!
       const currentlyIntroduced = selectedFlashcards.map(item => item.spanish);
       const eligibleStageItems = stageItems.filter(item => 
-        seenWords.includes(item.spanish) || currentlyIntroduced.includes(item.spanish) || isSentenceItem(item)
+        seenWords.includes(item.spanish) || currentlyIntroduced.includes(item.spanish)
       );
 
-      const stageQuizPool = eligibleStageItems.length > 0 
-        ? eligibleStageItems 
-        : (selectedFlashcards.length > 0 ? selectedFlashcards : stageItems.slice(0, 5));
+      // 1. Sentence Builder questions (scaling upward by level)
+      let targetSentenceCount = 2;
+      if (isReview) targetSentenceCount = 10;
+      else if (levelVal >= 20) targetSentenceCount = 8;
+      else if (levelVal >= 16) targetSentenceCount = 7;
+      else if (levelVal >= 11) targetSentenceCount = 6;
+      else if (levelVal >= 6) targetSentenceCount = 4;
+      else targetSentenceCount = Math.min(3, Math.max(1, Math.floor(quizCount * 0.3)));
 
-      let quizItems = [];
-      if (isReview) {
-        const pool = eligibleStageItems.length > 0 ? eligibleStageItems : stageItems;
-        const shuffledStage = [...pool].sort(() => Math.random() - 0.5);
-        quizItems = shuffledStage.slice(0, 20);
-        
-        while (quizItems.length < 20 && pool.length > 0) {
-          const needed = 20 - quizItems.length;
-          const extra = [...pool].sort(() => Math.random() - 0.5).slice(0, needed);
-          quizItems = [...quizItems, ...extra];
+      const unitSentencesPool = [...(SENTENCE_POOLS[stageVal] || SENTENCE_POOLS[1] || [])].sort(() => Math.random() - 0.5);
+      const chosenSentences = [];
+      for (let i = 0; i < targetSentenceCount && i < unitSentencesPool.length; i++) {
+        const sentenceItem = unitSentencesPool[i % unitSentencesPool.length];
+        const sSpec = generateSentenceBuilderQuestion({ unit: stageVal, sentenceItem });
+        if (sSpec) {
+          chosenSentences.push({
+            item: { spanish: sSpec.targetSentence, english: sSpec.meaning, subcategory: "Stage Sentences", category: `Unidad ${stageVal}` },
+            isCardIntro: false,
+            isConjugation: false,
+            isFillInTheBlank: false,
+            isSentenceBuilder: true,
+            unit: sSpec.unit,
+            prompt: sSpec.prompt,
+            promptLanguage: sSpec.promptLanguage,
+            targetLanguage: sSpec.targetLanguage,
+            targetSentence: sSpec.targetSentence,
+            targetWords: sSpec.targetWords,
+            targetTokens: sSpec.targetTokens,
+            bankTokens: sSpec.bankTokens,
+            distractors: sSpec.distractors,
+            meaning: sSpec.meaning,
+            hint: sSpec.hint,
+            syntaxBreakdown: sSpec.syntaxBreakdown,
+            correct: sSpec.targetSentence,
+            questionWord: sSpec.prompt,
+            choices: []
+          });
         }
-      } else {
-        const currentQuizCount = Math.ceil(quizCount * 0.7);
-        const reviewQuizCount = quizCount - currentQuizCount;
-
-        let reviewQuizItems = [];
-        if (stageVal > 2 && reviewQuizCount > 0) {
-          const pastSubcategories = [];
-          for (let s = 2; s < stageVal; s++) {
-            if (STAGES[s]?.subcategories) {
-              pastSubcategories.push(...STAGES[s].subcategories);
-            }
-          }
-          const pastItems = vocabularyData.filter(item => 
-            pastSubcategories.includes(item.subcategory)
-          );
-          const knownPast = pastItems.filter(item => 
-            state.wordsAnsweredCorrectly?.includes(item.spanish) ||
-            state.stageFlashcardsSeen?.includes(item.spanish)
-          );
-          if (knownPast.length > 0) {
-            reviewQuizItems = [...knownPast].sort(() => Math.random() - 0.5).slice(0, reviewQuizCount);
-          }
-        }
-
-        const neededCurrent = quizCount - reviewQuizItems.length;
-        let filledCurrent = [];
-        while (filledCurrent.length < neededCurrent && stageQuizPool.length > 0) {
-          const needed = neededCurrent - filledCurrent.length;
-          const extra = [...stageQuizPool].sort(() => Math.random() - 0.5).slice(0, needed);
-          filledCurrent = [...filledCurrent, ...extra];
-        }
-
-        quizItems = [...filledCurrent, ...reviewQuizItems];
       }
 
-      const isWordKnownForConjugation = (word) => {
-        if (stageVal === 1) return true;
-        return (state.stageFlashcardsSeen || []).includes(word) || (state.wordsAnsweredCorrectly || []).includes(word);
-      };
-
-      const quizSteps = quizItems.map(item => buildProgressiveQuizStep(item, levelVal, isWordKnownForConjugation(item.spanish)));
-      const shuffledQuizSteps = [...quizSteps].sort(() => Math.random() - 0.5);
-
-      finalQuestions = [...cardSteps, ...shuffledQuizSteps];
-
-      if (finalQuestions.length < 20 && stageQuizPool.length > 0) {
-        while (finalQuestions.length < 20) {
-          const needed = 20 - finalQuestions.length;
-          const extra = [...stageQuizPool].sort(() => Math.random() - 0.5).slice(0, needed);
-          const extraSteps = extra.map(item => buildProgressiveQuizStep(item, levelVal, isWordKnownForConjugation(item.spanish)));
-          finalQuestions = [...finalQuestions, ...extraSteps];
+      // 2. Contrast Decision questions (Which One to Use When)
+      const targetContrastCount = (levelVal >= 6 || isReview) ? 3 : 2;
+      const chosenContrasts = [];
+      const seenContrastPrompts = new Set();
+      for (let c = 0; c < targetContrastCount * 2 && chosenContrasts.length < targetContrastCount; c++) {
+        const cQ = generateContrastQuestion(stageVal, levelVal);
+        if (cQ && !seenContrastPrompts.has(cQ.questionWord)) {
+          seenContrastPrompts.add(cQ.questionWord);
+          chosenContrasts.push(cQ);
         }
-      } else if (finalQuestions.length > 20) {
-        if (cardSteps.length < 20) {
-          finalQuestions = [...cardSteps, ...shuffledQuizSteps.slice(0, 20 - cardSteps.length)];
+      }
+
+      // 3. Verb Conjugations (strictly for verbs that have been introduced)
+      const eligibleVerbs = eligibleStageItems.filter(item => isVerbItem(item) && !isSentenceItem(item)).sort(() => Math.random() - 0.5);
+      const stageTense = (stageVal >= 3) ? "preterite" : "present";
+      const targetConjugationCount = isReview ? 4 : (levelVal >= 6 ? 3 : 2);
+      const chosenConjugations = [];
+      const seenVerbNames = new Set();
+      for (const vItem of eligibleVerbs) {
+        if (chosenConjugations.length >= targetConjugationCount) break;
+        if (!seenVerbNames.has(vItem.spanish)) {
+          seenVerbNames.add(vItem.spanish);
+          const qSpec = generateConjugationQuestion(vItem, { tense: stageTense, excludeVosotros: state.excludeVosotros });
+          if (qSpec) {
+            chosenConjugations.push({
+              item: vItem,
+              isCardIntro: false,
+              isConjugation: true,
+              isGustar: qSpec.isGustar,
+              isReciprocal: qSpec.isReciprocal,
+              subjectPronoun: qSpec.subjectPronoun,
+              infinitive: qSpec.infinitive,
+              prompt: qSpec.prompt,
+              subjectMeaning: qSpec.subjectMeaning,
+              questionWord: qSpec.verb,
+              meaning: qSpec.meaning,
+              pronoun: qSpec.pronoun,
+              tense: qSpec.tense,
+              tenseLabel: qSpec.tenseLabel,
+              isReflexive: qSpec.isReflexive,
+              correct: qSpec.correct,
+              choices: qSpec.choices
+            });
+          }
+        }
+      }
+
+      // 4. Fill in the Blank & Vocab Translations (strictly from eligibleStageItems)
+      const remainingSlots = Math.max(0, quizCount - (chosenSentences.length + chosenContrasts.length + chosenConjugations.length));
+      const poolForVocab = eligibleStageItems.length > 0 ? eligibleStageItems : selectedFlashcards;
+      const shuffledEligible = [...poolForVocab].sort(() => Math.random() - 0.5);
+      const chosenVocabAndFills = [];
+
+      for (const item of shuffledEligible) {
+        if (chosenVocabAndFills.length >= remainingSlots) break;
+        const fillSpec = generateFillInTheBlank(item);
+        if (fillSpec) {
+          chosenVocabAndFills.push({
+            item,
+            isCardIntro: false,
+            isConjugation: false,
+            isFillInTheBlank: true,
+            questionWord: fillSpec.sentence,
+            meaning: fillSpec.meaning,
+            correct: fillSpec.correct,
+            choices: fillSpec.choices,
+            hint: fillSpec.hint,
+            targetVerb: fillSpec.targetVerb,
+            tense: fillSpec.tense
+          });
         } else {
-          finalQuestions = finalQuestions.slice(0, 20);
+          const step = buildProgressiveQuizStep(item, levelVal, true);
+          if (step && !step.isCardIntro && !step.isSentenceBuilder) {
+            chosenVocabAndFills.push(step);
+          }
         }
       }
+
+      // If still need slots to reach quizCount, pad with eligible items
+      while (chosenSentences.length + chosenContrasts.length + chosenConjugations.length + chosenVocabAndFills.length < quizCount && poolForVocab.length > 0) {
+        const item = poolForVocab[Math.floor(Math.random() * poolForVocab.length)];
+        const step = buildProgressiveQuizStep(item, levelVal, true);
+        if (step && !step.isCardIntro) {
+          chosenVocabAndFills.push(step);
+        }
+      }
+
+      const activeQuizQuestions = [
+        ...chosenSentences,
+        ...chosenContrasts,
+        ...chosenConjugations,
+        ...chosenVocabAndFills
+      ].slice(0, quizCount).sort(() => Math.random() - 0.5);
+
+      finalQuestions = [...cardSteps, ...activeQuizQuestions];
     }
 
     setQuestQuestions(finalQuestions);
@@ -1866,7 +2013,7 @@ export default function StudyQuest({
       const flawless = questScore === quizQuestionsCount && !earlyBossFailed;
       recordQuizPerformance(questScore, quizQuestionsCount);
       if (recordLevelCompletion) {
-        recordLevelCompletion(activeQuestStage, 20, questScore, quizQuestionsCount, usedHints);
+        recordLevelCompletion(activeQuestStage, 25, questScore, quizQuestionsCount, usedHints);
       }
 
       if (flawless) {
@@ -1888,7 +2035,7 @@ export default function StudyQuest({
         setQuestSuccessMsg(`⚡ ¡VICTORIA IMPLACABLE! ¡Has superado el Desafío de Salto con 100% de precisión perfecta (${questScore}/${quizQuestionsCount})! Has saltado la Unidad ${activeQuestStage} y desbloqueado la siguiente etapa. Ganaste +${totalGoldEarned} Oro & +${totalXpEarned} XP! (Streak Multiplier: ${comboMultiplier}x)${hintlessMsg}`);
       } else {
         playSound('gameover');
-        setQuestFailMsg(`💀 ¡Desafío de Salto Fallado! En el Desafío de Salto se exige Muerte Súbita (0 fallos permitidos). Lograste ${questScore}/${quizQuestionsCount} preguntas correctas antes de cometer un fallo. Completa las lecciones de la unidad (1-19) para desbloquear la Puerta de Revisión estándar con 80% de margen o vuelve a intentarlo con precisión perfecta.`);
+        setQuestFailMsg(`💀 ¡Desafío de Salto Fallado! En el Desafío de Salto se exige Muerte Súbita (0 fallos permitidos). Lograste ${questScore}/${quizQuestionsCount} preguntas correctas antes de cometer un fallo. Completa las lecciones de la unidad (1-24) para desbloquear la Puerta de Revisión estándar con 80% de margen o vuelve a intentarlo con precisión perfecta.`);
       }
     } else if (activeQuestIsReplay) {
       // Replaying an already passed level for extra practice:
@@ -1927,7 +2074,7 @@ export default function StudyQuest({
       const success = passStageReview(questScore, quizQuestionsCount, usedHints);
       recordQuizPerformance(questScore, quizQuestionsCount);
       if (recordLevelCompletion) {
-        recordLevelCompletion(activeQuestStage, 20, questScore, quizQuestionsCount, usedHints);
+        recordLevelCompletion(activeQuestStage, 25, questScore, quizQuestionsCount, usedHints);
       }
       if (success) {
         if (comboMultiplier > 1.0) {
@@ -2388,6 +2535,29 @@ export default function StudyQuest({
               <Globe size={14} />
               <span>{translateInstructions ? "Instrucciones: EN (Traducido)" : "Instrucciones: ES (Original)"}</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => openCodex("guia_contrastes")}
+              className="btn btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                fontSize: '0.8rem',
+                borderRadius: '10px',
+                border: '1.5px solid rgba(139, 92, 246, 0.4)',
+                background: 'rgba(139, 92, 246, 0.12)',
+                color: '#c4b5fd',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              title="Abrir la Guía de Contrastes Gramaticales (Which One to Use When)"
+            >
+              <span>⚖️</span>
+              <span>{translateInstructions ? "Guía de Contrastes (Grammar Contrasts)" : "Guía de Contrastes"}</span>
+            </button>
           </div>
         </div>
       )}
@@ -2514,7 +2684,7 @@ export default function StudyQuest({
                     <>
                       <button 
                         className="btn btn-danger" 
-                        onClick={() => { setQuestFinished(false); startQuestLevel(activeQuestStage, 20); }}
+                        onClick={() => { setQuestFinished(false); startQuestLevel(activeQuestStage, 25); }}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
                         <Zap size={16} /> {translateInstructions ? "Reintentar Reto de Salto (Retry Skip Challenge)" : "Reintentar Reto de Salto"}
@@ -2524,7 +2694,7 @@ export default function StudyQuest({
                         onClick={() => { 
                           setQuestFinished(false); 
                           setSelectedStage(state.questStage); 
-                          setSelectedLevel(state.isReviewReady ? 20 : state.questLevel); 
+                          setSelectedLevel(state.isReviewReady ? 25 : state.questLevel); 
                         }}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
@@ -2572,7 +2742,7 @@ export default function StudyQuest({
                       onClick={() => {
                         if (isStageUnlocked) {
                           setSelectedStage(sNum);
-                          setSelectedLevel(sNum === state.questStage ? (state.isReviewReady ? 20 : state.questLevel) : 1);
+                          setSelectedLevel(sNum === state.questStage ? (state.isReviewReady ? 25 : state.questLevel) : 1);
                         }
                       }}
                       disabled={!isStageUnlocked}
@@ -2631,8 +2801,8 @@ export default function StudyQuest({
                                 : "Has superado todos los niveles de esta etapa. ¡Selecciona cualquier nivel para practicarlo libremente para ganar Oro y XP extra!")
                             : selectedStage === state.questStage
                               ? (translateInstructions
-                                  ? `Campaign progress: Level ${state.isReviewReady ? 'Review Gate' : state.questLevel} of 19. You can replay previous levels to practice without risk.`
-                                  : `Progreso de campaña: Nivel ${state.isReviewReady ? 'Puerta de Revisión' : state.questLevel} de 19. Puedes volver a niveles anteriores para practicar sin riesgo.`)
+                                  ? `Campaign progress: Level ${state.isReviewReady ? 'Review Gate' : state.questLevel} of 24. You can replay previous levels to practice without risk.`
+                                  : `Progreso de campaña: Nivel ${state.isReviewReady ? 'Puerta de Revisión' : state.questLevel} de 24. Puedes volver a niveles anteriores para practicar sin riesgo.`)
                               : (translateInstructions ? "Stage locked." : "Etapa bloqueada.")}
                         </p>
                       </div>
@@ -2644,7 +2814,7 @@ export default function StudyQuest({
                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                               <button
                                 className={`btn ${state.isReviewReady ? 'btn-danger' : 'btn-primary'}`}
-                                onClick={() => startQuestLevel(state.questStage, state.isReviewReady ? 20 : state.questLevel)}
+                                onClick={() => startQuestLevel(state.questStage, state.isReviewReady ? 25 : state.questLevel)}
                                 style={{ fontSize: '0.88rem', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}
                               >
                                 <Play size={14} /> {translateInstructions ? "Play Current Level" : "Jugar Nivel Actual"} ({state.isReviewReady ? 'Review Gate' : `Lvl ${state.questLevel}`})
@@ -2653,8 +2823,8 @@ export default function StudyQuest({
                                 <button
                                   className="btn btn-danger"
                                   onClick={() => {
-                                    setSelectedLevel(20);
-                                    startQuestLevel(state.questStage, 20);
+                                    setSelectedLevel(25);
+                                    startQuestLevel(state.questStage, 25);
                                   }}
                                   style={{ 
                                     fontSize: '0.88rem', 
@@ -2678,7 +2848,7 @@ export default function StudyQuest({
                             className="btn btn-secondary"
                             onClick={() => {
                               setSelectedStage(state.questStage);
-                              setSelectedLevel(state.isReviewReady ? 20 : state.questLevel);
+                              setSelectedLevel(state.isReviewReady ? 25 : state.questLevel);
                             }}
                             style={{ fontSize: '0.88rem', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}
                           >
@@ -2694,10 +2864,10 @@ export default function StudyQuest({
                         <span>{translateInstructions ? "Stage Levels Passed" : "Niveles de Etapa Aprobados"}</span>
                         <strong>
                           {selectedStage < state.questStage 
-                            ? "20 / 20 (100%)" 
+                            ? "25 / 25 (100%)" 
                             : selectedStage === state.questStage 
-                              ? (state.isReviewReady ? (translateInstructions ? "19 / 20 (95%) • Review Gate Ready" : "19 / 20 (95%) • Puerta de Revisión Lista") : `${Math.min(19, state.questLevel - 1)} / 20 (${Math.round((Math.min(19, state.questLevel - 1) / 20) * 100)}%)`)
-                              : "0 / 20"}
+                              ? (state.isReviewReady ? (translateInstructions ? "24 / 25 (96%) • Review Gate Ready" : "24 / 25 (96%) • Puerta de Revisión Lista") : `${Math.min(24, state.questLevel - 1)} / 25 (${Math.round((Math.min(24, state.questLevel - 1) / 25) * 100)}%)`)
+                              : "0 / 25"}
                         </strong>
                       </div>
                       <div className="progress-bar-outer" style={{ height: '8px' }}>
@@ -2707,7 +2877,7 @@ export default function StudyQuest({
                             width: selectedStage < state.questStage 
                               ? '100%' 
                               : selectedStage === state.questStage 
-                                ? (state.isReviewReady ? '95%' : `${Math.round((Math.min(19, state.questLevel - 1) / 20) * 100)}%`)
+                                ? (state.isReviewReady ? '96%' : `${Math.round((Math.min(24, state.questLevel - 1) / 25) * 100)}%`)
                                 : '0%' 
                           }}
                         />
@@ -2729,7 +2899,7 @@ export default function StudyQuest({
                     </div>
                   </div>
 
-                  {/* 20 Levels Grid */}
+                  {/* 25 Levels Grid */}
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                       <h4 style={{ fontSize: '1rem', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -2746,12 +2916,12 @@ export default function StudyQuest({
                       gap: '12px', 
                       marginBottom: '16px' 
                     }}>
-                      {Array.from({ length: 20 }, (_, i) => i + 1).map(lvl => {
+                      {Array.from({ length: 25 }, (_, i) => i + 1).map(lvl => {
                         const passed = isLevelPassed(selectedStage, lvl);
                         const current = isLevelCurrent(selectedStage, lvl);
                         const locked = isLevelLocked(selectedStage, lvl);
                         const isSelected = selectedLevel === lvl;
-                        const isReviewGate = lvl === 20;
+                        const isReviewGate = lvl === 25;
                         const isEarlyBoss = isEarlyBossLevel(selectedStage, lvl);
 
                         const levelInfo = getLevelInfo(selectedStage, lvl, isEarlyBoss, translateInstructions);
@@ -2934,7 +3104,7 @@ export default function StudyQuest({
                                     : (showCardTranslate ? '🔒 Locked Level' : '🔒 Nivel Bloqueado')}
                             </span>
                             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                              {selectedLevel === 20 ? (showCardTranslate ? 'Review Gate (Boss)' : 'Puerta de Revisión (Jefe)') : (showCardTranslate ? `Level ${selectedLevel} of 19` : `Nivel ${selectedLevel} de 19`)}
+                              {selectedLevel === 25 ? (showCardTranslate ? 'Review Gate (Boss)' : 'Puerta de Revisión (Jefe)') : (showCardTranslate ? `Level ${selectedLevel} of 24` : `Nivel ${selectedLevel} de 24`)}
                             </span>
                           </div>
 
@@ -3025,7 +3195,7 @@ export default function StudyQuest({
                         <div style={{ background: 'rgba(0,0,0,0.15)', padding: '12px 16px', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span>💡</span>
                           <span>
-                            {selectedLevel === 20
+                            {selectedLevel === 25
                               ? (showCardTranslate ? 'Boss Assessment: Requires at least 16/20 (80%) to pass and unlock the next unit.' : 'Evaluación tipo Jefe: Requiere al menos 16/20 (80%) para aprobar.')
                               : isLevelPassed(selectedStage, selectedLevel)
                                 ? (showCardTranslate ? 'Extra Practice: Score at least 12/20 (60%) to complete the review session and earn extra Gold/XP. Doesn\'t risk campaign progress!' : 'Práctica Extra: Acierta al menos 12/20 (60%) para completar la sesión de repaso y ganar oro/XP extra. ¡No arriesga tu progreso de campaña!')
@@ -3043,7 +3213,7 @@ export default function StudyQuest({
                         ) : isEarlyBoss ? (
                           <button 
                             className="btn btn-danger"
-                            onClick={() => startQuestLevel(selectedStage, 20)}
+                            onClick={() => startQuestLevel(selectedStage, 25)}
                             style={{ 
                               fontSize: '1rem', 
                               padding: '12px 24px', 
@@ -3067,15 +3237,15 @@ export default function StudyQuest({
                             onClick={() => startQuestLevel(selectedStage, selectedLevel)}
                             style={{ fontSize: '1rem', padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                           >
-                            <RotateCcw size={16} /> {showCardTranslate ? `Practice Level ${selectedLevel === 20 ? 'Review Gate' : selectedLevel} (Extra Practice)` : `Practicar Nivel ${selectedLevel === 20 ? 'Review Gate' : selectedLevel} (Práctica Extra)`}
+                            <RotateCcw size={16} /> {showCardTranslate ? `Practice Level ${selectedLevel === 25 ? 'Review Gate' : selectedLevel} (Extra Practice)` : `Practicar Nivel ${selectedLevel === 25 ? 'Review Gate' : selectedLevel} (Práctica Extra)`}
                           </button>
                         ) : (
                           <button 
-                            className={`btn ${selectedLevel === 20 ? 'btn-danger' : 'btn-primary'}`}
+                            className={`btn ${selectedLevel === 25 ? 'btn-danger' : 'btn-primary'}`}
                             onClick={() => startQuestLevel(selectedStage, selectedLevel)}
                             style={{ fontSize: '1rem', padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                           >
-                            <Play size={16} /> {selectedLevel === 20 ? (showCardTranslate ? 'Start Review Gate' : 'Iniciar Puerta de Revisión') : (showCardTranslate ? `Start Campaign Level ${selectedLevel}` : `Iniciar Nivel ${selectedLevel} de Campaña`)}
+                            <Play size={16} /> {selectedLevel === 25 ? (showCardTranslate ? 'Start Review Gate' : 'Iniciar Puerta de Revisión') : (showCardTranslate ? `Start Campaign Level ${selectedLevel}` : `Iniciar Nivel ${selectedLevel} de Campaña`)}
                           </button>
                         )}
                       </div>
@@ -3329,12 +3499,94 @@ export default function StudyQuest({
               {!currentQuestQ.isSentenceBuilder && (
                 <div 
                   className="quiz-question-card"
-                  style={currentQuestQ.isConjugation ? {
+                  style={currentQuestQ.isContrastDecision ? {
+                    borderTop: '4px solid #8b5cf6',
+                    boxShadow: '0 -2px 18px rgba(139, 92, 246, 0.25)'
+                  } : currentQuestQ.isConjugation ? {
                     borderTop: isPreteriteTense(currentQuestQ) ? '4px solid #f97316' : '4px solid #10b981',
                     boxShadow: isPreteriteTense(currentQuestQ) ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
                   } : undefined}
                 >
-                  {currentQuestQ.isConjugation ? (
+                  {currentQuestQ.isContrastDecision ? (
+                    <>
+                      {/* Contrast Decision Header Pill */}
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '4px 14px',
+                          borderRadius: '12px',
+                          background: 'rgba(139, 92, 246, 0.15)',
+                          border: '1px solid rgba(139, 92, 246, 0.4)',
+                          color: '#c4b5fd',
+                          fontWeight: '700',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.03em'
+                        }}>
+                          <span>⚖️</span>
+                          <span>{currentQuestQ.contrastPair}</span>
+                        </span>
+                      </div>
+
+                      <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
+                        {translateInstructions ? "Decisión Contrastiva (Choose the correct form):" : "Decisión Contrastiva:"}
+                      </div>
+
+                      <h3 className="quiz-word" style={{ fontSize: '1.4rem', color: 'var(--accent)', margin: '10px 0 6px', lineHeight: 1.4 }}>
+                        {currentQuestQ.questionWord}
+                      </h3>
+
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '12px' }}>
+                        ({currentQuestQ.context || currentQuestQ.meaning})
+                      </p>
+
+                      {currentQuestQ.hint && (
+                        <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
+                          {!questHintRevealed ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setQuestHintRevealed(true);
+                                setHintsUsedInSession(prev => prev + 1);
+                              }}
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.06)',
+                                border: '1px solid rgba(255, 255, 255, 0.18)',
+                                color: 'var(--text-secondary)',
+                                borderRadius: '20px',
+                                padding: '4px 14px',
+                                fontSize: '0.78rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                transition: 'all 0.2s ease',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
+                                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+                                e.currentTarget.style.color = '#c4b5fd';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+                                e.currentTarget.style.color = 'var(--text-secondary)';
+                              }}
+                            >
+                              <span>💡</span>
+                              <span>{translateInstructions ? "Ver Pista de la Regla (Show Rule Hint)" : "Ver Pista de la Regla"}</span>
+                            </button>
+                          ) : (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.3)', padding: '6px 14px', borderRadius: '12px', color: '#c4b5fd', fontSize: '0.8rem', maxWidth: '90%', animation: 'fadeIn 0.2s ease' }}>
+                              <span>💡</span>
+                              <span><strong>{translateInstructions ? "Regla (Rule):" : "Regla:"}</strong> {currentQuestQ.hint}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  ) : currentQuestQ.isConjugation ? (
                     <>
                       {/* Tasteful Compact Tense Pill */}
                       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
@@ -3497,6 +3749,15 @@ export default function StudyQuest({
                     >
                       📖 {translateInstructions ? "Ver Pronombres de Objeto (View Object Pronouns)" : "Ver Pronombres de Objeto"}
                     </button>
+                  ) : currentQuestQ.isContrastDecision ? (
+                    <button 
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openCodex(currentQuestQ.contrastPair || "guia_contrastes")}
+                      style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
+                    >
+                      📖 {translateInstructions ? `Ver Guía: ${currentQuestQ.contrastPair} (View Guide)` : `Ver Guía: ${currentQuestQ.contrastPair}`}
+                    </button>
                   ) : null}
                 </div>
               )}
@@ -3597,22 +3858,42 @@ export default function StudyQuest({
                 >
                   {isQuestUserCorrect 
                     ? `¡Correcto! ${comboCount >= 3 ? `Combo Streak ${comboCount}! ` : ''}` 
-                    : currentQuestQ.isSentenceBuilder
+                    : currentQuestQ.isContrastDecision
                       ? (translateInstructions 
-                          ? `Incorrecto (Incorrect). Frase correcta (Correct sentence): "${currentQuestQ.correct}"`
-                          : `Incorrecto. Frase correcta: "${currentQuestQ.correct}"`)
-                      : currentQuestQ.isConjugation
+                          ? `Incorrecto (Incorrect). Opción correcta (Correct option): "${currentQuestQ.correct}"`
+                          : `Incorrecto. Opción correcta: "${currentQuestQ.correct}"`)
+                      : currentQuestQ.isSentenceBuilder
                         ? (translateInstructions 
-                            ? `Incorrecto (Incorrect). Forma correcta para "${currentQuestQ.subjectPronoun || 'sujeto'}" (${isPreteriteTense(currentQuestQ) ? 'Pretérito' : 'Presente'}): "${currentQuestQ.correct}"`
-                            : `Incorrecto. Forma correcta para "${currentQuestQ.subjectPronoun || 'sujeto'}" (${isPreteriteTense(currentQuestQ) ? 'Pretérito' : 'Presente'}): "${currentQuestQ.correct}"`)
-                        : currentQuestQ.isFillInTheBlank
+                            ? `Incorrecto (Incorrect). Frase correcta (Correct sentence): "${currentQuestQ.correct}"`
+                            : `Incorrecto. Frase correcta: "${currentQuestQ.correct}"`)
+                        : currentQuestQ.isConjugation
                           ? (translateInstructions 
-                              ? `Incorrecto (Incorrect). Palabra correcta (Correct word): "${currentQuestQ.correct}"`
-                              : `Incorrecto. Palabra correcta: "${currentQuestQ.correct}"`)
-                          : (translateInstructions 
-                              ? `Incorrecto (Incorrect). Traducción correcta (Correct translation): "${currentQuestQ.correct}"`
-                              : `Incorrecto! Traducción correcta: "${currentQuestQ.correct}"`)
+                              ? `Incorrecto (Incorrect). Forma correcta para "${currentQuestQ.subjectPronoun || 'sujeto'}" (${isPreteriteTense(currentQuestQ) ? 'Pretérito' : 'Presente'}): "${currentQuestQ.correct}"`
+                              : `Incorrecto. Forma correcta para "${currentQuestQ.subjectPronoun || 'sujeto'}" (${isPreteriteTense(currentQuestQ) ? 'Pretérito' : 'Presente'}): "${currentQuestQ.correct}"`)
+                          : currentQuestQ.isFillInTheBlank
+                            ? (translateInstructions 
+                                ? `Incorrecto (Incorrect). Palabra correcta (Correct word): "${currentQuestQ.correct}"`
+                                : `Incorrecto. Palabra correcta: "${currentQuestQ.correct}"`)
+                            : (translateInstructions 
+                                ? `Incorrecto (Incorrect). Traducción correcta (Correct translation): "${currentQuestQ.correct}"`
+                                : `Incorrecto! Traducción correcta: "${currentQuestQ.correct}"`)
                   }
+
+                  {currentQuestQ.ruleExplanation && (
+                    <div style={{
+                      marginTop: '10px',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      background: isQuestUserCorrect ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.15)',
+                      border: isQuestUserCorrect ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                      fontSize: '0.82rem',
+                      color: isQuestUserCorrect ? '#a7f3d0' : '#fca5a5',
+                      textAlign: 'left',
+                      lineHeight: 1.4
+                    }}>
+                      <strong>💡 {translateInstructions ? "Regla Gramatical (Grammar Rule):" : "Regla Gramatical:"}</strong> {currentQuestQ.ruleExplanation}
+                    </div>
+                  )}
                   
                   {activeQuestIsEarlyBoss && !isQuestUserCorrect ? (
                     <div style={{
@@ -4329,17 +4610,21 @@ export default function StudyQuest({
                 >
                   {isPracticeUserCorrect 
                     ? (translateInstructions ? "¡Correcto! (Correct!) +10 XP | +1 Gold" : "¡Correcto! +10 XP | +1 Gold") 
-                    : practiceQuestions[practiceCurrentIdx]?.isSentenceBuilder
+                    : practiceQuestions[practiceCurrentIdx]?.isContrastDecision
                       ? (translateInstructions 
-                          ? `Incorrecto (Incorrect). Frase correcta (Correct sentence): "${practiceQuestions[practiceCurrentIdx].correct}"`
-                          : `Incorrecto! Frase correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`)
-                      : practiceQuestions[practiceCurrentIdx]?.isConjugation
+                          ? `Incorrecto (Incorrect). Opción correcta (Correct option): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                          : `Incorrecto! Opción correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`)
+                      : practiceQuestions[practiceCurrentIdx]?.isSentenceBuilder
                         ? (translateInstructions 
-                            ? `Incorrecto (Incorrect). Forma correcta para "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'sujeto'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
-                            : `Incorrecto! Forma correcta para "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'sujeto'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`)
-                        : (translateInstructions 
-                            ? `Incorrecto (Incorrect). Respuesta correcta (Correct answer): "${practiceQuestions[practiceCurrentIdx].correct}"`
-                            : `Incorrecto! Respuesta correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`)
+                            ? `Incorrecto (Incorrect). Frase correcta (Correct sentence): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                            : `Incorrecto! Frase correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`)
+                        : practiceQuestions[practiceCurrentIdx]?.isConjugation
+                          ? (translateInstructions 
+                              ? `Incorrecto (Incorrect). Forma correcta para "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'sujeto'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                              : `Incorrecto! Forma correcta para "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'sujeto'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Pretérito' : 'Presente'}): "${practiceQuestions[practiceCurrentIdx].correct}"`)
+                          : (translateInstructions 
+                              ? `Incorrecto (Incorrect). Respuesta correcta (Correct answer): "${practiceQuestions[practiceCurrentIdx].correct}"`
+                              : `Incorrecto! Respuesta correcta: "${practiceQuestions[practiceCurrentIdx].correct}"`)
                   }
                   <button className="btn btn-primary" onClick={handlePracticeNext} style={{ width: '100%', marginTop: '16px' }}>
                     {translateInstructions ? "Siguiente Pregunta (Next Question)" : "Siguiente Pregunta"} <ArrowRight size={16} />
@@ -4385,12 +4670,43 @@ export default function StudyQuest({
                 {!currentQ.isSentenceBuilder && (
                   <div 
                     className="quiz-question-card"
-                    style={currentQ.isConjugation ? {
+                    style={currentQ.isContrastDecision ? {
+                      borderTop: '4px solid #8b5cf6',
+                      boxShadow: '0 -2px 18px rgba(139, 92, 246, 0.25)'
+                    } : currentQ.isConjugation ? {
                       borderTop: isPreteriteTense(currentQ) ? '4px solid #f97316' : '4px solid #10b981',
                       boxShadow: isPreteriteTense(currentQ) ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
                     } : undefined}
                   >
-                    {currentQ.isConjugation ? (
+                    {currentQ.isContrastDecision ? (
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '4px 14px',
+                            borderRadius: '12px',
+                            background: 'rgba(139, 92, 246, 0.15)',
+                            border: '1px solid rgba(139, 92, 246, 0.4)',
+                            color: '#c4b5fd',
+                            fontWeight: '700',
+                            fontSize: '0.8rem',
+                            letterSpacing: '0.03em'
+                          }}>
+                            <span>⚖️</span>
+                            <span>{currentQ.contrastPair}</span>
+                          </span>
+                        </div>
+                        <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>Decisión Contrastiva:</div>
+                        <h3 className="quiz-word" style={{ fontSize: '1.4rem', color: 'var(--accent)', margin: '10px 0 6px', lineHeight: 1.4 }}>
+                          {currentQ.questionWord}
+                        </h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '12px' }}>
+                          ({currentQ.context || currentQ.meaning})
+                        </p>
+                      </>
+                    ) : currentQ.isConjugation ? (
                     <>
                       {/* Tasteful Compact Tense Pill */}
                       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
@@ -4619,12 +4935,30 @@ export default function StudyQuest({
                       >
                         {isRedemptionCorrect
                           ? "¡Correcto!" 
-                          : currentQ.isSentenceBuilder
-                            ? `Incorrecto. Frase correcta: "${currentQ.correct}"`
-                            : currentQ.isConjugation
-                              ? `Incorrecto. Correct form for "${currentQ.subjectPronoun || 'subject'}" (${isPreteriteTense(currentQ) ? 'Pretérito' : 'Presente'}): "${currentQ.correct}"`
-                              : `Incorrecto. Correct answer: "${currentQ.correct}"`
+                          : currentQ.isContrastDecision
+                            ? `Incorrecto. Opción correcta: "${currentQ.correct}"`
+                            : currentQ.isSentenceBuilder
+                              ? `Incorrecto. Frase correcta: "${currentQ.correct}"`
+                              : currentQ.isConjugation
+                                ? `Incorrecto. Correct form for "${currentQ.subjectPronoun || 'subject'}" (${isPreteriteTense(currentQ) ? 'Pretérito' : 'Presente'}): "${currentQ.correct}"`
+                                : `Incorrecto. Correct answer: "${currentQ.correct}"`
                         }
+
+                        {currentQ.ruleExplanation && (
+                          <div style={{
+                            marginTop: '10px',
+                            padding: '10px 14px',
+                            borderRadius: '10px',
+                            background: isRedemptionCorrect ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.15)',
+                            border: isRedemptionCorrect ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                            fontSize: '0.82rem',
+                            color: isRedemptionCorrect ? '#a7f3d0' : '#fca5a5',
+                            textAlign: 'left',
+                            lineHeight: 1.4
+                          }}>
+                            <strong>💡 Regla Gramatical:</strong> {currentQ.ruleExplanation}
+                          </div>
+                        )}
                         <button className="btn btn-primary" onClick={handleRedemptionNext} style={{ width: '100%', marginTop: '16px' }}>
                           Next Question <ArrowRight size={16} />
                         </button>
@@ -4643,16 +4977,24 @@ export default function StudyQuest({
           ------------------------------------------------------------- */}
       {codexVerb && (
         <div className="modal-overlay" style={{ zIndex: 9999 }}>
-          <div className="glass-panel modal-content" style={{ animation: 'pop-in 0.3s ease-out', maxWidth: '440px', width: '92%' }}>
+          <div className="glass-panel modal-content" style={{ animation: 'pop-in 0.3s ease-out', maxWidth: (codexVerb === 'guia_contrastes' || codexVerb === 'pronombres_objeto') ? '720px' : '460px', width: '94%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
               <div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '2px' }}>
-                  {codexVerb === 'pronombres_objeto' ? '📖 Codex Gramatical' : '📖 Codex de Conjugación'}
+                  {codexVerb === 'guia_contrastes' 
+                    ? '⚖️ Guía de Contrastes / Which One to Use When' 
+                    : codexVerb === 'pronombres_objeto' 
+                      ? '📖 Codex Gramatical' 
+                      : '📖 Codex de Conjugación'}
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  {codexVerb === 'pronombres_objeto'
-                    ? (translateInstructions ? "Pronombres de Objeto Directo, Indirecto y Dobles (Object Pronouns)" : "Pronombres de Objeto: Directo, Indirecto y Dobles")
-                    : <>Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong></>}
+                  {codexVerb === 'guia_contrastes'
+                    ? (translateInstructions 
+                        ? "Reglas contrastivas de decisión: matrices comparativas y ejemplos de Español 102." 
+                        : "Reglas contrastivas de decisión: matrices comparativas y ejemplos de Español 102.")
+                    : codexVerb === 'pronombres_objeto'
+                      ? (translateInstructions ? "Pronombres de Objeto Directo, Indirecto y Dobles (Object Pronouns)" : "Pronombres de Objeto: Directo, Indirecto y Dobles")
+                      : <>Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong></>}
                 </p>
               </div>
               <button 
@@ -4664,9 +5006,71 @@ export default function StudyQuest({
               </button>
             </div>
 
+            {/* Top Codex Mode Switcher (Guía de Contrastes / Pronombres / Conjugación) */}
+            <div style={{ display: 'flex', gap: '6px', margin: '10px 0 14px', background: 'rgba(0,0,0,0.3)', padding: '5px', borderRadius: '12px' }}>
+              <button
+                type="button"
+                className="btn btn-sm"
+                style={{
+                  flex: 1,
+                  fontSize: '0.78rem',
+                  padding: '7px 8px',
+                  borderRadius: '8px',
+                  background: codexVerb === 'guia_contrastes' ? '#8b5cf6' : 'rgba(255,255,255,0.05)',
+                  color: codexVerb === 'guia_contrastes' ? '#ffffff' : 'var(--text-secondary)',
+                  border: codexVerb === 'guia_contrastes' ? '2px solid #a78bfa' : '1px solid transparent',
+                  boxShadow: codexVerb === 'guia_contrastes' ? '0 0 10px rgba(139, 92, 246, 0.4)' : 'none',
+                  fontWeight: codexVerb === 'guia_contrastes' ? '800' : '500'
+                }}
+                onClick={() => setCodexVerb("guia_contrastes")}
+              >
+                ⚖️ Guía de Contrastes
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm"
+                style={{
+                  flex: 1,
+                  fontSize: '0.78rem',
+                  padding: '7px 8px',
+                  borderRadius: '8px',
+                  background: codexVerb === 'pronombres_objeto' ? '#3b82f6' : 'rgba(255,255,255,0.05)',
+                  color: codexVerb === 'pronombres_objeto' ? '#ffffff' : 'var(--text-secondary)',
+                  border: codexVerb === 'pronombres_objeto' ? '2px solid #60a5fa' : '1px solid transparent',
+                  boxShadow: codexVerb === 'pronombres_objeto' ? '0 0 10px rgba(59, 130, 246, 0.4)' : 'none',
+                  fontWeight: codexVerb === 'pronombres_objeto' ? '800' : '500'
+                }}
+                onClick={() => setCodexVerb("pronombres_objeto")}
+              >
+                🎯 Pronombres
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm"
+                style={{
+                  flex: 1,
+                  fontSize: '0.78rem',
+                  padding: '7px 8px',
+                  borderRadius: '8px',
+                  background: (codexVerb !== 'guia_contrastes' && codexVerb !== 'pronombres_objeto') ? '#10b981' : 'rgba(255,255,255,0.05)',
+                  color: (codexVerb !== 'guia_contrastes' && codexVerb !== 'pronombres_objeto') ? '#ffffff' : 'var(--text-secondary)',
+                  border: (codexVerb !== 'guia_contrastes' && codexVerb !== 'pronombres_objeto') ? '2px solid #34d399' : '1px solid transparent',
+                  boxShadow: (codexVerb !== 'guia_contrastes' && codexVerb !== 'pronombres_objeto') ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none',
+                  fontWeight: (codexVerb !== 'guia_contrastes' && codexVerb !== 'pronombres_objeto') ? '800' : '500'
+                }}
+                onClick={() => {
+                  if (codexVerb === 'guia_contrastes' || codexVerb === 'pronombres_objeto') {
+                    setCodexVerb("tener");
+                  }
+                }}
+              >
+                📖 Conjugación
+              </button>
+            </div>
+
             {/* Dual Tense Switcher Tabs (Only for Verbs) */}
-            {codexVerb !== 'pronombres_objeto' && (
-              <div style={{ display: 'flex', gap: '8px', margin: '14px 0 12px', background: 'rgba(0,0,0,0.25)', padding: '5px', borderRadius: '12px' }}>
+            {codexVerb !== 'pronombres_objeto' && codexVerb !== 'guia_contrastes' && (
+              <div style={{ display: 'flex', gap: '8px', margin: '0 0 12px', background: 'rgba(0,0,0,0.25)', padding: '5px', borderRadius: '12px' }}>
                 <button
                   type="button"
                   className="btn btn-sm"
@@ -4707,7 +5111,7 @@ export default function StudyQuest({
             )}
 
             {/* Reflexive or Reciprocal Verb Banner */}
-            {codexVerb !== 'pronombres_objeto' && (
+            {codexVerb !== 'pronombres_objeto' && codexVerb !== 'guia_contrastes' && (
               isReciprocalVerb(codexVerb) ? (
                 <div style={{ 
                   background: 'rgba(236, 72, 153, 0.12)', 
@@ -4739,7 +5143,344 @@ export default function StudyQuest({
               ) : null
             )}
             
-            {codexVerb === 'pronombres_objeto' ? (
+            {codexVerb === 'guia_contrastes' ? (
+              <div>
+                {/* Horizontal scrollable subtabs */}
+                <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '14px', scrollbarWidth: 'thin' }}>
+                  {[
+                    { id: 'por_para', label: '⏳ Por vs Para' },
+                    { id: 'to_become', label: '🔄 To Become' },
+                    { id: 'to_realize', label: '💡 To Realize' },
+                    { id: 'personal_a', label: '👤 Personal "a"' },
+                    { id: 'reciprocal_reflexive', label: '🤝 Recíproco vs Reflexivo' },
+                    { id: 'saber_conocer_ser_estar', label: '🔍 Saber & Ser' },
+                    { id: 'preterite_families', label: '📦 Pretérito' },
+                    { id: 'devolver_volver', label: '🔄 Devolver vs Volver' }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      className="btn btn-sm"
+                      style={{
+                        whiteSpace: 'nowrap',
+                        fontSize: '0.74rem',
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        background: contrastCodexTab === tab.id ? '#8b5cf6' : 'rgba(255,255,255,0.05)',
+                        color: contrastCodexTab === tab.id ? '#ffffff' : 'var(--text-secondary)',
+                        border: contrastCodexTab === tab.id ? '2px solid #a78bfa' : '1px solid transparent',
+                        boxShadow: contrastCodexTab === tab.id ? '0 0 8px rgba(139, 92, 246, 0.4)' : 'none',
+                        fontWeight: contrastCodexTab === tab.id ? '700' : '500'
+                      }}
+                      onClick={() => setContrastCodexTab(tab.id)}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Subtab 1: POR VS PARA */}
+                {contrastCodexTab === 'por_para' && (
+                  <div>
+                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
+                      ⏳ <strong>Por vs Para (Lección 3.3)</strong>
+                      <br />
+                      <strong>POR</strong> mira hacia la causa o el trayecto (motivo, duración, medio, intercambio). <strong>PARA</strong> mira hacia la meta o el futuro (destino, destinatario, fecha límite, propósito + infinitivo).
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Uso / Regla</th>
+                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Preposición</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo Clave</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { uso: "Causa o motivo ('because of')", prep: "por", ex: "No fuimos por la lluvia." },
+                          { uso: "Duración de tiempo", prep: "por", ex: "Estudié por dos horas." },
+                          { uso: "Medio de transporte o comunicación", prep: "por", ex: "Mando la carta por correo / por tren." },
+                          { uso: "Intercambio o precio", prep: "por", ex: "Pagué 20 dólares por el libro." },
+                          { uso: "Movimiento por / a través de ('through')", prep: "por", ex: "Paseamos por el parque." },
+                          { uso: "Expresiones fijas comunes", prep: "por", ex: "Por favor, por fin, por ejemplo." },
+                          { uso: "Destino o dirección física", prep: "para", ex: "Salimos para Madrid mañana." },
+                          { uso: "Destinatario ('for whom')", prep: "para", ex: "Este regalo es para ti." },
+                          { uso: "Propósito u objetivo (+ infinitivo)", prep: "para", ex: "Estudio para aprender español." },
+                          { uso: "Fecha límite ('deadline')", prep: "para", ex: "La tarea es para el viernes." },
+                          { uso: "Opinión personal / Estándar", prep: "para", ex: "Para mí, es muy importante." }
+                        ].map((r, i) => (
+                          <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: r.prep === 'por' ? 'rgba(59, 130, 246, 0.04)' : 'rgba(16, 185, 129, 0.04)' }}>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{r.uso}</td>
+                            <td style={{ padding: '6px 8px', color: r.prep === 'por' ? '#60a5fa' : '#34d399', fontWeight: 700 }}>{r.prep}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      💡 <em>Regla Mnemotécnica:</em> <strong>POR</strong> = Motivo / Trayecto / Intercambio. <strong>PARA</strong> = Destino / Plazo / Propósito.
+                    </div>
+                  </div>
+                )}
+
+                {/* Subtab 2: TO BECOME */}
+                {contrastCodexTab === 'to_become' && (
+                  <div>
+                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
+                      🔄 <strong>"To Become" en Español (Lección 4.4)</strong>
+                      <br />
+                      En inglés solo se usa "to become", pero en español se elige según la velocidad, el esfuerzo y la permanencia.
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Verbo</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Tipo de Cambio</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Esfuerzo</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo Clave</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { verbo: "Ponerse + adjetivo", tipo: "Emoción / estado físico o ánimo pasajero", esfuerzo: "Involuntario, rápido", ex: "Se puso furioso / rojo / triste." },
+                          { verbo: "Volverse + adjetivo", tipo: "Transformación radical de personalidad", esfuerzo: "Profundo, drástico", ex: "Se volvió loco / rebelde / muy desconfiado." },
+                          { verbo: "Hacerse + sust./adj.", tipo: "Profesión, estatus, ideología, religión", esfuerzo: "Consciente, con tiempo y estudio", ex: "Se hizo médica / abogado / vegetariano." },
+                          { verbo: "Llegar a ser + sust.", tipo: "Culminación de una carrera exitosa", esfuerzo: "Meta final tras largo esfuerzo", ex: "Llegó a ser presidente de la empresa." }
+                        ].map((r, i) => (
+                          <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{r.verbo}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{r.tipo}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-muted)' }}>{r.esfuerzo}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      💡 <em>Regla de Oro:</em> Emoción rápida = <strong>Ponerse</strong>. Cambio radical de conducta = <strong>Volverse</strong>. Título o carrera universitaria = <strong>Hacerse</strong>.
+                    </div>
+                  </div>
+                )}
+
+                {/* Subtab 3: TO REALIZE */}
+                {contrastCodexTab === 'to_realize' && (
+                  <div>
+                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
+                      💡 <strong>"To Realize" vs "Realizar" (Lección 4.4 - ¡Falso Cognado!)</strong>
+                      <br />
+                      ¡Peligro de cognado falso! En español, <em>realizar</em> NUNCA significa percatarse mentalmente.
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Expresión</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Significado Real</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo Correcto</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(16, 185, 129, 0.05)' }}>
+                          <td style={{ padding: '8px', color: '#34d399', fontWeight: 700 }}>Darse cuenta de (que...)</td>
+                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>To become aware / realize mentally</td>
+                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Me di cuenta de que no tenía mi pasaporte."</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(239, 68, 68, 0.05)' }}>
+                          <td style={{ padding: '8px', color: '#f87171', fontWeight: 700 }}>Realizar (¡Falso Cognado!)</td>
+                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>To achieve, carry out, fulfill a project or dream</td>
+                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"El arquitecto realizó su gran proyecto."</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#fca5a5' }}>
+                      ❌ <strong>Nunca digas:</strong> "Yo realicé que tenía tarea."<br />
+                      ✅ <strong>Siempre di:</strong> "Me di cuenta de que tenía tarea."
+                    </div>
+                  </div>
+                )}
+
+                {/* Subtab 4: PERSONAL "A" */}
+                {contrastCodexTab === 'personal_a' && (
+                  <div>
+                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
+                      👤 <strong>La "A" Personal (Lección 2.2 y 3.1)</strong>
+                      <br />
+                      Se usa obligatoriamente cuando el objeto directo del verbo es una persona específica o una mascota querida.
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Situación</th>
+                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>¿Lleva "a"?</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo Clave</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { sit: "Persona humana específica y conocida", lleva: "SÍ", ex: "Visito a mi abuela en el hospital." },
+                          { sit: "Mascota o animal doméstico querido", lleva: "SÍ", ex: "Paseo a mi perro por el parque." },
+                          { sit: "Cosa u objeto inanimado", lleva: "NO", ex: "Compré el boleto de avión." },
+                          { sit: "Persona no específica / desconocida", lleva: "NO", ex: "Busco un recepcionista bilingüe." },
+                          { sit: "Con el verbo tener (posesión ordinaria)", lleva: "NO", ex: "Tengo dos hermanos y un gato." }
+                        ].map((r, i) => (
+                          <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: r.lleva === 'SÍ' ? 'rgba(16, 185, 129, 0.04)' : 'rgba(239, 68, 68, 0.04)' }}>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{r.sit}</td>
+                            <td style={{ padding: '6px 8px', color: r.lleva === 'SÍ' ? '#34d399' : '#f87171', fontWeight: 700 }}>{r.lleva}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      💡 <em>Recuerda:</em> <strong>a + el = al</strong> (*Llamo al doctor*).
+                    </div>
+                  </div>
+                )}
+
+                {/* Subtab 5: RECIPROCAL VS REFLEXIVE */}
+                {contrastCodexTab === 'reciprocal_reflexive' && (
+                  <div>
+                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
+                      🤝 <strong>Recíproco vs Reflexivo (Lección 2.3)</strong>
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Tipo</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>¿Quién recibe la acción?</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Pronombres</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(168, 85, 247, 0.05)' }}>
+                          <td style={{ padding: '8px', color: '#c084fc', fontWeight: 700 }}>Reflexivo</td>
+                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>El propio sujeto (a sí mismo)</td>
+                          <td style={{ padding: '8px', color: 'var(--text-muted)' }}>me, te, se, nos, os, se</td>
+                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Juan se mira en el espejo."</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(236, 72, 153, 0.05)' }}>
+                          <td style={{ padding: '8px', color: '#f472b6', fontWeight: 700 }}>Recíproco</td>
+                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Mutuamente el uno al otro ("each other")</td>
+                          <td style={{ padding: '8px', color: 'var(--text-muted)' }}>¡SOLO plural! nos, os, se</td>
+                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Juan y Elena se miran el uno al otro."</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      💡 <em>Pista Clave:</em> Los verbos recíprocos SIEMPRE requieren sujetos plurales (*nosotros*, *vosotros*, *ellos/ellas/ustedes*).
+                    </div>
+                  </div>
+                )}
+
+                {/* Subtab 6: SABER/CONOCER & SER/ESTAR */}
+                {contrastCodexTab === 'saber_conocer_ser_estar' && (
+                  <div>
+                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
+                      🔍 <strong>Saber vs Conocer & Ser vs Estar (Repaso y 2.1)</strong>
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Par</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Uso Fundamental</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>En Pretérito (Significado Especial)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '8px', color: '#60a5fa', fontWeight: 700 }}>Saber</td>
+                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Datos, hechos, información, cómo hacer algo (+ inf.)</td>
+                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Supe la noticia ayer" (I found out / learned)</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '8px', color: '#38bdf8', fontWeight: 700 }}>Conocer</td>
+                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Personas (con 'a'), lugares, familiaridad</td>
+                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Conocí a María anoche" (I met for the first time)</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '8px', color: '#34d399', fontWeight: 700 }}>Ser (DOCTOR)</td>
+                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Descripción, Ocupación, Característica, Hora, Origen, Material</td>
+                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Fue una fiesta divertida"</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '8px', color: '#f59e0b', fontWeight: 700 }}>Estar (PLACE)</td>
+                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Posición, Ubicación, Acción (-ndo), Condición, Emoción</td>
+                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Estuve en el hotel tres días"</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Subtab 7: PRETERITE FAMILIES */}
+                {contrastCodexTab === 'preterite_families' && (
+                  <div>
+                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
+                      📦 <strong>Familias de Verbos en el Pretérito (Lecciones 2.1, 3.2, 3.4, 4.1, 4.2)</strong>
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Familia</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Regla Específica</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplos</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { fam: "Regulares", regla: "-ar (-é, -aste, -ó, -amos, -aron) vs -er/-ir (-í, -iste, -ió, -imos, -ieron)", ex: "habló, comió, vivió" },
+                          { fam: "Cambios de Raíz (Sandal)", regla: "¡SOLO verbos -ir! ¡SOLO en 3ª persona (él/ellos)! (e->i, o->u)", ex: "pidió/pidieron, durmió/durmieron, sirvió" },
+                          { fam: "Ortográficos (yo)", regla: "-car -> qué, -gar -> gué, -zar -> cé", ex: "busqué, pagué, crucé, regué" },
+                          { fam: "Cambio i -> y", regla: "Doble vocal en 3ª persona", ex: "leyó/leyeron, creyó, oyó, destruyó" },
+                          { fam: "Radicales U-stem", regla: "Raíz irregular SIN acentos (-e, -iste, -o, -imos, -ieron)", ex: "estuve, tuve, anduve, puse, pude, supe" },
+                          { fam: "Radicales I-stem", regla: "hacer (hice/hizo), querer (quise), venir (vine)", ex: "hice, hizo, quiso, vino" },
+                          { fam: "Radicales J-stem", regla: "Terminan en -eron en ellos (sin 'i')", ex: "dije/dijeron, traje/trajeron, conduje/condujeron" }
+                        ].map((r, i) => (
+                          <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{r.fam}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{r.regla}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#fca5a5' }}>
+                      ⚠️ <strong>Regla Crítica:</strong> Los verbos <em>-ar</em> y <em>-er</em> (como <em>volver</em>, <em>devolver</em>, <em>entender</em>) <strong>NUNCA</strong> tienen cambio de raíz en pretérito (*ellos devolvieron*, *él entendió*).
+                    </div>
+                  </div>
+                )}
+
+                {/* Subtab 8: DEVOLVER VS VOLVER */}
+                {contrastCodexTab === 'devolver_volver' && (
+                  <div>
+                    <div style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.82rem', marginBottom: '14px', color: '#c4b5fd', lineHeight: '1.45' }}>
+                      🔄 <strong>Devolver vs Volver (Lección 3.3)</strong>
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left', marginBottom: '14px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          <th style={{ padding: '6px 8px', color: '#c4b5fd', fontWeight: 'bold' }}>Verbo</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Significado</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo Clave</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(59, 130, 246, 0.05)' }}>
+                          <td style={{ padding: '8px', color: '#60a5fa', fontWeight: 700 }}>Devolver</td>
+                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Regresar un objeto o dinero a su tienda o lugar</td>
+                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Tengo que devolver estos pantalones a la tienda."</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(16, 185, 129, 0.05)' }}>
+                          <td style={{ padding: '8px', color: '#34d399', fontWeight: 700 }}>Volver</td>
+                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>Regresar una persona físicamente</td>
+                          <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>"Nosotros volvimos de las vacaciones ayer."</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            ) : codexVerb === 'pronombres_objeto' ? (
               <div>
                 {/* 3 tabs switcher */}
                 <div style={{ display: 'flex', gap: '6px', margin: '0 0 12px', background: 'rgba(0,0,0,0.25)', padding: '5px', borderRadius: '12px' }}>

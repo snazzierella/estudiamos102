@@ -1,7 +1,7 @@
 // Level metadata and pedagogical guidance for Spanish 102 Quest Stages and Levels
 
 export function getLevelInfo(stageNum, levelNum, isEarlyBoss = false, translate = false) {
-  if (levelNum === 20 && isEarlyBoss) {
+  if (levelNum === 25 && isEarlyBoss) {
     return {
       title: translate 
         ? `⚡ Desafío de Salto (Jefe de Unidad ${stageNum}) • Skip Challenge`
@@ -10,8 +10,8 @@ export function getLevelInfo(stageNum, levelNum, isEarlyBoss = false, translate 
         ? "Sudden Death • 30 Questions" 
         : "Muerte Súbita (Sudden Death) • 30 Preguntas",
       desc: translate
-        ? `Early Skip Challenge! Face the Unit Boss directly to bypass all 19 lessons of Unit ${stageNum}. Extended 30-question advanced synthesis assessment in Sudden Death: a single mistake terminates the challenge immediately!`
-        : `¡Reto de Salto Anticipado! Enfréntate directamente al Jefe para saltarte las 19 lecciones de la Unidad ${stageNum}. Evaluación extendida de 30 preguntas de síntesis avanzada en Muerte Súbita: ¡un solo fallo termina el reto de inmediato!`
+        ? `Early Skip Challenge! Face the Unit Boss directly to bypass all 24 lessons of Unit ${stageNum}. Extended 30-question advanced synthesis assessment in Sudden Death: a single mistake terminates the challenge immediately!`
+        : `¡Reto de Salto Anticipado! Enfréntate directamente al Jefe para saltarte las 24 lecciones de la Unidad ${stageNum}. Evaluación extendida de 30 preguntas de síntesis avanzada en Muerte Súbita: ¡un solo fallo termina el reto de inmediato!`
     };
   }
 
@@ -121,17 +121,47 @@ export function getLevelInfo(stageNum, levelNum, isEarlyBoss = false, translate 
         };
       case 18:
         return {
-          title: translate ? "Desafío de Maestría 101 (101 Mastery Challenge)" : "Desafío de Maestría 101",
-          focus: "Comprehensive 101 Synthesis",
-          desc: "High-tempo mixed challenges: stem-changers, irregular yo forms, and complex sentence builders."
+          title: translate ? "Verbos Reflexivos y Rutina (Reflexive Verbs & Routine Review)" : "Verbos Reflexivos y Rutina",
+          focus: "101 Reflexive Foundations",
+          desc: "Reflexive pronouns and daily routine actions (levantarse, acostarse, vestirse) in the present tense."
         };
       case 19:
         return {
-          title: translate ? "Ensayo Final de Nivel 101 (101 Final Rehearsal)" : "Ensayo Final de Nivel 101",
-          focus: "Pre-Boss Rehearsal",
-          desc: "The ultimate trial preparing you for the Stage 1 Review Gate with multi-distractor sentence puzzles."
+          title: translate ? "Preguntas y Respuestas Complejas (Complex Questions & Answers)" : "Preguntas y Respuestas Complejas",
+          focus: "Interrogative Syntax & Conversational Flow",
+          desc: "Formulating interrogative clauses and matching logical conversational responses."
         };
       case 20:
+        return {
+          title: translate ? "Contraste Fundamental: Ser vs Estar & Saber vs Conocer (Foundational Contrasts)" : "Contraste Fundamental: Ser vs Estar & Saber vs Conocer",
+          focus: "101 High-Frequency Contrasts",
+          desc: "Targeted decisions distinguishing permanent characteristics/locations and knowledge of facts vs familiarity with people."
+        };
+      case 21:
+        return {
+          title: translate ? "Desafío de Concordancia y Plurales (Agreement & Plurals Challenge)" : "Desafío de Concordancia y Plurales",
+          focus: "Syntactic Precision: Gender, Number & Modifiers",
+          desc: "Multi-element agreement drills ensuring adjectives, articles, and verbs match their subjects."
+        };
+      case 22:
+        return {
+          title: translate ? "Traducción Contextual I: Vida Cotidiana (Contextual Translation I: Daily Life)" : "Traducción Contextual I: Vida Cotidiana",
+          focus: "Applied Dialogue & Real-World Scenarios",
+          desc: "Interactive sentence building for restaurant orders, campus life, and family discussions."
+        };
+      case 23:
+        return {
+          title: translate ? "Traducción Contextual II: Diálogos y Preguntas (Contextual Translation II: Dialogues)" : "Traducción Contextual II: Diálogos y Preguntas",
+          focus: "Advanced Sentence Ordering & Distractor Traps",
+          desc: "Complex English-to-Spanish sentence translations with targeted grammar distractors."
+        };
+      case 24:
+        return {
+          title: translate ? "Ensayo General de Nivel 101 (101 Grand Rehearsal)" : "Ensayo General de Nivel 101",
+          focus: "Pre-Boss Cumulative Challenge",
+          desc: "The final rehearsal covering all 101 topics before taking on the Unit 1 Review Gate."
+        };
+      case 25:
         return {
           title: translate ? "🛡️ Puerta de Revisión (Jefe de Unidad 1) • Review Gate" : "🛡️ Puerta de Revisión (Jefe de Unidad 1)",
           focus: "Boss Battle: 101 Review Gate",
@@ -148,26 +178,32 @@ export function getLevelInfo(stageNum, levelNum, isEarlyBoss = false, translate 
     if (levelNum <= 5) {
       return {
         title: translate ? `El Cuerpo y Salud (The Body & Health) (Pt. ${levelNum})` : `El Cuerpo y Salud (Pt. ${levelNum})`,
-        focus: "Body Parts & Health Emergencies",
-        desc: "Essential vocabulary for anatomy, health conditions, illness symptoms, and doctor visits."
+        focus: "Body Parts, Health Emergencies & Initial Vocab",
+        desc: "Essential vocabulary for anatomy, health conditions, illness symptoms, and doctor visits (Levels 1–5 Vocab Intro)."
       };
     } else if (levelNum <= 10) {
       return {
-        title: translate ? `Rutina Diaria (Daily Routine) (Pt. ${levelNum - 5})` : `Rutina Diaria (Pt. ${levelNum - 5})`,
-        focus: "Daily Routine & Reflexive Verbs",
+        title: translate ? `Rutina Diaria y Verbos Reflexivos (Daily Routine & Reflexives) (Pt. ${levelNum - 5})` : `Rutina Diaria y Verbos Reflexivos (Pt. ${levelNum - 5})`,
+        focus: "Daily Routine, Hygiene Verbs & Reflexive Pronouns",
         desc: "Reflexive pronouns (me, te, se, nos) and hygiene verbs (levantarse, ducharse, cepillarse, vestirse)."
       };
     } else if (levelNum <= 15) {
       return {
-        title: translate ? `Emociones y Recíprocos (Emotions & Reciprocals) (Pt. ${levelNum - 10})` : `Emociones y Recíprocos (Pt. ${levelNum - 10})`,
-        focus: "Emotions, Reciprocals & Por/Para",
+        title: translate ? `Emociones, Estados y Verbos Recíprocos (Emotions & Reciprocals) (Pt. ${levelNum - 10})` : `Emociones, Estados y Verbos Recíprocos (Pt. ${levelNum - 10})`,
+        focus: "Emotions, Reciprocals & Por/Para Triggers",
         desc: "Reciprocal verbs (abrazarse, besarse), expressions of emotional states, and distinctions between Por and Para."
       };
     } else if (levelNum <= 19) {
       return {
-        title: translate ? `Síntesis de Unidad 2 (Unidad 2 Synthesis) (Pt. ${levelNum - 15})` : `Síntesis de Unidad 2 (Pt. ${levelNum - 15})`,
-        focus: "Unidad 2 Advanced Synthesis",
-        desc: "Comprehensive sentence construction puzzles and contextual fill-in-the-blank drills."
+        title: translate ? `Contrastes de Uso & Vocabulario Final (Usage Contrasts & Final Vocab) (Pt. ${levelNum - 15})` : `Contrastes de Uso & Vocabulario Final (Pt. ${levelNum - 15})`,
+        focus: "Usage Contrasts (Por vs Para, Ponerse vs Sentirse) & Final Vocab Completion",
+        desc: "Targeted contrast decisions, idioms with por/para, emotional transitions, and final unit vocabulary mastery (147/147 words completed by Level 19)."
+      };
+    } else if (levelNum <= 24) {
+      return {
+        title: translate ? `Síntesis de Unidad 2: Maestría Activa (Unidad 2 Active Synthesis) (Pt. ${levelNum - 19})` : `Síntesis de Unidad 2: Maestría Activa (Pt. ${levelNum - 19})`,
+        focus: "100% Active Challenge • Zero Flashcards",
+        desc: "Pure active mastery: advanced sentence builder puzzles, medical consultation dialogues, reflexive syntax, and contrastive decisions with zero flashcards."
       };
     } else {
       return {
@@ -179,21 +215,33 @@ export function getLevelInfo(stageNum, levelNum, isEarlyBoss = false, translate 
   } else if (stageNum === 3) {
     if (levelNum <= 5) {
       return {
-        title: translate ? `Compras y Quehaceres (Shopping & Chores) (Pt. ${levelNum})` : `Compras y Quehaceres (Pt. ${levelNum})`,
-        focus: "Shopping & Chores",
-        desc: "Vocabulary for clothing shops, supermarkets, and household chores."
+        title: translate ? `Tareas, Mandados y la 'a' Personal (Chores & Personal 'a') (Pt. ${levelNum})` : `Tareas, Mandados y la 'a' Personal (Pt. ${levelNum})`,
+        focus: "Chores, Errands & Personal 'a' with Direct Objects",
+        desc: "Household tasks, errands, personal care objects, and the personal 'a' with specific person direct objects."
       };
-    } else if (levelNum <= 15) {
+    } else if (levelNum <= 10) {
       return {
-        title: translate ? `Pretérito Regular (Regular Preterite) (Pt. ${levelNum - 5})` : `Pretérito Regular (Pt. ${levelNum - 5})`,
-        focus: "Preterite Tense Basics",
-        desc: "Past completed actions with regular -ar, -er, -ir preterite endings."
+        title: translate ? `De Compras y Pretérito Regular (Shopping & Regular Preterite) (Pt. ${levelNum - 5})` : `De Compras y Pretérito Regular (Pt. ${levelNum - 5})`,
+        focus: "Shopping, Stores & Regular Preterite (-car/-gar/-zar yo changes)",
+        desc: "Clothing, sizes, supermarket items, regular past tense endings, and -car/-gar/-zar yo spelling changes (busqué, pagué, almorcé)."
+      };
+    } else if (levelNum <= 14) {
+      return {
+        title: translate ? `Pretérito con Cambio de Raíz y Pronombres de Objeto Directo (Pt. ${levelNum - 10})` : `Pretérito con Cambio de Raíz y Pronombres DO (Pt. ${levelNum - 10})`,
+        focus: "Preterite Stem Changers (-ir only) & DO Pronouns (lo/la/los/las)",
+        desc: "Mastering e->i and o->u stem changes in 3rd person preterite (pidió/durmió) and direct object pronouns (all 83 unit words introduced by Level 14!)."
       };
     } else if (levelNum <= 19) {
       return {
-        title: translate ? `Síntesis de Unidad 3 (Unidad 3 Synthesis) (Pt. ${levelNum - 15})` : `Síntesis de Unidad 3 (Pt. ${levelNum - 15})`,
-        focus: "Preterite Synthesis",
-        desc: "Sentence builder puzzles and mixed past tense conjugation."
+        title: translate ? `Contrastes Pretéritos y Diálogos de Tienda (Preterite Contrasts & Dialogues) (Pt. ${levelNum - 14})` : `Contrastes Pretéritos y Diálogos de Tienda (Pt. ${levelNum - 14})`,
+        focus: "Twin Verbs (fui/di/vi), Preterite Contrasts & Market Dialogues • Zero Flashcards",
+        desc: "Distinguishing irregular preterite twin forms, direct object pronoun placement, and interactive market bargaining dialogues."
+      };
+    } else if (levelNum <= 24) {
+      return {
+        title: translate ? `Síntesis de Unidad 3: Traducción en Pasado (Unidad 3 Past Synthesis) (Pt. ${levelNum - 19})` : `Síntesis de Unidad 3: Traducción en Pasado (Pt. ${levelNum - 19})`,
+        focus: "100% Active Challenge • Zero Flashcards",
+        desc: "Pure active mastery: complex past narrative sentence builders, DO pronoun substitutions, and shopping conversations."
       };
     } else {
       return {
@@ -205,21 +253,33 @@ export function getLevelInfo(stageNum, levelNum, isEarlyBoss = false, translate 
   } else if (stageNum === 4) {
     if (levelNum <= 5) {
       return {
-        title: translate ? `Viajes y Transporte (Travel & Lodging) (Pt. ${levelNum})` : `Viajes y Transporte (Pt. ${levelNum})`,
-        focus: "Travel & Lodging",
-        desc: "Transportation, vacations, airport vocabulary, and hotel amenities."
+        title: translate ? `Viajes, Transporte y Aeropuertos (Travel & Airports) (Pt. ${levelNum})` : `Viajes, Transporte y Aeropuertos (Pt. ${levelNum})`,
+        focus: "Travel, Airports, Trains & Flight Navigation",
+        desc: "Airport navigation, trains, flights, luggage, and completed travel action narratives in the preterite."
       };
-    } else if (levelNum <= 15) {
+    } else if (levelNum <= 10) {
       return {
-        title: translate ? `Pretérito Irregular y Pronombres (Irregular Preterite & Pronouns) (Pt. ${levelNum - 5})` : `Pretérito Irregular y Pronombres (Pt. ${levelNum - 5})`,
-        focus: "Irregular Preterite & Double Pronouns",
-        desc: "Irregular preterite stems and indirect/direct object pronoun sequences."
+        title: translate ? `Hoteles y Pretéritos Irregulares Radicales (Hotels & Radical Preterites) (Pt. ${levelNum - 5})` : `Hoteles y Pretéritos Irregulares Radicales (Pt. ${levelNum - 5})`,
+        focus: "Hotels, Lodging & Unaccented Radical Stems",
+        desc: "Hotel check-in, amenities, and unaccented preterite stems (anduv-, estuv-, tuv-, pud-, pus-, sup-, dij-, traj-)."
+      };
+    } else if (levelNum <= 16) {
+      return {
+        title: translate ? `Verbos de Cambio, Darse Cuenta y Pronombres Dobles (Pt. ${levelNum - 10})` : `Verbos de Cambio, Darse Cuenta y Pronombres Dobles (Pt. ${levelNum - 10})`,
+        focus: "Ponerse vs Volverse vs Hacerse, Darse cuenta vs Realizar & Se lo/la",
+        desc: "Contrasts between ways to say 'to become', mental realization vs 'realizar', and double object pronouns (all 104 unit words introduced by Level 16!)."
       };
     } else if (levelNum <= 19) {
       return {
-        title: translate ? `Síntesis de Unidad 4 (Unidad 4 Synthesis) (Pt. ${levelNum - 15})` : `Síntesis de Unidad 4 (Pt. ${levelNum - 15})`,
-        focus: "Unidad 4 Advanced Synthesis",
-        desc: "Complex travel scenarios and narrative past sentences."
+        title: translate ? `Guía de Contrastes de Viaje y Decisiones Gramaticales (Pt. ${levelNum - 16})` : `Guía de Contrastes de Viaje (Pt. ${levelNum - 16})`,
+        focus: "Travel Contrast Guide (Por/Para, Darse cuenta, Se lo) • Zero Flashcards",
+        desc: "Mastering the PowerPoint contrast rules in authentic travel and accommodation scenarios."
+      };
+    } else if (levelNum <= 24) {
+      return {
+        title: translate ? `Síntesis de Unidad 4: Gran Traducción de Viajes (Unidad 4 Synthesis) (Pt. ${levelNum - 19})` : `Síntesis de Unidad 4: Gran Traducción de Viajes (Pt. ${levelNum - 19})`,
+        focus: "100% Active Challenge • Zero Flashcards",
+        desc: "Pure active mastery: full travel narrative translations, double object pronoun constructions (se lo/la), and irregular preterite mastery."
       };
     } else {
       return {

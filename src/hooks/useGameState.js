@@ -533,7 +533,7 @@ export function useGameState() {
       let nextLevel = prev.questLevel;
       let nextReview = prev.isReviewReady;
       
-      if (prev.questLevel < 19) {
+      if (prev.questLevel < 24) {
         nextLevel += 1;
       } else {
         nextReview = true;
@@ -714,8 +714,8 @@ export function useGameState() {
       const updatedSeen = [...new Set([...(prev.stageFlashcardsSeen || []), ...passedStageWords])];
       const updatedAnswered = [...new Set([...(prev.wordsAnsweredCorrectly || []), ...passedStageWords])];
 
-      const reviewLevelKey = `${prev.questStage}-20`;
-      const stageLevelKeys = Array.from({ length: 20 }, (_, i) => `${prev.questStage}-${i + 1}`);
+      const reviewLevelKey = `${prev.questStage}-25`;
+      const stageLevelKeys = Array.from({ length: 25 }, (_, i) => `${prev.questStage}-${i + 1}`);
       const updatedCompleted = [...new Set([
         ...(prev.completedLevels || []),
         reviewLevelKey,
@@ -781,7 +781,7 @@ export function useGameState() {
         if (nextHintlessCount >= 5 && !leveledBadges.includes("hintless_master")) {
           leveledBadges.push("hintless_master");
         }
-        if (level === 20 && !leveledBadges.includes("hintless_boss")) {
+        if (level === 25 && !leveledBadges.includes("hintless_boss")) {
           leveledBadges.push("hintless_boss");
         }
       }

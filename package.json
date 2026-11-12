@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
+    "test:playtest": "node scripts/playtest-curriculum.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

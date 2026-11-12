@@ -178,6 +178,28 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
             </div>
           </div>
 
+          {/* Card 2.5: Guía de Contrastes */}
+          <div 
+            className="glass-panel menu-card accent-card" 
+            onClick={() => {
+              setStudyQuestTab("contrasts");
+              setView("study-quest");
+            }}
+            style={{
+              borderColor: 'rgba(139, 92, 246, 0.4)',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%)',
+              cursor: 'pointer'
+            }}
+          >
+            <div className="menu-card-icon" style={{ background: 'rgba(139, 92, 246, 0.2)', color: '#c4b5fd', borderColor: 'rgba(139, 92, 246, 0.4)' }}>
+              ⚖️
+            </div>
+            <div>
+              <h3 className="menu-card-title">Guía de Contrastes (Which One to Use When)</h3>
+              <p className="menu-card-desc">Master key contrast rules: Por vs Para, To Become, To Realize, Pronombres Dobles, Personal "a", and Irregular Preterites.</p>
+            </div>
+          </div>
+
           {/* Card 3: AI Chat */}
           <div className="glass-panel menu-card" onClick={() => setView('chat')}>
             <div className="menu-card-icon">

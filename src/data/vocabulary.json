@@ -7980,5 +7980,166 @@
     "category": "Unidad 8",
     "subcategory": "Unidad 8: Próximamente",
     "unit": "Unit 8: Próximamente (Coming Soon)"
+  },
+  {
+    "spanish": "mí",
+    "english": "me (prepositional pronoun: para mí, por mí)",
+    "category": "Unidad 2",
+    "subcategory": "Expresiones con Por y Para",
+    "unit": "Unit 2: ¿Qué haces todos los días?"
+  },
+  {
+    "spanish": "ti",
+    "english": "you (prepositional pronoun: para ti, por ti - no accent)",
+    "category": "Unidad 2",
+    "subcategory": "Expresiones con Por y Para",
+    "unit": "Unit 2: ¿Qué haces todos los días?"
+  },
+  {
+    "spanish": "conmigo",
+    "english": "with me (con + mí)",
+    "category": "Unidad 2",
+    "subcategory": "Expresiones con Por y Para",
+    "unit": "Unit 2: ¿Qué haces todos los días?"
+  },
+  {
+    "spanish": "contigo",
+    "english": "with you (con + ti)",
+    "category": "Unidad 2",
+    "subcategory": "Expresiones con Por y Para",
+    "unit": "Unit 2: ¿Qué haces todos los días?"
+  },
+  {
+    "spanish": "mutuamente",
+    "english": "mutually / each other",
+    "category": "Unidad 2",
+    "subcategory": "Emociones y Verbos Recíprocos",
+    "unit": "Unit 2: ¿Qué haces todos los días?"
+  },
+  {
+    "spanish": "el uno al otro",
+    "english": "each other / one another",
+    "category": "Unidad 2",
+    "subcategory": "Emociones y Verbos Recíprocos",
+    "unit": "Unit 2: ¿Qué haces todos los días?"
+  },
+  {
+    "spanish": "a sí mismo",
+    "english": "to himself / to oneself (reflexive intensifier)",
+    "category": "Unidad 2",
+    "subcategory": "Emociones y Verbos Recíprocos",
+    "unit": "Unit 2: ¿Qué haces todos los días?"
+  },
+  {
+    "spanish": "dejar la ropa en la tintorería",
+    "english": "to drop off clothes at the dry cleaners",
+    "category": "Unidad 3",
+    "subcategory": "Tareas y Quehaceres",
+    "unit": "Unit 3: Nosotros preferimos ir de compras"
+  },
+  {
+    "spanish": "la cinta métrica",
+    "english": "measuring tape",
+    "category": "Unidad 3",
+    "subcategory": "En la Tienda de Ropa y Compras",
+    "unit": "Unit 3: Nosotros preferimos ir de compras"
+  },
+  {
+    "spanish": "el billete de ida y vuelta",
+    "english": "round-trip ticket",
+    "category": "Unidad 4",
+    "subcategory": "Viajes y Medios de Transporte",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "el andén",
+    "english": "train platform",
+    "category": "Unidad 4",
+    "subcategory": "Viajes y Medios de Transporte",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "la aduana",
+    "english": "customs checkpoint",
+    "category": "Unidad 4",
+    "subcategory": "Viajes y Medios de Transporte",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "el puesto de seguridad",
+    "english": "security checkpoint",
+    "category": "Unidad 4",
+    "subcategory": "Viajes y Medios de Transporte",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "la demora",
+    "english": "delay (flight/travel)",
+    "category": "Unidad 4",
+    "subcategory": "Viajes y Medios de Transporte",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "despegar",
+    "english": "to take off (airplane)",
+    "category": "Unidad 4",
+    "subcategory": "Viajes y Medios de Transporte",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "aterrizar",
+    "english": "to land (airplane)",
+    "category": "Unidad 4",
+    "subcategory": "Viajes y Medios de Transporte",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "conducir",
+    "english": "to drive (irregular preterite: conduj-)",
+    "category": "Unidad 4",
+    "subcategory": "Verbos de Cambio y Pretéritos Irregulares",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "ponerse",
+    "english": "to become (sudden, emotional/physical change, effortless)",
+    "category": "Unidad 4",
+    "subcategory": "Verbos de Cambio y Pretéritos Irregulares",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "volverse",
+    "english": "to become (sudden, extreme involuntary character change)",
+    "category": "Unidad 4",
+    "subcategory": "Verbos de Cambio y Pretéritos Irregulares",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "hacerse",
+    "english": "to become (long-term, requires effort/training/profession)",
+    "category": "Unidad 4",
+    "subcategory": "Verbos de Cambio y Pretéritos Irregulares",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "llegar a ser",
+    "english": "to become / reach status of (long-term achievement)",
+    "category": "Unidad 4",
+    "subcategory": "Verbos de Cambio y Pretéritos Irregulares",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "realizar",
+    "english": "to achieve / carry out / make real (false cognate! NOT realize mentally)",
+    "category": "Unidad 4",
+    "subcategory": "Verbos de Cambio y Pretéritos Irregulares",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "el mostrador",
+    "english": "service counter / check-in desk",
+    "category": "Unidad 4",
+    "subcategory": "Hoteles y Alojamiento",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
   }
 ]

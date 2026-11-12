@@ -424,6 +424,20 @@ export default function SentenceBuilder({
               </div>
             </div>
           )}
+          {question.syntaxBreakdown && (
+            <div style={{
+              marginTop: '8px',
+              padding: '8px 12px',
+              background: 'rgba(255, 255, 255, 0.06)',
+              borderRadius: '8px',
+              borderLeft: '3px solid #38bdf8',
+              fontSize: '0.84rem',
+              color: '#bae6fd',
+              lineHeight: '1.4'
+            }}>
+              <strong style={{ color: '#38bdf8' }}>Estructura gramatical:</strong> {question.syntaxBreakdown}
+            </div>
+          )}
         </div>
       )}
 

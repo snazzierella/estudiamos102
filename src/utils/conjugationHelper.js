@@ -935,6 +935,15 @@ export const BLANK_SPECS = {
       tense: "present",
       hint: "Después de 'les gusta', el verbo va en infinitivo con pronombre: besarse."
     },
+    "nosotros vamos a besarnos antes de salir": {
+      blanked: "nosotros vamos a [_____] antes de salir",
+      correct: "besarnos",
+      choices: ["besarnos", "besarse", "nos besamos", "besarme"],
+      type: "verb",
+      targetVerb: "besarse",
+      tense: "present",
+      hint: "Con 'nosotros' después de 'vamos a', se une el pronombre 'nos' al infinitivo: besarnos (nunca 'se' ni 'me')."
+    },
     "los amigos se despiden en la estación": {
       blanked: "los amigos [_____] en la estación",
       correct: "se despiden",

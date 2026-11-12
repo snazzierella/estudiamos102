@@ -276,6 +276,12 @@ export const SENTENCE_POOLS = {
       hint: "Attach pronoun to the infinitive: 'besarse'"
     },
     {
+      spanish: "Nosotros vamos a besarnos antes de salir",
+      english: "We are going to kiss each other before leaving",
+      distractors: ["se", "besarse", "besarme"],
+      hint: "With nosotros in 'ir a + infinitive', attach 'nos' to the infinitive: besarnos (or say 'nos vamos a besar'). Never use 'se' or 'me' with nosotros!"
+    },
+    {
       spanish: "Yo estudio español por dos horas todos los días",
       english: "I study Spanish for two hours every day",
       distractors: ["para", "estudia", "las"],

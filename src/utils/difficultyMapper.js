@@ -124,10 +124,37 @@ export function getWordDifficulty(item) {
   return 5; // Unit 8
 }
 
+const NON_ARTICLE_PHRASES = new Set([
+  "una vez",
+  "el señor",
+  "la señorita",
+  "el próximo año",
+  "el proximo año",
+  "un millón",
+  "un millon"
+]);
+
 // Prefixes articles like 'the', 'a', 'an' to English translations based on Spanish article presence
 export function formatEnglishPrompt(spanish, english) {
+  if (!spanish || !english) return english || "";
   const sp = spanish.trim().toLowerCase();
   const en = english.trim().toLowerCase();
+  
+  // Skip adverbs, expressions, titles, numbers, and verb infinitives
+  if (
+    NON_ARTICLE_PHRASES.has(sp) ||
+    en.startsWith("once") ||
+    en.startsWith("twice") ||
+    en.startsWith("next ") ||
+    en.startsWith("mr.") ||
+    en.startsWith("ms.") ||
+    en.startsWith("mrs.") ||
+    en.startsWith("to ") ||
+    en.startsWith("every ") ||
+    /^\d/.test(en)
+  ) {
+    return english;
+  }
   
   // Definite Articles
   if (sp.startsWith("el ") || sp.startsWith("la ") || sp.startsWith("los ") || sp.startsWith("las ")) {
@@ -139,7 +166,7 @@ export function formatEnglishPrompt(spanish, english) {
   // Indefinite Singular Articles
   if (sp.startsWith("un ") || sp.startsWith("una ")) {
     if (!en.startsWith("a ") && !en.startsWith("an ")) {
-      const firstChar = english.trim().toLowerCase().charAt(0);
+      const firstChar = en.charAt(0);
       const isVowel = ['a', 'e', 'i', 'o', 'u'].includes(firstChar);
       return (isVowel ? "an " : "a ") + english;
     }

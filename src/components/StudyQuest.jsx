@@ -165,6 +165,13 @@ export default function StudyQuest({
     let target = verbItemOrString;
     let targetTense = explicitTense;
 
+    // Direct object / indirect object pronoun shortcut
+    if (target === "pronombres_objeto" || target === "pronoun") {
+      setCodexVerb("pronombres_objeto");
+      setCodexTense("present");
+      return;
+    }
+
     if (typeof target === 'object' && target !== null) {
       if (target.targetVerb) {
         if (!targetTense && target.tense) targetTense = target.tense;
@@ -177,21 +184,39 @@ export default function StudyQuest({
         if (BLANK_SPECS && BLANK_SPECS[sp]?.targetVerb) {
           if (!targetTense && BLANK_SPECS[sp].tense) targetTense = BLANK_SPECS[sp].tense;
           target = BLANK_SPECS[sp].targetVerb;
+        } else if (target.type === "pronoun" || target.subcategory?.includes("Objeto") || (BLANK_SPECS && BLANK_SPECS[sp]?.type === "pronoun")) {
+          setCodexVerb("pronombres_objeto");
+          setCodexTense("present");
+          return;
         } else {
           target = target.spanish;
         }
+      } else if (target.type === "pronoun" || target.subcategory?.includes("Objeto")) {
+        setCodexVerb("pronombres_objeto");
+        setCodexTense("present");
+        return;
       }
     }
 
     let verbStr = String(target || "").trim();
 
-    // If verbStr is a known sentence from BLANK_SPECS, resolve its targetVerb
+    // If verbStr is a known sentence from BLANK_SPECS, resolve its targetVerb or pronoun type
     if (BLANK_SPECS && BLANK_SPECS[verbStr.toLowerCase()]) {
       const spec = BLANK_SPECS[verbStr.toLowerCase()];
       if (spec.targetVerb) {
         if (!targetTense && spec.tense) targetTense = spec.tense;
         verbStr = spec.targetVerb;
+      } else if (spec.type === "pronoun") {
+        setCodexVerb("pronombres_objeto");
+        setCodexTense("present");
+        return;
       }
+    }
+
+    if (verbStr === "pronombres_objeto" || verbStr === "lo" || verbStr === "la" || verbStr === "los" || verbStr === "las") {
+      setCodexVerb("pronombres_objeto");
+      setCodexTense("present");
+      return;
     }
 
     setCodexVerb(verbStr);
@@ -3401,6 +3426,15 @@ export default function StudyQuest({
                     >
                       📖 {translateInstructions ? `Ver Conjugaciones: ${currentQuestQ.targetVerb} (View Conjugations)` : `Ver Conjugaciones (${currentQuestQ.targetVerb})`}
                     </button>
+                  ) : currentQuestQ.isFillInTheBlank && (currentQuestQ.type === 'pronoun' || currentQuestQ.item?.subcategory?.includes('Objeto')) ? (
+                    <button 
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openCodex("pronombres_objeto")}
+                      style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
+                    >
+                      📖 {translateInstructions ? "Ver Pronombres de Objeto (View Object Pronouns)" : "Ver Pronombres de Objeto"}
+                    </button>
                   ) : !currentQuestQ.isFillInTheBlank && isVerbItem(currentQuestQ.item) ? (
                     <button 
                       type="button"
@@ -3409,6 +3443,15 @@ export default function StudyQuest({
                       style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                     >
                       📖 {translateInstructions ? "Ver Conjugaciones (View Conjugations)" : "Ver Conjugaciones"}
+                    </button>
+                  ) : !currentQuestQ.isFillInTheBlank && currentQuestQ.item?.subcategory?.includes('Objeto') ? (
+                    <button 
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openCodex("pronombres_objeto")}
+                      style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
+                    >
+                      📖 {translateInstructions ? "Ver Pronombres de Objeto (View Object Pronouns)" : "Ver Pronombres de Objeto"}
                     </button>
                   ) : null}
                 </div>
@@ -3638,7 +3681,7 @@ export default function StudyQuest({
                       </span>
                       <h3 className="flashcard-term">{practiceCards[practiceCurrentIdx].spanish}</h3>
                       
-                      {isVerbItem(practiceCards[practiceCurrentIdx]) && (
+                      {(isVerbItem(practiceCards[practiceCurrentIdx]) || practiceCards[practiceCurrentIdx]?.subcategory?.includes("Objeto")) && (
                         <button 
                           type="button"
                           className="btn btn-secondary btn-sm"
@@ -4096,7 +4139,7 @@ export default function StudyQuest({
                       )}
                     </div>
                   )}
-                  {practiceQuestions[practiceCurrentIdx]?.targetVerb && (
+                  {practiceQuestions[practiceCurrentIdx]?.targetVerb ? (
                     <button 
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -4105,7 +4148,16 @@ export default function StudyQuest({
                     >
                       📖 {translateInstructions ? `Ver Conjugaciones: ${practiceQuestions[practiceCurrentIdx].targetVerb} (View Conjugations)` : `Ver Conjugaciones (${practiceQuestions[practiceCurrentIdx].targetVerb})`}
                     </button>
-                  )}
+                  ) : (practiceQuestions[practiceCurrentIdx]?.type === 'pronoun' || practiceQuestions[practiceCurrentIdx]?.item?.subcategory?.includes('Objeto')) ? (
+                    <button 
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openCodex("pronombres_objeto")}
+                      style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
+                    >
+                      📖 {translateInstructions ? "Ver Pronombres de Objeto (View Object Pronouns)" : "Ver Pronombres de Objeto"}
+                    </button>
+                  ) : null}
                 </div>
               ) : (
                 <div className="quiz-question-card">
@@ -4116,7 +4168,7 @@ export default function StudyQuest({
                   </div>
                   <h3 className="quiz-word">{practiceQuestions[practiceCurrentIdx]?.questionWord}</h3>
                   
-                  {!practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank && isVerbItem(practiceQuestions[practiceCurrentIdx]?.item) && (
+                  {!practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank && isVerbItem(practiceQuestions[practiceCurrentIdx]?.item) ? (
                     <button 
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -4125,7 +4177,16 @@ export default function StudyQuest({
                     >
                       📖 {translateInstructions ? "Ver Conjugaciones (View Conjugations)" : "Ver Conjugaciones"}
                     </button>
-                  )}
+                  ) : !practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank && practiceQuestions[practiceCurrentIdx]?.item?.subcategory?.includes('Objeto') ? (
+                    <button 
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openCodex("pronombres_objeto")}
+                      style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
+                    >
+                      📖 {translateInstructions ? "Ver Pronombres de Objeto (View Object Pronouns)" : "Ver Pronombres de Objeto"}
+                    </button>
+                  ) : null}
                 </div>
               )}
 
@@ -4542,10 +4603,12 @@ export default function StudyQuest({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
               <div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '2px' }}>
-                  📖 Codex de Conjugación
+                  {codexVerb === 'pronombres_objeto' ? '📖 Codex Gramatical' : '📖 Codex de Conjugación'}
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong>
+                  {codexVerb === 'pronombres_objeto'
+                    ? (translateInstructions ? "Pronombres de Objeto Directo e Indirecto (Direct & Indirect Object Pronouns)" : "Pronombres de Objeto Directo e Indirecto")
+                    : <>Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong></>}
                 </p>
               </div>
               <button 
@@ -4557,78 +4620,194 @@ export default function StudyQuest({
               </button>
             </div>
 
-            {/* Dual Tense Switcher Tabs */}
-            <div style={{ display: 'flex', gap: '8px', margin: '14px 0 12px', background: 'rgba(0,0,0,0.25)', padding: '5px', borderRadius: '12px' }}>
-              <button
-                type="button"
-                className="btn btn-sm"
-                style={{ 
-                  flex: 1, 
-                  fontSize: '0.82rem', 
-                  padding: '8px 12px', 
-                  borderRadius: '9px',
-                  background: codexTense === 'present' ? '#10b981' : 'rgba(255,255,255,0.05)',
-                  color: codexTense === 'present' ? '#ffffff' : 'var(--text-secondary)',
-                  border: codexTense === 'present' ? '2px solid #34d399' : '1px solid transparent',
-                  boxShadow: codexTense === 'present' ? '0 0 12px rgba(16, 185, 129, 0.4)' : 'none',
-                  fontWeight: codexTense === 'present' ? '800' : '500'
-                }}
-                onClick={() => setCodexTense('present')}
-              >
-                ⚡ Presente
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm"
-                style={{ 
-                  flex: 1, 
-                  fontSize: '0.82rem', 
-                  padding: '8px 12px', 
-                  borderRadius: '9px',
-                  background: codexTense === 'preterite' ? '#f97316' : 'rgba(255,255,255,0.05)',
-                  color: codexTense === 'preterite' ? '#ffffff' : 'var(--text-secondary)',
-                  border: codexTense === 'preterite' ? '2px solid #fb923c' : '1px solid transparent',
-                  boxShadow: codexTense === 'preterite' ? '0 0 12px rgba(249, 115, 22, 0.4)' : 'none',
-                  fontWeight: codexTense === 'preterite' ? '800' : '500'
-                }}
-                onClick={() => setCodexTense('preterite')}
-              >
-                ⏳ Pretérito (Past)
-              </button>
-            </div>
+            {/* Dual Tense Switcher Tabs (Only for Verbs) */}
+            {codexVerb !== 'pronombres_objeto' && (
+              <div style={{ display: 'flex', gap: '8px', margin: '14px 0 12px', background: 'rgba(0,0,0,0.25)', padding: '5px', borderRadius: '12px' }}>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  style={{ 
+                    flex: 1, 
+                    fontSize: '0.82rem', 
+                    padding: '8px 12px', 
+                    borderRadius: '9px',
+                    background: codexTense === 'present' ? '#10b981' : 'rgba(255,255,255,0.05)',
+                    color: codexTense === 'present' ? '#ffffff' : 'var(--text-secondary)',
+                    border: codexTense === 'present' ? '2px solid #34d399' : '1px solid transparent',
+                    boxShadow: codexTense === 'present' ? '0 0 12px rgba(16, 185, 129, 0.4)' : 'none',
+                    fontWeight: codexTense === 'present' ? '800' : '500'
+                  }}
+                  onClick={() => setCodexTense('present')}
+                >
+                  ⚡ Presente
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  style={{ 
+                    flex: 1, 
+                    fontSize: '0.82rem', 
+                    padding: '8px 12px', 
+                    borderRadius: '9px',
+                    background: codexTense === 'preterite' ? '#f97316' : 'rgba(255,255,255,0.05)',
+                    color: codexTense === 'preterite' ? '#ffffff' : 'var(--text-secondary)',
+                    border: codexTense === 'preterite' ? '2px solid #fb923c' : '1px solid transparent',
+                    boxShadow: codexTense === 'preterite' ? '0 0 12px rgba(249, 115, 22, 0.4)' : 'none',
+                    fontWeight: codexTense === 'preterite' ? '800' : '500'
+                  }}
+                  onClick={() => setCodexTense('preterite')}
+                >
+                  ⏳ Pretérito (Past)
+                </button>
+              </div>
+            )}
 
             {/* Reflexive or Reciprocal Verb Banner */}
-            {isReciprocalVerb(codexVerb) ? (
-              <div style={{ 
-                background: 'rgba(236, 72, 153, 0.12)', 
-                color: '#f472b6', 
-                border: '1px solid rgba(236, 72, 153, 0.3)', 
-                borderRadius: '8px', 
-                padding: '7px 12px', 
-                fontSize: '0.78rem', 
-                marginBottom: '12px', 
-                textAlign: 'center', 
-                fontWeight: 600 
-              }}>
-                🤝 Verbo Recíproco (Acción Mutua: "Each Other")
-              </div>
-            ) : parseVerb(codexVerb).isReflexive ? (
-              <div style={{ 
-                background: 'rgba(168, 85, 247, 0.12)', 
-                color: '#c084fc', 
-                border: '1px solid rgba(168, 85, 247, 0.3)', 
-                borderRadius: '8px', 
-                padding: '7px 12px', 
-                fontSize: '0.78rem', 
-                marginBottom: '12px', 
-                textAlign: 'center', 
-                fontWeight: 600 
-              }}>
-                ✨ Verbo Reflexivo (me, te, se, nos, os, se)
-              </div>
-            ) : null}
+            {codexVerb !== 'pronombres_objeto' && (
+              isReciprocalVerb(codexVerb) ? (
+                <div style={{ 
+                  background: 'rgba(236, 72, 153, 0.12)', 
+                  color: '#f472b6', 
+                  border: '1px solid rgba(236, 72, 153, 0.3)', 
+                  borderRadius: '8px', 
+                  padding: '7px 12px', 
+                  fontSize: '0.78rem', 
+                  marginBottom: '12px', 
+                  textAlign: 'center', 
+                  fontWeight: 600 
+                }}>
+                  🤝 Verbo Recíproco (Acción Mutua: "Each Other")
+                </div>
+              ) : parseVerb(codexVerb).isReflexive ? (
+                <div style={{ 
+                  background: 'rgba(168, 85, 247, 0.12)', 
+                  color: '#c084fc', 
+                  border: '1px solid rgba(168, 85, 247, 0.3)', 
+                  borderRadius: '8px', 
+                  padding: '7px 12px', 
+                  fontSize: '0.78rem', 
+                  marginBottom: '12px', 
+                  textAlign: 'center', 
+                  fontWeight: 600 
+                }}>
+                  ✨ Verbo Reflexivo (me, te, se, nos, os, se)
+                </div>
+              ) : null
+            )}
             
-            {isGustarVerb(codexVerb) ? (
+            {codexVerb === 'pronombres_objeto' ? (
+              <div>
+                <div style={{ 
+                  background: 'rgba(59, 130, 246, 0.12)', 
+                  border: '1px solid rgba(59, 130, 246, 0.35)', 
+                  borderRadius: '10px', 
+                  padding: '10px 12px', 
+                  fontSize: '0.82rem', 
+                  marginBottom: '14px', 
+                  color: '#93c5fd',
+                  lineHeight: '1.45'
+                }}>
+                  🎯 <strong>{translateInstructions ? "Pronombres de Objeto Directo (Direct Object Pronouns - DOP)" : "Pronombres de Objeto Directo (DOP)"}</strong>
+                  <br />
+                  {translateInstructions 
+                    ? "Reemplazan directamente a la persona o cosa sobre la que recae la acción (Answers 'What?' or 'Whom?'):" 
+                    : "Reemplazan al sustantivo que recibe directamente la acción del verbo (responden a ¿Qué? o ¿A quién?):"}
+                </div>
+
+                {/* Direct Object Pronouns Table */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left', marginBottom: '14px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                      <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Sustantivo / Persona</th>
+                      <th style={{ padding: '6px 8px', color: '#60a5fa', fontWeight: 'bold' }}>Pronombre OD</th>
+                      <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { person: "yo (me)", dop: "me", example: "Él me llamó" },
+                      { person: "tú (you inf.)", dop: "te", example: "Yo te escucho" },
+                      { person: "él / ella / ud. / masc. sing. (el pasaporte)", dop: "lo", example: "Yo lo tengo" },
+                      { person: "ella / ud. / fem. sing. (la maleta)", dop: "la", example: "Yo la compré" },
+                      { person: "nosotros / nosotras (us)", dop: "nos", example: "Nos ayuda" },
+                      { person: "vosotros / vosotras (Spain)", dop: "os", example: "Os vi", isVosotros: true },
+                      { person: "ellos / uds. / masc. pl. (los boletos)", dop: "los", example: "Los guardamos" },
+                      { person: "ellas / uds. / fem. pl. (las llaves)", dop: "las", example: "Las encontré" }
+                    ].map((row, idx) => (
+                      <tr 
+                        key={idx} 
+                        style={{ 
+                          borderBottom: '1px solid rgba(255,255,255,0.05)',
+                          opacity: row.isVosotros && state.excludeVosotros ? 0.6 : 1
+                        }}
+                      >
+                        <td style={{ padding: '6px 8px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{row.person}</td>
+                        <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{row.dop}</td>
+                        <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontSize: '0.8rem' }}><em>{row.example}</em></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Placement Rules Callout */}
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
+                  padding: '12px',
+                  fontSize: '0.82rem',
+                  lineHeight: '1.5',
+                  marginBottom: '12px'
+                }}>
+                  <h4 style={{ color: 'var(--gold)', fontSize: '0.88rem', margin: '0 0 6px 0', fontWeight: 700 }}>
+                    🔄 {translateInstructions ? "Reglas de Colocación (Placement Rules)" : "Reglas de Colocación"}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                      <strong style={{ color: '#93c5fd' }}>1. Un solo verbo conjugado:</strong>
+                      <br />
+                      El pronombre va <u>antes</u> del verbo:
+                      <br />
+                      <em>¿Tienes el pasaporte? — Sí, yo <u>lo</u> tengo en la mochila.</em>
+                      <br />
+                      <em>¿Compraste la maleta? — Sí, yo <u>la</u> compré ayer.</em>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                      <strong style={{ color: '#93c5fd' }}>2. Dos verbos (ir a + inf / querer / poder / necesitar):</strong>
+                      <br />
+                      ¡Tienes dos posiciones correctas!
+                      <br />
+                      • <strong>Antes</strong> del verbo conjugado: <em>Nosotros <u>los</u> vamos a guardar.</em>
+                      <br />
+                      • <strong>Unido</strong> al final del infinitivo: <em>Nosotros vamos a guardar<u>los</u>.</em>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                      <strong style={{ color: '#f87171' }}>⚠️ Errores comunes:</strong>
+                      <br />
+                      ❌ <em>Voy lo a guardar</em> (¡Nunca pongas el pronombre en medio!)
+                      <br />
+                      ❌ <em>Lo voy a guardarlo</em> (¡Nunca dupliques el pronombre!)
+                    </div>
+                  </div>
+                </div>
+
+                {/* DOP vs IOP Callout */}
+                <div style={{
+                  background: 'rgba(168, 85, 247, 0.08)',
+                  border: '1px solid rgba(168, 85, 247, 0.25)',
+                  borderRadius: '10px',
+                  padding: '10px 12px',
+                  fontSize: '0.8rem',
+                  lineHeight: '1.45'
+                }}>
+                  <strong style={{ color: '#c084fc' }}>💡 {translateInstructions ? "¿Objeto Directo o Indirecto? (Direct vs Indirect):" : "¿Objeto Directo o Indirecto?:"}</strong>
+                  <br />
+                  • <strong>Directo (lo/la/los/las):</strong> ¿Qué o a quién? <em>(Veo el hotel → <u>Lo</u> veo)</em>.
+                  <br />
+                  • <strong>Indirecto (me/te/le/nos/os/les):</strong> ¿A quién le beneficia? <em>(<u>Le</u> di la llave al cliente)</em>.
+                </div>
+              </div>
+            ) : isGustarVerb(codexVerb) ? (
               <div>
                 <div style={{ 
                   background: 'rgba(234, 179, 8, 0.12)', 

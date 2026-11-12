@@ -7830,6 +7830,130 @@
     "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
   },
   {
+    "spanish": "lo",
+    "english": "direct object: him / it / you formal (masculine singular)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "la",
+    "english": "direct object: her / it / you formal (feminine singular)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "los",
+    "english": "direct object: them / you all (masculine plural)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "las",
+    "english": "direct object: them / you all (feminine plural)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "yo lo tengo en la mochila",
+    "english": "I have it (the passport) in the backpack (direct object)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "yo la compré ayer",
+    "english": "I bought it (the suitcase) yesterday (direct object)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "nosotros los vamos a guardar",
+    "english": "we are going to keep them (the tickets - pronoun before verb)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "nosotros vamos a guardarlos",
+    "english": "we are going to keep them (the tickets - attached pronoun)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "ella las encontró en la habitación",
+    "english": "she found them (the keys) in the room (direct object)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "el botones lo sube en el ascensor",
+    "english": "the bellhop takes it (the luggage) up in the elevator (direct object)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "nosotros las queremos ver",
+    "english": "we want to see them (the photos - pronoun before verb)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "nosotros queremos verlas",
+    "english": "we want to see them (the photos - attached pronoun)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "mi hermana las tiene",
+    "english": "my sister has them (the boarding passes - direct object)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "nosotros lo encontramos cerca del centro",
+    "english": "we found it (the hotel) near the center (direct object)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "yo te escucho claramente",
+    "english": "I hear you clearly (direct object)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
+    "spanish": "el profesor nos ayuda con la lección",
+    "english": "the professor helps us with the lesson (direct object)",
+    "subcategory": "Pronombres de Objeto Directo",
+    "category": "Unidad 4",
+    "unit": "Unit 4: ¿Adónde fuiste de vacaciones?",
+    "isSentence": true
+  },
+  {
     "spanish": "[Unidad 5: Próximamente]",
     "english": "[Unit 5: Coming Soon in Class]",
     "category": "Unidad 5",

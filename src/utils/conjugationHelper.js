@@ -1560,8 +1560,98 @@ export const BLANK_SPECS = {
       choices: ["lo", "la", "los", "las"],
       type: "pronoun",
       hint: "Pronombre de objeto directo masculino singular: lo."
-  }
-};
+    },
+
+    // Spanish 102 Direct Object Pronoun (DOP) sentence drills:
+    "yo lo tengo en la mochila": {
+      blanked: "yo [_____] tengo en la mochila",
+      correct: "lo",
+      choices: ["lo", "la", "los", "las"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo masculino singular (reemplaza 'el pasaporte'): lo tengo."
+    },
+    "yo la compré ayer": {
+      blanked: "yo [_____] compré ayer",
+      correct: "la",
+      choices: ["la", "lo", "las", "le"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo femenino singular (reemplaza 'la maleta'): la compré."
+    },
+    "nosotros los vamos a guardar": {
+      blanked: "nosotros [_____] vamos a guardar",
+      correct: "los",
+      choices: ["los", "las", "les", "lo"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo masculino plural (reemplaza 'los boletos'): los vamos a guardar."
+    },
+    "nosotros vamos a guardarlos": {
+      blanked: "nosotros vamos a [_____]",
+      correct: "guardarlos",
+      choices: ["guardarlos", "guardar", "guardarlas", "guardarse"],
+      type: "verb",
+      targetVerb: "guardar",
+      tense: "present",
+      hint: "Con infinitivo, el pronombre de objeto directo masculino plural '-los' se une al final: guardarlos."
+    },
+    "ella las encontró en la habitación": {
+      blanked: "ella [_____] encontró en la habitación",
+      correct: "las",
+      choices: ["las", "los", "la", "les"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo femenino plural (reemplaza 'las llaves'): las encontró."
+    },
+    "el botones lo sube en el ascensor": {
+      blanked: "el botones [_____] sube en el ascensor",
+      correct: "lo",
+      choices: ["lo", "la", "los", "le"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo masculino singular (reemplaza 'el equipaje'): lo sube."
+    },
+    "nosotros las queremos ver": {
+      blanked: "nosotros [_____] queremos ver",
+      correct: "las",
+      choices: ["las", "los", "la", "les"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo femenino plural (reemplaza 'las fotos') antes del verbo querer: las queremos ver."
+    },
+    "nosotros queremos verlas": {
+      blanked: "nosotros queremos [_____]",
+      correct: "verlas",
+      choices: ["verlas", "verlos", "verla", "ver"],
+      type: "verb",
+      targetVerb: "ver",
+      tense: "present",
+      hint: "Pronombre de objeto directo femenino plural '-las' unido al final del infinitivo: verlas."
+    },
+    "mi hermana las tiene": {
+      blanked: "mi hermana [_____] tiene",
+      correct: "las",
+      choices: ["las", "los", "la", "le"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo femenino plural (reemplaza 'las tarjetas de embarque'): las tiene."
+    },
+    "nosotros lo encontramos cerca del centro": {
+      blanked: "nosotros [_____] encontramos cerca del centro",
+      correct: "lo",
+      choices: ["lo", "la", "los", "le"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo masculino singular (reemplaza 'el hotel'): lo encontramos."
+    },
+    "yo te escucho claramente": {
+      blanked: "yo [_____] escucho claramente",
+      correct: "te",
+      choices: ["te", "me", "le", "lo"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo de 2ª persona singular (a ti): te escucho."
+    },
+    "el profesor nos ayuda con la lección": {
+      blanked: "el profesor [_____] ayuda con la lección",
+      correct: "nos",
+      choices: ["nos", "les", "me", "se"],
+      type: "pronoun",
+      hint: "Pronombre de objeto directo de 1ª persona plural (a nosotros): nos ayuda."
+    }
+  };
 
 // -------------------------------------------------------------
 // SENTENCE & FLASHCARD ELIGIBILITY HELPERS
@@ -1618,6 +1708,9 @@ export function isSentenceItem(item) {
       sp.startsWith("nos lo ") ||
       sp.startsWith("el pasajero ") ||
       sp.startsWith("el recepcionista ") ||
+      sp.startsWith("el botones ") ||
+      sp.startsWith("mi hermana ") ||
+      sp.startsWith("el profesor ") ||
       sp.startsWith("el muchacho ") ||
       sp.startsWith("la mujer ") ||
       sp.startsWith("anoche ") ||

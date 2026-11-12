@@ -74,7 +74,8 @@ export const STAGES = {
       "Viajes y Medios de Transporte",
       "Hoteles y Alojamiento",
       "Verbos de Cambio y Pretéritos Irregulares",
-      "Pronombres de Objeto Indirecto y Doble Objeto"
+      "Pronombres de Objeto Indirecto y Doble Objeto",
+      "Pronombres de Objeto Directo"
     ]
   },
   5: {

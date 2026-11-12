@@ -762,6 +762,66 @@ export const SENTENCE_POOLS = {
       english: "The waiter served it hot to the customers",
       distractors: ["le", "lo", "sirve"],
       hint: "Double object pronoun: indirect 'le' changes to 'se' before 'la'"
+    },
+    {
+      spanish: "Yo tengo el pasaporte y lo guardo en la mochila",
+      english: "I have the passport and I keep it in the backpack",
+      distractors: ["la", "le", "los"],
+      hint: "Use masculine singular direct object pronoun 'lo' to replace 'el pasaporte'"
+    },
+    {
+      spanish: "Ella compró la maleta nueva y la llevó al aeropuerto",
+      english: "She bought the new suitcase and took it to the airport",
+      distractors: ["lo", "le", "las"],
+      hint: "Use feminine singular direct object pronoun 'la' to replace 'la maleta'"
+    },
+    {
+      spanish: "Nosotros tenemos los boletos y los vamos a guardar",
+      english: "We have the tickets and we are going to keep them",
+      distractors: ["las", "les", "lo"],
+      hint: "Plural masculine direct object pronoun 'los' placed before 'vamos'"
+    },
+    {
+      spanish: "Nosotros tenemos los boletos y vamos a guardarlos",
+      english: "We have the tickets and we are going to keep them",
+      distractors: ["guardarlas", "guardarle", "guardar"],
+      hint: "Direct object pronoun '-los' attached directly to the infinitive 'guardar'"
+    },
+    {
+      spanish: "Tú perdiste las llaves pero las encontraste en el hotel",
+      english: "You lost the keys but you found them in the hotel",
+      distractors: ["los", "les", "la"],
+      hint: "Feminine plural direct object pronoun 'las' replacing 'las llaves'"
+    },
+    {
+      spanish: "El botones tiene el equipaje y lo sube en el ascensor",
+      english: "The bellhop has the luggage and takes it up in the elevator",
+      distractors: ["la", "le", "los"],
+      hint: "Masculine singular direct object pronoun 'lo' replacing 'el equipaje'"
+    },
+    {
+      spanish: "Nosotros queremos ver las fotos y las vamos a mirar",
+      english: "We want to see the photos and we are going to look at them",
+      distractors: ["los", "le", "la"],
+      hint: "Feminine plural direct object pronoun 'las' before the conjugated verb 'vamos'"
+    },
+    {
+      spanish: "Nosotros queremos ver las fotos y vamos a mirarlas",
+      english: "We want to see the photos and we are going to look at them",
+      distractors: ["mirarlos", "mirarla", "mirar"],
+      hint: "Direct object pronoun '-las' attached directly to the infinitive 'mirar'"
+    },
+    {
+      spanish: "El profesor me llamó por teléfono para confirmar la reserva",
+      english: "The professor called me on the phone to confirm the reservation",
+      distractors: ["te", "le", "lo"],
+      hint: "Direct object pronoun 'me' (called me) placed before the conjugated verb 'llamó'"
+    },
+    {
+      spanish: "Nosotros buscamos el hotel en el mapa y lo encontramos",
+      english: "We searched for the hotel on the map and found it",
+      distractors: ["la", "los", "le"],
+      hint: "Masculine singular direct object pronoun 'lo' replacing 'el hotel'"
     }
   ]
 };

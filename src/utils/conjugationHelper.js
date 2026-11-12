@@ -700,7 +700,9 @@ export const BLANK_SPECS = {
       blanked: "la mujer [_____] una manzana roja",
       correct: "come",
       choices: ["como", "comes", "come", "comemos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "comer",
+      tense: "present"
     },
     "la mujer come una manzana roja (adj)": {
       blanked: "la mujer come una manzana [_____]",
@@ -712,7 +714,9 @@ export const BLANK_SPECS = {
       blanked: "el muchacho [_____] un perro negro",
       correct: "tiene",
       choices: ["tengo", "tienes", "tiene", "tenemos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "tener",
+      tense: "present"
     },
     "el muchacho tiene un perro negro (adj)": {
       blanked: "el muchacho tiene un perro [_____]",
@@ -724,37 +728,49 @@ export const BLANK_SPECS = {
       blanked: "nosotros [_____] en una casa grande",
       correct: "vivimos",
       choices: ["vivo", "vives", "vive", "vivimos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "vivir",
+      tense: "present"
     },
     "ellos quieren almorzar en la cafetería": {
       blanked: "ellos [_____] almorzar en la cafetería",
       correct: "quieren",
       choices: ["quiero", "quieres", "quiere", "quieren"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "querer",
+      tense: "present"
     },
     "el estudiante hace la tarea en la biblioteca": {
       blanked: "el estudiante [_____] la tarea en la biblioteca",
       correct: "hace",
       choices: ["hago", "haces", "hace", "hacemos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "hacer",
+      tense: "present"
     },
     "yo no sé la respuesta": {
       blanked: "yo no [_____] la respuesta",
       correct: "sé",
       choices: ["sé", "sabes", "sabe", "sabemos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "saber",
+      tense: "present"
     },
     "el maestro enseña la clase de español": {
       blanked: "el maestro [_____] la clase de español",
       correct: "enseña",
       choices: ["enseño", "enseñas", "enseña", "enseñan"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "enseñar",
+      tense: "present"
     },
     "dónde está la residencia estudiantil": {
       blanked: "dónde [_____] la residencia estudiantil",
       correct: "está",
       choices: ["estoy", "estás", "está", "están"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "estar",
+      tense: "present"
     },
     "hace mucho frío en el invierno": {
       blanked: "hace mucho [_____] en el invierno",
@@ -766,61 +782,81 @@ export const BLANK_SPECS = {
       blanked: "nosotros [_____] jugar al fútbol",
       correct: "preferimos",
       choices: ["prefiero", "prefieres", "prefiere", "preferimos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "preferir",
+      tense: "present"
     },
     "mi familia prefiere comer pollo con arroz": {
       blanked: "mi familia [_____] comer pollo con arroz",
       correct: "prefiere",
       choices: ["prefiero", "prefieres", "prefiere", "preferimos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "preferir",
+      tense: "present"
     },
     "yo tengo que estudiar para el examen": {
       blanked: "yo [_____] que estudiar para el examen",
       correct: "tengo",
       choices: ["tengo", "tienes", "tiene", "tenemos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "tener",
+      tense: "present"
     },
     "ella habla español muy bien": {
       blanked: "ella [_____] español muy bien",
       correct: "habla",
       choices: ["hablo", "hablas", "habla", "hablan"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "hablar",
+      tense: "present"
     },
     "qué quieres comer hoy": {
       blanked: "qué [_____] comer hoy",
       correct: "quieres",
       choices: ["quiero", "quieres", "quiere", "queremos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "querer",
+      tense: "present"
     },
     "el libro está encima del escritorio": {
       blanked: "el libro [_____] encima del escritorio",
       correct: "está",
       choices: ["estoy", "estás", "está", "están"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "estar",
+      tense: "present"
     },
     "la escuela está cerca de la casa": {
       blanked: "la escuela [_____] cerca de la casa",
       correct: "está",
       choices: ["estoy", "estás", "está", "están"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "estar",
+      tense: "present"
     },
     "nosotros compramos pan en el mercado": {
       blanked: "nosotros [_____] pan en el mercado",
       correct: "compramos",
       choices: ["compro", "compras", "compra", "compramos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "comprar",
+      tense: "present"
     },
     "yo vengo a la universidad en autobús": {
       blanked: "yo [_____] a la universidad en autobús",
       correct: "vengo",
       choices: ["vengo", "vienes", "viene", "venimos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "venir",
+      tense: "present"
     },
     "mi amigo duerme en la clase": {
       blanked: "mi amigo [_____] en la clase",
       correct: "duerme",
       choices: ["duermo", "duermes", "duerme", "dormimos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "dormir",
+      tense: "present"
     },
 
     // Spanish 102 Reciprocal and Direct Object Sentences:
@@ -832,6 +868,8 @@ export const BLANK_SPECS = {
       correct: "se abrazan",
       choices: ["se abrazan", "abrazarse", "abrazan", "se abraza"],
       type: "verb",
+      targetVerb: "abrazarse",
+      tense: "present",
       hint: "Verbo conjugado principal: los amigos (ellos) realizan la acción directamente."
     },
     "los dos amigos van a abrazarse con alegría": {
@@ -839,6 +877,8 @@ export const BLANK_SPECS = {
       correct: "abrazarse",
       choices: ["abrazarse", "se abrazan", "abrazar", "se abrazaron"],
       type: "verb",
+      targetVerb: "abrazarse",
+      tense: "present",
       hint: "Con perífrasis verbal ('van a...'), el pronombre se une al infinitivo: abrazarse."
     },
     "los dos amigos corrieron para abrazarse con emoción": {
@@ -846,6 +886,8 @@ export const BLANK_SPECS = {
       correct: "abrazarse",
       choices: ["abrazarse", "se abrazan", "abrazar", "se abrazaron"],
       type: "verb",
+      targetVerb: "abrazarse",
+      tense: "present",
       hint: "Después de una preposición ('para'), se usa el infinitivo con pronombre unido: abrazarse."
     },
     "a ellos les encanta abrazarse cuando hace frío": {
@@ -853,6 +895,8 @@ export const BLANK_SPECS = {
       correct: "abrazarse",
       choices: ["abrazarse", "se abrazan", "abrazar", "se abrazaron"],
       type: "verb",
+      targetVerb: "abrazarse",
+      tense: "present",
       hint: "Después de 'les encanta', el verbo va en infinitivo con pronombre: abrazarse."
     },
     "ellos se besan antes de salir": {
@@ -860,6 +904,8 @@ export const BLANK_SPECS = {
       correct: "se besan",
       choices: ["se besan", "besarse", "besan", "se besaron"],
       type: "verb",
+      targetVerb: "besarse",
+      tense: "present",
       hint: "Verbo conjugado principal: ellos realizan la acción mutuamente."
     },
     "los novios quieren besarse en el parque": {
@@ -867,6 +913,8 @@ export const BLANK_SPECS = {
       correct: "besarse",
       choices: ["besarse", "se besan", "besar", "se besaron"],
       type: "verb",
+      targetVerb: "besarse",
+      tense: "present",
       hint: "Con dos verbos ('quieren + ...'), el segundo verbo va en infinitivo con pronombre unido: besarse."
     },
     "los novios van a besarse en el altar": {
@@ -874,6 +922,8 @@ export const BLANK_SPECS = {
       correct: "besarse",
       choices: ["besarse", "se besan", "besar", "se besaron"],
       type: "verb",
+      targetVerb: "besarse",
+      tense: "present",
       hint: "Después de 'van a' (ir a + infinitivo), el pronombre se une al infinitivo: besarse."
     },
     "a ellos les gusta besarse bajo la lluvia": {
@@ -881,6 +931,8 @@ export const BLANK_SPECS = {
       correct: "besarse",
       choices: ["besarse", "se besan", "besar", "se besaron"],
       type: "verb",
+      targetVerb: "besarse",
+      tense: "present",
       hint: "Después de 'les gusta', el verbo va en infinitivo con pronombre: besarse."
     },
     "los amigos se despiden en la estación": {
@@ -888,6 +940,8 @@ export const BLANK_SPECS = {
       correct: "se despiden",
       choices: ["se despiden", "despedirse", "despiden", "se despide"],
       type: "verb",
+      targetVerb: "despedirse",
+      tense: "present",
       hint: "Verbo conjugado principal: los amigos realizan la acción."
     },
     "antes de despedirse los estudiantes se dieron un abrazo": {
@@ -895,6 +949,8 @@ export const BLANK_SPECS = {
       correct: "despedirse",
       choices: ["despedirse", "se despiden", "despedir", "se despidieron"],
       type: "verb",
+      targetVerb: "despedirse",
+      tense: "present",
       hint: "Después de una preposición ('antes de'), el verbo SIEMPRE va en infinitivo: despedirse."
     },
     "nosotros nos ayudamos con la tarea de español": {
@@ -902,6 +958,8 @@ export const BLANK_SPECS = {
       correct: "nos ayudamos",
       choices: ["nos ayudamos", "ayudarnos", "se ayudan", "ayudamos"],
       type: "verb",
+      targetVerb: "ayudarse",
+      tense: "present",
       hint: "Verbo conjugado: nosotros realizamos la acción."
     },
     "nosotros debemos ayudarnos en la clase": {
@@ -909,6 +967,8 @@ export const BLANK_SPECS = {
       correct: "ayudarnos",
       choices: ["ayudarnos", "nos ayudamos", "ayudarse", "ayudamos"],
       type: "verb",
+      targetVerb: "ayudarse",
+      tense: "present",
       hint: "Después de un verbo modal ('debemos'), el pronombre 'nos' se une al infinitivo: ayudarnos."
     },
     "es muy importante ayudarse entre compañeros": {
@@ -916,6 +976,8 @@ export const BLANK_SPECS = {
       correct: "ayudarse",
       choices: ["ayudarse", "se ayudan", "ayudar", "nos ayudamos"],
       type: "verb",
+      targetVerb: "ayudarse",
+      tense: "present",
       hint: "En expresiones impersonales ('es importante...'), se usa el infinitivo general: ayudarse."
     },
     "mis padres se conocieron en la universidad": {
@@ -923,6 +985,8 @@ export const BLANK_SPECS = {
       correct: "se conocieron",
       choices: ["se conocieron", "conocerse", "se conocen", "conocieron"],
       type: "verb",
+      targetVerb: "conocerse",
+      tense: "preterite",
       hint: "Verbo conjugado en pretérito (pasado): acción completada."
     },
     "los dos estudiantes van a conocerse hoy": {
@@ -930,6 +994,8 @@ export const BLANK_SPECS = {
       correct: "conocerse",
       choices: ["conocerse", "se conocen", "conocer", "se conocieron"],
       type: "verb",
+      targetVerb: "conocerse",
+      tense: "present",
       hint: "Después de 'van a' (ir a + infinitivo), el pronombre se une al infinitivo: conocerse."
     },
     "los hermanos a veces se pelean por los juguetes": {
@@ -937,6 +1003,8 @@ export const BLANK_SPECS = {
       correct: "se pelean",
       choices: ["se pelean", "pelearse", "pelean", "se pelea"],
       type: "verb",
+      targetVerb: "pelearse",
+      tense: "present",
       hint: "Verbo conjugado principal: los hermanos realizan la acción."
     },
     "después de pelearse los niños pidieron perdón": {
@@ -944,6 +1012,8 @@ export const BLANK_SPECS = {
       correct: "pelearse",
       choices: ["pelearse", "se pelean", "pelear", "se pelearon"],
       type: "verb",
+      targetVerb: "pelearse",
+      tense: "present",
       hint: "Después de una preposición ('después de'), se usa el infinitivo con pronombre unido: pelearse."
     },
     "yo me lavo las manos antes de comer": {
@@ -951,6 +1021,8 @@ export const BLANK_SPECS = {
       correct: "me lavo",
       choices: ["me lavo", "lavarme", "te lavas", "se lava"],
       type: "verb",
+      targetVerb: "lavarse",
+      tense: "present",
       hint: "Verbo reflexivo conjugado para 'yo' con objeto directo ('las manos')."
     },
     "yo me lavo las manos antes de comer (obj)": {
@@ -965,6 +1037,8 @@ export const BLANK_SPECS = {
       correct: "lavarme",
       choices: ["lavarme", "me lavo", "lavarse", "lavar"],
       type: "verb",
+      targetVerb: "lavarse",
+      tense: "present",
       hint: "Con 'necesito + infinitivo' para 'yo', el pronombre 'me' se une al infinitivo: lavarme."
     },
     "antes de comer es necesario lavarse las manos": {
@@ -972,19 +1046,25 @@ export const BLANK_SPECS = {
       correct: "lavarse",
       choices: ["lavarse", "se lava", "lavar", "me lavo"],
       type: "verb",
+      targetVerb: "lavarse",
+      tense: "present",
       hint: "Frase impersonal ('es necesario...'): se usa el infinitivo general con pronombre unido: lavarse."
     },
     "él se cepilla los dientes después de cenar": {
       blanked: "él [_____] los dientes después de cenar",
       correct: "se cepilla",
       choices: ["se cepilla", "me cepillo", "te cepillas", "se cepillan"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "cepillarse",
+      tense: "present"
     },
     "ella se pone la chaqueta porque hace frío": {
       blanked: "ella [_____] la chaqueta porque hace frío",
       correct: "se pone",
       choices: ["se pone", "me pongo", "te pones", "se ponen"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "ponerse",
+      tense: "present"
     },
     "yo beso a mi madre todas las mañanas": {
       blanked: "yo beso [_____] mi madre todas las mañanas",
@@ -1005,38 +1085,50 @@ export const BLANK_SPECS = {
       correct: "me despierto",
       choices: ["me despierto", "te despiertas", "se despierta", "nos despertamos"],
       type: "verb",
+      targetVerb: "despertarse",
+      tense: "present",
       hint: "Verbo reflexivo con cambio de raíz (e -> ie) conjugado para 'yo'."
     },
     "mi hermano se levanta tarde los fines de semana": {
       blanked: "mi hermano [_____] tarde los fines de semana",
       correct: "se levanta",
       choices: ["se levanta", "me levanto", "te levantas", "se levantan"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "levantarse",
+      tense: "present"
     },
     "nosotros nos duchamos con agua caliente": {
       blanked: "nosotros [_____] con agua caliente",
       correct: "nos duchamos",
       choices: ["nos duchamos", "se duchan", "me ducho", "duchamos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "ducharse",
+      tense: "present"
     },
     "a mi hermano le duele mucho la garganta hoy": {
       blanked: "a mi hermano le [_____] mucho la garganta hoy",
       correct: "duele",
       choices: ["duele", "duelen", "doler", "duelo"],
       type: "verb",
+      targetVerb: "doler",
+      tense: "present",
       hint: "Doler concuerda con el sujeto singular ('la garganta'): duele."
     },
     "nosotros nos sentimos muy cansados": {
       blanked: "nosotros nos [_____] muy cansados",
       correct: "sentimos",
       choices: ["sentimos", "sienten", "siento", "sientes"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "sentirse",
+      tense: "present"
     },
     "los amigos se saludan con un apretón de manos": {
       blanked: "los amigos [_____] con un apretón de manos",
       correct: "se saludan",
       choices: ["se saludan", "saludarse", "nos saludamos", "saludan"],
       type: "verb",
+      targetVerb: "saludarse",
+      tense: "present",
       hint: "Acción recíproca entre amigos (ellos): se saludan."
     },
     "ayer compré una camisa azul en la tienda": {
@@ -1044,69 +1136,91 @@ export const BLANK_SPECS = {
       correct: "compré",
       choices: ["compré", "compro", "compró", "compramos"],
       type: "verb",
+      targetVerb: "comprar",
+      tense: "preterite",
       hint: "Pretérito regular de -ar para 'yo': compré."
     },
     "nosotros lavamos los platos anoche": {
       blanked: "nosotros [_____] los platos anoche",
       correct: "lavamos",
       choices: ["lavamos", "lavaron", "lavo", "lavaste"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "lavar",
+      tense: "preterite"
     },
     "ella fue al supermercado ayer por la tarde": {
       blanked: "ella [_____] al supermercado ayer por la tarde",
       correct: "fue",
       choices: ["fue", "va", "fueron", "fui"],
       type: "verb",
+      targetVerb: "ir",
+      tense: "preterite",
       hint: "Pretérito irregular del verbo ir para 'ella': fue."
     },
     "mis amigos limpiaron la casa esta mañana": {
       blanked: "mis amigos [_____] la casa esta mañana",
       correct: "limpiaron",
       choices: ["limpiaron", "limpian", "limpió", "limpiamos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "limpiar",
+      tense: "preterite"
     },
     "tú pagaste la ropa con tarjeta de crédito": {
       blanked: "tú [_____] la ropa con tarjeta de crédito",
       correct: "pagaste",
       choices: ["pagaste", "pagas", "pagó", "pagué"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "pagar",
+      tense: "preterite"
     },
     "yo busqué los zapatos nuevos en el centro comercial": {
       blanked: "yo [_____] los zapatos nuevos en el centro comercial",
       correct: "busqué",
       choices: ["busqué", "busco", "buscó", "buscaron"],
       type: "verb",
+      targetVerb: "buscar",
+      tense: "preterite",
       hint: "Cambio ortográfico en pretérito (c -> qu) para 'yo': busqué."
     },
     "esta camisa de algodón cuesta treinta dólares": {
       blanked: "esta camisa de algodón [_____] treinta dólares",
       correct: "cuesta",
       choices: ["cuesta", "cuestan", "costó", "costar"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "costar",
+      tense: "present"
     },
     "anoche comí pollo asado con verduras": {
       blanked: "anoche [_____] pollo asado con verduras",
       correct: "comí",
       choices: ["comí", "como", "comió", "comimos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "comer",
+      tense: "preterite"
     },
     "nosotros viajamos a méxico en avión": {
       blanked: "nosotros [_____] a México en avión",
       correct: "viajamos",
       choices: ["viajamos", "viajo", "viajaron", "viaja"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "viajar",
+      tense: "preterite"
     },
     "el pasajero mostró el pasaporte en el mostrador": {
       blanked: "el pasajero [_____] el pasaporte en el mostrador",
       correct: "mostró",
       choices: ["mostró", "muestra", "mostraron", "mostré"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "mostrar",
+      tense: "preterite"
     },
     "ellos hicieron las maletas antes del viaje": {
       blanked: "ellos [_____] las maletas antes del viaje",
       correct: "hicieron",
       choices: ["hicieron", "hacen", "hizo", "hicimos"],
       type: "verb",
+      targetVerb: "hacer",
+      tense: "preterite",
       hint: "Pretérito irregular de hacer con raíz 'hic-': hicieron."
     },
     "yo le di la tarjeta de embarque al agente": {
@@ -1114,25 +1228,33 @@ export const BLANK_SPECS = {
       correct: "di",
       choices: ["di", "da", "dio", "dimos"],
       type: "verb",
+      targetVerb: "dar",
+      tense: "preterite",
       hint: "Pretérito irregular de dar para 'yo': di."
     },
     "nosotros nos quedamos en un hotel cómodo": {
       blanked: "nosotros [_____] en un hotel cómodo",
       correct: "nos quedamos",
       choices: ["nos quedamos", "se quedaron", "me quedé", "quedamos"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "quedarse",
+      tense: "preterite"
     },
     "el recepcionista nos dio la llave de la habitación": {
       blanked: "el recepcionista nos [_____] la llave de la habitación",
       correct: "dio",
       choices: ["dio", "da", "di", "dieron"],
-      type: "verb"
+      type: "verb",
+      targetVerb: "dar",
+      tense: "preterite"
     },
     "ayer yo no pude encontrar mi pasaporte": {
       blanked: "ayer yo no [_____] encontrar mi pasaporte",
       correct: "pude",
       choices: ["pude", "puedo", "pudo", "pudimos"],
       type: "verb",
+      targetVerb: "poder",
+      tense: "preterite",
       hint: "Pretérito irregular de poder para 'yo': pude."
     },
     "ella tuvo que cancelar la reserva": {
@@ -1140,6 +1262,8 @@ export const BLANK_SPECS = {
       correct: "tuvo",
       choices: ["tuvo", "tiene", "tuve", "tuvieron"],
       type: "verb",
+      targetVerb: "tener",
+      tense: "preterite",
       hint: "Pretérito irregular de tener para 'ella': tuvo."
     },
     "nosotros estuvimos en españa durante las vacaciones": {
@@ -1147,6 +1271,8 @@ export const BLANK_SPECS = {
       correct: "estuvimos",
       choices: ["estuvimos", "estamos", "estuvo", "estuvieron"],
       type: "verb",
+      targetVerb: "estar",
+      tense: "preterite",
       hint: "Pretérito irregular de estar con raíz 'estuv-': estuvimos."
     },
     "ella me lo explicó con calma": {
@@ -1288,6 +1414,8 @@ export function generateFillInTheBlank(sentenceItem) {
     correct: spec.correct,
     choices: [...spec.choices].sort(() => Math.random() - 0.5),
     type: spec.type,
-    hint: spec.hint || null
+    hint: spec.hint || null,
+    targetVerb: spec.targetVerb || null,
+    tense: spec.tense || null
   };
 }

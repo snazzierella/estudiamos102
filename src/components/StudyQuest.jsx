@@ -12,7 +12,8 @@ import {
   isPreteriteTense,
   INDIRECT_OBJECT_PRONOUNS,
   isEligibleForFlashcard,
-  isSentenceItem
+  isSentenceItem,
+  BLANK_SPECS
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { generateSentenceBuilderQuestion, SENTENCE_POOLS } from '../utils/sentenceBuilderHelper';
@@ -160,13 +161,49 @@ export default function StudyQuest({
     return !isLevelPassed(stageNum, levelNum) && !isLevelCurrent(stageNum, levelNum);
   };
 
-  const openCodex = (verbItemOrString) => {
-    const verbStr = typeof verbItemOrString === 'string' ? verbItemOrString : (verbItemOrString?.spanish || "");
+  const openCodex = (verbItemOrString, explicitTense = null) => {
+    let target = verbItemOrString;
+    let targetTense = explicitTense;
+
+    if (typeof target === 'object' && target !== null) {
+      if (target.targetVerb) {
+        if (!targetTense && target.tense) targetTense = target.tense;
+        target = target.targetVerb;
+      } else if (target.infinitive) {
+        if (!targetTense && target.tense) targetTense = target.tense;
+        target = target.infinitive;
+      } else if (target.spanish) {
+        const sp = target.spanish.trim().toLowerCase();
+        if (BLANK_SPECS && BLANK_SPECS[sp]?.targetVerb) {
+          if (!targetTense && BLANK_SPECS[sp].tense) targetTense = BLANK_SPECS[sp].tense;
+          target = BLANK_SPECS[sp].targetVerb;
+        } else {
+          target = target.spanish;
+        }
+      }
+    }
+
+    let verbStr = String(target || "").trim();
+
+    // If verbStr is a known sentence from BLANK_SPECS, resolve its targetVerb
+    if (BLANK_SPECS && BLANK_SPECS[verbStr.toLowerCase()]) {
+      const spec = BLANK_SPECS[verbStr.toLowerCase()];
+      if (spec.targetVerb) {
+        if (!targetTense && spec.tense) targetTense = spec.tense;
+        verbStr = spec.targetVerb;
+      }
+    }
+
     setCodexVerb(verbStr);
-    const isPreterite = typeof verbItemOrString === 'object' && verbItemOrString !== null
-      ? (verbItemOrString.subcategory?.includes("Pretérito") || verbItemOrString.unit?.includes("Unit 3") || verbItemOrString.unit?.includes("Unit 4") || verbItemOrString.english?.toLowerCase().includes("preterite") || verbItemOrString.english?.toLowerCase().includes("(past)"))
-      : /fui|hice|tuve|estuve|pude|puse|supe|vine|dije|traje|di|vi/i.test(verbStr);
-    setCodexTense(isPreterite ? "preterite" : "present");
+
+    if (targetTense) {
+      setCodexTense(targetTense);
+    } else {
+      const isPreterite = typeof verbItemOrString === 'object' && verbItemOrString !== null
+        ? (verbItemOrString.subcategory?.includes("Pretérito") || verbItemOrString.unit?.includes("Unit 3") || verbItemOrString.unit?.includes("Unit 4") || verbItemOrString.english?.toLowerCase().includes("preterite") || verbItemOrString.english?.toLowerCase().includes("(past)"))
+        : /fui|hice|tuve|estuve|pude|puse|supe|vine|dije|traje|di|vi/i.test(verbStr);
+      setCodexTense(isPreterite ? "preterite" : "present");
+    }
   };
 
   // -------------------------------------------------------------
@@ -535,7 +572,9 @@ export default function StudyQuest({
         meaning: fillSpec.meaning,
         correct: fillSpec.correct,
         choices: fillSpec.choices,
-        hint: fillSpec.hint
+        hint: fillSpec.hint,
+        targetVerb: fillSpec.targetVerb,
+        tense: fillSpec.tense
       };
     }
 
@@ -1098,7 +1137,9 @@ export default function StudyQuest({
             meaning: fillSpec.meaning,
             correct: fillSpec.correct,
             choices: fillSpec.choices,
-            hint: fillSpec.hint
+            hint: fillSpec.hint,
+            targetVerb: fillSpec.targetVerb,
+            tense: fillSpec.tense
           });
         }
       }
@@ -2049,7 +2090,9 @@ export default function StudyQuest({
             meaning: fillSpec.meaning,
             correct: fillSpec.correct,
             choices: fillSpec.choices,
-            hint: fillSpec.hint
+            hint: fillSpec.hint,
+            targetVerb: fillSpec.targetVerb,
+            tense: fillSpec.tense
           };
         }
 
@@ -3349,7 +3392,16 @@ export default function StudyQuest({
                     </>
                   )}
                   
-                  {isVerbItem(currentQuestQ.item) && (
+                  {currentQuestQ.isFillInTheBlank && currentQuestQ.targetVerb ? (
+                    <button 
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openCodex(currentQuestQ.targetVerb, currentQuestQ.tense)}
+                      style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
+                    >
+                      📖 {translateInstructions ? `Ver Conjugaciones: ${currentQuestQ.targetVerb} (View Conjugations)` : `Ver Conjugaciones (${currentQuestQ.targetVerb})`}
+                    </button>
+                  ) : !currentQuestQ.isFillInTheBlank && isVerbItem(currentQuestQ.item) ? (
                     <button 
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -3358,7 +3410,7 @@ export default function StudyQuest({
                     >
                       📖 {translateInstructions ? "Ver Conjugaciones (View Conjugations)" : "Ver Conjugaciones"}
                     </button>
-                  )}
+                  ) : null}
                 </div>
               )}
 
@@ -4044,6 +4096,16 @@ export default function StudyQuest({
                       )}
                     </div>
                   )}
+                  {practiceQuestions[practiceCurrentIdx]?.targetVerb && (
+                    <button 
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openCodex(practiceQuestions[practiceCurrentIdx].targetVerb, practiceQuestions[practiceCurrentIdx].tense)}
+                      style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
+                    >
+                      📖 {translateInstructions ? `Ver Conjugaciones: ${practiceQuestions[practiceCurrentIdx].targetVerb} (View Conjugations)` : `Ver Conjugaciones (${practiceQuestions[practiceCurrentIdx].targetVerb})`}
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="quiz-question-card">
@@ -4054,7 +4116,7 @@ export default function StudyQuest({
                   </div>
                   <h3 className="quiz-word">{practiceQuestions[practiceCurrentIdx]?.questionWord}</h3>
                   
-                  {isVerbItem(practiceQuestions[practiceCurrentIdx]?.item) && (
+                  {!practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank && isVerbItem(practiceQuestions[practiceCurrentIdx]?.item) && (
                     <button 
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -4748,39 +4810,46 @@ export default function StudyQuest({
                     ¡Ambas formas son correctas y esenciales en español! La elección depende de la estructura de la frase:
                   </p>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                      <strong style={{ color: '#93c5fd' }}>1. Verbo Principal Conjugado (se {parseVerb(codexVerb).base}n):</strong>
-                      <br />
-                      Cuando el verbo es la acción directa de la oración:
-                      <br />
-                      <em>Los dos amigos <u>se {parseVerb(codexVerb).base}n</u> todos los días.</em>
-                    </div>
-                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                      <strong style={{ color: '#93c5fd' }}>2. Con Verbo Auxiliar o Perífrasis ({parseVerb(codexVerb).base}rse):</strong>
-                      <br />
-                      Cuando sigue a verbos como <em>ir a, querer, preferir, poder, deber</em>, el pronombre se une al infinitivo:
-                      <br />
-                      <em>Ellos van a <u>{parseVerb(codexVerb).base}rse</u>.</em> / <em>Ellos quieren <u>{parseVerb(codexVerb).base}rse</u>.</em>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>
-                        (También se puede colocar antes del primer verbo: <em>"Se van a {parseVerb(codexVerb).base}r"</em>)
-                      </span>
-                    </div>
-                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                      <strong style={{ color: '#93c5fd' }}>3. Después de Preposiciones (antes de, para, al, después de):</strong>
-                      <br />
-                      En español, después de una preposición el verbo SIEMPRE va en infinitivo con el pronombre unido:
-                      <br />
-                      <em>Antes de <u>despedirse</u>, hablaron un momento.</em>
-                      <br />
-                      <em>Corrieron para <u>{parseVerb(codexVerb).base}rse</u> con alegría.</em>
-                    </div>
-                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
-                      <strong style={{ color: '#93c5fd' }}>4. Con Gustar / Encantar y Frases Impersonales:</strong>
-                      <br />
-                      <em>A ellos les gusta <u>{parseVerb(codexVerb).base}rse</u>.</em> / <em>Es importante <u>{parseVerb(codexVerb).base}rse</u>.</em>
-                    </div>
-                  </div>
+                  {(() => {
+                    const cleanBase = parseVerb(codexVerb).base;
+                    const infSe = cleanBase.endsWith("se") ? cleanBase : `${cleanBase}se`;
+                    const theyForm = conjugate(codexVerb, 5, "present");
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#93c5fd' }}>1. Verbo Principal Conjugado ({theyForm}):</strong>
+                          <br />
+                          {translateInstructions ? "Cuando el verbo es la acción directa de la oración (Main conjugated verb):" : "Cuando el verbo es la acción directa de la oración:"}
+                          <br />
+                          <em>Los dos amigos <u>{theyForm}</u> todos los días.</em>
+                        </div>
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#93c5fd' }}>2. Con Verbo Auxiliar o Perífrasis ({infSe}):</strong>
+                          <br />
+                          {translateInstructions ? "Con verbos como ir a, querer, poder, deber (verb + attached infinitive):" : "Cuando sigue a verbos como ir a, querer, preferir, poder, deber, el pronombre se une al infinitivo:"}
+                          <br />
+                          <em>Ellos van a <u>{infSe}</u>.</em> / <em>Ellos quieren <u>{infSe}</u>.</em>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>
+                            (También se puede colocar antes del primer verbo: <em>"Se van a {cleanBase}"</em>)
+                          </span>
+                        </div>
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#93c5fd' }}>3. Después de Preposiciones ({infSe}):</strong>
+                          <br />
+                          {translateInstructions ? "Después de preposiciones (antes de, después de, para):" : "En español, después de una preposición el verbo SIEMPRE va en infinitivo con el pronombre unido:"}
+                          <br />
+                          <em>Antes de <u>{infSe}</u>, hablaron un momento.</em>
+                          <br />
+                          <em>Corrieron para <u>{infSe}</u> con alegría.</em>
+                        </div>
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#93c5fd' }}>4. Con Gustar / Encantar y Frases Impersonales:</strong>
+                          <br />
+                          <em>A ellos les gusta <u>{infSe}</u>.</em> / <em>Es importante <u>{infSe}</u>.</em>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             ) : (

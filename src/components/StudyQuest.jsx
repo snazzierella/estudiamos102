@@ -10,7 +10,9 @@ import {
   isGustarVerb,
   isReciprocalVerb,
   isPreteriteTense,
-  INDIRECT_OBJECT_PRONOUNS
+  INDIRECT_OBJECT_PRONOUNS,
+  isEligibleForFlashcard,
+  isSentenceItem
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { generateSentenceBuilderQuestion, SENTENCE_POOLS } from '../utils/sentenceBuilderHelper';
@@ -365,7 +367,8 @@ export default function StudyQuest({
         item.category === selectedCategory && item.subcategory === selectedSubcategory
       );
     }
-    setPracticeCards(filtered);
+    // Practice flashcards must only display vocabulary words/terms, never full sentences or conversational phrases!
+    setPracticeCards(filtered.filter(item => isEligibleForFlashcard(item)));
     setPracticeCurrentIdx(0);
     setPracticeFlipped(false);
     setPracticeQuizStarted(false);
@@ -786,7 +789,11 @@ export default function StudyQuest({
     const stageItems = getUniqueItems(weightedItems, stageItemsRaw.length);
 
     const seenWords = state.stageFlashcardsSeen || [];
-    const unseenStageItems = stageItems.filter(item => !seenWords.includes(item.spanish));
+    // Only real vocabulary words/terms can be introduced as flashcards.
+    // Full sentences (like "a ellos les gusta besarse bajo la lluvia") and conversational phrases
+    // must NEVER be presented as flashcard introductions!
+    const flashcardEligibleStageItems = stageItems.filter(item => isEligibleForFlashcard(item));
+    const unseenStageItems = flashcardEligibleStageItems.filter(item => !seenWords.includes(item.spanish));
 
     const isUnit1 = stageVal === 1;
     let finalQuestions = [];
@@ -1193,7 +1200,7 @@ export default function StudyQuest({
 
       const currentlyIntroduced = selectedFlashcards.map(item => item.spanish);
       const eligibleStageItems = stageItems.filter(item => 
-        seenWords.includes(item.spanish) || currentlyIntroduced.includes(item.spanish)
+        seenWords.includes(item.spanish) || currentlyIntroduced.includes(item.spanish) || isSentenceItem(item)
       );
 
       const stageQuizPool = eligibleStageItems.length > 0 

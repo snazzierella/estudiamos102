@@ -660,10 +660,7 @@ export function generateConjugationQuestion(verbItem, options = {}) {
 // -------------------------------------------------------------
 // FILL IN THE BLANK SENTENCE PRACTICE
 // -------------------------------------------------------------
-export function generateFillInTheBlank(sentenceItem) {
-  const sentence = (sentenceItem.spanish || "").trim();
-  
-  const BLANK_SPECS = {
+export const BLANK_SPECS = {
     // Spanish 101 Present Tense Sentences
     "la mujer come una manzana roja": {
       blanked: "la mujer [_____] una manzana roja",
@@ -1124,9 +1121,92 @@ export function generateFillInTheBlank(sentenceItem) {
       choices: ["lo", "la", "los", "las"],
       type: "pronoun",
       hint: "Pronombre de objeto directo masculino singular: lo."
-    }
-  };
+  }
+};
 
+// -------------------------------------------------------------
+// SENTENCE & FLASHCARD ELIGIBILITY HELPERS
+// -------------------------------------------------------------
+export function isSentenceItem(item) {
+  if (!item) return false;
+  if (item.isSentence) return true;
+  if (item.category === "Sentences" || item.subcategory === "Syllabus Sentences") return true;
+
+  const sp = (item.spanish || "").trim().toLowerCase();
+  if (BLANK_SPECS && BLANK_SPECS[sp]) return true;
+
+  // Check known multi-word sentence patterns (with conjugated verbs / subjects)
+  const words = sp.split(/\s+/);
+  if (words.length >= 4) {
+    if (
+      sp.startsWith("a ellos ") ||
+      sp.startsWith("a ellas ") ||
+      sp.startsWith("los dos ") ||
+      sp.startsWith("los amigos ") ||
+      sp.startsWith("los novios ") ||
+      sp.startsWith("los hermanos ") ||
+      sp.startsWith("los estudiantes ") ||
+      sp.startsWith("mis padres ") ||
+      sp.startsWith("yo ") ||
+      sp.startsWith("él ") ||
+      sp.startsWith("ella ") ||
+      sp.startsWith("nosotros ") ||
+      sp.startsWith("ellos ") ||
+      sp.startsWith("ellas ") ||
+      sp.startsWith("es muy ") ||
+      sp.startsWith("antes de ") ||
+      sp.startsWith("después de ") ||
+      sp.startsWith("me dio ") ||
+      sp.startsWith("te dije ") ||
+      sp.startsWith("le di ") ||
+      sp.startsWith("nos mandaron ") ||
+      sp.startsWith("les pidió ") ||
+      sp.startsWith("se lo ") ||
+      sp.startsWith("te lo ") ||
+      sp.startsWith("nos lo ")
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function isEligibleForFlashcard(item) {
+  if (!item || !item.spanish) return false;
+
+  // 1. Full sentences and clause examples must never be flashcards
+  if (isSentenceItem(item)) return false;
+
+  // 2. Common conversational phrases/greetings that don't need formal vocabulary flashcards
+  const clean = item.spanish.trim().toLowerCase().replace(/[¿?¡!.,]/g, '');
+  const conversationalPhrases = [
+    "más o menos", "mas o menos",
+    "qué tal", "que tal",
+    "cómo estás", "como estas",
+    "cómo está usted", "como esta usted",
+    "buenos días", "buenos dias",
+    "buenas tardes",
+    "buenas noches",
+    "hasta luego",
+    "hasta pronto",
+    "hasta mañana", "hasta manana",
+    "mucho gusto",
+    "de nada",
+    "por favor",
+    "qué pasa", "que pasa",
+    "cómo te llamas", "como te llamas",
+    "de dónde eres", "de donde eres"
+  ];
+  if (conversationalPhrases.includes(clean)) {
+    return false;
+  }
+
+  return true;
+}
+
+export function generateFillInTheBlank(sentenceItem) {
+  const sentence = (sentenceItem?.spanish || "").trim();
   const normalizeKey = (str) => (str || "").trim().toLowerCase();
   let targetKey = normalizeKey(sentence);
 

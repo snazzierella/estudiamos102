@@ -944,6 +944,60 @@ export const BLANK_SPECS = {
       tense: "present",
       hint: "Con 'nosotros' después de 'vamos a', se une el pronombre 'nos' al infinitivo: besarnos (nunca 'se' ni 'me')."
     },
+    "nosotros nos vamos a besar antes de salir": {
+      blanked: "nosotros [_____] a besar antes de salir",
+      correct: "nos vamos",
+      choices: ["nos vamos", "vamos", "se van", "me voy"],
+      type: "verb",
+      targetVerb: "besarse",
+      tense: "present",
+      hint: "Pronombre recíproco 'nos' antes de 'vamos': nos vamos a besar (nunca 'se' con nosotros)."
+    },
+    "nosotros nos vamos a besar antes de salir (inf)": {
+      blanked: "nosotros nos vamos a [_____] antes de salir",
+      correct: "besar",
+      choices: ["besar", "besarse", "besarnos", "besan"],
+      type: "verb",
+      targetVerb: "besarse",
+      tense: "present",
+      hint: "El pronombre 'nos' ya está antes de 'vamos' (nos vamos a...). Por tanto, el infinitivo va solo: besar. ¡Nunca se repite el pronombre (*nos vamos a besarnos)!"
+    },
+    "los novios se van a besar en el altar": {
+      blanked: "los novios [_____] a besar en el altar",
+      correct: "se van",
+      choices: ["se van", "van", "se va", "nos vamos"],
+      type: "verb",
+      targetVerb: "besarse",
+      tense: "present",
+      hint: "Pronombre 'se' colocado antes del verbo conjugado: se van a besar."
+    },
+    "los novios se van a besar en el altar (inf)": {
+      blanked: "los novios se van a [_____] en el altar",
+      correct: "besar",
+      choices: ["besar", "besarse", "besan", "besaron"],
+      type: "verb",
+      targetVerb: "besarse",
+      tense: "present",
+      hint: "El pronombre 'se' ya está antes de 'van' (se van a...). El infinitivo va solo: besar. ¡Nunca dupliques el pronombre (*se van a besarse)!"
+    },
+    "los novios se quieren besar en el parque": {
+      blanked: "los novios se quieren [_____] en el parque",
+      correct: "besar",
+      choices: ["besar", "besarse", "besan", "se besan"],
+      type: "verb",
+      targetVerb: "besarse",
+      tense: "present",
+      hint: "El pronombre 'se' ya está antes del verbo auxiliar (se quieren...). Usa el infinitivo simple: besar."
+    },
+    "nosotros nos debemos ayudar en la clase": {
+      blanked: "nosotros nos debemos [_____] en la clase",
+      correct: "ayudar",
+      choices: ["ayudar", "ayudarnos", "ayudarse", "ayudamos"],
+      type: "verb",
+      targetVerb: "ayudarse",
+      tense: "present",
+      hint: "Con 'nos debemos...', el pronombre 'nos' ya está al principio. Usa el infinitivo simple: ayudar (no *nos debemos ayudarnos)."
+    },
     "los amigos se despiden en la estación": {
       blanked: "los amigos [_____] en la estación",
       correct: "se despiden",
@@ -1404,6 +1458,10 @@ export function generateFillInTheBlank(sentenceItem) {
     targetKey = "el muchacho tiene un perro negro (adj)";
   } else if (targetKey === "yo me lavo las manos antes de comer" && Math.random() > 0.5) {
     targetKey = "yo me lavo las manos antes de comer (obj)";
+  } else if (targetKey === "nosotros nos vamos a besar antes de salir" && Math.random() > 0.5) {
+    targetKey = "nosotros nos vamos a besar antes de salir (inf)";
+  } else if (targetKey === "los novios se van a besar en el altar" && Math.random() > 0.5) {
+    targetKey = "los novios se van a besar en el altar (inf)";
   }
 
   let spec = BLANK_SPECS[targetKey];

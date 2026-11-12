@@ -282,6 +282,24 @@ export const SENTENCE_POOLS = {
       hint: "With nosotros in 'ir a + infinitive', attach 'nos' to the infinitive: besarnos (or say 'nos vamos a besar'). Never use 'se' or 'me' with nosotros!"
     },
     {
+      spanish: "Nosotros nos vamos a besar antes de salir",
+      english: "We are going to kiss each other before leaving",
+      distractors: ["se", "besarse", "besarme"],
+      hint: "Pronoun in front: 'Nosotros nos vamos a besar'. Since 'nos' is before 'vamos', keep the infinitive plain: 'besar' (never *nos vamos a besarnos or *se vamos a besar)!"
+    },
+    {
+      spanish: "Los novios se van a besar en el altar",
+      english: "The sweethearts are going to kiss each other at the altar",
+      distractors: ["besarse", "nos", "vamos"],
+      hint: "Pronoun before verb: 'se van a besar'. Since 'se' is already in front, do not attach it again (*se van a besarse) and don't omit 'a' (*se van besarse)!"
+    },
+    {
+      spanish: "Los novios se quieren besar en el parque",
+      english: "The sweethearts want to kiss each other in the park",
+      distractors: ["besarse", "quiere", "nos"],
+      hint: "Pronoun before modal verb: 'se quieren besar'. Keep the second verb as plain infinitive 'besar' (never *se quieren besarse)!"
+    },
+    {
       spanish: "Yo estudio español por dos horas todos los días",
       english: "I study Spanish for two hours every day",
       distractors: ["para", "estudia", "las"],

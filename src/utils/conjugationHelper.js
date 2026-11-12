@@ -292,71 +292,94 @@ export const RECIPROCAL_VERBS = [
   "turnarse",
   "saludarse",
   "escribirse",
-  "hablarse",
-  "abrazar",
-  "ayudar",
-  "besar",
-  "conocer",
-  "despedir",
-  "divorciar",
-  "pelear",
-  "reunir",
-  "turnar",
-  "saludar",
-  "escribir"
+  "hablarse"
 ];
 
 export function isReciprocalVerb(itemOrStr) {
   if (!itemOrStr) return false;
+  if (isSentenceItem(itemOrStr)) return false;
+
   if (typeof itemOrStr === "object") {
     // Exclude reflexive actions with specific object or prepositional phrase like "mirarse en el espejo"
     if (itemOrStr.spanish?.includes("en el espejo") || itemOrStr.english?.toLowerCase().includes("oneself")) {
       return false;
     }
-    if (itemOrStr.subcategory?.includes("Recíproco")) {
-      const parsed = parseVerb(itemOrStr.spanish);
-      if (RECIPROCAL_VERBS.includes(parsed.base) || RECIPROCAL_VERBS.includes(itemOrStr.spanish.toLowerCase().trim())) {
-        return true;
-      }
-      if (itemOrStr.english?.toLowerCase().includes("each other") || itemOrStr.english?.toLowerCase().includes("one another")) {
-        return true;
-      }
-      return false;
+    const sp = (itemOrStr.spanish || "").trim().toLowerCase();
+    const parsed = parseVerb(sp);
+    if (parsed.isReflexive) {
+      const baseWithSe = parsed.base + "se";
+      return RECIPROCAL_VERBS.includes(sp) || RECIPROCAL_VERBS.includes(baseWithSe);
     }
-    if (itemOrStr.english?.toLowerCase().includes("each other") || itemOrStr.english?.toLowerCase().includes("one another")) {
-      return true;
-    }
-    const parsed = parseVerb(itemOrStr.spanish);
-    return RECIPROCAL_VERBS.includes(parsed.base) || RECIPROCAL_VERBS.includes(itemOrStr.spanish.toLowerCase().trim());
+    return RECIPROCAL_VERBS.includes(sp);
   }
 
   const str = String(itemOrStr).toLowerCase().trim();
   if (str.includes("en el espejo")) return false;
   const parsed = parseVerb(str);
-  return RECIPROCAL_VERBS.includes(parsed.base) || RECIPROCAL_VERBS.includes(str);
+  if (parsed.isReflexive) {
+    const baseWithSe = parsed.base + "se";
+    return RECIPROCAL_VERBS.includes(str) || RECIPROCAL_VERBS.includes(baseWithSe);
+  }
+  return RECIPROCAL_VERBS.includes(str);
 }
 
 /**
  * Checks if a vocabulary item represents a verb (101 verbs, reflexives, preterites, reciprocals)
  */
 export function isVerbItem(item) {
-  if (!item || !item.spanish) return false;
-  if (item.category === "Verbs") return true;
+  if (!item) return false;
+  if (item.isSentence || isSentenceItem(item)) return false;
+
+  const sp = (typeof item === "string" ? item : item.spanish || "").trim().toLowerCase();
+  if (!sp) return false;
+
+  // Sentences or non-verbs with punctuation (excluding slash preterite drill strings like "lavé / lavaste / lavó")
+  if (/[.,?¿!¡]/.test(sp)) {
+    if (!sp.includes("/") || sp.split("/").length < 2) return false;
+  }
+
+  // Reject noun phrases or sentences starting with determiners or subject pronouns
   if (
-    item.subcategory?.includes("Verbos Reflexivos") || 
-    item.subcategory?.includes("Pretérito") ||
-    item.subcategory?.includes("Recíproco") ||
-    isReciprocalVerb(item)
+    sp.startsWith("el ") ||
+    sp.startsWith("la ") ||
+    sp.startsWith("los ") ||
+    sp.startsWith("las ") ||
+    sp.startsWith("un ") ||
+    sp.startsWith("una ") ||
+    sp.startsWith("unos ") ||
+    sp.startsWith("unas ") ||
+    sp.startsWith("yo ") ||
+    sp.startsWith("tú ") ||
+    sp.startsWith("él ") ||
+    sp.startsWith("ella ") ||
+    sp.startsWith("usted ") ||
+    sp.startsWith("nosotros ") ||
+    sp.startsWith("nosotras ") ||
+    sp.startsWith("vosotros ") ||
+    sp.startsWith("vosotras ") ||
+    sp.startsWith("ellos ") ||
+    sp.startsWith("ellas ") ||
+    sp.startsWith("ustedes ") ||
+    sp.startsWith("a ellos ") ||
+    sp.startsWith("a ellas ") ||
+    sp.startsWith("mis ") ||
+    sp.startsWith("sus ") ||
+    sp.startsWith("nuestros ") ||
+    sp.startsWith("es muy ") ||
+    sp.startsWith("antes de ") ||
+    sp.startsWith("después de ")
   ) {
-    return true;
+    return false;
   }
-  
-  const parsed = parseVerb(item.spanish);
-  if (parsed.isReflexive) return true;
-  if (parsed.base.endsWith("ar") || parsed.base.endsWith("er") || parsed.base.endsWith("ir")) {
-    return !item.spanish.toLowerCase().startsWith("el ") && !item.spanish.toLowerCase().startsWith("la ");
-  }
-  return false;
+
+  const parsed = parseVerb(sp);
+  const baseNorm = parsed.base.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const baseEndsInVerb = baseNorm.endsWith("ar") || baseNorm.endsWith("er") || baseNorm.endsWith("ir");
+  const isKnownVerb = baseEndsInVerb || !!PRESENT_IRREGULARS[parsed.base] || GUSTAR_VERBS.includes(parsed.base);
+
+  if (!isKnownVerb) return false;
+
+  return true;
 }
 
 /**
@@ -505,6 +528,17 @@ const GUSTAR_PRACTICE_TEMPLATES = [
  * Automatically handles reflexive pronouns, preterite past tense, and Gustar-structure verbs.
  */
 export function generateConjugationQuestion(verbItem, options = {}) {
+  if (!verbItem || !verbItem.spanish || !isVerbItem(verbItem) || isSentenceItem(verbItem)) {
+    return null;
+  }
+
+  const parsedVerb = parseVerb(verbItem.spanish);
+  const baseNorm = parsedVerb.base.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const baseEndsInVerb = baseNorm.endsWith("ar") || baseNorm.endsWith("er") || baseNorm.endsWith("ir");
+  if (!baseEndsInVerb && !PRESENT_IRREGULARS[parsedVerb.base] && !GUSTAR_VERBS.includes(parsedVerb.base)) {
+    return null;
+  }
+
   const isGustar = isGustarVerb(verbItem);
 
   // Determine target tense: check options first, then infer from subcategory
@@ -1129,15 +1163,22 @@ export const BLANK_SPECS = {
 // -------------------------------------------------------------
 export function isSentenceItem(item) {
   if (!item) return false;
-  if (item.isSentence) return true;
-  if (item.category === "Sentences" || item.subcategory === "Syllabus Sentences") return true;
+  if (typeof item === "object" && item.isSentence) return true;
+  if (typeof item === "object" && (item.category === "Sentences" || item.subcategory === "Syllabus Sentences")) return true;
 
-  const sp = (item.spanish || "").trim().toLowerCase();
-  if (BLANK_SPECS && BLANK_SPECS[sp]) return true;
+  const sp = (typeof item === "string" ? item : item.spanish || "").trim().toLowerCase();
+  if (!sp) return false;
 
-  // Check known multi-word sentence patterns (with conjugated verbs / subjects)
+  if (typeof BLANK_SPECS !== "undefined" && BLANK_SPECS[sp]) return true;
+
+  // Sentences or non-verbs with punctuation (excluding slash preterite drill strings like "lavé / lavaste / lavó")
+  if (/[.,?¿!¡]/.test(sp)) {
+    if (!sp.includes("/") || sp.split("/").length < 2) return true;
+  }
+
+  // Multi-word phrases with sentence subject / clause starters
   const words = sp.split(/\s+/);
-  if (words.length >= 4) {
+  if (!sp.includes("/") && words.length >= 3) {
     if (
       sp.startsWith("a ellos ") ||
       sp.startsWith("a ellas ") ||
@@ -1148,11 +1189,17 @@ export function isSentenceItem(item) {
       sp.startsWith("los estudiantes ") ||
       sp.startsWith("mis padres ") ||
       sp.startsWith("yo ") ||
+      sp.startsWith("tú ") ||
       sp.startsWith("él ") ||
       sp.startsWith("ella ") ||
+      sp.startsWith("usted ") ||
       sp.startsWith("nosotros ") ||
+      sp.startsWith("nosotras ") ||
+      sp.startsWith("vosotros ") ||
+      sp.startsWith("vosotras ") ||
       sp.startsWith("ellos ") ||
       sp.startsWith("ellas ") ||
+      sp.startsWith("ustedes ") ||
       sp.startsWith("es muy ") ||
       sp.startsWith("antes de ") ||
       sp.startsWith("después de ") ||
@@ -1163,7 +1210,13 @@ export function isSentenceItem(item) {
       sp.startsWith("les pidió ") ||
       sp.startsWith("se lo ") ||
       sp.startsWith("te lo ") ||
-      sp.startsWith("nos lo ")
+      sp.startsWith("nos lo ") ||
+      sp.startsWith("el pasajero ") ||
+      sp.startsWith("el recepcionista ") ||
+      sp.startsWith("el muchacho ") ||
+      sp.startsWith("la mujer ") ||
+      sp.startsWith("anoche ") ||
+      sp.startsWith("ayer ")
     ) {
       return true;
     }

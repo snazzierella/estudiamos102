@@ -539,7 +539,7 @@ export default function StudyQuest({
       };
     }
 
-    const isVerb = isVerbItem(item);
+    const isVerb = isVerbItem(item) && !isSentenceItem(item);
 
     let format = "mc"; // "mc", "conjugation", "typing", "sentenceBuilder"
     
@@ -1105,7 +1105,7 @@ export default function StudyQuest({
 
       // Conjugation questions for this stage
       const stageVerbs = vocabularyData.filter(item => 
-        activeStage.subcategories.includes(item.subcategory) && isVerbItem(item)
+        activeStage.subcategories.includes(item.subcategory) && isVerbItem(item) && !isSentenceItem(item)
       ).sort(() => Math.random() - 0.5);
 
       const stageTense = (stageVal >= 3) ? "preterite" : "present";
@@ -1868,8 +1868,8 @@ export default function StudyQuest({
 
     if (practiceQuizMode === "mixed") {
       // MIX OF FLASHCARDS AND CONJUGATIONS (with translations for non-verbs)
-      const verbItems = practiceCards.filter(item => isVerbItem(item));
-      const otherItems = practiceCards.filter(item => !isVerbItem(item));
+      const verbItems = practiceCards.filter(item => isVerbItem(item) && !isSentenceItem(item));
+      const otherItems = practiceCards.filter(item => !isVerbItem(item) || isSentenceItem(item));
 
       // 1. Take up to 5 items as flashcards for study/review first
       const cardSource = verbItems.length >= 3 ? verbItems : practiceCards;
@@ -2028,7 +2028,7 @@ export default function StudyQuest({
     } else {
       let pool = practiceCards;
       if (practiceQuizMode === "conjugation") {
-        const verbPool = practiceCards.filter(item => isVerbItem(item));
+        const verbPool = practiceCards.filter(item => isVerbItem(item) && !isSentenceItem(item));
         if (verbPool.length > 0) {
           pool = verbPool;
         }
@@ -2053,7 +2053,7 @@ export default function StudyQuest({
           };
         }
 
-        const isVerb = isVerbItem(item);
+        const isVerb = isVerbItem(item) && !isSentenceItem(item);
         const wantsConjugation = isVerb && practiceQuizMode === "conjugation";
 
         if (wantsConjugation) {

@@ -1650,6 +1650,101 @@ export const BLANK_SPECS = {
       choices: ["nos", "les", "me", "se"],
       type: "pronoun",
       hint: "Pronombre de objeto directo de 1ª persona plural (a nosotros): nos ayuda."
+    },
+
+    // Spanish 102 Indirect Object Pronouns (IOP) & Double Object Drills:
+    "me dio un regalo": {
+      blanked: "[_____] dio un regalo",
+      correct: "me",
+      choices: ["me", "le", "te", "lo"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto de 1ª persona singular (a mí): me dio."
+    },
+    "te dije la verdad": {
+      blanked: "[_____] dije la verdad",
+      correct: "te",
+      choices: ["te", "le", "me", "lo"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto de 2ª persona singular (a ti): te dije."
+    },
+    "le di las maletas": {
+      blanked: "[_____] di las maletas",
+      correct: "le",
+      choices: ["le", "les", "lo", "la"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto singular (a él/ella): le di."
+    },
+    "nos mandaron los pasajes": {
+      blanked: "[_____] mandaron los pasajes",
+      correct: "nos",
+      choices: ["nos", "les", "me", "los"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto plural (a nosotros): nos mandaron."
+    },
+    "les pidió un taxi": {
+      blanked: "[_____] pidió un taxi",
+      correct: "les",
+      choices: ["les", "le", "los", "se"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto plural (a ellos/ellas/ustedes): les pidió."
+    },
+    "se lo compré": {
+      blanked: "[_____] lo compré",
+      correct: "se",
+      choices: ["se", "le", "me", "te"],
+      type: "pronoun",
+      hint: "En pronombres dobles, 'le' se transforma en 'se' antes de 'lo' (nunca *le lo compré): se lo compré."
+    },
+    "te lo presto": {
+      blanked: "[_____] lo presto",
+      correct: "te",
+      choices: ["te", "me", "le", "se"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto (a ti) antes del objeto directo (lo): te lo presto."
+    },
+    "nos lo explicaron": {
+      blanked: "[_____] lo explicaron",
+      correct: "nos",
+      choices: ["nos", "les", "me", "los"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto (a nosotros) antes del objeto directo (lo): nos lo explicaron."
+    },
+    "yo le di la tarjeta de embarque al agente (iop)": {
+      blanked: "yo [_____] di la tarjeta de embarque al agente",
+      correct: "le",
+      choices: ["le", "les", "lo", "la"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto singular (al agente): le di."
+    },
+    "el recepcionista nos dio la llave de la habitación (iop)": {
+      blanked: "el recepcionista [_____] dio la llave de la habitación",
+      correct: "nos",
+      choices: ["nos", "les", "me", "los"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto plural (a nosotros): nos dio."
+    },
+    "el botones les subió las maletas a los huéspedes": {
+      blanked: "el botones [_____] subió las maletas a los huéspedes",
+      correct: "les",
+      choices: ["les", "le", "los", "se"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto plural (a los huéspedes): les subió."
+    },
+    "ella va a mostrarme las fotos del viaje": {
+      blanked: "ella va a [_____] las fotos del viaje",
+      correct: "mostrarme",
+      choices: ["mostrarme", "mostrarte", "mostrarle", "mostrar"],
+      type: "verb",
+      targetVerb: "mostrar",
+      tense: "present",
+      hint: "Con infinitivo, el pronombre de objeto indirecto '-me' (a mí) se une al final: mostrarme."
+    },
+    "ella me va a mostrar las fotos del viaje": {
+      blanked: "ella [_____] va a mostrar las fotos del viaje",
+      correct: "me",
+      choices: ["me", "te", "le", "lo"],
+      type: "pronoun",
+      hint: "Pronombre de objeto indirecto 'me' (a mí) colocado antes de 'va a': me va a mostrar."
     }
   };
 
@@ -1783,6 +1878,10 @@ export function generateFillInTheBlank(sentenceItem) {
     targetKey = "los amigos se van a despedir en la estación (inf)";
   } else if (targetKey === "nosotros nos vamos a reunir en la cafetería" && Math.random() > 0.5) {
     targetKey = "nosotros nos vamos a reunir en la cafetería (inf)";
+  } else if (targetKey === "yo le di la tarjeta de embarque al agente" && Math.random() > 0.5) {
+    targetKey = "yo le di la tarjeta de embarque al agente (iop)";
+  } else if (targetKey === "el recepcionista nos dio la llave de la habitación" && Math.random() > 0.5) {
+    targetKey = "el recepcionista nos dio la llave de la habitación (iop)";
   }
 
   let spec = BLANK_SPECS[targetKey];

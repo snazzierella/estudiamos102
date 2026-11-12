@@ -97,6 +97,7 @@ export default function StudyQuest({
   const [maxCombo, setMaxCombo] = useState(0);
   const [codexVerb, setCodexVerb] = useState(null);
   const [codexTense, setCodexTense] = useState("present");
+  const [objectPronounTab, setObjectPronounTab] = useState("direct");
   const [isListening, setIsListening] = useState(false);
   
   // Hint reveal tracking for hintless lesson achievements
@@ -165,10 +166,43 @@ export default function StudyQuest({
     let target = verbItemOrString;
     let targetTense = explicitTense;
 
+    // Helper to detect initial tab for object pronouns codex
+    const detectPronounTab = (tgt) => {
+      if (!tgt) return null;
+      let str = "";
+      let subcat = "";
+      let eng = "";
+      if (typeof tgt === 'string') {
+        str = tgt.toLowerCase();
+      } else if (typeof tgt === 'object') {
+        str = (tgt.spanish || tgt.questionWord || "").toLowerCase();
+        subcat = (tgt.subcategory || "").toLowerCase();
+        eng = (tgt.english || "").toLowerCase();
+      }
+      if (str.includes("se lo") || str.includes("te lo") || str.includes("nos lo") || eng.includes("double") || subcat.includes("doble")) {
+        return "double";
+      }
+      if (
+        subcat.includes("indirect") || 
+        eng.includes("indirect") || 
+        /^(me dio|te dije|le di|nos mandaron|les pidió|yo le di|el recepcionista nos dio|el botones les subió|ella va a mostrarme|ella me va a mostrar)/.test(str) ||
+        /^(le|les)$/.test(str)
+      ) {
+        return "indirect";
+      }
+      if (subcat.includes("direct") || eng.includes("direct") || /^(lo|la|los|las)$/.test(str) || str.includes("dop")) {
+        return "direct";
+      }
+      return null;
+    };
+
+    const detectedTab = detectPronounTab(target);
+
     // Direct object / indirect object pronoun shortcut
     if (target === "pronombres_objeto" || target === "pronoun") {
       setCodexVerb("pronombres_objeto");
       setCodexTense("present");
+      if (detectedTab) setObjectPronounTab(detectedTab);
       return;
     }
 
@@ -187,6 +221,7 @@ export default function StudyQuest({
         } else if (target.type === "pronoun" || target.subcategory?.includes("Objeto") || (BLANK_SPECS && BLANK_SPECS[sp]?.type === "pronoun")) {
           setCodexVerb("pronombres_objeto");
           setCodexTense("present");
+          if (detectedTab) setObjectPronounTab(detectedTab);
           return;
         } else {
           target = target.spanish;
@@ -194,6 +229,7 @@ export default function StudyQuest({
       } else if (target.type === "pronoun" || target.subcategory?.includes("Objeto")) {
         setCodexVerb("pronombres_objeto");
         setCodexTense("present");
+        if (detectedTab) setObjectPronounTab(detectedTab);
         return;
       }
     }
@@ -209,13 +245,21 @@ export default function StudyQuest({
       } else if (spec.type === "pronoun") {
         setCodexVerb("pronombres_objeto");
         setCodexTense("present");
+        if (detectedTab) setObjectPronounTab(detectedTab);
         return;
       }
     }
 
-    if (verbStr === "pronombres_objeto" || verbStr === "lo" || verbStr === "la" || verbStr === "los" || verbStr === "las") {
+    if (
+      verbStr === "pronombres_objeto" || 
+      /^(lo|la|los|las|me|te|le|les|se|nos|os)$/i.test(verbStr) ||
+      verbStr.toLowerCase().includes("se lo") ||
+      verbStr.toLowerCase().includes("te lo") ||
+      verbStr.toLowerCase().includes("nos lo")
+    ) {
       setCodexVerb("pronombres_objeto");
       setCodexTense("present");
+      if (detectedTab) setObjectPronounTab(detectedTab);
       return;
     }
 
@@ -3426,11 +3470,11 @@ export default function StudyQuest({
                     >
                       📖 {translateInstructions ? `Ver Conjugaciones: ${currentQuestQ.targetVerb} (View Conjugations)` : `Ver Conjugaciones (${currentQuestQ.targetVerb})`}
                     </button>
-                  ) : currentQuestQ.isFillInTheBlank && (currentQuestQ.type === 'pronoun' || currentQuestQ.item?.subcategory?.includes('Objeto')) ? (
+                  ) : (currentQuestQ.isFillInTheBlank || currentQuestQ.isSentenceBuilder) && (currentQuestQ.type === 'pronoun' || currentQuestQ.item?.subcategory?.includes('Objeto') || /(les|le|me|te|nos|se lo|te lo|nos lo|lo|la|los|las)/.test(currentQuestQ.hint || "") || /(les|le|me|te|nos|se lo|te lo|nos lo|lo|la|los|las)/.test(currentQuestQ.spanish || "")) ? (
                     <button 
                       type="button"
                       className="btn btn-secondary btn-sm"
-                      onClick={() => openCodex("pronombres_objeto")}
+                      onClick={() => openCodex(currentQuestQ.item || currentQuestQ.spanish || "pronombres_objeto")}
                       style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                     >
                       📖 {translateInstructions ? "Ver Pronombres de Objeto (View Object Pronouns)" : "Ver Pronombres de Objeto"}
@@ -3448,7 +3492,7 @@ export default function StudyQuest({
                     <button 
                       type="button"
                       className="btn btn-secondary btn-sm"
-                      onClick={() => openCodex("pronombres_objeto")}
+                      onClick={() => openCodex(currentQuestQ.item || currentQuestQ.spanish || "pronombres_objeto")}
                       style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                     >
                       📖 {translateInstructions ? "Ver Pronombres de Objeto (View Object Pronouns)" : "Ver Pronombres de Objeto"}
@@ -4148,11 +4192,11 @@ export default function StudyQuest({
                     >
                       📖 {translateInstructions ? `Ver Conjugaciones: ${practiceQuestions[practiceCurrentIdx].targetVerb} (View Conjugations)` : `Ver Conjugaciones (${practiceQuestions[practiceCurrentIdx].targetVerb})`}
                     </button>
-                  ) : (practiceQuestions[practiceCurrentIdx]?.type === 'pronoun' || practiceQuestions[practiceCurrentIdx]?.item?.subcategory?.includes('Objeto')) ? (
+                  ) : (practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank || practiceQuestions[practiceCurrentIdx]?.isSentenceBuilder) && (practiceQuestions[practiceCurrentIdx]?.type === 'pronoun' || practiceQuestions[practiceCurrentIdx]?.item?.subcategory?.includes('Objeto') || /(les|le|me|te|nos|se lo|te lo|nos lo|lo|la|los|las)/.test(practiceQuestions[practiceCurrentIdx]?.hint || "") || /(les|le|me|te|nos|se lo|te lo|nos lo|lo|la|los|las)/.test(practiceQuestions[practiceCurrentIdx]?.spanish || "")) ? (
                     <button 
                       type="button"
                       className="btn btn-secondary btn-sm"
-                      onClick={() => openCodex("pronombres_objeto")}
+                      onClick={() => openCodex(practiceQuestions[practiceCurrentIdx].item || practiceQuestions[practiceCurrentIdx].spanish || "pronombres_objeto")}
                       style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                     >
                       📖 {translateInstructions ? "Ver Pronombres de Objeto (View Object Pronouns)" : "Ver Pronombres de Objeto"}
@@ -4177,11 +4221,11 @@ export default function StudyQuest({
                     >
                       📖 {translateInstructions ? "Ver Conjugaciones (View Conjugations)" : "Ver Conjugaciones"}
                     </button>
-                  ) : !practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank && practiceQuestions[practiceCurrentIdx]?.item?.subcategory?.includes('Objeto') ? (
+                  ) : !practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank && (practiceQuestions[practiceCurrentIdx]?.item?.subcategory?.includes('Objeto') || /(les|le|me|te|nos|se lo|te lo|nos lo|lo|la|los|las)/.test(practiceQuestions[practiceCurrentIdx]?.hint || "") || /(les|le|me|te|nos|se lo|te lo|nos lo|lo|la|los|las)/.test(practiceQuestions[practiceCurrentIdx]?.spanish || "")) ? (
                     <button 
                       type="button"
                       className="btn btn-secondary btn-sm"
-                      onClick={() => openCodex("pronombres_objeto")}
+                      onClick={() => openCodex(practiceQuestions[practiceCurrentIdx].item || practiceQuestions[practiceCurrentIdx].spanish || "pronombres_objeto")}
                       style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
                     >
                       📖 {translateInstructions ? "Ver Pronombres de Objeto (View Object Pronouns)" : "Ver Pronombres de Objeto"}
@@ -4607,7 +4651,7 @@ export default function StudyQuest({
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                   {codexVerb === 'pronombres_objeto'
-                    ? (translateInstructions ? "Pronombres de Objeto Directo e Indirecto (Direct & Indirect Object Pronouns)" : "Pronombres de Objeto Directo e Indirecto")
+                    ? (translateInstructions ? "Pronombres de Objeto Directo, Indirecto y Dobles (Object Pronouns)" : "Pronombres de Objeto: Directo, Indirecto y Dobles")
                     : <>Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong></>}
                 </p>
               </div>
@@ -4697,22 +4741,83 @@ export default function StudyQuest({
             
             {codexVerb === 'pronombres_objeto' ? (
               <div>
-                <div style={{ 
-                  background: 'rgba(59, 130, 246, 0.12)', 
-                  border: '1px solid rgba(59, 130, 246, 0.35)', 
-                  borderRadius: '10px', 
-                  padding: '10px 12px', 
-                  fontSize: '0.82rem', 
-                  marginBottom: '14px', 
-                  color: '#93c5fd',
-                  lineHeight: '1.45'
-                }}>
-                  🎯 <strong>{translateInstructions ? "Pronombres de Objeto Directo (Direct Object Pronouns - DOP)" : "Pronombres de Objeto Directo (DOP)"}</strong>
-                  <br />
-                  {translateInstructions 
-                    ? "Reemplazan directamente a la persona o cosa sobre la que recae la acción (Answers 'What?' or 'Whom?'):" 
-                    : "Reemplazan al sustantivo que recibe directamente la acción del verbo (responden a ¿Qué? o ¿A quién?):"}
+                {/* 3 tabs switcher */}
+                <div style={{ display: 'flex', gap: '6px', margin: '0 0 12px', background: 'rgba(0,0,0,0.25)', padding: '5px', borderRadius: '12px' }}>
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    style={{
+                      flex: 1,
+                      fontSize: '0.74rem',
+                      padding: '7px 6px',
+                      borderRadius: '8px',
+                      background: objectPronounTab === 'direct' ? '#3b82f6' : 'rgba(255,255,255,0.05)',
+                      color: objectPronounTab === 'direct' ? '#ffffff' : 'var(--text-secondary)',
+                      border: objectPronounTab === 'direct' ? '2px solid #60a5fa' : '1px solid transparent',
+                      boxShadow: objectPronounTab === 'direct' ? '0 0 10px rgba(59, 130, 246, 0.4)' : 'none',
+                      fontWeight: objectPronounTab === 'direct' ? '800' : '500'
+                    }}
+                    onClick={() => setObjectPronounTab('direct')}
+                  >
+                    🎯 Directo (DOP)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    style={{
+                      flex: 1,
+                      fontSize: '0.74rem',
+                      padding: '7px 6px',
+                      borderRadius: '8px',
+                      background: objectPronounTab === 'indirect' ? '#a855f7' : 'rgba(255,255,255,0.05)',
+                      color: objectPronounTab === 'indirect' ? '#ffffff' : 'var(--text-secondary)',
+                      border: objectPronounTab === 'indirect' ? '2px solid #c084fc' : '1px solid transparent',
+                      boxShadow: objectPronounTab === 'indirect' ? '0 0 10px rgba(168, 85, 247, 0.4)' : 'none',
+                      fontWeight: objectPronounTab === 'indirect' ? '800' : '500'
+                    }}
+                    onClick={() => setObjectPronounTab('indirect')}
+                  >
+                    📬 Indirecto (IOP)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    style={{
+                      flex: 1,
+                      fontSize: '0.74rem',
+                      padding: '7px 6px',
+                      borderRadius: '8px',
+                      background: objectPronounTab === 'double' ? '#f59e0b' : 'rgba(255,255,255,0.05)',
+                      color: objectPronounTab === 'double' ? '#ffffff' : 'var(--text-secondary)',
+                      border: objectPronounTab === 'double' ? '2px solid #fbbf24' : '1px solid transparent',
+                      boxShadow: objectPronounTab === 'double' ? '0 0 10px rgba(245, 158, 11, 0.4)' : 'none',
+                      fontWeight: objectPronounTab === 'double' ? '800' : '500'
+                    }}
+                    onClick={() => setObjectPronounTab('double')}
+                  >
+                    🔄 Doble (se lo/la)
+                  </button>
                 </div>
+
+                {/* TAB 1: DIRECT OBJECT PRONOUNS (DOP) */}
+                {objectPronounTab === 'direct' && (
+                  <div>
+                    <div style={{ 
+                      background: 'rgba(59, 130, 246, 0.12)', 
+                      border: '1px solid rgba(59, 130, 246, 0.35)', 
+                      borderRadius: '10px', 
+                      padding: '10px 12px', 
+                      fontSize: '0.82rem', 
+                      marginBottom: '14px', 
+                      color: '#93c5fd',
+                      lineHeight: '1.45'
+                    }}>
+                      🎯 <strong>{translateInstructions ? "Pronombres de Objeto Directo (Direct Object Pronouns - DOP)" : "Pronombres de Objeto Directo (DOP)"}</strong>
+                      <br />
+                      {translateInstructions 
+                        ? "Reemplazan directamente a la persona o cosa sobre la que recae la acción (Answers 'What?' or 'Whom?'):" 
+                        : "Reemplazan al sustantivo que recibe directamente la acción del verbo (responden a ¿Qué? o ¿A quién?):"}
+                    </div>
 
                 {/* Direct Object Pronouns Table */}
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left', marginBottom: '14px' }}>
@@ -4791,14 +4896,174 @@ export default function StudyQuest({
                   </div>
                 </div>
 
-                {/* DOP vs IOP Callout */}
+                  </div>
+                )}
+
+                {/* TAB 2: INDIRECT OBJECT PRONOUNS (IOP) */}
+                {objectPronounTab === 'indirect' && (
+                  <div>
+                    <div style={{ 
+                      background: 'rgba(168, 85, 247, 0.12)', 
+                      border: '1px solid rgba(168, 85, 247, 0.35)', 
+                      borderRadius: '10px', 
+                      padding: '10px 12px', 
+                      fontSize: '0.82rem', 
+                      marginBottom: '14px', 
+                      color: '#c084fc',
+                      lineHeight: '1.45'
+                    }}>
+                      📬 <strong>{translateInstructions ? "Pronombres de Objeto Indirecto (Indirect Object Pronouns - IOP)" : "Pronombres de Objeto Indirecto (IOP)"}</strong>
+                      <br />
+                      {translateInstructions 
+                        ? "Indican a quién beneficia/perjudica la acción o quién recibe algo (Answers 'To whom?' or 'For whom?'):" 
+                        : "Indican a quién beneficia o perjudica la acción, o quién recibe algo (responden a ¿A quién? o ¿Para quién?):"}
+                    </div>
+
+                    {/* Indirect Object Pronouns Table */}
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left', marginBottom: '14px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Persona</th>
+                          <th style={{ padding: '6px 8px', color: '#c084fc', fontWeight: 'bold' }}>Pronombre OI</th>
+                          <th style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>Ejemplo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { person: "yo (to/for me)", iop: "me", example: "Él me dio un regalo" },
+                          { person: "tú (to/for you inf.)", iop: "te", example: "Te dije la verdad" },
+                          { person: "él / ella / usted (to/for him/her)", iop: "le", example: "Le di las maletas al botones" },
+                          { person: "nosotros / nosotras (to/for us)", iop: "nos", example: "Nos mandaron los pasajes" },
+                          { person: "vosotros / vosotras (Spain)", iop: "os", example: "Os presté el mapa", isVosotros: true },
+                          { person: "ellos / ellas / ustedes (to/for them)", iop: "les", example: "Les pidió un taxi a los turistas" }
+                        ].map((row, idx) => (
+                          <tr 
+                            key={idx} 
+                            style={{ 
+                              borderBottom: '1px solid rgba(255,255,255,0.05)',
+                              opacity: row.isVosotros && state.excludeVosotros ? 0.6 : 1
+                            }}
+                          >
+                            <td style={{ padding: '6px 8px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{row.person}</td>
+                            <td style={{ padding: '6px 8px', color: '#e879f9', fontWeight: 700 }}>{row.iop}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontSize: '0.8rem' }}><em>{row.example}</em></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Key IOP Rules Callout */}
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '10px',
+                      padding: '12px',
+                      fontSize: '0.82rem',
+                      lineHeight: '1.5',
+                      marginBottom: '12px'
+                    }}>
+                      <h4 style={{ color: 'var(--gold)', fontSize: '0.88rem', margin: '0 0 6px 0', fontWeight: 700 }}>
+                        💡 {translateInstructions ? "Reglas Clave del Objeto Indirecto" : "Reglas Clave del Objeto Indirecto"}
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#c084fc' }}>1. Redundancia obligatoria con "a + persona":</strong>
+                          <br />
+                          En español, el pronombre (<strong>le / les / nos</strong>) se usa casi siempre, aunque se mencione el nombre de la persona:
+                          <br />
+                          <em>Yo <u>le</u> di la tarjeta de embarque <u>al agente</u>.</em>
+                          <br />
+                          <em>El recepcionista <u>nos</u> dio la llave <u>a nosotros</u>.</em>
+                          <br />
+                          <em>El botones <u>les</u> subió las maletas <u>a los huéspedes</u>.</em>
+                        </div>
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '6px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#c084fc' }}>2. Dos verbos (ir a + inf / querer / poder):</strong>
+                          <br />
+                          • <strong>Antes</strong> del verbo conjugado: <em>Ella <u>me</u> va a mostrar las fotos.</em>
+                          <br />
+                          • <strong>Unido</strong> al final del infinitivo: <em>Ella va a mostrar<u>me</u> las fotos.</em>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 3: DOUBLE OBJECT PRONOUNS (IOP + DOP) */}
+                {objectPronounTab === 'double' && (
+                  <div>
+                    <div style={{ 
+                      background: 'rgba(245, 158, 11, 0.12)', 
+                      border: '1px solid rgba(245, 158, 11, 0.35)', 
+                      borderRadius: '10px', 
+                      padding: '10px 12px', 
+                      fontSize: '0.82rem', 
+                      marginBottom: '14px', 
+                      color: '#fde047',
+                      lineHeight: '1.45'
+                    }}>
+                      🔄 <strong>{translateInstructions ? "Pronombres Dobles de Objeto (Double Object Pronouns)" : "Pronombres Dobles de Objeto"}</strong>
+                      <br />
+                      {translateInstructions 
+                        ? "Cuando se combinan el Objeto Indirecto (persona) y el Objeto Directo (cosa) en la misma frase:" 
+                        : "Cuando combinamos el Objeto Indirecto (persona) y el Objeto Directo (cosa) en la misma oración:"}
+                    </div>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '10px',
+                      padding: '12px',
+                      fontSize: '0.82rem',
+                      lineHeight: '1.5',
+                      marginBottom: '12px'
+                    }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '8px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#fbbf24' }}>1. Orden Inmutable: Indirecto Primero, Directo Segundo (I.D.)</strong>
+                          <br />
+                          Mnemotecnia: <em>"La gente va antes que las cosas"</em> (o tu <strong>ID</strong>).
+                          <br />
+                          • <em>¿Me prestas el libro? — Sí, <u>te</u> (IOP) <u>lo</u> (DOP) presto.</em>
+                          <br />
+                          • <em>¿Quién les explicó el plan? — <u>Nos</u> <u>lo</u> explicaron ayer.</em>
+                        </div>
+
+                        <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '8px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#f87171' }}>2. ¡La Regla de Oro! LE / LES se convierte en SE:</strong>
+                          <br />
+                          En español, dos pronombres seguidos que empiezan con "L" chocan fonéticamente (no decimos <em>*le lo</em> ni <em>*les la</em>).
+                          <br />
+                          El pronombre indirecto <strong>le / les</strong> cambia obligatoriamente a <strong>se</strong>:
+                          <br />
+                          ❌ <em>Le lo compré</em> ➔ ✅ <strong>Se lo compré</strong>.
+                          <br />
+                          ❌ <em>Les la sirvió</em> ➔ ✅ <strong>Se la sirvió</strong>.
+                          <br />
+                          ❌ <em>Le los entregué</em> ➔ ✅ <strong>Se los entregué</strong>.
+                        </div>
+
+                        <div style={{ background: 'rgba(0,0,0,0.25)', padding: '8px 10px', borderRadius: '6px' }}>
+                          <strong style={{ color: '#fbbf24' }}>3. Dos verbos (con acento escrito al final):</strong>
+                          <br />
+                          • <strong>Antes</strong> del verbo conjugado: <em>Ella <u>se lo</u> va a decir.</em>
+                          <br />
+                          • <strong>Unidos</strong> al final: <em>Ella va a decír<u>selo</u>.</em> (¡Requiere tilde para mantener la pronunciación original!).
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* DOP vs IOP Summary Banner */}
                 <div style={{
                   background: 'rgba(168, 85, 247, 0.08)',
                   border: '1px solid rgba(168, 85, 247, 0.25)',
                   borderRadius: '10px',
                   padding: '10px 12px',
                   fontSize: '0.8rem',
-                  lineHeight: '1.45'
+                  lineHeight: '1.45',
+                  marginTop: '10px'
                 }}>
                   <strong style={{ color: '#c084fc' }}>💡 {translateInstructions ? "¿Objeto Directo o Indirecto? (Direct vs Indirect):" : "¿Objeto Directo o Indirecto?:"}</strong>
                   <br />

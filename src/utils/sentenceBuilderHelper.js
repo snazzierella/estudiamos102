@@ -822,6 +822,42 @@ export const SENTENCE_POOLS = {
       english: "We searched for the hotel on the map and found it",
       distractors: ["la", "los", "le"],
       hint: "Masculine singular direct object pronoun 'lo' replacing 'el hotel'"
+    },
+    {
+      spanish: "Tú les dijiste la verdad a tus padres antes del viaje",
+      english: "You told the truth to your parents before the trip",
+      distractors: ["le", "los", "dices"],
+      hint: "Plural indirect object pronoun 'les' (to your parents) before 'dijiste'"
+    },
+    {
+      spanish: "El botones les subió las maletas pesadas a los turistas",
+      english: "The bellhop brought up the heavy suitcases for the tourists",
+      distractors: ["le", "los", "sube"],
+      hint: "Plural indirect object pronoun 'les' (for the tourists) before 'subió'"
+    },
+    {
+      spanish: "Mi hermano me mandó un mensaje de texto desde el aeropuerto",
+      english: "My brother sent me a text message from the airport",
+      distractors: ["te", "le", "lo"],
+      hint: "Indirect object pronoun 'me' (to me) before the conjugated verb 'mandó'"
+    },
+    {
+      spanish: "Nosotros le pedimos un taxi al recepcionista del hotel",
+      english: "We requested a taxi from the hotel receptionist",
+      distractors: ["les", "lo", "nos"],
+      hint: "Singular indirect object pronoun 'le' (to the receptionist) before 'pedimos'"
+    },
+    {
+      spanish: "Ella va a mostrarme las fotos de sus vacaciones en Madrid",
+      english: "She is going to show me the photos of her vacation in Madrid",
+      distractors: ["mostrarnos", "mostrarlas", "mostrar"],
+      hint: "Indirect object pronoun '-me' (to me) attached directly to the infinitive 'mostrar'"
+    },
+    {
+      spanish: "Ella me va a mostrar las fotos de sus vacaciones en Madrid",
+      english: "She is going to show me the photos of her vacation in Madrid",
+      distractors: ["te", "le", "lo"],
+      hint: "Indirect object pronoun 'me' (to me) placed before the conjugated verb 'va'"
     }
   ]
 };

@@ -46,7 +46,6 @@ export default function OralExamPractice({
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isQuestionRevealed, setIsQuestionRevealed] = useState(false);
   const [isQuestionTranslationRevealed, setIsQuestionTranslationRevealed] = useState(false);
-  const [isTargetMeaningRevealed, setIsTargetMeaningRevealed] = useState(false);
   const [audioSpeed, setAudioSpeed] = useState(1.0); // 1.0 (Normal) or 0.75 (Lento)
   const isFirstMountRef = useRef(true);
   const audioTimeoutRef = useRef(null);
@@ -108,7 +107,6 @@ export default function OralExamPractice({
     // Reset revealed state on question change
     setIsQuestionRevealed(false);
     setIsQuestionTranslationRevealed(false);
-    setIsTargetMeaningRevealed(false);
     setGuidedAnswered(false);
     setGuidedIsCorrect(false);
     setShowHint(false);
@@ -875,39 +873,24 @@ export default function OralExamPractice({
             </div>
           </div>
 
-          {/* Meaning Target Callout */}
+          {/* Meaning Target Callout (Directly in English for Guided Mode) */}
           <div style={{ 
-            padding: '10px 14px', 
-            borderRadius: '10px', 
-            background: 'rgba(255, 255, 255, 0.02)', 
-            border: '1px solid var(--card-border)', 
+            padding: '12px 16px', 
+            borderRadius: '12px', 
+            background: 'rgba(99, 102, 241, 0.08)', 
+            border: '1px solid rgba(99, 102, 241, 0.25)', 
             marginBottom: '16px' 
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-              <div>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {t('midtermGuidedIdeaToExpress', translate)}
-                </span>
-                {isTargetMeaningRevealed || guidedAnswered ? (
-                  <span style={{ fontSize: '0.92rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-                    "{currentPath.englishMeaning}"
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                    ({currentPath.label})
-                  </span>
-                )}
-              </div>
-              {!guidedAnswered && !isTargetMeaningRevealed && (
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setIsTargetMeaningRevealed(true)}
-                  style={{ fontSize: '0.7rem', padding: '3px 8px' }}
-                >
-                  {t('midtermRevealTranslationBtn', translate)}
-                </button>
-              )}
+            <span style={{ fontSize: '0.7rem', color: '#a5b4fc', fontWeight: 700, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
+              {t('midtermGuidedIdeaToExpress', translate)}
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.95rem', color: '#e0e7ff', fontWeight: 600 }}>
+                "{currentPath.englishMeaning}"
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                ({currentPath.label})
+              </span>
             </div>
           </div>
 

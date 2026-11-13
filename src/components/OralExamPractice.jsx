@@ -126,6 +126,15 @@ export default function OralExamPractice({
     if (existingOpen) {
       setOpenAnswered(true);
       setOpenFeedback({ isValid: true, feedback: existingOpen.feedback });
+      setIsQuestionTranslationRevealed(true);
+      if (existingOpen.text) {
+        const words = existingOpen.text.split(" ").filter(Boolean);
+        setOpenPlacedTokens(words.map((w, i) => ({
+          id: `open-restored-${currentIdx}-${i}-${w}`,
+          text: w,
+          gloss: ''
+        })));
+      }
     } else {
       setOpenPlacedTokens([]);
       setOpenAnswered(false);
@@ -238,6 +247,7 @@ export default function OralExamPractice({
     const assembled = guidedPlacedTokens.map(t => t.text.toLowerCase().trim()).join(" ");
     const target = currentPath.targetSentence.toLowerCase().trim();
 
+    setIsQuestionTranslationRevealed(true);
     if (assembled === target) {
       setGuidedIsCorrect(true);
       setGuidedAnswered(true);
@@ -275,6 +285,7 @@ export default function OralExamPractice({
 
     setOpenAnswered(true);
     setOpenFeedback(validation);
+    setIsQuestionTranslationRevealed(true);
 
     if (validation.isValid) {
       if (recordOralQuestionCompleted) {
@@ -407,12 +418,25 @@ export default function OralExamPractice({
       (window.SpeechRecognition || window.webkitSpeechRecognition);
 
     if (!SpeechRecognition) {
-      alert("El reconocimiento de voz no está disponible en este navegador. Puedes escuchar la pronunciación y practicar en voz alta.");
+      alert(translate 
+        ? "Speech recognition is not available in this browser. You can listen to the pronunciation and practice aloud." 
+        : "El reconocimiento de voz no está disponible en este navegador. Puedes escuchar la pronunciación y practicar en voz alta.");
+      return;
+    }
+
+    if (!targetText || !targetText.trim()) {
+      alert(translate 
+        ? "Please place words to form a sentence first before testing pronunciation." 
+        : "Por favor arma tu oración antes de probar la pronunciación.");
       return;
     }
 
     if (isTestingPronunciation) {
-      recognitionRef.current?.stop();
+      try {
+        recognitionRef.current?.stop();
+      } catch (e) {
+        console.warn(e);
+      }
       setIsTestingPronunciation(false);
       return;
     }
@@ -425,42 +449,55 @@ export default function OralExamPractice({
 
       recognition.onstart = () => {
         setIsTestingPronunciation(true);
-        setPronunciationScore({ status: 'listening', message: 'Escuchando... di tu respuesta en voz alta.' });
+        setPronunciationScore({
+          status: 'listening',
+          message: translate 
+            ? "Listening... say your sentence aloud in Spanish." 
+            : "Escuchando... di tu respuesta en voz alta en español."
+        });
       };
 
       recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.toLowerCase();
+        const transcript = event.results?.[0]?.[0]?.transcript?.toLowerCase() || "";
         setIsTestingPronunciation(false);
 
         // Compare target vs transcript
         const targetClean = targetText.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()¿?¡!]/g, "");
         const heardClean = transcript.replace(/[.,/#!$%^&*;:{}=\-_`~()¿?¡!]/g, "");
 
-        const targetWords = targetClean.split(" ").filter(Boolean);
-        const heardWords = heardClean.split(" ").filter(Boolean);
+        const targetWords = targetClean.split(/\s+/).filter(Boolean);
+        const heardWords = heardClean.split(/\s+/).filter(Boolean);
 
         let matches = 0;
         targetWords.forEach(w => {
           if (heardWords.includes(w)) matches++;
         });
 
-        const percent = Math.min(100, Math.round((matches / targetWords.length) * 100));
+        const percent = targetWords.length > 0 
+          ? Math.min(100, Math.round((matches / targetWords.length) * 100))
+          : 0;
 
         setPronunciationScore({
           status: 'result',
           transcript,
           percentage: percent,
           feedback: percent >= 80 
-            ? "¡Excelente pronunciación! Tu acento y fluidez en pretérito son claros." 
+            ? (translate ? "Excellent pronunciation! Your accent and preterite flow are clear." : "¡Excelente pronunciación! Tu acento y fluidez en pretérito son claros.")
             : percent >= 50 
-            ? "¡Buen intento! Se entendió la idea principal. Escucha el audio de nuevo e inténtalo una vez más." 
-            : "Sigue practicando. Escucha el audio modelo para perfeccionar el ritmo."
+            ? (translate ? "Good attempt! The main idea was understood. Listen to the audio again and try once more." : "¡Buen intento! Se entendió la idea principal. Escucha el audio de nuevo e inténtalo una vez más.")
+            : (translate ? "Keep practicing. Listen to the model audio to perfect your rhythm." : "Sigue practicando. Escucha el audio modelo para perfeccionar el ritmo.")
         });
       };
 
-      recognition.onerror = () => {
+      recognition.onerror = (event) => {
+        console.warn("Pronunciation speech recognition error:", event?.error);
         setIsTestingPronunciation(false);
-        setPronunciationScore({ status: 'error', message: 'No se pudo captar el audio del micrófono.' });
+        const errMsg = event?.error === 'no-speech'
+          ? (translate ? "No speech detected. Please speak clearly into the microphone." : "No se detectó voz. Por favor habla claro al micrófono.")
+          : event?.error === 'not-allowed'
+          ? (translate ? "Microphone permission denied. Please allow microphone access in your browser." : "Acceso al micrófono denegado. Por favor permite el acceso al micrófono en tu navegador.")
+          : (translate ? "Could not capture audio from microphone." : "No se pudo captar el audio del micrófono.");
+        setPronunciationScore({ status: 'error', message: errMsg });
       };
 
       recognition.onend = () => {
@@ -585,7 +622,7 @@ export default function OralExamPractice({
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
         <button
           className={`btn ${mode === 'guided' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setMode('guided')}
+          onClick={() => { setMode('guided'); setPronunciationScore(null); }}
           style={{ flex: 1, minWidth: '160px', padding: '10px 14px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
         >
           <span>🎓</span>
@@ -597,7 +634,7 @@ export default function OralExamPractice({
 
         <button
           className={`btn ${mode === 'open' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setMode('open')}
+          onClick={() => { setMode('open'); setPronunciationScore(null); }}
           style={{ flex: 1, minWidth: '160px', padding: '10px 14px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
         >
           <span>🧩</span>
@@ -609,7 +646,7 @@ export default function OralExamPractice({
 
         <button
           className={`btn ${mode === 'challenge' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setMode('challenge')}
+          onClick={() => { setMode('challenge'); setPronunciationScore(null); }}
           style={{ 
             flex: 1, 
             minWidth: '160px', 
@@ -1192,42 +1229,6 @@ export default function OralExamPractice({
             {t('midtermOpenGoalCallout', translate)}
           </div>
 
-          {/* Question Translation in Open Mode (concealed until answered or explicitly revealed) */}
-          <div style={{ 
-            padding: '10px 14px', 
-            borderRadius: '10px', 
-            background: 'rgba(59, 130, 246, 0.08)', 
-            border: '1px solid rgba(59, 130, 246, 0.25)', 
-            marginBottom: '16px' 
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-              <div>
-                <span style={{ fontSize: '0.7rem', color: '#93c5fd', fontWeight: 700, display: 'block', textTransform: 'uppercase' }}>
-                  {t('midtermQuestionTranslationTitle', translate)}
-                </span>
-                {isQuestionTranslationRevealed || openAnswered ? (
-                  <span style={{ fontSize: '0.92rem', color: '#e0e7ff', fontWeight: 600 }}>
-                    "{currentQuestion.english}"
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '0.85rem', color: '#93c5fd', fontStyle: 'italic', opacity: 0.8 }}>
-                    ({t('midtermQuestionHiddenPrompt', translate)})
-                  </span>
-                )}
-              </div>
-              {!openAnswered && !isQuestionTranslationRevealed && (
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setIsQuestionTranslationRevealed(true)}
-                  style={{ fontSize: '0.7rem', padding: '3px 8px' }}
-                >
-                  {t('midtermRevealTranslationBtn', translate)}
-                </button>
-              )}
-            </div>
-          </div>
-
           {/* Constructed Custom Sentence Zone */}
           <div style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -1403,26 +1404,70 @@ export default function OralExamPractice({
               </div>
 
               {/* Speech Controls in Open Mode */}
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => playSentenceAudio(openPlacedTokens.map(t => t.text).join(" "))}
-                  style={{ flex: 1, minWidth: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.82rem' }}
-                >
-                  <Volume2 size={15} color="var(--primary)" /> {t('midtermOpenListenMineBtn', translate)}
-                </button>
+              {(() => {
+                const targetOpenSentence = openPlacedTokens.map(t => t.text).join(" ") || openAnswers[currentIdx]?.text || "";
+                return (
+                  <>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => playSentenceAudio(targetOpenSentence)}
+                        disabled={!targetOpenSentence}
+                        style={{ flex: 1, minWidth: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.82rem' }}
+                      >
+                        <Volume2 size={15} color="var(--primary)" /> {t('midtermOpenListenMineBtn', translate)}
+                      </button>
 
-                {speechSupported && (
-                  <button
-                    className={`btn ${isTestingPronunciation ? 'btn-danger' : 'btn-secondary'}`}
-                    onClick={() => handleTestPronunciation(openPlacedTokens.map(t => t.text).join(" "))}
-                    style={{ flex: 1, minWidth: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.82rem' }}
-                  >
-                    <Mic size={15} color={isTestingPronunciation ? "#fff" : "var(--primary)"} />
-                    <span>{isTestingPronunciation ? t('midtermRecordingAudio', translate) : t('midtermTestPronunciationBtn', translate)}</span>
-                  </button>
-                )}
-              </div>
+                      {speechSupported && (
+                        <button
+                          className={`btn ${isTestingPronunciation ? 'btn-danger' : 'btn-secondary'}`}
+                          onClick={() => handleTestPronunciation(targetOpenSentence)}
+                          disabled={!targetOpenSentence}
+                          style={{ flex: 1, minWidth: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.82rem' }}
+                        >
+                          <Mic size={15} color={isTestingPronunciation ? "#fff" : "var(--primary)"} />
+                          <span>{isTestingPronunciation ? t('midtermRecordingPronunciation', translate) : t('midtermTestPronunciationBtn', translate)}</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Pronunciation Feedback Box in Open Mode */}
+                    {pronunciationScore && (
+                      <div style={{ 
+                        padding: '10px 14px', 
+                        borderRadius: '10px', 
+                        background: 'rgba(99, 102, 241, 0.08)', 
+                        border: '1px solid rgba(99, 102, 241, 0.25)', 
+                        marginBottom: '14px',
+                        fontSize: '0.8rem'
+                      }}>
+                        {pronunciationScore.status === 'listening' && (
+                          <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{pronunciationScore.message}</span>
+                        )}
+                        {pronunciationScore.status === 'result' && (
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                              <span>{t('midtermPronunciationMatch', translate)} <strong>{pronunciationScore.percentage}%</strong></span>
+                              <span style={{ color: pronunciationScore.percentage >= 80 ? 'var(--accent)' : 'var(--gold)' }}>
+                                {pronunciationScore.percentage >= 80 ? t('midtermPronunciationExcellent', translate) : t('midtermPronunciationNeedsPractice', translate)}
+                              </span>
+                            </div>
+                            <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '4px' }}>
+                              {t('midtermElenaHeard', translate, pronunciationScore.transcript)}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              {pronunciationScore.feedback}
+                            </div>
+                          </div>
+                        )}
+                        {pronunciationScore.status === 'error' && (
+                          <span style={{ color: 'var(--danger)' }}>{pronunciationScore.message}</span>
+                        )}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
               <div style={{ display: 'flex', gap: '8px' }}>
                 {!openFeedback?.isValid && (

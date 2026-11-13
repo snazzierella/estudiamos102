@@ -133,6 +133,18 @@ const BADGES_LIST = [
     name: "Maestro de Estudiamos 102 (Game Champion)",
     desc: "Complete all campaign stages and reviews.",
     icon: "👑"
+  },
+  {
+    id: "midterm_ready",
+    name: "Listo para el Examen (Ready for the Midterm)",
+    desc: "Score 9/10 or higher in the Oral Exam Modo Libre (Open Word Bank practice).",
+    icon: "🎯"
+  },
+  {
+    id: "midterm_master",
+    name: "Maestro del Examen de Medio Término (Midterm Master)",
+    desc: "Score a perfect 10/10 in the Oral Exam Modo Desafío (typing/speaking in Spanish with no translations). Unlocked the Corazón de Titán (Doubles Maximum HP to 200)!",
+    icon: "👑"
   }
 ];
 

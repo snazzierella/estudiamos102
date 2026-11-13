@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShoppingBag, Coins, Heart, BookOpen, ArrowLeft } from 'lucide-react';
+import { getMaxHp } from '../hooks/useGameState';
 
 const SHOP_ITEMS = [
   {
@@ -13,7 +14,7 @@ const SHOP_ITEMS = [
   {
     key: "goldenElixir",
     name: "Elixir Dorado (Golden Elixir)",
-    desc: "Fully restores 100 HP and cures the 'Fainted' status effect.",
+    desc: "Fully restores HP and cures the 'Fainted' status effect.",
     cost: 35,
     icon: "🍯",
     theme: "blue-item"
@@ -126,7 +127,7 @@ export default function GameShop({ state, buyItem, consumeItem, buyEquipment, eq
   const [feedback, setFeedback] = useState("");
   const [mysteryText, setMysteryText] = useState("");
 
-  const maxHp = state.equipped?.ring === "ringOfLife" ? 150 : 100;
+  const maxHp = getMaxHp(state);
 
   const handleBuy = (item) => {
     const success = buyItem(item.key, item.cost);

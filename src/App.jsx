@@ -8,6 +8,7 @@ import AiChat from './components/AiChat';
 import MiniGames from './components/MiniGames';
 import BadgeTrophy from './components/BadgeTrophy';
 import MistakesDungeon from './components/MistakesDungeon';
+import OralExamPractice from './components/OralExamPractice';
 import { Settings, RefreshCw, Mail, Volume2, Sparkles, X, Download, Upload, Copy, Check, FileText, Save } from 'lucide-react';
 import { subscribeToVoices, formatVoiceLabel, speakSpanish } from './utils/speechHelper';
 import './App.css';
@@ -52,6 +53,9 @@ export default function App() {
     setTranslateInstructions,
     exportSaveData,
     importSaveData,
+    recordOralQuestionCompleted,
+    awardMidtermOpenRewards,
+    awardMidtermChallengeRewards,
   } = useGameState();
 
   const [view, setView] = useState('dashboard');
@@ -281,6 +285,16 @@ export default function App() {
         );
       case 'badges':
         return <BadgeTrophy state={state} setView={setView} />;
+      case 'oral-exam':
+        return (
+          <OralExamPractice 
+            state={state}
+            setView={setView}
+            recordOralQuestionCompleted={recordOralQuestionCompleted}
+            awardMidtermOpenRewards={awardMidtermOpenRewards}
+            awardMidtermChallengeRewards={awardMidtermChallengeRewards}
+          />
+        );
       default:
         return (
           <Dashboard 
@@ -310,7 +324,7 @@ export default function App() {
         </div>
 
         {state.hasCompletedPlacement ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               Lvl <strong>{state.level}</strong>
             </div>
@@ -320,6 +334,28 @@ export default function App() {
             <div style={{ fontSize: '0.85rem', color: '#ff7a00', fontWeight: 'bold' }}>
               🔥 {state.streak} days
             </div>
+
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setView('oral-exam')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.78rem',
+                padding: '5px 12px',
+                borderRadius: '20px',
+                color: view === 'oral-exam' ? '#fff' : '#f472b6',
+                background: view === 'oral-exam' ? 'rgba(236, 72, 153, 0.4)' : 'rgba(236, 72, 153, 0.12)',
+                border: '1px solid rgba(236, 72, 153, 0.35)',
+                cursor: 'pointer'
+              }}
+              title="Práctica para el Examen Oral de Medio Término (10 preguntas del PDF)"
+            >
+              <span>🎙️</span>
+              <span>Examen Oral</span>
+            </button>
+
             <a 
               href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback"
               className="btn btn-secondary btn-sm"

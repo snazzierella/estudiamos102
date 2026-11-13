@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "oxlint",
     "test:playtest": "node scripts/playtest-curriculum.mjs",
+    "test:oral-exam": "node scripts/test-oral-exam.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

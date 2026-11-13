@@ -10,9 +10,11 @@ import {
   Gamepad2, 
   Settings, 
   Heart,
-  Mail
+  Mail,
+  Mic
 } from 'lucide-react';
 import NarfySprite from './NarfySprite';
+import { getMaxHp } from '../hooks/useGameState';
 
 const RANKS = [
   { level: 1, title: "Estudiante Novato (Novice Learner)", icon: "🎒" },
@@ -32,7 +34,7 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
   const hasPotions = (state.inventory.redPotion || 0) > 0;
   const hasElixirs = (state.inventory.goldenElixir || 0) > 0;
 
-  const maxHp = state.equipped?.ring === "ringOfLife" ? 150 : 100;
+  const maxHp = getMaxHp(state);
 
   const handleUsePotion = () => {
     consumeItem('redPotion');
@@ -197,6 +199,54 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
             <div>
               <h3 className="menu-card-title">Guía de Contrastes (Which One to Use When)</h3>
               <p className="menu-card-desc">Master key contrast rules: Por vs Para, To Become, To Realize, Pronombres Dobles, Personal "a", and Irregular Preterites.</p>
+            </div>
+          </div>
+
+          {/* Card: Examen Oral Midterm Simulator */}
+          <div 
+            className="glass-panel menu-card accent-card" 
+            onClick={() => setView('oral-exam')}
+            style={{
+              borderColor: 'rgba(236, 72, 153, 0.45)',
+              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%)',
+              cursor: 'pointer',
+              position: 'relative'
+            }}
+          >
+            <div className="menu-card-icon" style={{ background: 'rgba(236, 72, 153, 0.2)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.4)' }}>
+              <Mic size={24} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                <h3 className="menu-card-title" style={{ margin: 0 }}>Examen Oral: Medio Término (Midterm Practice)</h3>
+                <span style={{ 
+                  background: 'rgba(236, 72, 153, 0.25)', 
+                  color: '#f472b6', 
+                  fontSize: '0.68rem', 
+                  fontWeight: 700, 
+                  padding: '2px 6px', 
+                  borderRadius: '6px',
+                  border: '1px solid rgba(236, 72, 153, 0.4)'
+                }}>
+                  {state.oralExamProgress?.completedQuestions?.length || 0}/10 Completadas
+                </span>
+                {state.hasMidtermHpDoubler && (
+                  <span style={{ 
+                    background: 'rgba(245, 158, 11, 0.2)', 
+                    color: '#fbbf24', 
+                    fontSize: '0.68rem', 
+                    fontWeight: 700, 
+                    padding: '2px 6px', 
+                    borderRadius: '6px',
+                    border: '1px solid rgba(245, 158, 11, 0.4)'
+                  }}>
+                    👑 Titán (200 HP)
+                  </span>
+                )}
+              </div>
+              <p className="menu-card-desc">
+                Practica las 10 preguntas del examen oral (PDF) con audio oculto, banco de palabras, traducciones bilingües y el Desafío del Corazón de Titán.
+              </p>
             </div>
           </div>
 

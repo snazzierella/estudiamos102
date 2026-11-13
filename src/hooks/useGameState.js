@@ -13,6 +13,19 @@ export const getStageWords = (stageNum) => {
   ));
 };
 
+export const getMaxHp = (state) => {
+  if (!state) return 100;
+  let base = state.equipped?.ring === "ringOfLife" ? 150 : 100;
+  if (
+    state.hasMidtermHpDoubler ||
+    (state.inventory && (state.inventory.corazonDeTitan || 0) > 0) ||
+    (state.ownedEquipment && state.ownedEquipment.includes("corazonDeTitan"))
+  ) {
+    base *= 2;
+  }
+  return base;
+};
+
 const INITIAL_STATE = {
   level: 1,
   xp: 0,
@@ -29,6 +42,13 @@ const INITIAL_STATE = {
     streakShield: 0,
     juicyBone: 0,
     funBall: 0,
+    corazonDeTitan: 0,
+  },
+  hasMidtermHpDoubler: false,
+  oralExamProgress: {
+    completedQuestions: [],
+    challengeCompleted: false,
+    bestChallengeScore: 0,
   },
   fainted: false,
   completedAdventures: [],
@@ -94,6 +114,15 @@ export function useGameState() {
         return {
           ...INITIAL_STATE,
           ...parsed,
+          inventory: {
+            ...INITIAL_STATE.inventory,
+            ...(parsed.inventory || {})
+          },
+          hasMidtermHpDoubler: Boolean(parsed.hasMidtermHpDoubler),
+          oralExamProgress: {
+            ...INITIAL_STATE.oralExamProgress,
+            ...(parsed.oralExamProgress || {})
+          },
           excludeVosotros,
           stageFlashcardsSeen,
           wordsAnsweredCorrectly,
@@ -133,7 +162,7 @@ export function useGameState() {
       let isLevelUp = false;
       const leveledBadges = [...prev.badges];
 
-      const maxHp = prev.equipped?.ring === "ringOfLife" ? 150 : 100;
+      const maxHp = getMaxHp(prev);
 
       while (newXp >= newLevel * 100) {
         newXp -= newLevel * 100;
@@ -224,7 +253,7 @@ export function useGameState() {
 
   const heal = (amount) => {
     setState(prev => {
-      const maxHp = prev.equipped?.ring === "ringOfLife" ? 150 : 100;
+      const maxHp = getMaxHp(prev);
       return {
         ...prev,
         hp: Math.min(maxHp, prev.hp + amount)
@@ -234,7 +263,7 @@ export function useGameState() {
 
   const revive = (hpAmount = 100) => {
     setState(prev => {
-      const maxHp = prev.equipped?.ring === "ringOfLife" ? 150 : 100;
+      const maxHp = getMaxHp(prev);
       return {
         ...prev,
         hp: hpAmount === 100 ? maxHp : Math.min(maxHp, hpAmount),
@@ -297,16 +326,18 @@ export function useGameState() {
       let newHp = prev.hp;
       let newFainted = prev.fainted;
 
+      const maxHp = getMaxHp(prev);
+
       if (itemKey === "redPotion") {
-        if (prev.fainted || prev.hp < 100) {
-          newHp = Math.min(100, prev.hp + 50);
+        if (prev.fainted || prev.hp < maxHp) {
+          newHp = Math.min(maxHp, prev.hp + 50);
           newFainted = false;
           newInventory.redPotion -= 1;
           success = true;
         }
       } else if (itemKey === "goldenElixir") {
-        if (prev.fainted || prev.hp < 100) {
-          newHp = 100;
+        if (prev.fainted || prev.hp < maxHp) {
+          newHp = maxHp;
           newFainted = false;
           newInventory.goldenElixir -= 1;
           success = true;
@@ -445,7 +476,7 @@ export function useGameState() {
   const checkAndUpdateStreak = () => {
     setState(prev => {
       const today = new Date().toISOString().split('T')[0];
-      const maxHp = prev.equipped?.ring === "ringOfLife" ? 150 : 100;
+      const maxHp = getMaxHp(prev);
       const isNewDay = prev.lastActiveDate && prev.lastActiveDate !== today;
       let newHp = isNewDay ? maxHp : prev.hp;
       let newFainted = isNewDay ? false : prev.fainted;
@@ -559,7 +590,7 @@ export function useGameState() {
 
       let newXp = prev.xp + xpReward;
       let newLevel = prev.level;
-      const maxHp = prev.equipped?.ring === "ringOfLife" ? 150 : 100;
+      const maxHp = getMaxHp(prev);
       let newHp = prev.hp;
       let newGold = prev.gold + goldReward;
       let isLevelUp = false;
@@ -670,7 +701,7 @@ export function useGameState() {
 
       let newXp = prev.xp + xpReward;
       let newLevel = prev.level;
-      const maxHp = prev.equipped?.ring === "ringOfLife" ? 150 : 100;
+      const maxHp = getMaxHp(prev);
       let newHp = prev.hp;
       let newGold = prev.gold + goldReward;
       let isLevelUp = false;
@@ -937,7 +968,7 @@ export function useGameState() {
     setState(prev => {
       const newInv = { ...prev.inventory };
       newInv.juicyBone -= 1;
-      const maxHp = prev.equipped?.ring === "ringOfLife" ? 150 : 100;
+      const maxHp = getMaxHp(prev);
       const newHp = Math.min(maxHp, prev.hp + 20);
       return {
         ...prev,
@@ -967,7 +998,7 @@ export function useGameState() {
 
       let newXp = prev.xp + xpBonus;
       let newLevel = prev.level;
-      const maxHp = prev.equipped?.ring === "ringOfLife" ? 150 : 100;
+      const maxHp = getMaxHp(prev);
       let newHp = prev.hp;
       let newGold = prev.gold;
       let isLevelUp = false;
@@ -1135,6 +1166,11 @@ export function useGameState() {
         mistakes: Array.isArray(rawState.mistakes) ? rawState.mistakes : [],
         wordMastery: (rawState.wordMastery && typeof rawState.wordMastery === 'object') ? rawState.wordMastery : {},
         hasCompletedPlacement: Boolean(rawState.hasCompletedPlacement),
+        hasMidtermHpDoubler: Boolean(rawState.hasMidtermHpDoubler),
+        oralExamProgress: {
+          ...INITIAL_STATE.oralExamProgress,
+          ...(rawState.oralExamProgress || {})
+        },
         excludeVosotros: rawState._hasSetVosotros ? Boolean(rawState.excludeVosotros) : true,
         translateInstructions: Boolean(rawState.translateInstructions)
       };
@@ -1150,6 +1186,122 @@ export function useGameState() {
       console.error("Error importing save data:", err);
       return { success: false, error: err.message || "Error al procesar el archivo de guardado." };
     }
+  };
+
+  const recordOralQuestionCompleted = (questionId) => {
+    setState(prev => {
+      const currentCompleted = prev.oralExamProgress?.completedQuestions || [];
+      if (currentCompleted.includes(questionId)) {
+        return prev;
+      }
+      const newCompleted = [...currentCompleted, questionId];
+      return {
+        ...prev,
+        oralExamProgress: {
+          ...(prev.oralExamProgress || {}),
+          completedQuestions: newCompleted
+        }
+      };
+    });
+    addXp(20);
+    addGold(10);
+  };
+
+  const awardMidtermOpenRewards = (score) => {
+    let result = {
+      earnedReadyBadge: false,
+    };
+
+    setState(prev => {
+      const currentBadges = [...(prev.badges || [])];
+      let newBadges = [...currentBadges];
+
+      if (score >= 9) {
+        if (!newBadges.includes("midterm_ready")) {
+          newBadges.push("midterm_ready");
+          result.earnedReadyBadge = true;
+        }
+      }
+
+      const bestScore = Math.max(score, prev.oralExamProgress?.bestOpenScore || 0);
+
+      return {
+        ...prev,
+        badges: newBadges,
+        oralExamProgress: {
+          ...(prev.oralExamProgress || {}),
+          openCompleted: score >= 9 ? true : Boolean(prev.oralExamProgress?.openCompleted),
+          bestOpenScore: bestScore
+        }
+      };
+    });
+
+    if (score >= 9) {
+      addXp(50);
+      addGold(25);
+    }
+
+    return result;
+  };
+
+  const awardMidtermChallengeRewards = (score) => {
+    let result = {
+      earnedMasterBadge: false,
+      earnedTitanHeart: false,
+    };
+
+    setState(prev => {
+      const currentBadges = [...(prev.badges || [])];
+      let newBadges = [...currentBadges];
+      let hasDoubler = Boolean(prev.hasMidtermHpDoubler);
+      const newInventory = { ...(prev.inventory || {}) };
+      let newHp = prev.hp;
+
+      if (score === 10) {
+        if (!newBadges.includes("midterm_master")) {
+          newBadges.push("midterm_master");
+          result.earnedMasterBadge = true;
+        }
+        if (!hasDoubler || (newInventory.corazonDeTitan || 0) <= 0) {
+          hasDoubler = true;
+          newInventory.corazonDeTitan = 1;
+          result.earnedTitanHeart = true;
+        }
+      }
+
+      const tempState = {
+        ...prev,
+        hasMidtermHpDoubler: hasDoubler,
+        inventory: newInventory
+      };
+      const maxHp = getMaxHp(tempState);
+
+      if (score === 10) {
+        newHp = maxHp;
+      }
+
+      const bestScore = Math.max(score, prev.oralExamProgress?.bestChallengeScore || 0);
+
+      return {
+        ...prev,
+        hasMidtermHpDoubler: hasDoubler,
+        inventory: newInventory,
+        hp: Math.min(maxHp, newHp),
+        badges: newBadges,
+        oralExamProgress: {
+          ...(prev.oralExamProgress || {}),
+          challengeCompleted: score === 10 ? true : Boolean(prev.oralExamProgress?.challengeCompleted),
+          bestChallengeScore: bestScore
+        }
+      };
+    });
+
+    if (score === 10) {
+      addXp(100);
+      addGold(50);
+    }
+
+    return result;
   };
 
   return {
@@ -1192,5 +1344,8 @@ export function useGameState() {
     setTranslateInstructions,
     exportSaveData,
     importSaveData,
+    recordOralQuestionCompleted,
+    awardMidtermOpenRewards,
+    awardMidtermChallengeRewards,
   };
 }

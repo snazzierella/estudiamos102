@@ -252,7 +252,7 @@ export default function OralExamPractice({
       setGuidedIsCorrect(true);
       setGuidedAnswered(true);
       if (recordOralQuestionCompleted) {
-        recordOralQuestionCompleted(currentQuestion.id);
+        recordOralQuestionCompleted(currentQuestion.id, 'guided');
       }
     } else {
       setGuidedIsCorrect(false);
@@ -289,7 +289,7 @@ export default function OralExamPractice({
 
     if (validation.isValid) {
       if (recordOralQuestionCompleted) {
-        recordOralQuestionCompleted(currentQuestion.id);
+        recordOralQuestionCompleted(currentQuestion.id, 'open');
       }
 
       const updated = {
@@ -395,7 +395,7 @@ export default function OralExamPractice({
     setChallengeAnswers(updated);
 
     if (validation.isValid && recordOralQuestionCompleted) {
-      recordOralQuestionCompleted(currentQuestion.id);
+      recordOralQuestionCompleted(currentQuestion.id, 'challenge');
     }
 
     // Check if all 10 questions answered in challenge mode
@@ -543,7 +543,29 @@ export default function OralExamPractice({
     }
   };
 
-  const completedCount = state.oralExamProgress?.completedQuestions?.length || 0;
+  const isQuestionCompletedInCurrentMode = (qId, idx) => {
+    if (mode === 'guided') {
+      return Boolean(
+        state.oralExamProgress?.guidedCompletedQuestions?.includes(qId) ||
+        (idx === currentIdx && guidedIsCorrect)
+      );
+    }
+    if (mode === 'open') {
+      return Boolean(
+        openAnswers[idx]?.isCorrect ||
+        state.oralExamProgress?.openCompletedQuestions?.includes(qId)
+      );
+    }
+    if (mode === 'challenge') {
+      return Boolean(
+        challengeAnswers[idx]?.isCorrect ||
+        state.oralExamProgress?.challengeCompletedQuestions?.includes(qId)
+      );
+    }
+    return false;
+  };
+
+  const completedCount = MIDTERM_QUESTIONS.filter((q, idx) => isQuestionCompletedInCurrentMode(q.id, idx)).length;
 
   return (
     <div className="view-container" style={{ maxWidth: '940px', margin: '0 auto', paddingBottom: '60px' }}>
@@ -690,7 +712,7 @@ export default function OralExamPractice({
           </span>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {state.oralExamProgress?.completedQuestions?.includes(currentQuestion.id) && (
+            {isQuestionCompletedInCurrentMode(currentQuestion.id, currentIdx) && (
               <span style={{ color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Check size={14} /> {t('midtermCompletedCheck', translate)}
               </span>
@@ -1697,9 +1719,10 @@ export default function OralExamPractice({
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '6px' }}>
           {MIDTERM_QUESTIONS.map((q, idx) => {
-            const isCompleted = state.oralExamProgress?.completedQuestions?.includes(q.id);
+            const isCompleted = isQuestionCompletedInCurrentMode(q.id, idx);
             const isCurrent = idx === currentIdx;
-            const isChallengeCorrect = challengeAnswers[idx]?.isCorrect;
+            const isChallengeAttempted = Boolean(challengeAnswers[idx]);
+            const isChallengeCorrect = Boolean(challengeAnswers[idx]?.isCorrect);
 
             return (
               <button
@@ -1734,26 +1757,15 @@ export default function OralExamPractice({
                 {isCompleted && (
                   <span style={{ position: 'absolute', top: '-4px', right: '-2px', fontSize: '0.6rem' }}>✓</span>
                 )}
-                {mode === 'open' && openAnswers[idx]?.isCorrect && (
+                {mode === 'challenge' && isChallengeAttempted && !isChallengeCorrect && (
                   <span style={{ 
                     position: 'absolute', 
                     bottom: '1px', 
                     right: '3px', 
                     fontSize: '0.55rem', 
-                    color: 'var(--accent)' 
+                    color: 'var(--danger)' 
                   }}>
-                    ●
-                  </span>
-                )}
-                {mode === 'challenge' && challengeAnswers[idx] && (
-                  <span style={{ 
-                    position: 'absolute', 
-                    bottom: '1px', 
-                    right: '3px', 
-                    fontSize: '0.55rem', 
-                    color: isChallengeCorrect ? 'var(--accent)' : 'var(--danger)' 
-                  }}>
-                    {isChallengeCorrect ? '●' : '×'}
+                    ×
                   </span>
                 )}
               </button>

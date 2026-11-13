@@ -47,8 +47,13 @@ const INITIAL_STATE = {
   hasMidtermHpDoubler: false,
   oralExamProgress: {
     completedQuestions: [],
+    guidedCompletedQuestions: [],
+    openCompletedQuestions: [],
+    challengeCompletedQuestions: [],
     challengeCompleted: false,
     bestChallengeScore: 0,
+    openCompleted: false,
+    bestOpenScore: 0,
   },
   fainted: false,
   completedAdventures: [],
@@ -121,7 +126,10 @@ export function useGameState() {
           hasMidtermHpDoubler: Boolean(parsed.hasMidtermHpDoubler),
           oralExamProgress: {
             ...INITIAL_STATE.oralExamProgress,
-            ...(parsed.oralExamProgress || {})
+            ...(parsed.oralExamProgress || {}),
+            guidedCompletedQuestions: parsed.oralExamProgress?.guidedCompletedQuestions || (parsed.oralExamProgress?.completedQuestions ? [...parsed.oralExamProgress.completedQuestions] : []),
+            openCompletedQuestions: parsed.oralExamProgress?.openCompletedQuestions || [],
+            challengeCompletedQuestions: parsed.oralExamProgress?.challengeCompletedQuestions || [],
           },
           excludeVosotros,
           stageFlashcardsSeen,
@@ -1188,18 +1196,33 @@ export function useGameState() {
     }
   };
 
-  const recordOralQuestionCompleted = (questionId) => {
+  const recordOralQuestionCompleted = (questionId, mode = 'guided') => {
     setState(prev => {
-      const currentCompleted = prev.oralExamProgress?.completedQuestions || [];
-      if (currentCompleted.includes(questionId)) {
+      const modeKey = mode === 'challenge' 
+        ? 'challengeCompletedQuestions' 
+        : mode === 'open' 
+        ? 'openCompletedQuestions' 
+        : 'guidedCompletedQuestions';
+
+      const currentModeCompleted = prev.oralExamProgress?.[modeKey] || [];
+      const currentOverall = prev.oralExamProgress?.completedQuestions || [];
+
+      const alreadyInMode = currentModeCompleted.includes(questionId);
+      const alreadyOverall = currentOverall.includes(questionId);
+
+      if (alreadyInMode && alreadyOverall) {
         return prev;
       }
-      const newCompleted = [...currentCompleted, questionId];
+
+      const newModeCompleted = alreadyInMode ? currentModeCompleted : [...currentModeCompleted, questionId];
+      const newOverall = alreadyOverall ? currentOverall : [...currentOverall, questionId];
+
       return {
         ...prev,
         oralExamProgress: {
           ...(prev.oralExamProgress || {}),
-          completedQuestions: newCompleted
+          [modeKey]: newModeCompleted,
+          completedQuestions: newOverall
         }
       };
     });

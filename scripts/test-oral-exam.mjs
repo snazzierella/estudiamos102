@@ -79,8 +79,25 @@ tests.forEach((t, i) => {
   if (res.isValid !== t.expected) {
     throw new Error(`Validation test ${i+1} failed for Q${t.qId}: expected ${t.expected}, got ${res.isValid} (${res.feedback})`);
   }
+  if (res.userTranslation && typeof res.userTranslation !== 'string') {
+    throw new Error(`Expected string userTranslation for Q${t.qId}`);
+  }
 });
-console.log("✓ Verified 12/12 validation engine test cases.");
+console.log("✓ Verified 12/12 validation engine test cases and gloss generation.");
+
+// 6. Test Curriculum Dictionary Translation with Free Sentences
+const freeSentences = [
+  { es: "Fui a la tienda de ropa con mi prima", enContains: "clothing store" },
+  { es: "Pagué con tarjeta de crédito en el centro comercial", enContains: "credit card" },
+  { es: "El dependiente fue muy amable y me dio un descuento", enContains: "clerk" }
+];
+freeSentences.forEach(({ es, enContains }) => {
+  const res = validateOralExamAnswer(1, es);
+  if (!res.userTranslation.toLowerCase().includes(enContains.toLowerCase())) {
+    throw new Error(`Failed to translate '${es}': expected '${enContains}', got '${res.userTranslation}'`);
+  }
+});
+console.log("✓ Verified free curriculum vocabulary translation across complex sentences.");
 
 console.log("==========================================");
 console.log("🎉 ALL MIDTERM ORAL EXAM TESTS PASSED!");

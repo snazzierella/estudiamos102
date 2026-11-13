@@ -5,6 +5,8 @@
 // Focus: Preterite tense (regular, irregular, stem-changing, spelling changes)
 // --------------------------------------------------------------------------
 
+import { translateSpanishTextToEnglish } from '../utils/curriculumDictionary.js';
+
 export const MIDTERM_TITLE = {
   spanish: "¿Cómo fue la última vez que fuiste de compras?",
   english: "How was the last time you went shopping?",
@@ -577,35 +579,10 @@ export const OPEN_WORD_BANK = {
 
 // --------------------------------------------------------------------------
 // DYNAMIC TRANSLATOR FOR MODO LIBRE ASSEMBLED TOKENS
-// Converts an array of chosen tokens into a natural English translation.
+// Converts an array of chosen tokens or words into a natural English translation.
 // --------------------------------------------------------------------------
 export function translateCustomSentence(tokens) {
-  if (!tokens || tokens.length === 0) return "";
-  
-  const glosses = tokens.map(t => {
-    if (typeof t === 'string') {
-      const found = Object.values(OPEN_WORD_BANK).flat().find(item => item.text.toLowerCase() === t.toLowerCase());
-      return found ? found.gloss : t;
-    }
-    return t.gloss || t.text;
-  });
-
-  let raw = glosses.join(" ");
-
-  // Clean common grammatical glue in English
-  raw = raw
-    .replace(/\bYes I\b/gi, "Yes, I")
-    .replace(/\bNo I\b/gi, "No, I")
-    .replace(/\bI went with\b/gi, "I went with")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  // Capitalize first letter
-  if (raw.length > 0) {
-    raw = raw.charAt(0).toUpperCase() + raw.slice(1);
-  }
-
-  return raw;
+  return translateSpanishTextToEnglish(tokens);
 }
 
 // --------------------------------------------------------------------------
@@ -631,6 +608,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
     .replace(/[.,/#!$%^&*;:{}=\-_`~()¿?¡!]/g, "")
     .replace(/\s+/g, " ");
 
+  const userTranslation = clean ? generateGlossaryTranslation(clean) : "";
   const words = clean.split(" ");
   if (words.length < 3) {
     return {
@@ -638,7 +616,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
       feedback: translate
         ? "Your answer is too short. The oral exam requires a complete sentence in preterite (at least 3 or 4 words)."
         : "Tu respuesta es muy corta. En el examen oral se requiere una oración completa en pretérito (al menos 3 o 4 palabras).",
-      userTranslation: ""
+      userTranslation
     };
   }
 
@@ -653,7 +631,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Remember to use the preterite of 'ir': 'Fui con...' or 'Fui solo/sola'."
             : "Recuerda usar el pretérito de 'ir': 'Fui con...' o 'Fui solo/sola'.",
-          userTranslation: ""
+          userTranslation
         };
       }
       if (!hasCompanion) {
@@ -662,7 +640,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Mention who you went with using 'con [amigo/mamá/familia]' or indicate that you went 'solo/sola'."
             : "Menciona con quién fuiste usando 'con [amigo/mamá/familia]' o indica que fuiste 'solo/sola'.",
-          userTranslation: ""
+          userTranslation
         };
       }
       return {
@@ -670,7 +648,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
         feedback: translate
           ? "Excellent! You used the preterite 'fui' and clearly explained who you went with."
           : "¡Excelente! Usaste el pretérito 'fui' y explicaste con quién fuiste claramente.",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
     }
 
@@ -683,7 +661,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Use the preterite of 'ir' with destination preposition: 'Fui a la...' or 'Fui al...'."
             : "Usa el pretérito de 'ir' con preposición de lugar: 'Fui a la...' o 'Fui al...'.",
-          userTranslation: ""
+          userTranslation
         };
       }
       if (!hasPlace) {
@@ -692,7 +670,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Specify what place or shop you went to (e.g.: mercado, centro comercial, tienda de ropa)."
             : "Especifica a qué lugar o tienda fuiste (ej: mercado, centro comercial, tienda de ropa).",
-          userTranslation: ""
+          userTranslation
         };
       }
       return {
@@ -700,7 +678,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
         feedback: translate
           ? "Very good! You specified your destination with the correct preposition."
           : "¡Muy bien! Especificaste tu destino con la preposición correcta.",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
     }
 
@@ -713,7 +691,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Use the verb 'comprar' in preterite: 'Compré...' (with accent on the e)."
             : "Usa el verbo 'comprar' en pretérito: 'Compré...' (con tilde en la e).",
-          userTranslation: ""
+          userTranslation
         };
       }
       if (!hasItem && !clean.includes("nada") && !clean.includes("mucho")) {
@@ -722,7 +700,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Mention what item you bought (ropa, zapatos, una camisa, recuerdos) or if you bought nothing ('no compré nada')."
             : "Menciona qué artículo compraste (ropa, zapatos, una camisa, recuerdos) o si no compraste nada.",
-          userTranslation: ""
+          userTranslation
         };
       }
       return {
@@ -730,7 +708,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
         feedback: translate
           ? "Perfect! You used 'compré' and detailed your purchases with appropriate vocabulary."
           : "¡Perfecto! Usaste 'compré' y detallaste tus compras con vocabulario apropiado.",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
     }
 
@@ -743,7 +721,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "This is a dual question: respond with 'probé...' (or 'no probé...') and specify 'comí [food]'."
             : "Esta es una pregunta doble: responde con 'probé...' (o 'no probé...') y especifica 'comí [alimento]'.",
-          userTranslation: ""
+          userTranslation
         };
       }
       return {
@@ -751,7 +729,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
         feedback: translate
           ? "Fantastic! You responded about both the experience and the food in preterite."
           : "¡Fantástico! Respondiste sobre la experiencia y la comida en pretérito.",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
     }
 
@@ -763,7 +741,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Remember that 'medirse' is reflexive: use 'me medí...' or 'no me medí ropa'."
             : "Recuerda que 'medirse' es reflexivo: usa 'me medí...' o 'no me medí ropa'.",
-          userTranslation: ""
+          userTranslation
         };
       }
       return {
@@ -771,7 +749,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
         feedback: translate
           ? "Excellent mastery of the reflexive preterite 'me medí'!"
           : "¡Excelente dominio del reflexivo pretérito 'me medí'!",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
     }
 
@@ -783,7 +761,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Use the preterite of 'escoger': 'Sí, escogí...' or 'No escogí artesanías'."
             : "Usa el pretérito de 'escoger': 'Sí, escogí...' o 'No escogí artesanías'.",
-          userTranslation: ""
+          userTranslation
         };
       }
       return {
@@ -791,7 +769,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
         feedback: translate
           ? "Very good! You used 'escogí' with suitable direct/indirect objects."
           : "¡Muy bien! Usaste 'escogí' con los complementos adecuados.",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
     }
 
@@ -804,7 +782,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Remember the spelling change of 'pagar' in preterite: 'Pagué' (with gu)."
             : "Recuerda el cambio ortográfico de 'pagar' en pretérito: 'Pagué' (con gu).",
-          userTranslation: ""
+          userTranslation
         };
       }
       if (!hasPaymentMethod) {
@@ -813,7 +791,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Indicate your payment method: 'en efectivo' or 'con tarjeta de crédito'."
             : "Indica tu método de pago: 'en efectivo' o 'con tarjeta de crédito'.",
-          userTranslation: ""
+          userTranslation
         };
       }
       return {
@@ -821,7 +799,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
         feedback: translate
           ? "Perfect! You wrote 'pagué' with correct orthography and specified the payment method."
           : "¡Perfecto! Escribiste 'pagué' con su ortografía correcta y especificaste el método de pago.",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
     }
 
@@ -833,7 +811,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Use the verb 'encontrar' in preterite: 'Encontré...' or 'También vi...'."
             : "Usa el verbo 'encontrar' en pretérito: 'Encontré...' o 'También vi...'.",
-          userTranslation: ""
+          userTranslation
         };
       }
       return {
@@ -841,7 +819,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
         feedback: translate
           ? "Excellent! You described other items found at the market in preterite."
           : "¡Excelente! Describiste otros artículos hallados en el mercado en pretérito.",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
     }
 
@@ -854,7 +832,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Use the reflexive verb 'sentirse' in preterite: 'Me sentí...'."
             : "Usa el verbo reflexivo 'sentirse' en pretérito: 'Me sentí...'.",
-          userTranslation: ""
+          userTranslation
         };
       }
       if (!hasEmotion) {
@@ -863,7 +841,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Add how you felt (e.g.: muy contento/a, emocionado/a, un poco cansado/a, feliz)."
             : "Agrega cómo te sentiste (ej: muy contento/a, emocionado/a, un poco cansado/a, feliz).",
-          userTranslation: ""
+          userTranslation
         };
       }
       return {
@@ -871,7 +849,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
         feedback: translate
           ? "Great response! You used 'me sentí' and expressed your mood with precision."
           : "¡Gran respuesta! Usaste 'me sentí' y expresaste tu estado de ánimo con precisión.",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
     }
 
@@ -884,7 +862,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Begin with your opinion in preterite: 'Pensé que fue [maravillosa / divertida / fascinante]...'."
             : "Comienza con tu opinión en pretérito: 'Pensé que fue [maravillosa / divertida / fascinante]...'.",
-          userTranslation: ""
+          userTranslation
         };
       }
       if (!hasCausa) {
@@ -893,7 +871,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
           feedback: translate
             ? "Don't forget to explain the reason using 'porque...' (why did you think that?)."
             : "No olvides explicar la razón usando 'porque...' (¿por qué pensaste eso?).",
-          userTranslation: ""
+          userTranslation
         };
       }
       return {
@@ -901,7 +879,7 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
         feedback: translate
           ? "Wonderful! You expressed your critical evaluation with 'pensé que fue...' and justified it with 'porque'."
           : "¡Maravilloso! Expresaste tu valoración crítica con 'pensé que fue...' y la justificaste con 'porque'.",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
     }
 
@@ -909,101 +887,13 @@ export function validateOralExamAnswer(questionId, userInput, translate = false)
       return {
         isValid: true,
         feedback: translate ? "Response recorded!" : "¡Respuesta registrada!",
-        userTranslation: generateGlossaryTranslation(clean)
+        userTranslation
       };
   }
 }
 
 // Helper to provide a quick English gloss of student's Spanish input
 function generateGlossaryTranslation(cleanSpanish) {
-  const dictionary = {
-    "fui": "I went",
-    "con": "with",
-    "mi": "my",
-    "mejor": "best",
-    "amigo": "friend",
-    "amiga": "friend",
-    "mama": "mom",
-    "mamá": "mom",
-    "hermanos": "siblings",
-    "familia": "family",
-    "solo": "alone",
-    "sola": "alone",
-    "ayer": "yesterday",
-    "al": "to the",
-    "mercado": "market",
-    "centro": "mall/downtown",
-    "comercial": "mall",
-    "tienda": "store",
-    "de": "of",
-    "ropa": "clothes",
-    "artesanias": "crafts",
-    "artesanías": "crafts",
-    "compre": "I bought",
-    "compré": "I bought",
-    "una": "a",
-    "camisa": "shirt",
-    "bordada": "embroidered",
-    "pantalones": "pants",
-    "zapatos": "shoes",
-    "comodos": "comfortable",
-    "cómodos": "comfortable",
-    "probe": "I tried",
-    "probé": "I tried",
-    "comi": "I ate",
-    "comí": "I ate",
-    "tacos": "tacos",
-    "pescado": "fish",
-    "empanadas": "empanadas",
-    "tamales": "tamales",
-    "me": "myself",
-    "medi": "I tried on",
-    "medí": "I tried on",
-    "chaqueta": "jacket",
-    "cuero": "leather",
-    "escogi": "I chose",
-    "escogí": "I chose",
-    "para": "for",
-    "regalar": "to gift",
-    "pague": "I paid",
-    "pagué": "I paid",
-    "en": "in",
-    "efectivo": "cash",
-    "tarjeta": "card",
-    "credito": "credit",
-    "crédito": "credit",
-    "descuento": "discount",
-    "recibi": "I received",
-    "recibí": "I received",
-    "encontre": "I found",
-    "encontré": "I found",
-    "vi": "I saw",
-    "libros": "books",
-    "antiguos": "antique",
-    "dulces": "candies",
-    "senti": "I felt",
-    "sentí": "I felt",
-    "muy": "very",
-    "contento": "happy",
-    "contenta": "happy",
-    "feliz": "happy",
-    "emocionado": "excited",
-    "emocionada": "excited",
-    "cansado": "tired",
-    "cansada": "tired",
-    "pense": "I thought",
-    "pensé": "I thought",
-    "que": "that",
-    "fue": "it was",
-    "maravillosa": "wonderful",
-    "divertida": "fun",
-    "porque": "because",
-    "aprendi": "I learned",
-    "mucho": "a lot"
-  };
-
-  const words = cleanSpanish.split(" ");
-  const translatedWords = words.map(w => dictionary[w] || w);
-  let res = translatedWords.join(" ");
-  return res.charAt(0).toUpperCase() + res.slice(1);
+  return translateSpanishTextToEnglish(cleanSpanish);
 }
+

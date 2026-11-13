@@ -9,8 +9,9 @@ import MiniGames from './components/MiniGames';
 import BadgeTrophy from './components/BadgeTrophy';
 import MistakesDungeon from './components/MistakesDungeon';
 import OralExamPractice from './components/OralExamPractice';
-import { Settings, RefreshCw, Mail, Volume2, Sparkles, X, Download, Upload, Copy, Check, FileText, Save } from 'lucide-react';
+import { Settings, RefreshCw, Mail, Volume2, Sparkles, X, Download, Upload, Copy, Check, FileText, Save, Globe } from 'lucide-react';
 import { subscribeToVoices, formatVoiceLabel, speakSpanish } from './utils/speechHelper';
+import { t } from './utils/translationsHelper';
 import './App.css';
 
 export default function App() {
@@ -58,6 +59,8 @@ export default function App() {
     awardMidtermChallengeRewards,
   } = useGameState();
 
+  const translate = Boolean(state.translateInstructions);
+
   const [view, setView] = useState('dashboard');
   const [studyQuestTab, setStudyQuestTab] = useState('quest');
   const [showSettings, setShowSettings] = useState(false);
@@ -87,10 +90,10 @@ export default function App() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      setSaveStatus({ type: 'success', message: '¡Archivo de guardado descargado exitosamente!' });
+      setSaveStatus({ type: 'success', message: t('settingsSaveDownloadSuccess', translate) });
     } catch (e) {
       console.error("Export download error:", e);
-      setSaveStatus({ type: 'error', message: 'Error al exportar el archivo de guardado.' });
+      setSaveStatus({ type: 'error', message: t('settingsSaveDownloadError', translate) });
     }
   };
 
@@ -100,11 +103,11 @@ export default function App() {
       const jsonStr = JSON.stringify(saveObj, null, 2);
       await navigator.clipboard.writeText(jsonStr);
       setCopiedSave(true);
-      setSaveStatus({ type: 'success', message: '¡Código de guardado copiado al portapapeles!' });
+      setSaveStatus({ type: 'success', message: t('settingsSaveCopySuccess', translate) });
       setTimeout(() => setCopiedSave(false), 2500);
     } catch (e) {
       console.error("Export copy error:", e);
-      setSaveStatus({ type: 'error', message: 'No se pudo copiar automáticamente. Puedes descargar el archivo .json.' });
+      setSaveStatus({ type: 'error', message: t('settingsSaveCopyError', translate) });
     }
   };
 
@@ -113,7 +116,7 @@ export default function App() {
     if (!file) return;
 
     if (state.hasCompletedPlacement && (state.level > 1 || state.xp > 0 || state.questStage > 1)) {
-      if (!window.confirm("¿Deseas restaurar esta partida? Esto reemplazará tu progreso actual con los datos del archivo.")) {
+      if (!window.confirm(t('settingsRestoreConfirm', translate))) {
         e.target.value = '';
         return;
       }
@@ -133,11 +136,11 @@ export default function App() {
         }
       } catch (err) {
         console.error("File read error:", err);
-        setSaveStatus({ type: 'error', message: 'Error al procesar el archivo seleccionado.' });
+        setSaveStatus({ type: 'error', message: translate ? 'Error processing the selected file.' : 'Error al procesar el archivo seleccionado.' });
       }
     };
     reader.onerror = () => {
-      setSaveStatus({ type: 'error', message: 'Error al cargar el archivo del dispositivo.' });
+      setSaveStatus({ type: 'error', message: translate ? 'Error loading file from device.' : 'Error al cargar el archivo del dispositivo.' });
     };
     reader.readAsText(file);
     e.target.value = '';
@@ -145,12 +148,12 @@ export default function App() {
 
   const handlePasteImport = () => {
     if (!pastedSaveText.trim()) {
-      setSaveStatus({ type: 'error', message: 'Por favor pega el código JSON de tu partida antes de restaurar.' });
+      setSaveStatus({ type: 'error', message: t('settingsSaveEmptyPasteError', translate) });
       return;
     }
 
     if (state.hasCompletedPlacement && (state.level > 1 || state.xp > 0 || state.questStage > 1)) {
-      if (!window.confirm("¿Deseas restaurar esta partida? Esto reemplazará tu progreso actual con el código pegado.")) {
+      if (!window.confirm(t('settingsRestoreConfirm', translate))) {
         return;
       }
     }
@@ -209,7 +212,7 @@ export default function App() {
   };
 
   const handleReset = () => {
-    if (window.confirm("¿De veras? Are you sure you want to reset all stats, badges, and progress? This cannot be undone.")) {
+    if (window.confirm(t('settingsResetConfirm', translate))) {
       resetAllProgress();
       setView('dashboard');
       setShowSettings(false);
@@ -290,6 +293,7 @@ export default function App() {
           <OralExamPractice 
             state={state}
             setView={setView}
+            toggleTranslateInstructions={toggleTranslateInstructions}
             recordOralQuestionCompleted={recordOralQuestionCompleted}
             awardMidtermOpenRewards={awardMidtermOpenRewards}
             awardMidtermChallengeRewards={awardMidtermChallengeRewards}
@@ -335,6 +339,24 @@ export default function App() {
               🔥 {state.streak} days
             </div>
 
+            {/* Quick Instruction Translation Toggle */}
+            <button
+              className={`btn ${translate ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+              onClick={toggleTranslateInstructions}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.78rem',
+                padding: '5px 10px',
+                borderRadius: '20px'
+              }}
+              title={translate ? "Switch instructions to Spanish" : "Traducir instrucciones al inglés"}
+            >
+              <Globe size={13} />
+              <span>{translate ? "🌐 EN" : "🌐 ES"}</span>
+            </button>
+
             <button
               className="btn btn-secondary btn-sm"
               onClick={() => setView('oral-exam')}
@@ -350,10 +372,10 @@ export default function App() {
                 border: '1px solid rgba(236, 72, 153, 0.35)',
                 cursor: 'pointer'
               }}
-              title="Práctica para el Examen Oral de Medio Término (10 preguntas del PDF)"
+              title={translate ? "Midterm Oral Exam Practice (10 questions from syllabus PDF)" : "Práctica para el Examen Oral de Medio Término (10 preguntas del PDF)"}
             >
               <span>🎙️</span>
-              <span>Examen Oral</span>
+              <span>{t('headerOralExamBtn', translate)}</span>
             </button>
 
             <a 
@@ -455,14 +477,14 @@ export default function App() {
               flexShrink: 0
             }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                <Settings size={18} color="var(--primary)" /> Configuración (Settings)
+                <Settings size={18} color="var(--primary)" /> {t('settingsTitle', translate)}
               </h3>
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => setShowSettings(false)}
                 style={{ padding: '4px 8px', borderRadius: '8px', lineHeight: 1 }}
-                title="Cerrar (Close)"
+                title={t('settingsClose', translate)}
               >
                 <X size={16} />
               </button>
@@ -489,10 +511,10 @@ export default function App() {
                 />
                 <div>
                   <label htmlFor="translateInstructions" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>🌐</span> Traducir instrucciones al inglés (Translate Instructions)
+                    <span>🌐</span> {t('settingsTranslateToggleLabel', translate)}
                   </label>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', lineHeight: 1.3 }}>
-                    Muestra traducciones al inglés en instrucciones de niveles, reglas de desafíos y ejercicios (por defecto en español para máxima inmersión).
+                    {t('settingsTranslateToggleDesc', translate)}
                   </span>
                 </div>
               </div>
@@ -508,10 +530,10 @@ export default function App() {
                 />
                 <div>
                   <label htmlFor="excludeVosotros" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
-                    Ignore &quot;vosotros&quot; forms (Spain)
+                    {t('settingsVosotrosLabel', translate)}
                   </label>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', lineHeight: 1.3 }}>
-                    Hides Spain-specific plural forms in quizzes & Codex (active by default).
+                    {t('settingsVosotrosDesc', translate)}
                   </span>
                 </div>
               </div>
@@ -519,7 +541,7 @@ export default function App() {
               {/* Difficulty Mode */}
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
                 <label className="form-label" style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: '6px', display: 'block' }}>
-                  Dificultad (Difficulty Mode)
+                  {t('settingsDifficultyHeader', translate)}
                 </label>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {['relaxed', 'standard', 'hardcore'].map(mode => (
@@ -530,26 +552,26 @@ export default function App() {
                       onClick={() => setDifficultyMode(mode)}
                       style={{ flex: 1, textTransform: 'capitalize', fontSize: '0.75rem', padding: '5px 4px' }}
                     >
-                      {mode === 'relaxed' ? 'Relaxed' : mode === 'hardcore' ? 'Hardcore' : 'Standard'}
+                      {mode === 'relaxed' ? t('settingsDiffRelaxedBtn', translate) : mode === 'hardcore' ? t('settingsDiffHardcoreBtn', translate) : t('settingsDiffStandardBtn', translate)}
                     </button>
                   ))}
                 </div>
                 <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginTop: '6px', lineHeight: 1.3 }}>
-                  {state.difficultyMode === 'relaxed' && "Relaxed: No quiz damage. 50% XP/Gold rewards."}
-                  {state.difficultyMode === 'standard' && "Standard: 15 HP damage on mistakes."}
-                  {state.difficultyMode === 'hardcore' && "Hardcore: 30 HP damage. Fainting resets quest level. 2x rewards!"}
+                  {state.difficultyMode === 'relaxed' && t('settingsDiffRelaxedDesc', translate)}
+                  {state.difficultyMode === 'standard' && t('settingsDiffStandardDesc', translate)}
+                  {state.difficultyMode === 'hardcore' && t('settingsDiffHardcoreDesc', translate)}
                 </span>
               </div>
 
               {/* Voice & Pronunciation */}
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
                 <label className="form-label" style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Volume2 size={15} color="var(--primary)" /> Pronunciación y Voz (Text-to-Speech)
+                  <Volume2 size={15} color="var(--primary)" /> {t('settingsTtsHeader', translate)}
                 </label>
 
                 <div style={{ marginBottom: '8px' }}>
                   <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '3px' }}>
-                    Voz en Español:
+                    {t('settingsTtsVoiceLabel', translate)}
                   </label>
                   <select
                     className="form-input"
@@ -557,7 +579,7 @@ export default function App() {
                     onChange={(e) => setTtsVoice(e.target.value)}
                     style={{ fontSize: '0.78rem', padding: '6px 8px', width: '100%' }}
                   >
-                    <option value="">Auto (Voz natural recomendada de tu sistema)</option>
+                    <option value="">{t('settingsTtsVoiceAuto', translate)}</option>
                     {availableVoices.map((v) => (
                       <option key={v.name} value={v.name}>
                         {formatVoiceLabel(v)}
@@ -568,7 +590,7 @@ export default function App() {
 
                 <div style={{ marginBottom: '8px' }}>
                   <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '3px' }}>
-                    Velocidad:
+                    {t('settingsTtsSpeedLabel', translate)}
                   </label>
                   <div style={{ display: 'flex', gap: '6px' }}>
                     {[0.85, 0.95, 1.0, 1.1].map((r) => (
@@ -596,10 +618,10 @@ export default function App() {
                     />
                     <div>
                       <label htmlFor="useGeminiTts" style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Sparkles size={12} /> Gemini Studio AI Voice (Voz humana)
+                        <Sparkles size={12} /> {t('settingsTtsGeminiLabel', translate)}
                       </label>
                       <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', display: 'block' }}>
-                        Pronunciación ultra-realista generada por IA.
+                        {t('settingsTtsGeminiDesc', translate)}
                       </span>
                     </div>
                   </div>
@@ -611,14 +633,14 @@ export default function App() {
                   onClick={() => speakSpanish("¡Hola! Me llamo Elena. Bienvenidos a Estudiamos 102. Vamos a aprender español juntos.", { state })}
                   style={{ width: '100%', fontSize: '0.75rem', padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                 >
-                  <Volume2 size={14} color="var(--primary)" /> 🔊 Probar Pronunciación
+                  <Volume2 size={14} color="var(--primary)" /> {t('settingsTtsTestBtn', translate)}
                 </button>
               </div>
 
               {/* Gemini API Key */}
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
                 <label className="form-label" style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: '4px', display: 'block' }}>
-                  Gemini API Key (Opcional)
+                  {t('settingsGeminiKeyHeader', translate)}
                 </label>
                 <input
                   type="password"
@@ -629,21 +651,21 @@ export default function App() {
                   style={{ fontSize: '0.8rem', padding: '7px 10px', width: '100%' }}
                 />
                 <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
-                  Requerido para chatear libremente con Elena en el AI Chat.
+                  {t('settingsGeminiKeyDesc', translate)}
                 </span>
               </div>
 
               {/* Feedback Button */}
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
                 <label className="form-label" style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: '6px', display: 'block' }}>
-                  Comentarios y Sugerencias
+                  {t('settingsFeedbackHeader', translate)}
                 </label>
                 <a 
                   href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback" 
                   className="btn btn-secondary" 
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', textDecoration: 'none', fontSize: '0.78rem', padding: '6px 10px' }}
                 >
-                  <Mail size={14} color="var(--primary)" /> Enviar correo a jsorba@mail.pima.edu
+                  <Mail size={14} color="var(--primary)" /> {t('settingsFeedbackBtn', translate)}
                 </a>
               </div>
 
@@ -651,15 +673,15 @@ export default function App() {
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <label className="form-label" style={{ fontWeight: 700, fontSize: '0.82rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Save size={15} color="var(--primary)" /> Guardar y Restaurar (Save & Backup)
+                    <Save size={15} color="var(--primary)" /> {t('settingsSaveHeader', translate)}
                   </label>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                    Lvl {state.level} • {state.gold} G • Etapa {state.questStage}
+                    Lvl {state.level} • {state.gold} G • {translate ? "Stage" : "Etapa"} {state.questStage}
                   </span>
                 </div>
 
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '10px', lineHeight: 1.35 }}>
-                  Exporta tu archivo de guardado para respaldar tu progreso o transferirlo a otro navegador o dispositivo.
+                  {t('settingsSaveDesc', translate)}
                 </span>
 
                 {saveStatus && (
@@ -694,9 +716,9 @@ export default function App() {
                     className="btn btn-primary"
                     onClick={handleExportDownload}
                     style={{ flex: 1, fontSize: '0.75rem', padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-                    title="Descargar archivo .json con tu progreso"
+                    title={translate ? "Download .json file with your progress" : "Descargar archivo .json con tu progreso"}
                   >
-                    <Download size={13} /> Exportar (.json)
+                    <Download size={13} /> {t('settingsSaveExportBtn', translate)}
                   </button>
 
                   <button
@@ -704,10 +726,10 @@ export default function App() {
                     className="btn btn-secondary"
                     onClick={handleExportCopy}
                     style={{ fontSize: '0.75rem', padding: '6px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
-                    title="Copiar código JSON al portapapeles"
+                    title={translate ? "Copy JSON code to clipboard" : "Copiar código JSON al portapapeles"}
                   >
                     {copiedSave ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
-                    <span>{copiedSave ? "¡Copiado!" : "Copiar"}</span>
+                    <span>{copiedSave ? t('settingsSaveCopied', translate) : t('settingsSaveCopyBtn', translate)}</span>
                   </button>
                 </div>
 
@@ -725,9 +747,9 @@ export default function App() {
                     className="btn btn-secondary"
                     onClick={() => fileInputRef.current?.click()}
                     style={{ flex: 1, fontSize: '0.75rem', padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-                    title="Cargar archivo .json desde tu dispositivo"
+                    title={translate ? "Load .json file from your device" : "Cargar archivo .json desde tu dispositivo"}
                   >
-                    <Upload size={13} color="var(--primary)" /> Importar Archivo
+                    <Upload size={13} color="var(--primary)" /> {t('settingsSaveImportFileBtn', translate)}
                   </button>
 
                   <button
@@ -735,10 +757,10 @@ export default function App() {
                     className="btn btn-secondary"
                     onClick={() => setShowPasteImport(!showPasteImport)}
                     style={{ fontSize: '0.75rem', padding: '6px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
-                    title="Pegar código JSON de guardado"
+                    title={translate ? "Paste save JSON code" : "Pegar código JSON de guardado"}
                   >
                     <FileText size={13} />
-                    <span>Pegar</span>
+                    <span>{t('settingsSavePasteBtn', translate)}</span>
                   </button>
                 </div>
 
@@ -746,7 +768,7 @@ export default function App() {
                 {showPasteImport && (
                   <div style={{ marginTop: '10px', padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
                     <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                      Pega aquí el código JSON de tu partida:
+                      {t('settingsSavePastePrompt', translate)}
                     </label>
                     <textarea
                       value={pastedSaveText}
@@ -772,7 +794,7 @@ export default function App() {
                         onClick={() => { setShowPasteImport(false); setPastedSaveText(""); }}
                         style={{ fontSize: '0.72rem', padding: '4px 8px' }}
                       >
-                        Cancelar
+                        {t('settingsSaveCancelBtn', translate)}
                       </button>
                       <button
                         type="button"
@@ -780,7 +802,7 @@ export default function App() {
                         onClick={handlePasteImport}
                         style={{ fontSize: '0.72rem', padding: '4px 10px' }}
                       >
-                        Restaurar
+                        {t('settingsSaveRestoreBtn', translate)}
                       </button>
                     </div>
                   </div>
@@ -790,10 +812,10 @@ export default function App() {
               {/* Danger Zone */}
               <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
                 <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--danger)', display: 'block', marginBottom: '6px' }}>
-                  Zona de Peligro (Danger Zone)
+                  {t('settingsDangerHeader', translate)}
                 </span>
                 <button className="btn btn-danger btn-sm" onClick={handleReset} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.75rem', width: '100%', padding: '6px 10px' }}>
-                  <RefreshCw size={13} /> Reiniciar Todo el Progreso
+                  <RefreshCw size={13} /> {t('settingsResetAllBtn', translate)}
                 </button>
               </div>
             </div>
@@ -808,10 +830,10 @@ export default function App() {
               flexShrink: 0
             }}>
               <button className="btn btn-secondary" onClick={() => setShowSettings(false)} style={{ flex: 1, padding: '8px', fontSize: '0.82rem' }}>
-                Cerrar (Close)
+                {t('settingsFooterClose', translate)}
               </button>
               <button className="btn btn-primary" onClick={handleSaveSettings} style={{ flex: 1, padding: '8px', fontSize: '0.82rem' }}>
-                Guardar (Save)
+                {t('settingsFooterSave', translate)}
               </button>
             </div>
           </div>

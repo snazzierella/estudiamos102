@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import NarfySprite from './NarfySprite';
 import { getMaxHp } from '../hooks/useGameState';
+import { t } from '../utils/translationsHelper';
 
 const RANKS = [
   { level: 1, title: "Estudiante Novato (Novice Learner)", icon: "🎒" },
@@ -26,6 +27,7 @@ const RANKS = [
 ];
 
 export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, playWithNarfy, setView, setStudyQuestTab, onOpenSettings }) {
+  const translate = Boolean(state.translateInstructions);
   const rank = [...RANKS].reverse().find(r => state.level >= r.level) || RANKS[0];
   
   const xpNeeded = state.level * 100;
@@ -50,16 +52,16 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
       <div className="view-container">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem' }}>¡Hola, Aventurero!</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Welcome back. What is your goal today?</p>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem' }}>{t('dashGreeting', translate)}</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('dashSubtitle', translate)}</p>
           </div>
           <button 
             className="btn btn-secondary" 
             onClick={onOpenSettings} 
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            title="Configuración del juego y respaldo de partida"
+            title={translate ? "Game settings & save file backup" : "Configuración del juego y respaldo de partida"}
           >
-            <Settings size={16} /> Configuración
+            <Settings size={16} /> {t('dashSettingsBtn', translate)}
           </button>
         </div>
 
@@ -218,7 +220,7 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                <h3 className="menu-card-title" style={{ margin: 0 }}>Examen Oral: Medio Término (Midterm Practice)</h3>
+                <h3 className="menu-card-title" style={{ margin: 0 }}>{t('dashMidtermCardTitle', translate)}</h3>
                 <span style={{ 
                   background: 'rgba(236, 72, 153, 0.25)', 
                   color: '#f472b6', 
@@ -228,7 +230,7 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
                   borderRadius: '6px',
                   border: '1px solid rgba(236, 72, 153, 0.4)'
                 }}>
-                  {state.oralExamProgress?.completedQuestions?.length || 0}/10 Completadas
+                  {t('dashMidtermCardBadge', translate, state.oralExamProgress?.completedQuestions?.length || 0)}
                 </span>
                 {state.hasMidtermHpDoubler && (
                   <span style={{ 
@@ -240,12 +242,12 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
                     borderRadius: '6px',
                     border: '1px solid rgba(245, 158, 11, 0.4)'
                   }}>
-                    👑 Titán (200 HP)
+                    👑 {translate ? "Titan (200 HP)" : "Titán (200 HP)"}
                   </span>
                 )}
               </div>
               <p className="menu-card-desc">
-                Practica las 10 preguntas del examen oral (PDF) con audio oculto, banco de palabras, traducciones bilingües y el Desafío del Corazón de Titán.
+                {t('dashMidtermCardDesc', translate)}
               </p>
             </div>
           </div>

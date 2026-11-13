@@ -778,6 +778,30 @@ export const INSTRUCTION_TRANSLATIONS = {
     es: (score) => `Obtuviste ${score} de 10 preguntas correctas. Para desbloquear la medalla "Maestro del Examen" y duplicar tu vida a 200 HP con el Corazón de Titán, se requiere una puntuación perfecta de 10/10.`,
     en: (score) => `You scored ${score} out of 10 questions correct. To unlock the "Midterm Master" badge and double your health to 200 HP with the Titan's Heart, a perfect 10/10 is required.`
   },
+  midtermModalGuidedTitle: {
+    es: "¡Práctica Guiada Completada!",
+    en: "Guided Practice Completed!"
+  },
+  midtermModalGuidedScore: {
+    es: (score) => `Progreso: ${score} / 10 Preguntas Practicadas`,
+    en: (score) => `Progress: ${score} / 10 Questions Practiced`
+  },
+  midtermModalGuidedDesc: {
+    es: "¡Excelente trabajo! Has explorado y dominado las 10 preguntas oficiales del examen oral de medio término con estructuras modelo y desglose sintáctico.",
+    en: "Great job! You have explored and practiced all 10 official midterm oral exam questions with model sentences and syntax breakdowns."
+  },
+  midtermModalGuidedNextOpen: {
+    es: "🧩 Siguiente Paso: Modo Libre. ¡Construye tus propias oraciones libres con los cajones temáticos y valida al menos 9 de 10 para ganar la medalla \"Listo para el Examen\" (+50 XP, +25 Oro)!",
+    en: "🧩 Next Step: Free Mode. Construct your own custom sentences using thematic drawers and validate at least 9 of 10 to win the \"Ready for the Midterm\" Badge (+50 XP, +25 Gold)!"
+  },
+  midtermModalGuidedGoOpen: {
+    es: "🧩 Probar Modo Libre (9/10 Medalla)",
+    en: "🧩 Try Free Mode (9/10 Badge)"
+  },
+  midtermModalGuidedGoChallenge: {
+    es: "⚔️ Ir al Modo Desafío (200 HP)",
+    en: "⚔️ Go to Challenge Mode (200 HP)"
+  },
 
   // Settings Menu
   settingsTitle: {

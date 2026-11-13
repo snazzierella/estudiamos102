@@ -57,6 +57,7 @@ export default function OralExamPractice({
   const [showHint, setShowHint] = useState(false);
   const [guidedAnswered, setGuidedAnswered] = useState(false);
   const [guidedIsCorrect, setGuidedIsCorrect] = useState(false);
+  const [showGuidedModal, setShowGuidedModal] = useState(false);
 
   // Open Mode (Modo Libre) state
   const [openCategory, setOpenCategory] = useState('verbos');
@@ -482,6 +483,8 @@ export default function OralExamPractice({
   const handleNext = () => {
     if (currentIdx < MIDTERM_QUESTIONS.length - 1) {
       setCurrentIdx(currentIdx + 1);
+    } else if (mode === 'guided') {
+      setShowGuidedModal(true);
     } else if (mode === 'open') {
       const score = Object.values(openAnswers).filter(a => a.isCorrect).length;
       if (awardMidtermOpenRewards) {
@@ -1713,6 +1716,113 @@ export default function OralExamPractice({
           })}
         </div>
       </div>
+
+      {/* ============================================================== */}
+      {/* GUIDED MODE COMPLETION MODAL                                   */}
+      {/* ============================================================== */}
+      {showGuidedModal && (
+        <div className="modal-overlay" onClick={() => setShowGuidedModal(false)}>
+          <div 
+            className="glass-panel modal-content" 
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+              maxWidth: '480px', 
+              textAlign: 'center', 
+              padding: '28px 24px', 
+              borderRadius: '20px',
+              animation: 'pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+            }}
+          >
+            <div style={{ fontSize: '3.5rem', marginBottom: '8px' }}>
+              🎓
+            </div>
+
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: 'var(--gold)', margin: '0 0 8px 0' }}>
+              {t('midtermModalGuidedTitle', translate)}
+            </h2>
+
+            <p style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 600, margin: '0 0 12px 0' }}>
+              {t('midtermModalGuidedScore', translate, completedCount || 10)}
+            </p>
+
+            <div style={{ 
+              padding: '14px', 
+              borderRadius: '12px', 
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', 
+              border: '1px solid rgba(99, 102, 241, 0.35)',
+              marginBottom: '16px',
+              textAlign: 'left'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <span style={{ fontSize: '1.2rem' }}>✨</span>
+                <strong style={{ color: '#a5b4fc', fontSize: '0.92rem' }}>
+                  {translate ? "Model Foundations Mastered!" : "¡Bases del Examen Dominadas!"}
+                </strong>
+              </div>
+              <p style={{ margin: '0', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                {t('midtermModalGuidedDesc', translate)}
+              </p>
+            </div>
+
+            <div style={{ 
+              padding: '12px 14px', 
+              borderRadius: '10px', 
+              background: 'rgba(16, 185, 129, 0.08)', 
+              border: '1px solid rgba(16, 185, 129, 0.25)', 
+              marginBottom: '18px',
+              fontSize: '0.78rem',
+              color: '#6ee7b7',
+              textAlign: 'left',
+              lineHeight: 1.45
+            }}>
+              {t('midtermModalGuidedNextOpen', translate)}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setShowGuidedModal(false);
+                  setMode('open');
+                  setCurrentIdx(0);
+                }}
+                style={{ width: '100%', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontWeight: 600 }}
+              >
+                <span>{t('midtermModalGuidedGoOpen', translate)}</span>
+              </button>
+
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setShowGuidedModal(false);
+                  setMode('challenge');
+                  setCurrentIdx(0);
+                }}
+                style={{ width: '100%', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.82rem', borderColor: 'rgba(245, 158, 11, 0.4)', color: '#fbbf24' }}
+              >
+                <span>{t('midtermModalGuidedGoChallenge', translate)}</span>
+              </button>
+
+              <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowGuidedModal(false)}
+                  style={{ flex: 1, padding: '7px', fontSize: '0.75rem' }}
+                >
+                  {translate ? "Review Questions" : "Revisar Preguntas"}
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setView('dashboard')}
+                  style={{ flex: 1, padding: '7px', fontSize: '0.75rem' }}
+                >
+                  {t('midtermReturnDashboard', translate)}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ============================================================== */}
       {/* OPEN MODE CELEBRATION MODAL (9/10 "Listo para el Examen")       */}

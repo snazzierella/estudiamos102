@@ -8,7 +8,8 @@
 export const MIDTERM_TITLE = {
   spanish: "¿Cómo fue la última vez que fuiste de compras?",
   english: "How was the last time you went shopping?",
-  context: "Tema del Examen Oral de Medio Término: Una visita de compras / al mercado en tiempo pretérito."
+  context: "Tema del Examen Oral de Medio Término: Una visita de compras / al mercado en tiempo pretérito.",
+  contextEn: "Midterm Oral Exam Theme: A shopping trip / market visit in the preterite tense."
 };
 
 export const MIDTERM_QUESTIONS = [
@@ -18,6 +19,7 @@ export const MIDTERM_QUESTIONS = [
     english: "Who did you go with?",
     verbTested: "ir (fuiste -> fui)",
     grammarFocus: "Pretérito irregular del verbo 'ir'. Responde en primera persona singular: 'Fui con...'",
+    grammarFocusEn: "Irregular preterite of 'ir'. Respond in first-person singular: 'Fui con...'",
     guidedPaths: [
       {
         id: "1a",
@@ -63,6 +65,7 @@ export const MIDTERM_QUESTIONS = [
     english: "Where did you go?",
     verbTested: "ir (fuiste -> fui a / al)",
     grammarFocus: "Pretérito de 'ir' con preposición de destino 'a'. Recuerda la contracción obligatoria: a + el = al.",
+    grammarFocusEn: "Preterite of 'ir' with destination preposition 'a'. Remember mandatory contraction: a + el = al.",
     guidedPaths: [
       {
         id: "2a",
@@ -108,6 +111,7 @@ export const MIDTERM_QUESTIONS = [
     english: "What did you buy during your visit?",
     verbTested: "comprar (compraste -> compré)",
     grammarFocus: "Pretérito regular de -ar: terminación '-é' con tilde (compré).",
+    grammarFocusEn: "Regular preterite of -ar verbs: accented ending '-é' (compré).",
     guidedPaths: [
       {
         id: "3a",
@@ -153,6 +157,7 @@ export const MIDTERM_QUESTIONS = [
     english: "Did you try new foods? What did you eat?",
     verbTested: "probar & comer (probaste -> probé; comiste -> comí)",
     grammarFocus: "Pregunta compuesta: requiere responder sobre la experiencia (probar) y el alimento específico (comer). Ambos verbos en primera persona pretérito.",
+    grammarFocusEn: "Compound question: requires answering about the experience (probar) and the specific food (comer). Both verbs in first-person preterite.",
     guidedPaths: [
       {
         id: "4a",
@@ -198,6 +203,7 @@ export const MIDTERM_QUESTIONS = [
     english: "Did you try on clothes?",
     verbTested: "medirse (te mediste -> me medí)",
     grammarFocus: "Verbo reflexivo en pretérito con cambio de raíz e->i en tercera persona (medirse). Para 'yo': pronombre 'me' + 'medí'.",
+    grammarFocusEn: "Reflexive verb in preterite with e->i stem change in 3rd person (medirse). For 'yo': pronoun 'me' + 'medí'.",
     guidedPaths: [
       {
         id: "5a",
@@ -243,6 +249,7 @@ export const MIDTERM_QUESTIONS = [
     english: "Did you pick out handicrafts as gifts?",
     verbTested: "escoger (escogiste -> escogí)",
     grammarFocus: "Pretérito regular de -er: 'escogí'. Preposición 'para' expresa propósito / destinatario ('para regalar', 'para mi madre').",
+    grammarFocusEn: "Regular preterite of -er: 'escogí'. Preposition 'para' expresses purpose / recipient ('para regalar', 'para mi madre').",
     guidedPaths: [
       {
         id: "6a",
@@ -288,6 +295,7 @@ export const MIDTERM_QUESTIONS = [
     english: "Did you pay in cash or with a credit card? Did you receive discounts?",
     verbTested: "pagar (pagaste -> pagué [g->gu]) & recibir (recibiste -> recibí)",
     grammarFocus: "Cambio ortográfico en pretérito de verbos -gar: g -> gu ante 'e' (yo pagué). Pregunta doble sobre método de pago y descuentos.",
+    grammarFocusEn: "Spelling change in preterite of -gar verbs: g -> gu before 'e' (yo pagué). Dual question on payment method and discounts.",
     guidedPaths: [
       {
         id: "7a",
@@ -333,6 +341,7 @@ export const MIDTERM_QUESTIONS = [
     english: "What other things did you find?",
     verbTested: "encontrar (encontraste -> encontré) / ver (vi)",
     grammarFocus: "Pretérito regular de 'encontrar' (-ar): 'encontré'. Describe artículos adicionales o sorpresas en el mercado.",
+    grammarFocusEn: "Regular preterite of 'encontrar' (-ar): 'encontré'. Describe additional items or surprises at the market.",
     guidedPaths: [
       {
         id: "8a",
@@ -378,6 +387,7 @@ export const MIDTERM_QUESTIONS = [
     english: "How did you feel at the market?",
     verbTested: "sentirse (te sentiste -> me sentí)",
     grammarFocus: "Verbo reflexivo de cambio de raíz e->i en pretérito (solo 3ra persona: se sintió; para yo: me sentí con tilde). Usa adjetivos de emoción acordes con el género del hablante.",
+    grammarFocusEn: "Reflexive verb with e->i stem change in preterite (3rd person: se sintió; for yo: me sentí with accent). Use emotion adjectives matching speaker gender.",
     guidedPaths: [
       {
         id: "9a",
@@ -423,6 +433,7 @@ export const MIDTERM_QUESTIONS = [
     english: "What did you think of your visit to the market? Why?",
     verbTested: "pensar (pensaste -> pensé)",
     grammarFocus: "Pregunta reflexiva/evaluativa: 'Pensé que fue...' seguida de adjetivo valorativo (maravillosa, excelente, divertida) y la justificación causal con 'porque...'.",
+    grammarFocusEn: "Evaluative question: 'Pensé que fue...' followed by an assessment adjective (maravillosa, excelente, divertida) and causal justification with 'porque...'.",
     guidedPaths: [
       {
         id: "10a",
@@ -605,11 +616,13 @@ export function translateCustomSentence(tokens) {
 // 2. Presence of logically necessary semantic elements
 // 3. Minimum sentence length and basic grammar agreement
 // --------------------------------------------------------------------------
-export function validateOralExamAnswer(questionId, userInput) {
+export function validateOralExamAnswer(questionId, userInput, translate = false) {
   if (!userInput || typeof userInput !== 'string') {
     return {
       isValid: false,
-      feedback: "Por favor escribe o dicta una respuesta en español.",
+      feedback: translate 
+        ? "Please type or speak a response in Spanish."
+        : "Por favor escribe o dicta una respuesta en español.",
       userTranslation: ""
     };
   }
@@ -622,7 +635,9 @@ export function validateOralExamAnswer(questionId, userInput) {
   if (words.length < 3) {
     return {
       isValid: false,
-      feedback: "Tu respuesta es muy corta. En el examen oral se requiere una oración completa en pretérito (al menos 3 o 4 palabras).",
+      feedback: translate
+        ? "Your answer is too short. The oral exam requires a complete sentence in preterite (at least 3 or 4 words)."
+        : "Tu respuesta es muy corta. En el examen oral se requiere una oración completa en pretérito (al menos 3 o 4 palabras).",
       userTranslation: ""
     };
   }
@@ -635,20 +650,26 @@ export function validateOralExamAnswer(questionId, userInput) {
       if (!hasIrPreterite) {
         return {
           isValid: false,
-          feedback: "Recuerda usar el pretérito de 'ir': 'Fui con...' o 'Fui solo/sola'.",
+          feedback: translate
+            ? "Remember to use the preterite of 'ir': 'Fui con...' or 'Fui solo/sola'."
+            : "Recuerda usar el pretérito de 'ir': 'Fui con...' o 'Fui solo/sola'.",
           userTranslation: ""
         };
       }
       if (!hasCompanion) {
         return {
           isValid: false,
-          feedback: "Menciona con quién fuiste usando 'con [amigo/mamá/familia]' o indica que fuiste 'solo/sola'.",
+          feedback: translate
+            ? "Mention who you went with using 'con [amigo/mamá/familia]' or indicate that you went 'solo/sola'."
+            : "Menciona con quién fuiste usando 'con [amigo/mamá/familia]' o indica que fuiste 'solo/sola'.",
           userTranslation: ""
         };
       }
       return {
         isValid: true,
-        feedback: "¡Excelente! Usaste el pretérito 'fui' y explicaste con quién fuiste claramente.",
+        feedback: translate
+          ? "Excellent! You used the preterite 'fui' and clearly explained who you went with."
+          : "¡Excelente! Usaste el pretérito 'fui' y explicaste con quién fuiste claramente.",
         userTranslation: generateGlossaryTranslation(clean)
       };
     }
@@ -659,20 +680,26 @@ export function validateOralExamAnswer(questionId, userInput) {
       if (!hasDest) {
         return {
           isValid: false,
-          feedback: "Usa el pretérito de 'ir' con preposición de lugar: 'Fui a la...' o 'Fui al...'.",
+          feedback: translate
+            ? "Use the preterite of 'ir' with destination preposition: 'Fui a la...' or 'Fui al...'."
+            : "Usa el pretérito de 'ir' con preposición de lugar: 'Fui a la...' o 'Fui al...'.",
           userTranslation: ""
         };
       }
       if (!hasPlace) {
         return {
           isValid: false,
-          feedback: "Especifica a qué lugar o tienda fuiste (ej: mercado, centro comercial, tienda de ropa).",
+          feedback: translate
+            ? "Specify what place or shop you went to (e.g.: mercado, centro comercial, tienda de ropa)."
+            : "Especifica a qué lugar o tienda fuiste (ej: mercado, centro comercial, tienda de ropa).",
           userTranslation: ""
         };
       }
       return {
         isValid: true,
-        feedback: "¡Muy bien! Especificaste tu destino con la preposición correcta.",
+        feedback: translate
+          ? "Very good! You specified your destination with the correct preposition."
+          : "¡Muy bien! Especificaste tu destino con la preposición correcta.",
         userTranslation: generateGlossaryTranslation(clean)
       };
     }
@@ -683,20 +710,26 @@ export function validateOralExamAnswer(questionId, userInput) {
       if (!hasComprar) {
         return {
           isValid: false,
-          feedback: "Usa el verbo 'comprar' en pretérito: 'Compré...' (con tilde en la e).",
+          feedback: translate
+            ? "Use the verb 'comprar' in preterite: 'Compré...' (with accent on the e)."
+            : "Usa el verbo 'comprar' en pretérito: 'Compré...' (con tilde en la e).",
           userTranslation: ""
         };
       }
       if (!hasItem && !clean.includes("nada") && !clean.includes("mucho")) {
         return {
           isValid: false,
-          feedback: "Menciona qué artículo compraste (ropa, zapatos, una camisa, recuerdos) o si no compraste nada.",
+          feedback: translate
+            ? "Mention what item you bought (ropa, zapatos, una camisa, recuerdos) or if you bought nothing ('no compré nada')."
+            : "Menciona qué artículo compraste (ropa, zapatos, una camisa, recuerdos) o si no compraste nada.",
           userTranslation: ""
         };
       }
       return {
         isValid: true,
-        feedback: "¡Perfecto! Usaste 'compré' y detallaste tus compras con vocabulario apropiado.",
+        feedback: translate
+          ? "Perfect! You used 'compré' and detailed your purchases with appropriate vocabulary."
+          : "¡Perfecto! Usaste 'compré' y detallaste tus compras con vocabulario apropiado.",
         userTranslation: generateGlossaryTranslation(clean)
       };
     }
@@ -707,13 +740,17 @@ export function validateOralExamAnswer(questionId, userInput) {
       if (!hasProbar && !hasComer) {
         return {
           isValid: false,
-          feedback: "Esta es una pregunta doble: responde con 'probé...' (o 'no probé...') y especifica 'comí [alimento]'.",
+          feedback: translate
+            ? "This is a dual question: respond with 'probé...' (or 'no probé...') and specify 'comí [food]'."
+            : "Esta es una pregunta doble: responde con 'probé...' (o 'no probé...') y especifica 'comí [alimento]'.",
           userTranslation: ""
         };
       }
       return {
         isValid: true,
-        feedback: "¡Fantástico! Respondiste sobre la experiencia y la comida en pretérito.",
+        feedback: translate
+          ? "Fantastic! You responded about both the experience and the food in preterite."
+          : "¡Fantástico! Respondiste sobre la experiencia y la comida en pretérito.",
         userTranslation: generateGlossaryTranslation(clean)
       };
     }
@@ -723,13 +760,17 @@ export function validateOralExamAnswer(questionId, userInput) {
       if (!hasMedir) {
         return {
           isValid: false,
-          feedback: "Recuerda que 'medirse' es reflexivo: usa 'me medí...' o 'no me medí ropa'.",
+          feedback: translate
+            ? "Remember that 'medirse' is reflexive: use 'me medí...' or 'no me medí ropa'."
+            : "Recuerda que 'medirse' es reflexivo: usa 'me medí...' o 'no me medí ropa'.",
           userTranslation: ""
         };
       }
       return {
         isValid: true,
-        feedback: "¡Excelente dominio del reflexivo pretérito 'me medí'!",
+        feedback: translate
+          ? "Excellent mastery of the reflexive preterite 'me medí'!"
+          : "¡Excelente dominio del reflexivo pretérito 'me medí'!",
         userTranslation: generateGlossaryTranslation(clean)
       };
     }
@@ -739,13 +780,17 @@ export function validateOralExamAnswer(questionId, userInput) {
       if (!hasEscoger) {
         return {
           isValid: false,
-          feedback: "Usa el pretérito de 'escoger': 'Sí, escogí...' o 'No escogí artesanías'.",
+          feedback: translate
+            ? "Use the preterite of 'escoger': 'Sí, escogí...' or 'No escogí artesanías'."
+            : "Usa el pretérito de 'escoger': 'Sí, escogí...' o 'No escogí artesanías'.",
           userTranslation: ""
         };
       }
       return {
         isValid: true,
-        feedback: "¡Muy bien! Usaste 'escogí' con los complementos adecuados.",
+        feedback: translate
+          ? "Very good! You used 'escogí' with suitable direct/indirect objects."
+          : "¡Muy bien! Usaste 'escogí' con los complementos adecuados.",
         userTranslation: generateGlossaryTranslation(clean)
       };
     }
@@ -756,20 +801,26 @@ export function validateOralExamAnswer(questionId, userInput) {
       if (!hasPagar) {
         return {
           isValid: false,
-          feedback: "Recuerda el cambio ortográfico de 'pagar' en pretérito: 'Pagué' (con gu).",
+          feedback: translate
+            ? "Remember the spelling change of 'pagar' in preterite: 'Pagué' (with gu)."
+            : "Recuerda el cambio ortográfico de 'pagar' en pretérito: 'Pagué' (con gu).",
           userTranslation: ""
         };
       }
       if (!hasPaymentMethod) {
         return {
           isValid: false,
-          feedback: "Indica tu método de pago: 'en efectivo' o 'con tarjeta de crédito'.",
+          feedback: translate
+            ? "Indicate your payment method: 'en efectivo' or 'con tarjeta de crédito'."
+            : "Indica tu método de pago: 'en efectivo' o 'con tarjeta de crédito'.",
           userTranslation: ""
         };
       }
       return {
         isValid: true,
-        feedback: "¡Perfecto! Escribiste 'pagué' con su ortografía correcta y especificaste el método de pago.",
+        feedback: translate
+          ? "Perfect! You wrote 'pagué' with correct orthography and specified the payment method."
+          : "¡Perfecto! Escribiste 'pagué' con su ortografía correcta y especificaste el método de pago.",
         userTranslation: generateGlossaryTranslation(clean)
       };
     }
@@ -779,13 +830,17 @@ export function validateOralExamAnswer(questionId, userInput) {
       if (!hasEncontrar) {
         return {
           isValid: false,
-          feedback: "Usa el verbo 'encontrar' en pretérito: 'Encontré...' o 'También vi...'.",
+          feedback: translate
+            ? "Use the verb 'encontrar' in preterite: 'Encontré...' or 'También vi...'."
+            : "Usa el verbo 'encontrar' en pretérito: 'Encontré...' o 'También vi...'.",
           userTranslation: ""
         };
       }
       return {
         isValid: true,
-        feedback: "¡Excelente! Describiste otros artículos hallados en el mercado en pretérito.",
+        feedback: translate
+          ? "Excellent! You described other items found at the market in preterite."
+          : "¡Excelente! Describiste otros artículos hallados en el mercado en pretérito.",
         userTranslation: generateGlossaryTranslation(clean)
       };
     }
@@ -796,20 +851,26 @@ export function validateOralExamAnswer(questionId, userInput) {
       if (!hasSentir) {
         return {
           isValid: false,
-          feedback: "Usa el verbo reflexivo 'sentirse' en pretérito: 'Me sentí...'.",
+          feedback: translate
+            ? "Use the reflexive verb 'sentirse' in preterite: 'Me sentí...'."
+            : "Usa el verbo reflexivo 'sentirse' en pretérito: 'Me sentí...'.",
           userTranslation: ""
         };
       }
       if (!hasEmotion) {
         return {
           isValid: false,
-          feedback: "Agrega cómo te sentiste (ej: muy contento/a, emocionado/a, un poco cansado/a, feliz).",
+          feedback: translate
+            ? "Add how you felt (e.g.: muy contento/a, emocionado/a, un poco cansado/a, feliz)."
+            : "Agrega cómo te sentiste (ej: muy contento/a, emocionado/a, un poco cansado/a, feliz).",
           userTranslation: ""
         };
       }
       return {
         isValid: true,
-        feedback: "¡Gran respuesta! Usaste 'me sentí' y expresaste tu estado de ánimo con precisión.",
+        feedback: translate
+          ? "Great response! You used 'me sentí' and expressed your mood with precision."
+          : "¡Gran respuesta! Usaste 'me sentí' y expresaste tu estado de ánimo con precisión.",
         userTranslation: generateGlossaryTranslation(clean)
       };
     }
@@ -820,20 +881,26 @@ export function validateOralExamAnswer(questionId, userInput) {
       if (!hasPensar) {
         return {
           isValid: false,
-          feedback: "Comienza con tu opinión en pretérito: 'Pensé que fue [maravillosa / divertida / fascinante]...'.",
+          feedback: translate
+            ? "Begin with your opinion in preterite: 'Pensé que fue [maravillosa / divertida / fascinante]...'."
+            : "Comienza con tu opinión en pretérito: 'Pensé que fue [maravillosa / divertida / fascinante]...'.",
           userTranslation: ""
         };
       }
       if (!hasCausa) {
         return {
           isValid: false,
-          feedback: "No olvides explicar la razón usando 'porque...' (¿por qué pensaste eso?).",
+          feedback: translate
+            ? "Don't forget to explain the reason using 'porque...' (why did you think that?)."
+            : "No olvides explicar la razón usando 'porque...' (¿por qué pensaste eso?).",
           userTranslation: ""
         };
       }
       return {
         isValid: true,
-        feedback: "¡Maravilloso! Expresaste tu valoración crítica con 'pensé que fue...' y la justificaste con 'porque'.",
+        feedback: translate
+          ? "Wonderful! You expressed your critical evaluation with 'pensé que fue...' and justified it with 'porque'."
+          : "¡Maravilloso! Expresaste tu valoración crítica con 'pensé que fue...' y la justificaste con 'porque'.",
         userTranslation: generateGlossaryTranslation(clean)
       };
     }
@@ -841,7 +908,7 @@ export function validateOralExamAnswer(questionId, userInput) {
     default:
       return {
         isValid: true,
-        feedback: "¡Respuesta registrada!",
+        feedback: translate ? "Response recorded!" : "¡Respuesta registrada!",
         userTranslation: generateGlossaryTranslation(clean)
       };
   }

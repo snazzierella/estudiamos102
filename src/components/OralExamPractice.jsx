@@ -12,7 +12,8 @@ import {
   Mic, 
   MicOff, 
   Trophy, 
-  HelpCircle 
+  HelpCircle,
+  Globe 
 } from 'lucide-react';
 import { 
   MIDTERM_TITLE, 
@@ -21,15 +22,19 @@ import {
   translateCustomSentence, 
   validateOralExamAnswer 
 } from '../data/midtermOralExamData';
-import { speakSpanish } from '../utils/speechHelper';
+import { speakSpanish, stopSpanishSpeech } from '../utils/speechHelper';
+import { t } from '../utils/translationsHelper';
 
 export default function OralExamPractice({ 
   state, 
   setView, 
   recordOralQuestionCompleted, 
   awardMidtermOpenRewards,
-  awardMidtermChallengeRewards 
+  awardMidtermChallengeRewards,
+  toggleTranslateInstructions 
 }) {
+  const translate = Boolean(state?.translateInstructions);
+
   // Current question index (0 to 9)
   const [currentIdx, setCurrentIdx] = useState(0);
   const currentQuestion = MIDTERM_QUESTIONS[currentIdx];
@@ -40,6 +45,11 @@ export default function OralExamPractice({
   // Audio & Listening state
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isQuestionRevealed, setIsQuestionRevealed] = useState(false);
+  const [isQuestionTranslationRevealed, setIsQuestionTranslationRevealed] = useState(false);
+  const [isTargetMeaningRevealed, setIsTargetMeaningRevealed] = useState(false);
+  const [audioSpeed, setAudioSpeed] = useState(1.0); // 1.0 (Normal) or 0.75 (Lento)
+  const isFirstMountRef = useRef(true);
+  const audioTimeoutRef = useRef(null);
 
   // Guided Mode state
   const [selectedPathId, setSelectedPathId] = useState(currentQuestion.guidedPaths[0].id);
@@ -73,6 +83,14 @@ export default function OralExamPractice({
   const [isTestingPronunciation, setIsTestingPronunciation] = useState(false);
   const recognitionRef = useRef(null);
 
+  // Clean up any timers or audio on unmount
+  useEffect(() => {
+    return () => {
+      stopSpanishSpeech();
+      if (audioTimeoutRef.current) clearTimeout(audioTimeoutRef.current);
+    };
+  }, []);
+
   // Setup Speech Recognition on mount
   useEffect(() => {
     const SpeechRecognition = typeof window !== 'undefined' && 
@@ -82,19 +100,27 @@ export default function OralExamPractice({
     }
   }, []);
 
-  // When question or path changes in Guided Mode, initialize tokens
+  // Current guided path
   const currentPath = currentQuestion.guidedPaths.find(p => p.id === selectedPathId) || currentQuestion.guidedPaths[0];
 
+  // Question navigation effect
   useEffect(() => {
     // Reset revealed state on question change
     setIsQuestionRevealed(false);
+    setIsQuestionTranslationRevealed(false);
+    setIsTargetMeaningRevealed(false);
     setGuidedAnswered(false);
     setGuidedIsCorrect(false);
     setShowHint(false);
     setPronunciationScore(null);
+    setIsPlayingAudio(false);
+    stopSpanishSpeech();
+    if (audioTimeoutRef.current) clearTimeout(audioTimeoutRef.current);
 
-    // Initialize guided tokens
-    initGuidedTokens(currentPath);
+    // Reset guided tokens to default path
+    const defaultPath = currentQuestion.guidedPaths[0];
+    setSelectedPathId(defaultPath.id);
+    initGuidedTokens(defaultPath);
 
     // Open mode state for current question
     const existingOpen = openAnswers[currentIdx];
@@ -119,9 +145,13 @@ export default function OralExamPractice({
       setChallengeFeedback(null);
     }
 
-    // Auto-play audio of the question when arriving
-    playQuestionAudio(1.0);
-  }, [currentIdx, selectedPathId]);
+    // Auto-play on question change if the user has navigated (not on initial cold mount)
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+    } else {
+      playQuestionAudio(audioSpeed);
+    }
+  }, [currentIdx]);
 
   // Handle path switch in guided mode
   const handleSelectPath = (path) => {
@@ -152,20 +182,38 @@ export default function OralExamPractice({
   };
 
   // Audio Playback
-  const playQuestionAudio = (rate = 1.0) => {
+  const playQuestionAudio = (rate) => {
+    const targetRate = typeof rate === 'number' ? rate : audioSpeed;
+    if (audioTimeoutRef.current) clearTimeout(audioTimeoutRef.current);
+
+    stopSpanishSpeech();
     setIsPlayingAudio(true);
+
     speakSpanish(currentQuestion.question, {
       state,
-      rate,
+      rate: targetRate,
       onStart: () => setIsPlayingAudio(true),
       onEnd: () => setIsPlayingAudio(false)
     });
+
+    // Safety fallback timeout to prevent stuck playing states
+    const safetyMs = Math.max(4000, Math.round((currentQuestion.question.length * 140) / targetRate));
+    audioTimeoutRef.current = setTimeout(() => {
+      setIsPlayingAudio(false);
+    }, safetyMs);
   };
 
-  const playSentenceAudio = (text, rate = 0.95) => {
+  const handleSetSpeedAndPlay = (speed) => {
+    setAudioSpeed(speed);
+    playQuestionAudio(speed);
+  };
+
+  const playSentenceAudio = (text, rate) => {
+    const targetRate = typeof rate === 'number' ? rate : audioSpeed;
+    stopSpanishSpeech();
     speakSpanish(text, {
       state,
-      rate
+      rate: targetRate
     });
   };
 
@@ -224,7 +272,7 @@ export default function OralExamPractice({
   const handleCheckOpen = () => {
     if (openPlacedTokens.length === 0) return;
     const assembledText = openPlacedTokens.map(t => t.text).join(" ");
-    const validation = validateOralExamAnswer(currentQuestion.id, assembledText);
+    const validation = validateOralExamAnswer(currentQuestion.id, assembledText, translate);
 
     setOpenAnswered(true);
     setOpenFeedback(validation);
@@ -317,7 +365,7 @@ export default function OralExamPractice({
   const handleCheckChallenge = () => {
     if (!challengeInput.trim()) return;
 
-    const validation = validateOralExamAnswer(currentQuestion.id, challengeInput);
+    const validation = validateOralExamAnswer(currentQuestion.id, challengeInput, translate);
     setChallengeAnswered(true);
     setChallengeFeedback({
       isCorrect: validation.isValid,
@@ -469,12 +517,25 @@ export default function OralExamPractice({
           onClick={() => setView('dashboard')}
           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
         >
-          <ArrowLeft size={15} /> Volver al Dashboard
+          <ArrowLeft size={15} /> {t('midtermReturnDashboard', translate)}
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {toggleTranslateInstructions && (
+            <button
+              type="button"
+              className={`btn ${translate ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+              onClick={toggleTranslateInstructions}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', padding: '4px 10px', borderRadius: '16px' }}
+              title={translate ? "Switch instructions to Spanish" : "Traducir instrucciones al inglés"}
+            >
+              <Globe size={13} />
+              <span>{translate ? "🌐 English" : "🌐 Español"}</span>
+            </button>
+          )}
+
           <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            Progreso general: <strong style={{ color: 'var(--primary)' }}>{completedCount} / 10</strong>
+            {t('midtermOverallProgress', translate, completedCount)}
           </span>
           {state.hasMidtermHpDoubler && (
             <span style={{ 
@@ -489,7 +550,7 @@ export default function OralExamPractice({
               gap: '4px',
               border: '1px solid rgba(245, 158, 11, 0.3)'
             }}>
-              👑 Corazón de Titán (200 HP)
+              {t('midtermTitanHeartBadge', translate)}
             </span>
           )}
         </div>
@@ -507,7 +568,7 @@ export default function OralExamPractice({
           <span style={{ fontSize: '1.8rem' }}>🎙️</span>
           <div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', margin: 0, color: 'var(--text-primary)' }}>
-              Simulador del Examen Oral: Medio Término
+              {t('midtermTitle', translate)}
             </h2>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               {MIDTERM_TITLE.spanish} • <em>"{MIDTERM_TITLE.english}"</em>
@@ -515,7 +576,7 @@ export default function OralExamPractice({
           </div>
         </div>
         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '8px 0 0 0', lineHeight: 1.4 }}>
-          {MIDTERM_TITLE.context} Basado en el documento oficial del examen oral de español 102.
+          {translate && MIDTERM_TITLE.contextEn ? MIDTERM_TITLE.contextEn : MIDTERM_TITLE.context} {t('midtermPdfBasis', translate)}
         </p>
       </div>
 
@@ -528,8 +589,8 @@ export default function OralExamPractice({
         >
           <span>🎓</span>
           <div>
-            <strong>Modo Guiado</strong>
-            <span style={{ display: 'block', fontSize: '0.68rem', opacity: 0.8 }}>Opciones modulares + sintaxis</span>
+            <strong>{t('midtermModeGuided', translate)}</strong>
+            <span style={{ display: 'block', fontSize: '0.68rem', opacity: 0.8 }}>{t('midtermModeGuidedSub', translate)}</span>
           </div>
         </button>
 
@@ -540,8 +601,8 @@ export default function OralExamPractice({
         >
           <span>🧩</span>
           <div>
-            <strong>Modo Libre</strong>
-            <span style={{ display: 'block', fontSize: '0.68rem', opacity: 0.8 }}>9/10: Medalla "Listo para el Examen"</span>
+            <strong>{t('midtermModeOpen', translate)}</strong>
+            <span style={{ display: 'block', fontSize: '0.68rem', opacity: 0.8 }}>{t('midtermModeOpenSub', translate)}</span>
           </div>
         </button>
 
@@ -563,8 +624,8 @@ export default function OralExamPractice({
         >
           <span>⚔️</span>
           <div>
-            <strong style={{ color: mode === 'challenge' ? '#fff' : '#fbbf24' }}>Modo Desafío</strong>
-            <span style={{ display: 'block', fontSize: '0.68rem', opacity: 0.8 }}>10/10: Medalla Maestro + 200 HP</span>
+            <strong style={{ color: mode === 'challenge' ? '#fff' : '#fbbf24' }}>{t('midtermModeChallenge', translate)}</strong>
+            <span style={{ display: 'block', fontSize: '0.68rem', opacity: 0.8 }}>{t('midtermModeChallengeSub', translate)}</span>
           </div>
         </button>
       </div>
@@ -587,13 +648,13 @@ export default function OralExamPractice({
             fontSize: '0.78rem', 
             fontWeight: 700 
           }}>
-            Pregunta {currentIdx + 1} de {MIDTERM_QUESTIONS.length}
+            {t('midtermQuestionCounter', translate, currentIdx + 1, MIDTERM_QUESTIONS.length)}
           </span>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {state.oralExamProgress?.completedQuestions?.includes(currentQuestion.id) && (
               <span style={{ color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Check size={14} /> Completada
+                <Check size={14} /> {t('midtermCompletedCheck', translate)}
               </span>
             )}
           </div>
@@ -612,22 +673,68 @@ export default function OralExamPractice({
           flexWrap: 'wrap',
           gap: '10px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <button
               className={`btn ${isPlayingAudio ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => playQuestionAudio(1.0)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}
+              onClick={() => playQuestionAudio(audioSpeed)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600 }}
             >
-              <Volume2 size={16} /> 🔊 Escuchar Pregunta
+              <Volume2 size={16} />
+              <span>{isPlayingAudio ? (translate ? "Playing..." : "Reproduciendo...") : t('midtermListenAudio', translate)}</span>
             </button>
-            <button
-              className="btn btn-secondary"
-              onClick={() => playQuestionAudio(0.8)}
-              style={{ fontSize: '0.75rem', padding: '6px 10px' }}
-              title="Escuchar a velocidad lenta (0.8x)"
-            >
-              🐢 0.8x Lento
-            </button>
+
+            {/* Interactive Speed Toggle Segment */}
+            <div style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              background: 'rgba(0, 0, 0, 0.3)', 
+              borderRadius: '24px', 
+              padding: '3px',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              gap: '2px'
+            }}>
+              <button
+                type="button"
+                onClick={() => handleSetSpeedAndPlay(1.0)}
+                className="btn btn-sm"
+                style={{ 
+                  borderRadius: '20px', 
+                  fontSize: '0.75rem', 
+                  padding: '4px 10px',
+                  fontWeight: audioSpeed === 1.0 ? 700 : 500,
+                  background: audioSpeed === 1.0 ? 'var(--primary)' : 'transparent',
+                  color: audioSpeed === 1.0 ? '#fff' : 'var(--text-secondary)',
+                  border: audioSpeed === 1.0 ? '1px solid rgba(255, 255, 255, 0.25)' : 'none',
+                  boxShadow: audioSpeed === 1.0 ? '0 2px 8px rgba(99, 102, 241, 0.4)' : 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                title={translate ? "Normal speed (1.0x)" : "Velocidad normal (1.0x)"}
+              >
+                {t('midtermListenNormal', translate)}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSetSpeedAndPlay(0.75)}
+                className="btn btn-sm"
+                style={{ 
+                  borderRadius: '20px', 
+                  fontSize: '0.75rem', 
+                  padding: '4px 10px',
+                  fontWeight: audioSpeed === 0.75 ? 700 : 500,
+                  background: audioSpeed === 0.75 ? '#d97706' : 'transparent',
+                  color: audioSpeed === 0.75 ? '#fff' : 'var(--text-secondary)',
+                  border: audioSpeed === 0.75 ? '1px solid rgba(245, 158, 11, 0.5)' : 'none',
+                  boxShadow: audioSpeed === 0.75 ? '0 2px 8px rgba(217, 119, 6, 0.4)' : 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                title={translate ? "Slow, clear speed (0.75x)" : "Velocidad lenta clara (0.75x)"}
+              >
+                {t('midtermListenSlow', translate)}
+              </button>
+            </div>
           </div>
 
           <button
@@ -642,7 +749,7 @@ export default function OralExamPractice({
             }}
           >
             {isQuestionRevealed ? <EyeOff size={15} /> : <Eye size={15} />}
-            <span>{isQuestionRevealed ? "Ocultar Texto" : "👁️ Mostrar Pregunta"}</span>
+            <span>{isQuestionRevealed ? t('midtermHideQuestion', translate) : t('midtermShowQuestion', translate)}</span>
           </button>
         </div>
 
@@ -659,23 +766,8 @@ export default function OralExamPractice({
               {currentQuestion.question}
             </h3>
 
-            {/* English translation: Shown before answering in Guided and Open modes; suppressed in Challenge mode */}
-            {mode !== 'challenge' ? (
-              <div style={{ 
-                padding: '8px 12px', 
-                borderRadius: '8px', 
-                background: 'rgba(59, 130, 246, 0.08)', 
-                border: '1px solid rgba(59, 130, 246, 0.25)', 
-                marginBottom: '12px' 
-              }}>
-                <span style={{ fontSize: '0.72rem', color: '#93c5fd', fontWeight: 700, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  🇺🇸 Significado en Inglés (Before Answering):
-                </span>
-                <span style={{ fontSize: '0.92rem', color: '#e0e7ff', fontWeight: 600 }}>
-                  "{currentQuestion.english}"
-                </span>
-              </div>
-            ) : (
+            {/* English translation: Concealed before answering; revealed via toggle or post-answer */}
+            {mode === 'challenge' ? (
               <div style={{ 
                 padding: '6px 10px', 
                 borderRadius: '8px', 
@@ -685,14 +777,55 @@ export default function OralExamPractice({
                 fontSize: '0.75rem',
                 color: '#fbbf24'
               }}>
-                ⚠️ <strong>Modo Desafío activo:</strong> Las traducciones al inglés están bloqueadas para simular la condición real del examen oral.
+                {t('midtermChallengeNoTranslationNotice', translate)}
+              </div>
+            ) : (
+              <div style={{ marginBottom: '12px' }}>
+                {isQuestionTranslationRevealed ? (
+                  <div style={{ 
+                    padding: '8px 12px', 
+                    borderRadius: '8px', 
+                    background: 'rgba(59, 130, 246, 0.08)', 
+                    border: '1px solid rgba(59, 130, 246, 0.25)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <div>
+                      <span style={{ fontSize: '0.72rem', color: '#93c5fd', fontWeight: 700, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        🇺🇸 {t('midtermQuestionMeaningLabel', translate)}
+                      </span>
+                      <span style={{ fontSize: '0.92rem', color: '#e0e7ff', fontWeight: 600 }}>
+                        "{currentQuestion.english}"
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setIsQuestionTranslationRevealed(false)}
+                      style={{ fontSize: '0.7rem', padding: '3px 8px' }}
+                    >
+                      {t('midtermHideTranslationBtn', translate)}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => setIsQuestionTranslationRevealed(true)}
+                    style={{ fontSize: '0.72rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  >
+                    <span>{t('midtermRevealTranslationBtn', translate)}</span>
+                  </button>
+                )}
               </div>
             )}
 
             {/* Grammar Focus Tag */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               <Sparkles size={13} color="var(--primary)" />
-              <span><strong>Foco Gramatical:</strong> {currentQuestion.grammarFocus}</span>
+              <span><strong>{t('midtermGrammarFocusLabel', translate)}</strong> {translate && currentQuestion.grammarFocusEn ? currentQuestion.grammarFocusEn : currentQuestion.grammarFocus}</span>
             </div>
           </div>
         ) : (
@@ -709,10 +842,10 @@ export default function OralExamPractice({
           >
             <div style={{ fontSize: '1.8rem', marginBottom: '6px', opacity: 0.7 }}>🎧</div>
             <p style={{ margin: '0 0 6px 0', fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              El texto de la pregunta está oculto por audio.
+              {t('midtermHiddenAudioTitle', translate)}
             </p>
             <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              Trata de entenderla escuchando el audio de Elena. Haz clic aquí o pulsa <strong>"Mostrar Pregunta"</strong> para revelar el texto{mode !== 'challenge' ? ' y su traducción' : ''}.
+              {t('midtermHiddenAudioDesc', translate)}
             </p>
           </div>
         )}
@@ -726,7 +859,7 @@ export default function OralExamPractice({
           {/* Path Selector Tabs */}
           <div style={{ marginBottom: '16px' }}>
             <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px', fontWeight: 700 }}>
-              Elige tu respuesta personalizada (Choose your story path):
+              {t('midtermGuidedChoosePathLabel', translate)}
             </label>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               {currentQuestion.guidedPaths.map(path => (
@@ -750,18 +883,38 @@ export default function OralExamPractice({
             border: '1px solid var(--card-border)', 
             marginBottom: '16px' 
           }}>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Idea que vas a expresar:
-            </span>
-            <span style={{ fontSize: '0.92rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-              "{currentPath.englishMeaning}"
-            </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {t('midtermGuidedIdeaToExpress', translate)}
+                </span>
+                {isTargetMeaningRevealed || guidedAnswered ? (
+                  <span style={{ fontSize: '0.92rem', color: 'var(--text-primary)', fontWeight: 600 }}>
+                    "{currentPath.englishMeaning}"
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                    ({currentPath.label})
+                  </span>
+                )}
+              </div>
+              {!guidedAnswered && !isTargetMeaningRevealed && (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setIsTargetMeaningRevealed(true)}
+                  style={{ fontSize: '0.7rem', padding: '3px 8px' }}
+                >
+                  {t('midtermRevealTranslationBtn', translate)}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Sentence Builder Slot Zone (Placed tokens) */}
           <div style={{ marginBottom: '16px' }}>
             <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
-              Tu respuesta construida (Toca las palabras para colocarlas):
+              {t('midtermGuidedConstructedLabel', translate)}
             </label>
             <div style={{ 
               minHeight: '60px', 
@@ -778,7 +931,7 @@ export default function OralExamPractice({
             }}>
               {guidedPlacedTokens.length === 0 ? (
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                  Toca las fichas de abajo para formar tu oración completa en pretérito...
+                  {t('midtermGuidedEmptySlotNotice', translate)}
                 </span>
               ) : (
                 guidedPlacedTokens.map((token) => (
@@ -808,7 +961,7 @@ export default function OralExamPractice({
           <div style={{ marginBottom: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
-                Banco de Palabras (Word Bank):
+                {t('midtermWordBankLabel', translate)}
               </label>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
@@ -817,14 +970,14 @@ export default function OralExamPractice({
                   disabled={guidedAnswered}
                   style={{ fontSize: '0.72rem', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
-                  <RotateCcw size={12} /> Reiniciar
+                  <RotateCcw size={12} /> {t('midtermResetBtn', translate)}
                 </button>
                 <button
                   className="btn btn-secondary btn-sm"
                   onClick={() => setShowHint(!showHint)}
                   style={{ fontSize: '0.72rem', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
-                  <HelpCircle size={12} /> {showHint ? "Ocultar Pista" : "Ver Pista"}
+                  <HelpCircle size={12} /> {showHint ? t('midtermHideHint', translate) : t('midtermShowHint', translate)}
                 </button>
               </div>
             </div>
@@ -860,13 +1013,13 @@ export default function OralExamPractice({
               animation: 'pop-in 0.2s ease-out'
             }}>
               <span style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                💡 Pista de Gramática:
+                {t('midtermGrammarHintLabel', translate)}
               </span>
               <p style={{ margin: '0 0 8px 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                 {currentPath.hint}
               </p>
               <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>
-                Estructura Sintáctica:
+                {t('midtermSyntaxBreakdownLabel', translate)}
               </span>
               <code style={{ fontSize: '0.78rem', color: 'var(--primary)', fontFamily: 'monospace' }}>
                 {currentPath.syntaxBreakdown}
@@ -882,7 +1035,7 @@ export default function OralExamPractice({
               disabled={guidedPlacedTokens.length === 0}
               style={{ width: '100%', padding: '10px', fontSize: '0.9rem', fontWeight: 600 }}
             >
-              Comprobar Respuesta
+              {t('midtermCheckGuidedBtn', translate)}
             </button>
           ) : (
             <div style={{ animation: 'pop-in 0.25s ease-out' }}>
@@ -897,7 +1050,7 @@ export default function OralExamPractice({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                   {guidedIsCorrect ? <Check size={18} color="var(--accent)" /> : <AlertCircle size={18} color="var(--danger)" />}
                   <span style={{ fontWeight: 700, fontSize: '0.92rem', color: guidedIsCorrect ? 'var(--accent)' : 'var(--danger)' }}>
-                    {guidedIsCorrect ? "¡Excelente! Respuesta correcta (+20 XP, +10 Oro)" : "Casi lo tienes. Revisa el orden o los distractores."}
+                    {guidedIsCorrect ? t('midtermFeedbackCorrect', translate) : t('midtermFeedbackIncorrect', translate)}
                   </span>
                 </div>
 
@@ -905,7 +1058,7 @@ export default function OralExamPractice({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.82rem' }}>
                   <div>
                     <strong style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>
-                      ❓ Pregunta del Examen:
+                      {t('midtermFeedbackQuestionLabel', translate)}
                     </strong>
                     <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{currentQuestion.question}</div>
                     <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>"{currentQuestion.english}"</div>
@@ -913,7 +1066,7 @@ export default function OralExamPractice({
 
                   <div>
                     <strong style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>
-                      💬 Tu Respuesta Completa:
+                      {t('midtermFeedbackYourAnswerLabel', translate)}
                     </strong>
                     <div style={{ color: 'var(--accent)', fontWeight: 700 }}>{currentPath.targetSentence}</div>
                     <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>"{currentPath.englishMeaning}"</div>
@@ -921,7 +1074,7 @@ export default function OralExamPractice({
 
                   <div>
                     <strong style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase' }}>
-                      💡 Estructura Gramatical:
+                      {t('midtermFeedbackSyntaxLabel', translate)}
                     </strong>
                     <div style={{ color: 'var(--primary)', fontFamily: 'monospace', fontSize: '0.75rem' }}>
                       {currentPath.syntaxBreakdown}
@@ -937,7 +1090,7 @@ export default function OralExamPractice({
                   onClick={() => playSentenceAudio(currentPath.targetSentence)}
                   style={{ flex: 1, minWidth: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.82rem' }}
                 >
-                  <Volume2 size={15} color="var(--primary)" /> 🔊 Escuchar Pronunciación
+                  <Volume2 size={15} color="var(--primary)" /> {t('midtermListenModelAudioBtn', translate)}
                 </button>
 
                 {speechSupported && (
@@ -947,7 +1100,7 @@ export default function OralExamPractice({
                     style={{ flex: 1, minWidth: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.82rem' }}
                   >
                     <Mic size={15} color={isTestingPronunciation ? "#fff" : "var(--primary)"} />
-                    <span>{isTestingPronunciation ? "Grabando..." : "🎙️ Probar Pronunciación"}</span>
+                    <span>{isTestingPronunciation ? t('midtermRecordingPronunciation', translate) : t('midtermTestPronunciationBtn', translate)}</span>
                   </button>
                 )}
               </div>
@@ -968,13 +1121,13 @@ export default function OralExamPractice({
                   {pronunciationScore.status === 'result' && (
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                        <span>Coincidencia de pronunciación: <strong>{pronunciationScore.percentage}%</strong></span>
+                        <span>{t('midtermPronunciationMatch', translate)} <strong>{pronunciationScore.percentage}%</strong></span>
                         <span style={{ color: pronunciationScore.percentage >= 80 ? 'var(--accent)' : 'var(--gold)' }}>
-                          {pronunciationScore.percentage >= 80 ? "¡Excelente!" : "Práctica recomendada"}
+                          {pronunciationScore.percentage >= 80 ? t('midtermPronunciationExcellent', translate) : t('midtermPronunciationNeedsPractice', translate)}
                         </span>
                       </div>
                       <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '4px' }}>
-                        Elena escuchó: "{pronunciationScore.transcript}"
+                        {t('midtermElenaHeard', translate, pronunciationScore.transcript)}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                         {pronunciationScore.feedback}
@@ -995,7 +1148,7 @@ export default function OralExamPractice({
                     onClick={() => { setGuidedAnswered(false); initGuidedTokens(currentPath); }}
                     style={{ flex: 1 }}
                   >
-                    Reintentar
+                    {t('midtermRetryBtn', translate)}
                   </button>
                 )}
                 <button
@@ -1003,7 +1156,7 @@ export default function OralExamPractice({
                   onClick={handleNext}
                   style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                 >
-                  <span>{currentIdx < MIDTERM_QUESTIONS.length - 1 ? "Siguiente Pregunta" : "Finalizar Práctica"}</span>
+                  <span>{currentIdx < MIDTERM_QUESTIONS.length - 1 ? t('midtermNextQuestionBtn', translate) : t('midtermFinishPracticeBtn', translate)}</span>
                   <ArrowRight size={15} />
                 </button>
               </div>

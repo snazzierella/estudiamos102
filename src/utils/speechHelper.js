@@ -100,13 +100,16 @@ export function formatVoiceLabel(voice) {
 }
 
 // Play speech using Gemini Studio TTS if API key is provided
-async function playGeminiTts(cleanText, apiKey) {
+async function playGeminiTts(cleanText, apiKey, rate = 1.0) {
   if (audioCache.has(cleanText)) {
     const cachedUrl = audioCache.get(cleanText);
     if (currentAudio) {
-      currentAudio.pause();
+      try { currentAudio.pause(); } catch {}
     }
     currentAudio = new Audio(cachedUrl);
+    if (rate && typeof rate === 'number') {
+      currentAudio.playbackRate = Math.max(0.5, Math.min(2.0, rate));
+    }
     await currentAudio.play();
     return true;
   }
@@ -139,8 +142,13 @@ async function playGeminiTts(cleanText, apiKey) {
       if (base64Audio) {
         const audioUrl = `data:audio/wav;base64,${base64Audio}`;
         audioCache.set(cleanText, audioUrl);
-        if (currentAudio) currentAudio.pause();
+        if (currentAudio) {
+          try { currentAudio.pause(); } catch {}
+        }
         currentAudio = new Audio(audioUrl);
+        if (rate && typeof rate === 'number') {
+          currentAudio.playbackRate = Math.max(0.5, Math.min(2.0, rate));
+        }
         await currentAudio.play();
         return true;
       }
@@ -150,6 +158,21 @@ async function playGeminiTts(cleanText, apiKey) {
   }
 
   return false;
+}
+
+// Stop any currently playing speech (Gemini audio or Web Speech)
+export function stopSpanishSpeech() {
+  if (currentAudio) {
+    try {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    } catch {}
+  }
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    try {
+      window.speechSynthesis.cancel();
+    } catch {}
+  }
 }
 
 // Main speech synthesis function used across all app components
@@ -165,16 +188,26 @@ export async function speakSpanish(text, options = {}) {
   const clean = cleanTextForSpeech(text);
   if (!clean) return;
 
+  const finalRate = rate ?? state.ttsRate ?? 0.95;
+
   // 1. Try Gemini Neural Studio Voice if enabled and key exists
   const apiKey = state.apiKeys?.gemini;
   const wantsGemini = state.useGeminiTts || options.forceGemini;
   if (apiKey && wantsGemini) {
     try {
-      const success = await playGeminiTts(clean, apiKey);
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      const success = await playGeminiTts(clean, apiKey, finalRate);
       if (success) {
         if (onStart) onStart();
-        if (onEnd && currentAudio) {
-          currentAudio.onended = onEnd;
+        if (currentAudio) {
+          currentAudio.onended = () => {
+            if (onEnd) onEnd();
+          };
+          currentAudio.onerror = () => {
+            if (onEnd) onEnd();
+          };
         }
         return;
       }
@@ -184,17 +217,31 @@ export async function speakSpanish(text, options = {}) {
   }
 
   // 2. Browser Web Speech API with ranked natural voices
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    if (onEnd) onEnd();
+    return;
+  }
 
   try {
+    // Stop any in-flight HTML5 audio
+    if (currentAudio) {
+      try {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      } catch {}
+    }
+
+    // Cancel prior speech and resume if paused (workaround for Chrome/Edge)
     window.speechSynthesis.cancel();
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
 
     const utterance = new SpeechSynthesisUtterance(clean);
     utterance.lang = 'es-MX';
     
-    // 0.95 - 1.0 cadence sounds significantly more natural than 0.85
-    const finalRate = rate ?? state.ttsRate ?? 0.95;
-    utterance.rate = finalRate;
+    // Scale rate within safe Web Speech limits
+    utterance.rate = Math.max(0.4, Math.min(2.0, finalRate));
     utterance.pitch = 1.0;
 
     const voices = getSpanishVoices();
@@ -217,9 +264,25 @@ export async function speakSpanish(text, options = {}) {
 
     if (onStart) utterance.onstart = onStart;
     if (onEnd) utterance.onend = onEnd;
+    utterance.onerror = (e) => {
+      console.warn("Speech synthesis utterance error:", e);
+      if (onEnd) onEnd();
+    };
 
-    window.speechSynthesis.speak(utterance);
+    // Chrome/Blink requires brief delay after cancel before speaking a new utterance
+    setTimeout(() => {
+      try {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.warn("Web Speech API speak invocation error:", err);
+        if (onEnd) onEnd();
+      }
+    }, 30);
   } catch (e) {
     console.warn("Web Speech API error:", e);
+    if (onEnd) onEnd();
   }
 }

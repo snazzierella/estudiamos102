@@ -18,7 +18,9 @@ import {
   getVerbPracticeCards,
   isPreteriteSpellingChanger,
   isPreteriteStemChanger,
-  isPreteriteDoubleVowel
+  isPreteriteDoubleVowel,
+  VERB_CATEGORIES,
+  getVerbCategoryInfo
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { generateSentenceBuilderQuestion, SENTENCE_POOLS } from '../utils/sentenceBuilderHelper';
@@ -111,6 +113,8 @@ export default function StudyQuest({
   const [objectPronounTab, setObjectPronounTab] = useState("direct");
   const [contrastCodexTab, setContrastCodexTab] = useState("por_para");
   const [codexLang, setCodexLang] = useState("en"); // 'en' (default) or 'es'
+  const [codexVerbCategory, setCodexVerbCategory] = useState("u_group");
+  const [codexVerbSubcategory, setCodexVerbSubcategory] = useState(null);
   const [isListening, setIsListening] = useState(false);
   
   // Hint reveal tracking for hintless lesson achievements
@@ -328,6 +332,13 @@ export default function StudyQuest({
     }
 
     setCodexVerb(verbStr);
+    const catInfo = getVerbCategoryInfo(verbStr);
+    if (catInfo) {
+      setCodexVerbCategory(catInfo.categoryId);
+      if (catInfo.subcategoryId) {
+        setCodexVerbSubcategory(catInfo.subcategoryId);
+      }
+    }
 
     if (targetTense) {
       setCodexTense(targetTense);
@@ -5058,7 +5069,7 @@ export default function StudyQuest({
           ------------------------------------------------------------- */}
       {codexVerb && (
         <div className="modal-overlay" style={{ zIndex: 9999 }}>
-          <div className="glass-panel modal-content" style={{ animation: 'pop-in 0.3s ease-out', maxWidth: (codexVerb === 'guia_contrastes' || codexVerb === 'pronombres_objeto') ? '720px' : '460px', width: '94%', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="glass-panel modal-content" style={{ animation: 'pop-in 0.3s ease-out', maxWidth: '740px', width: '94%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
               <div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '2px' }}>
@@ -5075,21 +5086,25 @@ export default function StudyQuest({
                         : "Reglas contrastivas de decisión: matrices comparativas y ejemplos de Español 102.")
                     : codexVerb === 'pronombres_objeto'
                       ? (codexLang === 'en' ? "Direct (DOP), Indirect (IOP), and Double Object Pronouns (se lo/la)." : "Pronombres de Objeto Directo, Indirecto y Dobles")
-                      : (codexLang === 'en' ? (
-                          <>
-                            Verb: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong>
-                            {codexVerb === 'hablar' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (to speak / to talk — regular -ar)</span>}
-                            {codexVerb === 'comer' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (to eat — regular -er)</span>}
-                            {codexVerb === 'vivir' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (to live — regular -ir)</span>}
-                          </>
-                        ) : (
-                          <>
-                            Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong>
-                            {codexVerb === 'hablar' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (hablar — regular -ar)</span>}
-                            {codexVerb === 'comer' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (comer — regular -er)</span>}
-                            {codexVerb === 'vivir' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (vivir — regular -ir)</span>}
-                          </>
-                        ))}
+                      : (() => {
+                          const info = getVerbCategoryInfo(codexVerb);
+                          const isEn = codexLang === 'en';
+                          const catName = info?.category ? (isEn ? info.category.labelEn : info.category.labelEs) : '';
+                          const meta = info?.verbMeta;
+                          return isEn ? (
+                            <>
+                              Verb: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong>
+                              {meta?.meaning && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> ({meta.meaning})</span>}
+                              {catName && <span style={{ color: info?.category?.color || '#38bdf8', fontSize: '0.78rem', marginLeft: '6px', fontWeight: 600 }}>• {catName}</span>}
+                            </>
+                          ) : (
+                            <>
+                              Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong>
+                              {meta?.meaning && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> ({meta.meaning})</span>}
+                              {catName && <span style={{ color: info?.category?.color || '#38bdf8', fontSize: '0.78rem', marginLeft: '6px', fontWeight: 600 }}>• {catName}</span>}
+                            </>
+                          );
+                        })()}
                 </p>
               </div>
               <button 
@@ -5266,39 +5281,170 @@ export default function StudyQuest({
               </div>
             )}
 
-            {/* Quick Regular Model Verb Selector (Only for Verbs) */}
-            {codexVerb !== 'pronombres_objeto' && codexVerb !== 'guia_contrastes' && (
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'center', margin: '0 0 12px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.73rem', color: 'var(--text-muted)' }}>
-                  {codexLang === 'en' ? 'Regular Model Verbs:' : 'Verbos Modelo Regulares:'}
-                </span>
-                {[
-                  { verb: 'hablar', label: 'hablar (-ar)', meaning: 'to speak' },
-                  { verb: 'comer', label: 'comer (-er)', meaning: 'to eat' },
-                  { verb: 'vivir', label: 'vivir (-ir)', meaning: 'to live' }
-                ].map(m => (
-                  <button
-                    key={m.verb}
-                    type="button"
-                    className="btn btn-sm"
-                    style={{
-                      fontSize: '0.72rem',
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                      background: codexVerb === m.verb ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255,255,255,0.05)',
-                      color: codexVerb === m.verb ? '#34d399' : 'var(--text-secondary)',
-                      border: codexVerb === m.verb ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
-                      fontWeight: codexVerb === m.verb ? 700 : 500,
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => setCodexVerb(m.verb)}
-                    title={codexLang === 'en' ? `${m.verb} (${m.meaning})` : m.verb}
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Categorized Verb Explorer (Radical U/I/J Groups, Spell Change (-car/-gar/-zar), Stem Change, etc.) */}
+            {codexVerb !== 'pronombres_objeto' && codexVerb !== 'guia_contrastes' && (() => {
+              const activeCatInfo = getVerbCategoryInfo(codexVerb);
+              const currentCatId = codexVerbCategory || activeCatInfo?.categoryId || 'u_group';
+              const currentCat = VERB_CATEGORIES.find(c => c.id === currentCatId) || VERB_CATEGORIES[0];
+              const isEn = codexLang === 'en';
+
+              const subcats = currentCat.subcategories || null;
+              const currentSubId = codexVerbSubcategory || (activeCatInfo?.categoryId === currentCatId ? activeCatInfo?.subcategoryId : null) || (subcats ? subcats[0].id : null);
+              const activeSubcat = subcats ? (subcats.find(s => s.id === currentSubId) || subcats[0]) : null;
+              const verbsToDisplay = subcats ? (activeSubcat?.verbs || []) : (currentCat.verbs || []);
+
+              return (
+                <div style={{ marginBottom: '14px', background: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '10px 12px' }}>
+                  {/* Category Header Bar */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      {isEn ? '📚 Verb Group / Category:' : '📚 Grupo de Verbos / Categoría:'}
+                    </span>
+                    <span style={{ 
+                      fontSize: '0.72rem', 
+                      color: currentCat.color, 
+                      fontWeight: 700, 
+                      background: `${currentCat.color}20`, 
+                      border: `1px solid ${currentCat.color}40`,
+                      padding: '2px 8px', 
+                      borderRadius: '5px' 
+                    }}>
+                      {currentCat.badge}
+                    </span>
+                  </div>
+
+                  {/* Horizontal Scrollable Category Selector */}
+                  <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '6px', marginBottom: '8px', scrollbarWidth: 'thin' }}>
+                    {VERB_CATEGORIES.map(cat => {
+                      const isSelected = currentCatId === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          className="btn btn-sm"
+                          style={{
+                            whiteSpace: 'nowrap',
+                            fontSize: '0.73rem',
+                            padding: '5px 10px',
+                            borderRadius: '8px',
+                            background: isSelected ? `${cat.color}25` : 'rgba(255,255,255,0.04)',
+                            color: isSelected ? '#ffffff' : 'var(--text-secondary)',
+                            border: isSelected ? `2px solid ${cat.color}` : '1px solid rgba(255,255,255,0.08)',
+                            boxShadow: isSelected ? `0 0 10px ${cat.color}45` : 'none',
+                            fontWeight: isSelected ? 800 : 500,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                          onClick={() => {
+                            setCodexVerbCategory(cat.id);
+                            if (cat.subcategories) {
+                              const firstSub = cat.subcategories[0];
+                              setCodexVerbSubcategory(firstSub.id);
+                              if (firstSub.verbs[0]) setCodexVerb(firstSub.verbs[0].verb);
+                            } else if (cat.verbs && cat.verbs[0]) {
+                              setCodexVerbSubcategory(null);
+                              setCodexVerb(cat.verbs[0].verb);
+                            }
+                          }}
+                        >
+                          {isEn ? cat.labelEn : cat.labelEs}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Subcategories if present (e.g. -car, -gar, -zar or Sandal e->i, o->u) */}
+                  {subcats && (
+                    <div style={{ display: 'flex', gap: '6px', margin: '4px 0 8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        {isEn ? 'Subgroup:' : 'Subgrupo:'}
+                      </span>
+                      {subcats.map(sub => {
+                        const isSubSelected = activeSubcat?.id === sub.id;
+                        return (
+                          <button
+                            key={sub.id}
+                            type="button"
+                            className="btn btn-sm"
+                            style={{
+                              fontSize: '0.72rem',
+                              padding: '3px 9px',
+                              borderRadius: '6px',
+                              background: isSubSelected ? `${currentCat.color}35` : 'rgba(255,255,255,0.04)',
+                              color: isSubSelected ? '#ffffff' : 'var(--text-secondary)',
+                              border: isSubSelected ? `1.5px solid ${currentCat.color}` : '1px solid rgba(255,255,255,0.08)',
+                              fontWeight: isSubSelected ? 700 : 500,
+                              cursor: 'pointer'
+                            }}
+                            onClick={() => {
+                              setCodexVerbSubcategory(sub.id);
+                              if (sub.verbs[0]) setCodexVerb(sub.verbs[0].verb);
+                            }}
+                          >
+                            {sub.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Verbs in Selected Group */}
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginTop: '4px' }}>
+                    {verbsToDisplay.map(v => {
+                      const isActive = parseVerb(codexVerb).base.toLowerCase() === v.verb.toLowerCase();
+                      return (
+                        <button
+                          key={v.verb}
+                          type="button"
+                          className="btn btn-sm"
+                          style={{
+                            fontSize: '0.74rem',
+                            padding: '4px 10px',
+                            borderRadius: '7px',
+                            background: isActive ? currentCat.color : 'rgba(255,255,255,0.06)',
+                            color: isActive ? '#ffffff' : 'var(--text-primary)',
+                            border: isActive ? `1.5px solid #ffffff` : '1px solid rgba(255,255,255,0.12)',
+                            fontWeight: isActive ? 800 : 500,
+                            boxShadow: isActive ? `0 0 10px ${currentCat.color}70` : 'none',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.12s ease'
+                          }}
+                          onClick={() => setCodexVerb(v.verb)}
+                          title={`${v.verb}: ${v.meaning} (${v.stem})`}
+                        >
+                          <span>{v.verb}</span>
+                          <span style={{ fontSize: '0.68rem', opacity: isActive ? 0.95 : 0.6, fontWeight: 400 }}>
+                            ({v.stem})
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Explanatory Rule Banner for Active Category */}
+                  <div style={{ 
+                    marginTop: '10px', 
+                    padding: '8px 12px', 
+                    background: `${currentCat.color}14`, 
+                    border: `1px solid ${currentCat.color}35`, 
+                    borderRadius: '8px', 
+                    fontSize: '0.76rem', 
+                    color: '#e2e8f0',
+                    lineHeight: '1.45' 
+                  }}>
+                    <strong style={{ color: currentCat.color }}>
+                      {isEn ? '💡 Grammar Rule:' : '💡 Regla Gramatical:'}
+                    </strong>{' '}
+                    {isEn 
+                      ? (activeSubcat?.ruleEn || currentCat.ruleEn) 
+                      : (activeSubcat?.ruleEs || currentCat.ruleEs)}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Reflexive or Reciprocal Verb Banner */}
             {codexVerb !== 'pronombres_objeto' && codexVerb !== 'guia_contrastes' && (
@@ -6257,19 +6403,86 @@ export default function StudyQuest({
                   ].map((p, idx) => {
                     const conjugated = conjugate(codexVerb, idx, codexTense);
                     const isVosotros = idx === 4;
+                    const catInfo = getVerbCategoryInfo(codexVerb);
+                    const catId = catInfo?.categoryId;
+                    const isPreterite = codexTense === 'preterite';
+                    
+                    let isIrregularForm = false;
+                    let irregularTag = null;
+                    let highlightColor = catInfo?.category?.color || '#38bdf8';
+
+                    if (isPreterite) {
+                      if (catId === 'spell_change' && idx === 0) {
+                        isIrregularForm = true;
+                        irregularTag = catInfo?.subcategoryId === 'car' ? 'c ➔ qu' : catInfo?.subcategoryId === 'gar' ? 'g ➔ gu' : 'z ➔ c';
+                        highlightColor = '#ec4899';
+                      } else if (catId === 'stem_change' && (idx === 2 || idx === 5)) {
+                        isIrregularForm = true;
+                        irregularTag = catInfo?.subcategoryId === 'sandal_ou' ? 'sandal: o ➔ u' : 'sandal: e ➔ i';
+                        highlightColor = '#a855f7';
+                      } else if (catId === 'j_group' && idx === 5) {
+                        isIrregularForm = true;
+                        irregularTag = "-eron (drops 'i')";
+                        highlightColor = '#f97316';
+                      } else if (catId === 'j_group' || catId === 'u_group' || catId === 'i_group') {
+                        isIrregularForm = true;
+                        if (idx === 0 || idx === 2) irregularTag = 'no accent';
+                        highlightColor = catInfo?.category?.color || '#3b82f6';
+                      } else if (catId === 'twin_verbs') {
+                        isIrregularForm = true;
+                        highlightColor = '#06b6d4';
+                      } else if (catId === 'double_vowel' && (idx === 2 || idx === 5)) {
+                        isIrregularForm = true;
+                        irregularTag = 'i ➔ y';
+                        highlightColor = '#818cf8';
+                      }
+                    } else {
+                      // Present tense
+                      if (catId === 'stem_change' && idx !== 3 && idx !== 4) {
+                        isIrregularForm = true;
+                        irregularTag = 'boot change';
+                        highlightColor = '#a855f7';
+                      } else if ((catId === 'u_group' || catId === 'i_group' || catId === 'j_group' || catId === 'twin_verbs') && idx === 0) {
+                        isIrregularForm = true;
+                        irregularTag = 'irregular yo';
+                        highlightColor = '#eab308';
+                      }
+                    }
+
                     return (
                       <tr 
                         key={idx} 
                         style={{ 
                           borderBottom: '1px solid rgba(255,255,255,0.05)',
-                          opacity: isVosotros && state.excludeVosotros ? 0.6 : 1
+                          opacity: isVosotros && state.excludeVosotros ? 0.6 : 1,
+                          background: isIrregularForm ? `${highlightColor}08` : 'transparent'
                         }}
                       >
                         <td style={{ padding: '8px 10px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                           {p.pronoun} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({p.translation})</span>
                         </td>
                         <td style={{ padding: '8px 10px', color: 'var(--text-primary)', fontWeight: 600 }}>
-                          {conjugated}
+                          <span style={{ 
+                            color: isIrregularForm ? highlightColor : 'var(--text-primary)',
+                            fontWeight: isIrregularForm ? 700 : 600
+                          }}>
+                            {conjugated}
+                          </span>
+                          {irregularTag && (
+                            <span style={{ 
+                              marginLeft: '8px', 
+                              fontSize: '0.68rem', 
+                              color: highlightColor, 
+                              background: `${highlightColor}18`, 
+                              border: `1px solid ${highlightColor}35`,
+                              padding: '1px 6px', 
+                              borderRadius: '4px',
+                              fontWeight: 600,
+                              display: 'inline-block'
+                            }}>
+                              {irregularTag}
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );

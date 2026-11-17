@@ -58,6 +58,9 @@ export const PRESENT_IRREGULARS = {
   "ver": ["veo", "ves", "ve", "vemos", "veis", "ven"],
   "saber": ["sé", "sabes", "sabe", "sabemos", "sabéis", "saben"],
   "conocer": ["conozco", "conoces", "conoce", "conocemos", "conocéis", "conocen"],
+  "conducir": ["conduzco", "conduces", "conduce", "conducemos", "conducéis", "conducen"],
+  "traducir": ["traduzco", "traduces", "traduce", "traducemos", "traducéis", "traducen"],
+  "producir": ["produzco", "produces", "produce", "producemos", "producéis", "producen"],
   
   // Stem changers (o -> ue)
   "almorzar": ["almuerzo", "almuerzas", "almuerza", "almorzamos", "almorzáis", "almuerzan"],
@@ -2657,5 +2660,284 @@ export function generateContrastQuestion(stageVal, _levelVal) {
     ruleExplanation: chosen.ruleExplanation,
     ruleExplanationEs: chosen.ruleExplanationEs || chosen.ruleExplanation,
     hint: chosen.ruleExplanation
+  };
+}
+
+// -------------------------------------------------------------
+// CATEGORIZED IRREGULAR & REGULAR VERBS FOR CONJUGATION HELPER
+// (Radical U-group, I-group, J-group, Spell Change (-car/-gar/-zar),
+// Stem Change (Sandal / Boot), Twin Verbs, Double Vowel, Regulars)
+// -------------------------------------------------------------
+export const VERB_CATEGORIES = [
+  {
+    id: "u_group",
+    labelEn: "📦 U-Group (Radical)",
+    labelEs: "📦 Grupo U (Radical)",
+    badge: "U-Stem",
+    color: "#3b82f6",
+    ruleEn: "Preterite Radical U-Stem: takes special endings with NO ACCENTS (-e, -iste, -o, -imos, -isteis, -ieron).",
+    ruleEs: "Pretérito Raíz U: terminaciones especiales SIN ACENTOS (-e, -iste, -o, -imos, -isteis, -ieron).",
+    verbs: [
+      { verb: "tener", stem: "tuv-", meaning: "to have" },
+      { verb: "estar", stem: "estuv-", meaning: "to be (state/loc)" },
+      { verb: "poder", stem: "pud-", meaning: "to be able / can" },
+      { verb: "poner", stem: "pus-", meaning: "to put / place" },
+      { verb: "saber", stem: "sup-", meaning: "to know (facts)" },
+      { verb: "andar", stem: "anduv-", meaning: "to walk" },
+      { verb: "haber", stem: "hub-", meaning: "there was / had" }
+    ]
+  },
+  {
+    id: "i_group",
+    labelEn: "⚡ I-Group (Radical)",
+    labelEs: "⚡ Grupo I (Radical)",
+    badge: "I-Stem",
+    color: "#eab308",
+    ruleEn: "Preterite Radical I-Stem: takes endings with NO ACCENTS (-e, -iste, -o, -imos, -isteis, -ieron). Note: hacer becomes 'hizo' in él/ella/usted to preserve the /s/ sound.",
+    ruleEs: "Pretérito Raíz I: terminaciones SIN ACENTOS (-e, -iste, -o, -imos, -isteis, -ieron). Nota: hacer cambia a 'hizo' en 3ª persona.",
+    verbs: [
+      { verb: "hacer", stem: "hic- / hiz-", meaning: "to do / make" },
+      { verb: "querer", stem: "quis-", meaning: "to want / tried" },
+      { verb: "venir", stem: "vin-", meaning: "to come" }
+    ]
+  },
+  {
+    id: "j_group",
+    labelEn: "🎯 J-Group (Radical)",
+    labelEs: "🎯 Grupo J (Radical)",
+    badge: "J-Stem",
+    color: "#f97316",
+    ruleEn: "Preterite Radical J-Stem: takes endings with NO ACCENTS, and DROPS the 'i' in ellos/ellas/ustedes: -eron (dijeron, trajeron, condujeron - never -ieron)!",
+    ruleEs: "Pretérito Raíz J: terminaciones SIN ACENTOS y PIERDEN la 'i' en ellos: -eron (dijeron, trajeron, condujeron).",
+    verbs: [
+      { verb: "decir", stem: "dij-", meaning: "to say / tell" },
+      { verb: "traer", stem: "traj-", meaning: "to bring" },
+      { verb: "conducir", stem: "conduj-", meaning: "to drive" },
+      { verb: "traducir", stem: "traduj-", meaning: "to translate" },
+      { verb: "producir", stem: "produj-", meaning: "to produce" }
+    ]
+  },
+  {
+    id: "spell_change",
+    labelEn: "✏️ Spell Change (-car/-gar/-zar)",
+    labelEs: "✏️ Ortográficos (-car/-gar/-zar)",
+    badge: "Ortografía",
+    color: "#ec4899",
+    ruleEn: "Spelling Change in Preterite: ONLY in the 'yo' form to preserve original consonant sounds: -car -> qué, -gar -> gué, -zar -> cé. All other forms are regular.",
+    ruleEs: "Cambio Ortográfico en Pretérito: SOLO en la forma 'yo': -car -> qué, -gar -> gué, -zar -> cé. El resto son regulares.",
+    subcategories: [
+      {
+        id: "car",
+        label: "-car (c ➔ qu)",
+        ruleEn: "Verbs in -car change c -> qu before 'e' (yo busqué)",
+        ruleEs: "Verbos en -car cambian c -> qu delante de 'e' (yo busqué)",
+        verbs: [
+          { verb: "buscar", stem: "c ➔ qu (yo busqué)", meaning: "to search / look for" },
+          { verb: "practicar", stem: "c ➔ qu (yo practiqué)", meaning: "to practice" },
+          { verb: "tocar", stem: "c ➔ qu (yo toqué)", meaning: "to play / touch" },
+          { verb: "sacar", stem: "c ➔ qu (yo saqué)", meaning: "to take out" },
+          { verb: "explicar", stem: "c ➔ qu (yo expliqué)", meaning: "to explain" }
+        ]
+      },
+      {
+        id: "gar",
+        label: "-gar (g ➔ gu)",
+        ruleEn: "Verbs in -gar change g -> gu before 'e' (yo pagué)",
+        ruleEs: "Verbos en -gar cambian g -> gu delante de 'e' (yo pagué)",
+        verbs: [
+          { verb: "pagar", stem: "g ➔ gu (yo pagué)", meaning: "to pay" },
+          { verb: "llegar", stem: "g ➔ gu (yo llegué)", meaning: "to arrive" },
+          { verb: "jugar", stem: "g ➔ gu (yo jugué)", meaning: "to play (sport/game)" },
+          { verb: "apagar", stem: "g ➔ gu (yo apagué)", meaning: "to turn off" },
+          { verb: "regar", stem: "g ➔ gu (yo regué)", meaning: "to water (plants)" }
+        ]
+      },
+      {
+        id: "zar",
+        label: "-zar (z ➔ c)",
+        ruleEn: "Verbs in -zar change z -> c before 'e' (yo empecé)",
+        ruleEs: "Verbos en -zar cambian z -> c delante de 'e' (yo empecé)",
+        verbs: [
+          { verb: "empezar", stem: "z ➔ c (yo empecé)", meaning: "to begin / start" },
+          { verb: "comenzar", stem: "z ➔ c (yo comencé)", meaning: "to start" },
+          { verb: "almorzar", stem: "z ➔ c (yo almorcé)", meaning: "to eat lunch" },
+          { verb: "cruzar", stem: "z ➔ c (yo crucé)", meaning: "to cross" },
+          { verb: "organizar", stem: "z ➔ c (yo organicé)", meaning: "to organize" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "stem_change",
+    labelEn: "🔄 Stem Change (Sandal & Boot)",
+    labelEs: "🔄 Cambio de Raíz (Sandalia)",
+    badge: "Raíz",
+    color: "#a855f7",
+    ruleEn: "Preterite Sandal Verbs: ONLY -ir verbs change, and ONLY in the 3rd person (él: -ió, ellos: -ieron) with e->i or o->u. In present tense, stem changes occur in the boot (yo, tú, él, ellos).",
+    ruleEs: "Verbos Sandalia en Pretérito: ¡SOLO los verbos -ir cambian y SOLO en 3ª persona (él/ellos) con e->i u o->u! En presente cambian en la bota.",
+    subcategories: [
+      {
+        id: "sandal_ei",
+        label: "Sandal (e ➔ i)",
+        ruleEn: "-ir verbs with e -> i in 3rd person (él pidió, ellos pidieron)",
+        ruleEs: "Verbos -ir con e -> i en 3ª persona (él pidió, ellos pidieron)",
+        verbs: [
+          { verb: "pedir", stem: "e ➔ i (pidió, pidieron)", meaning: "to ask for / order" },
+          { verb: "servir", stem: "e ➔ i (sirvió, sirvieron)", meaning: "to serve" },
+          { verb: "preferir", stem: "e ➔ i (prefirió, prefirieron)", meaning: "to prefer" },
+          { verb: "repetir", stem: "e ➔ i (repitió, repitieron)", meaning: "to repeat" },
+          { verb: "seguir", stem: "e ➔ i (siguió, siguieron)", meaning: "to follow / continue" },
+          { verb: "sentir", stem: "e ➔ i (sintió, sintieron)", meaning: "to feel" }
+        ]
+      },
+      {
+        id: "sandal_ou",
+        label: "Sandal (o ➔ u)",
+        ruleEn: "-ir verbs with o -> u in 3rd person (él durmió, ellos durmieron)",
+        ruleEs: "Verbos -ir con o -> u en 3ª persona (él durmió, ellos durmieron)",
+        verbs: [
+          { verb: "dormir", stem: "o ➔ u (durmió, durmieron)", meaning: "to sleep" },
+          { verb: "morir", stem: "o ➔ u (murió, murieron)", meaning: "to die" }
+        ]
+      },
+      {
+        id: "present_boot",
+        label: "Present Boot Changers",
+        ruleEn: "Stem changers in present boot (e->ie, o->ue, e->i)",
+        ruleEs: "Cambio de raíz en presente (e->ie, o->ue, e->i)",
+        verbs: [
+          { verb: "pensar", stem: "e ➔ ie (pienso)", meaning: "to think" },
+          { verb: "cerrar", stem: "e ➔ ie (cierro)", meaning: "to close" },
+          { verb: "entender", stem: "e ➔ ie (entiendo)", meaning: "to understand" },
+          { verb: "volver", stem: "o ➔ ue (vuelvo)", meaning: "to return (person)" },
+          { verb: "devolver", stem: "o ➔ ue (devuelvo)", meaning: "to return (object)" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "twin_verbs",
+    labelEn: "⭐ Twin Verbs (Irregular)",
+    labelEs: "⭐ Verbos Gemelos",
+    badge: "Gemelos",
+    color: "#06b6d4",
+    ruleEn: "Core Irregulars: Ser and Ir share identical forms in the preterite (fui, fuiste, fue...). Dar and Ver share parallel preterite endings with NO ACCENTS (di/vi, dio/vio).",
+    ruleEs: "Irregulares Puros: Ser e Ir comparten conjugación idéntica en pretérito (fui, fuiste, fue...). Dar y Ver tienen formas paralelas SIN ACENTOS (di/vi, dio/vio).",
+    verbs: [
+      { verb: "ser", stem: "fui, fuiste, fue...", meaning: "to be (essence/traits)" },
+      { verb: "ir", stem: "fui, fuiste, fue...", meaning: "to go" },
+      { verb: "dar", stem: "di, diste, dio...", meaning: "to give" },
+      { verb: "ver", stem: "vi, viste, vio...", meaning: "to see / watch" }
+    ]
+  },
+  {
+    id: "double_vowel",
+    labelEn: "🌊 Double Vowel (i ➔ y)",
+    labelEs: "🌊 Doble Vocal (i ➔ y)",
+    badge: "i ➔ y",
+    color: "#818cf8",
+    ruleEn: "Intervocalic i -> y: Unstressed 'i' becomes 'y' in 3rd person (él leyó, ellos leyeron; oyó, creyó, destruyó). Other forms carry written accents.",
+    ruleEs: "i intervocálica -> y: La 'i' átona cambia a 'y' en 3ª persona (él leyó, ellos leyeron; oyó, creyó, destruyó).",
+    verbs: [
+      { verb: "leer", stem: "i ➔ y (leyó, leyeron)", meaning: "to read" },
+      { verb: "creer", stem: "i ➔ y (creyó, creyeron)", meaning: "to believe" },
+      { verb: "oír", stem: "i ➔ y (oyó, oyeron)", meaning: "to hear" },
+      { verb: "caer", stem: "i ➔ y (cayó, cayeron)", meaning: "to fall" },
+      { verb: "destruir", stem: "i ➔ y (destruyó, destruyeron)", meaning: "to destroy" }
+    ]
+  },
+  {
+    id: "regulars",
+    labelEn: "🟢 Regular Models",
+    labelEs: "🟢 Modelos Regulares",
+    badge: "Regular",
+    color: "#10b981",
+    ruleEn: "Regular Verbs: Follow standard, predictable -ar, -er, and -ir ending patterns in both present and preterite.",
+    ruleEs: "Verbos Regulares: Siguen patrones estándar y predecibles en -ar, -er e -ir tanto en presente como en pretérito.",
+    verbs: [
+      { verb: "hablar", stem: "Regular -ar", meaning: "to speak / talk" },
+      { verb: "comer", stem: "Regular -er", meaning: "to eat" },
+      { verb: "vivir", stem: "Regular -ir", meaning: "to live" }
+    ]
+  }
+];
+
+/**
+ * Resolves which grammatical category a verb belongs to for the Conjugation Helper
+ */
+export function getVerbCategoryInfo(rawVerb) {
+  if (!rawVerb) return null;
+  const base = parseVerb(rawVerb).base.toLowerCase();
+
+  for (const cat of VERB_CATEGORIES) {
+    if (cat.verbs) {
+      const match = cat.verbs.find(v => v.verb === base);
+      if (match) {
+        return {
+          categoryId: cat.id,
+          category: cat,
+          subcategoryId: null,
+          subcategory: null,
+          verbMeta: match
+        };
+      }
+    }
+    if (cat.subcategories) {
+      for (const sub of cat.subcategories) {
+        const match = sub.verbs.find(v => v.verb === base);
+        if (match) {
+          return {
+            categoryId: cat.id,
+            category: cat,
+            subcategoryId: sub.id,
+            subcategory: sub,
+            verbMeta: match
+          };
+        }
+      }
+    }
+  }
+
+  // Fallback checks for -car, -gar, -zar or regular
+  if (base.endsWith("car")) {
+    const spellCat = VERB_CATEGORIES.find(c => c.id === "spell_change");
+    const sub = spellCat?.subcategories?.find(s => s.id === "car");
+    return {
+      categoryId: "spell_change",
+      category: spellCat,
+      subcategoryId: "car",
+      subcategory: sub,
+      verbMeta: { verb: base, stem: "c ➔ qu (yo)", meaning: "" }
+    };
+  }
+  if (base.endsWith("gar")) {
+    const spellCat = VERB_CATEGORIES.find(c => c.id === "spell_change");
+    const sub = spellCat?.subcategories?.find(s => s.id === "gar");
+    return {
+      categoryId: "spell_change",
+      category: spellCat,
+      subcategoryId: "gar",
+      subcategory: sub,
+      verbMeta: { verb: base, stem: "g ➔ gu (yo)", meaning: "" }
+    };
+  }
+  if (base.endsWith("zar")) {
+    const spellCat = VERB_CATEGORIES.find(c => c.id === "spell_change");
+    const sub = spellCat?.subcategories?.find(s => s.id === "zar");
+    return {
+      categoryId: "spell_change",
+      category: spellCat,
+      subcategoryId: "zar",
+      subcategory: sub,
+      verbMeta: { verb: base, stem: "z ➔ c (yo)", meaning: "" }
+    };
+  }
+
+  return {
+    categoryId: "regulars",
+    category: VERB_CATEGORIES.find(c => c.id === "regulars"),
+    subcategoryId: null,
+    subcategory: null,
+    verbMeta: { verb: base, stem: base.endsWith("ar") ? "-ar" : base.endsWith("er") ? "-er" : "-ir", meaning: "" }
   };
 }

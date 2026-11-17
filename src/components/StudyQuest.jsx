@@ -20,8 +20,12 @@ import {
   isPreteriteStemChanger,
   isPreteriteDoubleVowel,
   getVerbCategories,
-  getVerbCategoryInfo
+  getVerbCategoryInfo,
+  VERB_LAB_GROUPS,
+  getVerbsForGroups,
+  cleanConjugationInput
 } from '../utils/conjugationHelper';
+import { t } from '../utils/translationsHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { generateSentenceBuilderQuestion, SENTENCE_POOLS } from '../utils/sentenceBuilderHelper';
 import { CONTRAST_CODEX_TABS, CONTRAST_TABS_CONTENT } from '../utils/codexData';
@@ -367,6 +371,9 @@ export default function StudyQuest({
   const [practiceAnswered, setPracticeAnswered] = useState(false);
   const [practiceSelected, setPracticeSelected] = useState(null);
   const [practiceTyped, setPracticeTyped] = useState("");
+  const [selectedVerbGroups, setSelectedVerbGroups] = useState(() => VERB_LAB_GROUPS.map(g => g.id));
+  const [practiceInputMode, setPracticeInputMode] = useState("choice"); // "choice" or "typed"
+  const [practiceQuestionCount, setPracticeQuestionCount] = useState(10); // 10, 25, 50, or 'all'
 
   // Speech and Audio synthesis refs
   const [speechAvailable, setSpeechAvailable] = useState(false);
@@ -448,8 +455,8 @@ export default function StudyQuest({
       }
     }
 
-    // 9. Part-of-speech categories
-    const posKeys = ["Nouns", "Verbs", "Adjectives", "Grammar & Conversation", "Sentences"];
+    // 9. Part-of-speech categories (Verbs consolidated into Verb Lab)
+    const posKeys = ["Nouns", "Adjectives", "Grammar & Conversation", "Sentences"];
     posKeys.forEach(cat => {
       if (grouped[cat]) {
         formatted[cat] = Array.from(grouped[cat]);
@@ -515,57 +522,61 @@ export default function StudyQuest({
 
   // Filter free practice cards when category changes
   useEffect(() => {
-    if (!selectedSubcategory) return;
-    let filtered;
-    const verbCards = getVerbPracticeCards(selectedSubcategory);
-    if (verbCards && verbCards.length > 0) {
-      filtered = verbCards;
-    } else if (selectedCategory.includes("Práctica de Verbos") || selectedCategory.includes("Verb Practice Lab")) {
-      filtered = getVerbPracticeCards("Todos los Verbos");
-    } else if (selectedCategory === "Repaso 101") {
-      if (selectedSubcategory === "All of Unit 1 (Todo el Repaso)") {
-        filtered = vocabularyData.filter(item => item.unit === "Unit 1: Repaso 101" || !item.unit);
-      } else {
-        filtered = vocabularyData.filter(item => 
-          item.subcategory === selectedSubcategory && (item.unit === "Unit 1: Repaso 101" || !item.unit)
-        );
-      }
-    } else if (selectedCategory === "Unidad 2") {
-      if (selectedSubcategory.startsWith("All of Unit 2")) {
-        filtered = vocabularyData.filter(item => item.category === "Unidad 2" || (item.unit && item.unit.startsWith("Unit 2")));
-      } else {
-        filtered = vocabularyData.filter(item => 
-          item.subcategory === selectedSubcategory && (item.category === "Unidad 2" || (item.unit && item.unit.startsWith("Unit 2")))
-        );
-      }
-    } else if (selectedCategory === "Unidad 3") {
-      if (selectedSubcategory.startsWith("All of Unit 3")) {
-        filtered = vocabularyData.filter(item => item.category === "Unidad 3" || (item.unit && item.unit.startsWith("Unit 3")));
-      } else {
-        filtered = vocabularyData.filter(item => 
-          item.subcategory === selectedSubcategory && (item.category === "Unidad 3" || (item.unit && item.unit.startsWith("Unit 3")))
-        );
-      }
-    } else if (selectedCategory === "Unidad 4") {
-      if (selectedSubcategory.startsWith("All of Unit 4")) {
-        filtered = vocabularyData.filter(item => item.category === "Unidad 4" || (item.unit && item.unit.startsWith("Unit 4")));
-      } else {
-        filtered = vocabularyData.filter(item => 
-          item.subcategory === selectedSubcategory && (item.category === "Unidad 4" || (item.unit && item.unit.startsWith("Unit 4")))
-        );
-      }
-    } else if (selectedCategory.startsWith("Unidad 5")) {
-      filtered = vocabularyData.filter(item => item.category === "Unidad 5" || (item.unit && item.unit.startsWith("Unit 5")));
-    } else if (selectedCategory.startsWith("Unidad 6")) {
-      filtered = vocabularyData.filter(item => item.category === "Unidad 6" || (item.unit && item.unit.startsWith("Unit 6")));
-    } else if (selectedCategory.startsWith("Unidad 7")) {
-      filtered = vocabularyData.filter(item => item.category === "Unidad 7" || (item.unit && item.unit.startsWith("Unit 7")));
-    } else if (selectedCategory.startsWith("Unidad 8")) {
-      filtered = vocabularyData.filter(item => item.category === "Unidad 8" || (item.unit && item.unit.startsWith("Unit 8")));
+    const isVerbLab = selectedCategory.includes("Práctica de Verbos") || selectedCategory.includes("Verb Practice Lab") || selectedCategory.includes("Verb Lab");
+    let filtered = [];
+
+    if (isVerbLab) {
+      filtered = getVerbsForGroups(selectedVerbGroups, vocabularyData);
     } else {
-      filtered = vocabularyData.filter(item => 
-        item.category === selectedCategory && item.subcategory === selectedSubcategory
-      );
+      if (!selectedSubcategory) return;
+      const verbCards = getVerbPracticeCards(selectedSubcategory);
+      if (verbCards && verbCards.length > 0) {
+        filtered = verbCards;
+      } else if (selectedCategory === "Repaso 101") {
+        if (selectedSubcategory === "All of Unit 1 (Todo el Repaso)") {
+          filtered = vocabularyData.filter(item => item.unit === "Unit 1: Repaso 101" || !item.unit);
+        } else {
+          filtered = vocabularyData.filter(item => 
+            item.subcategory === selectedSubcategory && (item.unit === "Unit 1: Repaso 101" || !item.unit)
+          );
+        }
+      } else if (selectedCategory === "Unidad 2") {
+        if (selectedSubcategory.startsWith("All of Unit 2")) {
+          filtered = vocabularyData.filter(item => item.category === "Unidad 2" || (item.unit && item.unit.startsWith("Unit 2")));
+        } else {
+          filtered = vocabularyData.filter(item => 
+            item.subcategory === selectedSubcategory && (item.category === "Unidad 2" || (item.unit && item.unit.startsWith("Unit 2")))
+          );
+        }
+      } else if (selectedCategory === "Unidad 3") {
+        if (selectedSubcategory.startsWith("All of Unit 3")) {
+          filtered = vocabularyData.filter(item => item.category === "Unidad 3" || (item.unit && item.unit.startsWith("Unit 3")));
+        } else {
+          filtered = vocabularyData.filter(item => 
+            item.subcategory === selectedSubcategory && (item.category === "Unidad 3" || (item.unit && item.unit.startsWith("Unit 3")))
+          );
+        }
+      } else if (selectedCategory === "Unidad 4") {
+        if (selectedSubcategory.startsWith("All of Unit 4")) {
+          filtered = vocabularyData.filter(item => item.category === "Unidad 4" || (item.unit && item.unit.startsWith("Unit 4")));
+        } else {
+          filtered = vocabularyData.filter(item => 
+            item.subcategory === selectedSubcategory && (item.category === "Unidad 4" || (item.unit && item.unit.startsWith("Unit 4")))
+          );
+        }
+      } else if (selectedCategory.startsWith("Unidad 5")) {
+        filtered = vocabularyData.filter(item => item.category === "Unidad 5" || (item.unit && item.unit.startsWith("Unit 5")));
+      } else if (selectedCategory.startsWith("Unidad 6")) {
+        filtered = vocabularyData.filter(item => item.category === "Unidad 6" || (item.unit && item.unit.startsWith("Unit 6")));
+      } else if (selectedCategory.startsWith("Unidad 7")) {
+        filtered = vocabularyData.filter(item => item.category === "Unidad 7" || (item.unit && item.unit.startsWith("Unit 7")));
+      } else if (selectedCategory.startsWith("Unidad 8")) {
+        filtered = vocabularyData.filter(item => item.category === "Unidad 8" || (item.unit && item.unit.startsWith("Unit 8")));
+      } else {
+        filtered = vocabularyData.filter(item => 
+          item.category === selectedCategory && item.subcategory === selectedSubcategory
+        );
+      }
     }
     // Practice flashcards must only display vocabulary words/terms, never full sentences or conversational phrases!
     setPracticeCards(filtered.filter(item => isEligibleForFlashcard(item)));
@@ -573,7 +584,7 @@ export default function StudyQuest({
     setPracticeFlipped(false);
     setPracticeQuizStarted(false);
     setPracticeQuizFinished(false);
-  }, [selectedCategory, selectedSubcategory]);
+  }, [selectedCategory, selectedSubcategory, selectedVerbGroups]);
 
   const handleCategoryChange = (e) => {
     const cat = e.target.value;
@@ -581,9 +592,13 @@ export default function StudyQuest({
     if (practiceCategories[cat] && practiceCategories[cat].length > 0) {
       setSelectedSubcategory(practiceCategories[cat][0]);
     }
+    if (cat.includes("Práctica de Verbos") || cat.includes("Verb Practice Lab") || cat.includes("Verb Lab")) {
+      setPracticeQuizMode("conjugation");
+    }
   };
 
   const subcategories = practiceCategories[selectedCategory] || [];
+  const isVerbLab = selectedCategory.includes("Práctica de Verbos") || selectedCategory.includes("Verb Practice Lab") || selectedCategory.includes("Verb Lab");
 
   const initAudio = () => {
     if (!audioCtxRef.current) {
@@ -1702,7 +1717,9 @@ export default function StudyQuest({
     const currentQ = practiceQuestions[practiceCurrentIdx];
     const correctStr = currentQ.correct;
     const userStr = practiceTyped;
-    const isCorrect = compareAnswers(correctStr, userStr);
+    const isCorrect = currentQ.isConjugation
+      ? cleanConjugationInput(userStr, correctStr)
+      : compareAnswers(correctStr, userStr);
 
     if (isCorrect) {
       setPracticeScore(prev => prev + 1);
@@ -1723,7 +1740,7 @@ export default function StudyQuest({
       if (addMistake && currentQ.item) {
         addMistake(currentQ.item.spanish);
       }
-      if (!state.fainted) takeDamage(15);
+      // Zero damage in practice mode!
       setTimeout(() => setShakeTrigger(false), 500);
     }
   };
@@ -1753,7 +1770,7 @@ export default function StudyQuest({
       if (addMistake && currentQ.item) {
         addMistake(currentQ.item.spanish);
       }
-      if (!state.fainted) takeDamage(15);
+      // Zero damage in practice mode!
       setTimeout(() => setShakeTrigger(false), 500);
     }
   };
@@ -1781,7 +1798,7 @@ export default function StudyQuest({
       if (addMistake && currentQ.item) {
         addMistake(currentQ.item.spanish);
       }
-      if (!state.fainted) takeDamage(15);
+      // Zero damage in practice mode!
       setTimeout(() => setShakeTrigger(false), 500);
     }
   };
@@ -2172,6 +2189,11 @@ export default function StudyQuest({
     initAudio();
     if (practiceCards.length === 0) return;
 
+    const isVerbLab = selectedCategory.includes("Práctica de Verbos") || selectedCategory.includes("Verb Practice Lab") || selectedCategory.includes("Verb Lab");
+    const targetCount = practiceQuestionCount === 'all' 
+      ? practiceCards.length 
+      : Math.min(Number(practiceQuestionCount) || 10, practiceCards.length);
+
     let questions = [];
 
     if (practiceQuizMode === "mixed") {
@@ -2179,28 +2201,30 @@ export default function StudyQuest({
       const verbItems = practiceCards.filter(item => isVerbItem(item) && !isSentenceItem(item));
       const otherItems = practiceCards.filter(item => !isVerbItem(item) || isSentenceItem(item));
 
-      // 1. Take up to 5 items as flashcards for study/review first
+      // 1. Take up to 20% of targetCount as flashcards for study/review first (min 1, max 5)
+      const flashcardCount = Math.min(5, Math.max(1, Math.floor(targetCount * 0.2)));
       const cardSource = verbItems.length >= 3 ? verbItems : practiceCards;
       const shuffledCards = [...cardSource].sort(() => Math.random() - 0.5);
-      const cardBatch = shuffledCards.slice(0, Math.min(5, cardSource.length));
+      const cardBatch = shuffledCards.slice(0, Math.min(flashcardCount, cardSource.length));
 
       const cardSteps = cardBatch.map(item => ({
         item,
         isCardIntro: true
       }));
 
-      // 2. Conjugation & Translation Quiz challenges (6-8 questions)
+      // 2. Conjugation & Translation Quiz challenges
+      const quizSlots = Math.max(1, targetCount - cardSteps.length - 1);
       let quizItemsPool = [];
       if (verbItems.length > 0) {
         const shuffledVerbs = [...verbItems].sort(() => Math.random() - 0.5);
-        quizItemsPool.push(...shuffledVerbs.slice(0, 6));
+        quizItemsPool.push(...shuffledVerbs.slice(0, quizSlots));
       }
-      if (quizItemsPool.length < 6 && otherItems.length > 0) {
+      if (quizItemsPool.length < quizSlots && otherItems.length > 0) {
         const shuffledOther = [...otherItems].sort(() => Math.random() - 0.5);
-        quizItemsPool.push(...shuffledOther.slice(0, 6 - quizItemsPool.length));
+        quizItemsPool.push(...shuffledOther.slice(0, quizSlots - quizItemsPool.length));
       }
       if (quizItemsPool.length === 0) {
-        quizItemsPool = [...practiceCards].sort(() => Math.random() - 0.5).slice(0, 6);
+        quizItemsPool = [...practiceCards].sort(() => Math.random() - 0.5).slice(0, quizSlots);
       }
 
       const quizSteps = quizItemsPool.map(item => {
@@ -2210,7 +2234,9 @@ export default function StudyQuest({
           if (chosenTense === "both") {
             chosenTense = Math.random() > 0.5 ? "present" : "preterite";
           } else if (chosenTense === "auto") {
-            if (
+            if (item.defaultTense) {
+              chosenTense = item.defaultTense === "both" ? (Math.random() > 0.5 ? "present" : "preterite") : item.defaultTense;
+            } else if (
               item.unit?.includes("Unit 3") || 
               item.unit?.includes("Unit 4") || 
               item.category === "Unidad 3" || 
@@ -2237,6 +2263,7 @@ export default function StudyQuest({
               item,
               isCardIntro: false,
               isConjugation: true,
+              isTyped: practiceInputMode === "typed",
               isGustar: qSpec.isGustar,
               isReciprocal: qSpec.isReciprocal,
               isSpellChanger: qSpec.isSpellChanger,
@@ -2258,7 +2285,11 @@ export default function StudyQuest({
           }
         }
 
-        const qType = Math.random() > 0.5 ? 0 : 1;
+        let qType = practiceInputMode === "typed" ? 2 : (Math.random() > 0.5 ? 0 : 1);
+        if (qType === 2 && (item.spanish.includes("/") || item.spanish.includes("(") || item.spanish.length > 25)) {
+          qType = 0;
+        }
+
         const isEsToEn = qType === 0;
         const correctVal = isEsToEn ? formatEnglishPrompt(item.spanish, item.english) : item.spanish;
         const questionText = isEsToEn ? item.spanish : formatEnglishPrompt(item.spanish, item.english);
@@ -2283,6 +2314,7 @@ export default function StudyQuest({
           isCardIntro: false,
           isConjugation: false,
           type: qType,
+          isTyped: qType === 2,
           questionWord: questionText,
           correct: correctVal,
           choices: choices
@@ -2313,9 +2345,9 @@ export default function StudyQuest({
         choices: []
       }];
 
-      questions = [...cardSteps, ...quizSteps, ...sentenceSteps];
+      questions = [...cardSteps, ...quizSteps, ...sentenceSteps].slice(0, targetCount);
     } else if (practiceQuizMode === "sentence") {
-      questions = Array.from({ length: 8 }).map(() => {
+      questions = Array.from({ length: Math.min(targetCount, 25) }).map(() => {
         const sSpec = generateSentenceBuilderQuestion({ unit: state.questStage || 1 });
         return {
           item: null,
@@ -2349,35 +2381,20 @@ export default function StudyQuest({
       }
 
       const shuffled = [...pool].sort(() => Math.random() - 0.5);
-      const chosen = shuffled.slice(0, 10);
+      const chosen = shuffled.slice(0, targetCount);
 
       questions = chosen.map(item => {
-        const fillSpec = generateFillInTheBlank(item);
-        if (fillSpec) {
-          return {
-            item,
-            isCardIntro: false,
-            isConjugation: false,
-            isFillInTheBlank: true,
-            questionWord: fillSpec.sentence,
-            meaning: fillSpec.meaning,
-            correct: fillSpec.correct,
-            choices: fillSpec.choices,
-            hint: fillSpec.hint,
-            targetVerb: fillSpec.targetVerb,
-            tense: fillSpec.tense
-          };
-        }
-
         const isVerb = isVerbItem(item) && !isSentenceItem(item);
-        const wantsConjugation = isVerb && practiceQuizMode === "conjugation";
+        const wantsConjugation = isVerb && (practiceQuizMode === "conjugation" || isVerbLab);
 
         if (wantsConjugation) {
           let chosenTense = practiceTense;
           if (chosenTense === "both") {
             chosenTense = Math.random() > 0.5 ? "present" : "preterite";
           } else if (chosenTense === "auto") {
-            if (
+            if (item.defaultTense) {
+              chosenTense = item.defaultTense === "both" ? (Math.random() > 0.5 ? "present" : "preterite") : item.defaultTense;
+            } else if (
               item.unit?.includes("Unit 3") || 
               item.unit?.includes("Unit 4") || 
               item.category === "Unidad 3" || 
@@ -2404,6 +2421,7 @@ export default function StudyQuest({
               item,
               isCardIntro: false,
               isConjugation: true,
+              isTyped: practiceInputMode === "typed",
               isGustar: qSpec.isGustar,
               isReciprocal: qSpec.isReciprocal,
               isSpellChanger: qSpec.isSpellChanger,
@@ -2425,9 +2443,26 @@ export default function StudyQuest({
           }
         }
 
-        let qType = Math.floor(Math.random() * 3);
+        const fillSpec = !isVerbLab ? generateFillInTheBlank(item) : null;
+        if (fillSpec) {
+          return {
+            item,
+            isCardIntro: false,
+            isConjugation: false,
+            isFillInTheBlank: true,
+            questionWord: fillSpec.sentence,
+            meaning: fillSpec.meaning,
+            correct: fillSpec.correct,
+            choices: fillSpec.choices,
+            hint: fillSpec.hint,
+            targetVerb: fillSpec.targetVerb,
+            tense: fillSpec.tense
+          };
+        }
+
+        let qType = practiceInputMode === "typed" ? 2 : (Math.floor(Math.random() * 2));
         if (qType === 2 && (item.spanish.includes("/") || item.spanish.includes("(") || item.spanish.length > 25)) {
-          qType = Math.random() > 0.5 ? 0 : 1;
+          qType = 0;
         }
 
         const isEsToEn = qType === 0;
@@ -2454,6 +2489,7 @@ export default function StudyQuest({
           isCardIntro: false,
           isConjugation: false,
           type: qType,
+          isTyped: qType === 2,
           questionWord: questionText,
           correct: correctVal,
           choices: choices
@@ -2461,7 +2497,7 @@ export default function StudyQuest({
       });
     }
 
-    setPracticeQuestions(questions);
+    setPracticeQuestions(questions.filter(Boolean));
     setPracticeCurrentIdx(0);
     setPracticeScore(0);
     setPracticeAnswered(false);
@@ -2507,7 +2543,9 @@ export default function StudyQuest({
   const isPracticeUserCorrect = practiceAnswered && practiceQuestions[practiceCurrentIdx] && (
     practiceQuestions[practiceCurrentIdx].isSentenceBuilder
       ? practiceSelected?.trim().toLowerCase() === practiceQuestions[practiceCurrentIdx].correct?.trim().toLowerCase()
-      : compareAnswers(practiceQuestions[practiceCurrentIdx].correct, practiceSelected)
+      : practiceQuestions[practiceCurrentIdx].isConjugation
+        ? cleanConjugationInput(practiceSelected, practiceQuestions[practiceCurrentIdx].correct)
+        : compareAnswers(practiceQuestions[practiceCurrentIdx].correct, practiceSelected)
   );
 
   // RPG Sprite calculations
@@ -4019,19 +4057,38 @@ export default function StudyQuest({
                 </select>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Vocabulary Unit</span>
-                <select 
-                  value={selectedSubcategory} 
-                  onChange={(e) => setSelectedSubcategory(e.target.value)} 
-                  className="study-select"
-                  disabled={subcategories.length === 0}
-                >
-                  {subcategories.map(sub => (
-                    <option key={sub} value={sub}>{sub}</option>
-                  ))}
-                </select>
-              </div>
+              {isVerbLab ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    {t('verbLabSelectedCount', translateInstructions)}
+                  </span>
+                  <div style={{ 
+                    padding: '8px 12px', 
+                    borderRadius: '8px', 
+                    background: 'rgba(255,255,255,0.05)', 
+                    border: '1px solid var(--card-border)',
+                    fontSize: '0.85rem',
+                    color: 'var(--primary)',
+                    fontWeight: 600
+                  }}>
+                    ⚡ {selectedVerbGroups.length} / {VERB_LAB_GROUPS.length} ({practiceCards.length} {translateInstructions ? "verbs" : "verbos"})
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Vocabulary Unit</span>
+                  <select 
+                    value={selectedSubcategory} 
+                    onChange={(e) => setSelectedSubcategory(e.target.value)} 
+                    className="study-select"
+                    disabled={subcategories.length === 0}
+                  >
+                    {subcategories.map(sub => (
+                      <option key={sub} value={sub}>{sub}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginLeft: 'auto' }}>
                 {practiceMode === "cards" && (
@@ -4058,6 +4115,176 @@ export default function StudyQuest({
                 </div>
               </div>
             </div>
+
+            {isVerbLab && (
+              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--card-border)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {translateInstructions ? "Select Verb Families to Practice:" : "Elige las Familias de Verbos a Practicar:"}
+                  </span>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                      onClick={() => setSelectedVerbGroups(VERB_LAB_GROUPS.map(g => g.id))}
+                    >
+                      {t('verbLabSelectAll', translateInstructions)}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                      onClick={() => setSelectedVerbGroups(VERB_LAB_GROUPS.filter(g => g.group === 'present').map(g => g.id))}
+                    >
+                      {t('verbLabSelectPresent', translateInstructions)}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                      onClick={() => setSelectedVerbGroups(VERB_LAB_GROUPS.filter(g => g.group === 'preterite').map(g => g.id))}
+                    >
+                      {t('verbLabSelectPreterite', translateInstructions)}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                      onClick={() => setSelectedVerbGroups([])}
+                    >
+                      {t('verbLabClear', translateInstructions)}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Verb groups organized by tense */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Present Tense */}
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      {t('verbLabGroupPresent', translateInstructions)}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {VERB_LAB_GROUPS.filter(g => g.group === 'present').map(group => {
+                        const isSelected = selectedVerbGroups.includes(group.id);
+                        return (
+                          <button
+                            key={group.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedVerbGroups(prev => 
+                                isSelected ? prev.filter(id => id !== group.id) : [...prev, group.id]
+                              );
+                            }}
+                            className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{
+                              fontSize: '0.75rem',
+                              padding: '5px 10px',
+                              borderRadius: '20px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              background: isSelected ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                              borderColor: isSelected ? '#10b981' : 'var(--card-border)',
+                              color: isSelected ? '#fff' : 'var(--text-secondary)'
+                            }}
+                          >
+                            <span>{group.icon}</span>
+                            <span>{translateInstructions ? group.labelEn : group.labelEs}</span>
+                            <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>{isSelected ? '✓' : '+'}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Reflexive Verbs */}
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#38bdf8', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      {t('verbLabGroupReflexive', translateInstructions)}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {VERB_LAB_GROUPS.filter(g => g.group === 'reflexive').map(group => {
+                        const isSelected = selectedVerbGroups.includes(group.id);
+                        return (
+                          <button
+                            key={group.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedVerbGroups(prev => 
+                                isSelected ? prev.filter(id => id !== group.id) : [...prev, group.id]
+                              );
+                            }}
+                            className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{
+                              fontSize: '0.75rem',
+                              padding: '5px 10px',
+                              borderRadius: '20px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              background: isSelected ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                              borderColor: isSelected ? '#38bdf8' : 'var(--card-border)',
+                              color: isSelected ? '#fff' : 'var(--text-secondary)'
+                            }}
+                          >
+                            <span>{group.icon}</span>
+                            <span>{translateInstructions ? group.labelEn : group.labelEs}</span>
+                            <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>{isSelected ? '✓' : '+'}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Preterite Tense */}
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#f97316', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      {t('verbLabGroupPreterite', translateInstructions)}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {VERB_LAB_GROUPS.filter(g => g.group === 'preterite').map(group => {
+                        const isSelected = selectedVerbGroups.includes(group.id);
+                        return (
+                          <button
+                            key={group.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedVerbGroups(prev => 
+                                isSelected ? prev.filter(id => id !== group.id) : [...prev, group.id]
+                              );
+                            }}
+                            className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{
+                              fontSize: '0.75rem',
+                              padding: '5px 10px',
+                              borderRadius: '20px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              background: isSelected ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                              borderColor: isSelected ? '#f97316' : 'var(--card-border)',
+                              color: isSelected ? '#fff' : 'var(--text-secondary)'
+                            }}
+                          >
+                            <span>{group.icon}</span>
+                            <span>{translateInstructions ? group.labelEn : group.labelEs}</span>
+                            <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>{isSelected ? '✓' : '+'}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {selectedVerbGroups.length === 0 && (
+                  <div style={{ fontSize: '0.78rem', color: 'var(--danger)', padding: '6px 10px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px' }}>
+                    ⚠️ {translateInstructions ? "Please select at least one verb family to practice." : "Por favor selecciona al menos una familia de verbos para practicar."}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {practiceMode === "cards" && (
@@ -4068,9 +4295,11 @@ export default function StudyQuest({
                     
                     <div className="flashcard-face flashcard-front">
                       <span className="flashcard-category">
-                        {selectedSubcategory.startsWith("All of ")
-                          ? `${selectedCategory} • ${practiceCards[practiceCurrentIdx]?.subcategory || 'General'}`
-                          : selectedSubcategory}
+                        {isVerbLab 
+                          ? `${selectedCategory} • ${practiceCards[practiceCurrentIdx]?.subcategory || 'Verbo'}`
+                          : selectedSubcategory.startsWith("All of ")
+                            ? `${selectedCategory} • ${practiceCards[practiceCurrentIdx]?.subcategory || 'General'}`
+                            : selectedSubcategory}
                       </span>
                       <h3 className="flashcard-term">{practiceCards[practiceCurrentIdx].spanish}</h3>
                       
@@ -4152,138 +4381,218 @@ export default function StudyQuest({
             ) : (
               <div className="glass-panel" style={{ padding: '30px', textAlign: 'center', maxWidth: '550px', margin: '0 auto' }}>
                 <Swords size={36} color="var(--primary)" style={{ margin: '0 auto 12px' }} />
-                <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '8px' }}>Start Custom Practice Quiz</h4>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px', lineHeight: '1.4' }}>
-                  Test yourself in: <strong>{selectedSubcategory}</strong>. You will receive 10 questions. Errors deal damage to your HP!
-                </p>
-                <p style={{ fontSize: '0.8rem', color: 'var(--accent)', marginBottom: '20px', background: 'rgba(16, 185, 129, 0.05)', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.15)', display: 'inline-block' }}>
-                  💡 Tip: First time studying this topic? Switch to <strong>Flashcards</strong> above to learn the words first!
+                <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '8px' }}>
+                  {translateInstructions ? "Start Custom Practice Quiz" : "Comenzar Cuestionario de Práctica"}
+                </h4>
+                
+                {/* 🛡️ Safe Practice Badge */}
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '16px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', fontSize: '0.8rem', fontWeight: 600, marginBottom: '10px' }}>
+                  {t('practiceSafeBadge', translateInstructions)}
+                </div>
+
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '6px', lineHeight: '1.4' }}>
+                  {translateInstructions ? "Test yourself in: " : "Ponte a prueba en: "}
+                  <strong>{isVerbLab ? (translateInstructions ? "Verb Practice Lab" : "Laboratorio de Verbos") : selectedSubcategory}</strong>
                 </p>
 
-                {practiceCards.some(item => isVerbItem(item)) && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '440px', margin: '0 auto 20px' }}>
-                    <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
-                      <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Quiz Type</label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
-                        <button 
-                          className={`btn ${practiceQuizMode === 'translation' ? 'btn-primary' : 'btn-secondary'}`} 
-                          style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
-                          onClick={() => setPracticeQuizMode("translation")}
-                        >
-                          {translateInstructions ? "Traducción (Translation)" : "Traducción"}
-                        </button>
-                        <button 
-                          className={`btn ${practiceQuizMode === 'conjugation' ? 'btn-primary' : 'btn-secondary'}`} 
-                          style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
-                          onClick={() => setPracticeQuizMode("conjugation")}
-                        >
-                          ⚡ {translateInstructions ? "Conjugación (Conjugation)" : "Conjugación"}
-                        </button>
-                        <button 
-                          className={`btn ${practiceQuizMode === 'sentence' ? 'btn-primary' : 'btn-secondary'}`} 
-                          style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
-                          onClick={() => setPracticeQuizMode("sentence")}
-                        >
-                          🧩 {translateInstructions ? "Frases (Sentences)" : "Frases"}
-                        </button>
-                        <button 
-                          className={`btn ${practiceQuizMode === 'mixed' ? 'btn-primary' : 'btn-secondary'}`} 
-                          style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
-                          onClick={() => setPracticeQuizMode("mixed")}
-                        >
-                          🔀 {translateInstructions ? "Mixto (Mixed)" : "Mixto"}
-                        </button>
-                      </div>
+                <p style={{ fontSize: '0.8rem', color: '#10b981', marginBottom: '16px', lineHeight: '1.4' }}>
+                  {t('practiceZeroDamageBanner', translateInstructions)}
+                </p>
+
+                <p style={{ fontSize: '0.8rem', color: 'var(--accent)', marginBottom: '18px', background: 'rgba(16, 185, 129, 0.05)', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.15)', display: 'inline-block' }}>
+                  💡 {translateInstructions ? "Tip: First time studying this topic? Switch to " : "Consejo: ¿Primera vez con este tema? Cambia a "}
+                  <strong>{translateInstructions ? "Flashcards" : "Tarjetas"}</strong>
+                  {translateInstructions ? " above to learn the words first!" : " arriba para aprender los términos primero!"}
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '440px', margin: '0 auto 20px' }}>
+                  {/* Question Count Selector */}
+                  <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+                    <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>
+                      {t('practiceQuestionCountLabel', translateInstructions)}
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+                      {[10, 25, 50, 'all'].map(count => {
+                        const isSelected = practiceQuestionCount === count;
+                        const label = count === 'all' ? t('practiceCountAll', translateInstructions) : count;
+                        return (
+                          <button
+                            key={count}
+                            type="button"
+                            className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{ 
+                              padding: '6px', 
+                              fontSize: '0.8rem',
+                              fontWeight: isSelected ? 700 : 500
+                            }}
+                            onClick={() => setPracticeQuestionCount(count)}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
                     </div>
+                  </div>
 
-                    {practiceQuizMode === 'sentence' && (
-                      <p style={{ fontSize: '0.78rem', color: 'var(--accent)', margin: '-4px 0 2px', lineHeight: '1.4' }}>
-                        {translateInstructions
-                          ? "🧩 Sentence Construction: Drag or tap words to correctly order Spanish sentences with grammatical distractors."
-                          : "🧩 Construcción de Frases: Arrastra o toca las palabras para ordenar correctamente las oraciones en español con distractores gramaticales."}
-                      </p>
-                    )}
+                  {/* Answer Format Toggle */}
+                  <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+                    <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>
+                      {t('practiceAnswerModeLabel', translateInstructions)}
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${practiceInputMode === 'choice' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ padding: '7px 8px', fontSize: '0.8rem' }}
+                        onClick={() => setPracticeInputMode("choice")}
+                      >
+                        🔘 {t('practiceModeChoice', translateInstructions)}
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${practiceInputMode === 'typed' ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ padding: '7px 8px', fontSize: '0.8rem' }}
+                        onClick={() => setPracticeInputMode("typed")}
+                      >
+                        ⌨️ {t('practiceModeTyped', translateInstructions)}
+                      </button>
+                    </div>
+                  </div>
 
-                    {practiceQuizMode === 'mixed' && (
-                      <p style={{ fontSize: '0.78rem', color: 'var(--accent)', margin: '-4px 0 2px', lineHeight: '1.4' }}>
-                        {translateInstructions
-                          ? "🔀 Mixed Mode: Review interactive flashcards, conjugation drills, and sentence puzzles in the same comprehensive deck."
-                          : "🔀 Modo Mixto: Repasa tarjetas interactivas, desafíos de conjugación y construcción de frases en el mismo mazo integral."}
-                      </p>
-                    )}
-
-                    {(practiceQuizMode === 'conjugation' || practiceQuizMode === 'mixed') && (
-                      <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)', animation: 'pop-in 0.2s ease-out' }}>
-                        <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Tense Mode</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+                  {practiceCards.some(item => isVerbItem(item)) && (
+                    <>
+                      <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+                        <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Quiz Type</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
                           <button 
-                            type="button"
-                            className="btn btn-sm"
-                            style={{ 
-                              fontSize: '0.75rem', 
-                              padding: '6px',
-                              background: practiceTense === 'auto' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
-                              color: practiceTense === 'auto' ? '#fff' : 'var(--text-secondary)',
-                              borderColor: practiceTense === 'auto' ? 'var(--primary)' : 'transparent'
-                            }} 
-                            onClick={() => setPracticeTense("auto")}
+                            className={`btn ${practiceQuizMode === 'translation' ? 'btn-primary' : 'btn-secondary'}`} 
+                            style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
+                            onClick={() => setPracticeQuizMode("translation")}
                           >
-                            🎯 Auto (By Unit)
+                            {translateInstructions ? "Traducción (Translation)" : "Traducción"}
                           </button>
                           <button 
-                            type="button"
-                            className="btn btn-sm"
-                            style={{ 
-                              fontSize: '0.75rem', 
-                              padding: '6px',
-                              background: practiceTense === 'present' ? '#10b981' : 'rgba(255,255,255,0.05)',
-                              color: practiceTense === 'present' ? '#fff' : 'var(--text-secondary)',
-                              borderColor: practiceTense === 'present' ? '#34d399' : 'transparent',
-                              boxShadow: practiceTense === 'present' ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none',
-                              fontWeight: practiceTense === 'present' ? 'bold' : 'normal'
-                            }} 
-                            onClick={() => setPracticeTense("present")}
+                            className={`btn ${practiceQuizMode === 'conjugation' ? 'btn-primary' : 'btn-secondary'}`} 
+                            style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
+                            onClick={() => setPracticeQuizMode("conjugation")}
                           >
-                            ⚡ Presente
+                            ⚡ {translateInstructions ? "Conjugación (Conjugation)" : "Conjugación"}
                           </button>
                           <button 
-                            type="button"
-                            className="btn btn-sm"
-                            style={{ 
-                              fontSize: '0.75rem', 
-                              padding: '6px',
-                              background: practiceTense === 'preterite' ? '#f97316' : 'rgba(255,255,255,0.05)',
-                              color: practiceTense === 'preterite' ? '#fff' : 'var(--text-secondary)',
-                              borderColor: practiceTense === 'preterite' ? '#fb923c' : 'transparent',
-                              boxShadow: practiceTense === 'preterite' ? '0 0 10px rgba(249, 115, 22, 0.4)' : 'none',
-                              fontWeight: practiceTense === 'preterite' ? 'bold' : 'normal'
-                            }} 
-                            onClick={() => setPracticeTense("preterite")}
+                            className={`btn ${practiceQuizMode === 'sentence' ? 'btn-primary' : 'btn-secondary'}`} 
+                            style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
+                            onClick={() => setPracticeQuizMode("sentence")}
                           >
-                            ⏳ Pretérito (Past)
+                            🧩 {translateInstructions ? "Frases (Sentences)" : "Frases"}
                           </button>
                           <button 
-                            type="button"
-                            className="btn btn-sm"
-                            style={{ 
-                              fontSize: '0.75rem', 
-                              padding: '6px',
-                              background: practiceTense === 'both' ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
-                              color: practiceTense === 'both' ? '#fff' : 'var(--text-secondary)',
-                              borderColor: practiceTense === 'both' ? 'var(--accent)' : 'transparent'
-                            }} 
-                            onClick={() => setPracticeTense("both")}
+                            className={`btn ${practiceQuizMode === 'mixed' ? 'btn-primary' : 'btn-secondary'}`} 
+                            style={{ padding: '7px 4px', fontSize: '0.78rem' }} 
+                            onClick={() => setPracticeQuizMode("mixed")}
                           >
-                            🔀 Mixto (Both)
+                            🔀 {translateInstructions ? "Mixto (Mixed)" : "Mixto"}
                           </button>
                         </div>
                       </div>
-                    )}
-                  </div>
-                )}
 
-                <button className="btn btn-primary" onClick={startCustomPracticeQuiz}>
-                  Start Practice Quiz
+                      {practiceQuizMode === 'sentence' && (
+                        <p style={{ fontSize: '0.78rem', color: 'var(--accent)', margin: '-4px 0 2px', lineHeight: '1.4' }}>
+                          {translateInstructions
+                            ? "🧩 Sentence Construction: Drag or tap words to correctly order Spanish sentences with grammatical distractors."
+                            : "🧩 Construcción de Frases: Arrastra o toca las palabras para ordenar correctamente las oraciones en español con distractores gramaticales."}
+                        </p>
+                      )}
+
+                      {practiceQuizMode === 'mixed' && (
+                        <p style={{ fontSize: '0.78rem', color: 'var(--accent)', margin: '-4px 0 2px', lineHeight: '1.4' }}>
+                          {translateInstructions
+                            ? "🔀 Mixed Mode: Review interactive flashcards, conjugation drills, and sentence puzzles in the same comprehensive deck."
+                            : "🔀 Modo Mixto: Repasa tarjetas interactivas, desafíos de conjugación y construcción de frases en el mismo mazo integral."}
+                        </p>
+                      )}
+
+                      {(practiceQuizMode === 'conjugation' || practiceQuizMode === 'mixed') && (
+                        <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)', animation: 'pop-in 0.2s ease-out' }}>
+                          <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Tense Mode</label>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+                            <button 
+                              type="button"
+                              className="btn btn-sm"
+                              style={{ 
+                                fontSize: '0.75rem', 
+                                padding: '6px',
+                                background: practiceTense === 'auto' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                                color: practiceTense === 'auto' ? '#fff' : 'var(--text-secondary)',
+                                borderColor: practiceTense === 'auto' ? 'var(--primary)' : 'transparent'
+                              }} 
+                              onClick={() => setPracticeTense("auto")}
+                            >
+                              🎯 Auto (By Unit)
+                            </button>
+                            <button 
+                              type="button"
+                              className="btn btn-sm"
+                              style={{ 
+                                fontSize: '0.75rem', 
+                                padding: '6px',
+                                background: practiceTense === 'present' ? '#10b981' : 'rgba(255,255,255,0.05)',
+                                color: practiceTense === 'present' ? '#fff' : 'var(--text-secondary)',
+                                borderColor: practiceTense === 'present' ? '#34d399' : 'transparent',
+                                boxShadow: practiceTense === 'present' ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none',
+                                fontWeight: practiceTense === 'present' ? 'bold' : 'normal'
+                              }} 
+                              onClick={() => setPracticeTense("present")}
+                            >
+                              ⚡ Presente
+                            </button>
+                            <button 
+                              type="button"
+                              className="btn btn-sm"
+                              style={{ 
+                                fontSize: '0.75rem', 
+                                padding: '6px',
+                                background: practiceTense === 'preterite' ? '#f97316' : 'rgba(255,255,255,0.05)',
+                                color: practiceTense === 'preterite' ? '#fff' : 'var(--text-secondary)',
+                                borderColor: practiceTense === 'preterite' ? '#fb923c' : 'transparent',
+                                boxShadow: practiceTense === 'preterite' ? '0 0 10px rgba(249, 115, 22, 0.4)' : 'none',
+                                fontWeight: practiceTense === 'preterite' ? 'bold' : 'normal'
+                              }} 
+                              onClick={() => setPracticeTense("preterite")}
+                            >
+                              ⏳ Pretérito (Past)
+                            </button>
+                            <button 
+                              type="button"
+                              className="btn btn-sm"
+                              style={{ 
+                                fontSize: '0.75rem', 
+                                padding: '6px',
+                                background: practiceTense === 'both' ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
+                                color: practiceTense === 'both' ? '#fff' : 'var(--text-secondary)',
+                                borderColor: practiceTense === 'both' ? 'var(--accent)' : 'transparent'
+                              }} 
+                              onClick={() => setPracticeTense("both")}
+                            >
+                              🔀 Mixto (Both)
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                <button 
+                  className="btn btn-primary" 
+                  onClick={startCustomPracticeQuiz}
+                  disabled={practiceCards.length === 0 || (isVerbLab && selectedVerbGroups.length === 0)}
+                  style={{ width: '100%', maxWidth: '280px', margin: '0 auto' }}
+                >
+                  {practiceCards.length === 0
+                    ? (translateInstructions ? "No items available" : "No hay elementos disponibles")
+                    : (isVerbLab && selectedVerbGroups.length === 0)
+                      ? (translateInstructions ? "Select at least 1 group" : "Selecciona al menos 1 grupo")
+                      : (translateInstructions ? "Start Practice Quiz" : "Comenzar Cuestionario")}
                 </button>
               </div>
             )
@@ -4305,7 +4614,7 @@ export default function StudyQuest({
 
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '16px', border: '1px solid var(--card-border)', marginBottom: '24px' }}>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Score Gained</div>
-                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--accent)', margin: '4px 0' }}>{practiceScore} / 10</div>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--accent)', margin: '4px 0' }}>{practiceScore} / {practiceQuestions.length}</div>
                 
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
                   <div>
@@ -4331,8 +4640,19 @@ export default function StudyQuest({
                   Practice Item {practiceCurrentIdx + 1} of {practiceQuestions.length}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', color: 'var(--danger)', fontWeight: 'bold' }}>
-                    <Heart size={14} fill="var(--danger)" /> {state.hp} HP
+                  <span style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px', 
+                    fontSize: '0.8rem', 
+                    color: '#10b981', 
+                    fontWeight: 600,
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    padding: '3px 8px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(16, 185, 129, 0.25)'
+                  }}>
+                    {t('practiceSafeBadge', translateInstructions)}
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', color: 'var(--gold)', fontWeight: 'bold' }}>
                     <Coins size={14} /> {state.gold} G
@@ -4431,7 +4751,13 @@ export default function StudyQuest({
                       </div>
 
                       <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
-                        {currQ?.isGustar ? "Select the correct form of gustar:" : "Conjugate for the subject pronoun:"}
+                        {currQ?.isGustar 
+                          ? (practiceInputMode === "typed" || currQ?.isTyped 
+                              ? (translateInstructions ? "Escribe la forma correcta de gustar (Type form):" : "Escribe la forma correcta de gustar:")
+                              : (translateInstructions ? "Elige la forma correcta de gustar (Choose form):" : "Elige la forma correcta de gustar:"))
+                          : (practiceInputMode === "typed" || currQ?.isTyped
+                              ? (translateInstructions ? "Escribe la conjugación para el pronombre (Type conjugation):" : "Escribe la conjugación para el pronombre:")
+                              : (translateInstructions ? "Elige la conjugación para el pronombre (Choose conjugation):" : "Elige la conjugación para el pronombre:"))}
                       </div>
 
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
@@ -4570,7 +4896,7 @@ export default function StudyQuest({
               ) : (
                 <div className="quiz-question-card">
                   <div className="quiz-question-lbl">
-                    {practiceQuestions[practiceCurrentIdx]?.type === 2 
+                    {practiceQuestions[practiceCurrentIdx]?.type === 2 || practiceQuestions[practiceCurrentIdx]?.isTyped || practiceInputMode === "typed"
                       ? (translateInstructions ? "Escribe la traducción al español (Type Spanish translation):" : "Escribe la traducción al español:") 
                       : (translateInstructions ? "Elige la traducción correcta (Choose correct translation):" : "Elige la traducción correcta:")}
                   </div>
@@ -4610,7 +4936,7 @@ export default function StudyQuest({
                       translateInstructions={translateInstructions}
                     />
                   </div>
-                ) : practiceQuestions[practiceCurrentIdx]?.isConjugation || practiceQuestions[practiceCurrentIdx]?.isFillInTheBlank || practiceQuestions[practiceCurrentIdx]?.type !== 2 ? (
+                ) : (practiceInputMode === 'choice' && !practiceQuestions[practiceCurrentIdx]?.isTyped && practiceQuestions[practiceCurrentIdx]?.type !== 2) ? (
                   <div className="quiz-choices-grid">
                     {practiceQuestions[practiceCurrentIdx]?.choices.map((choice, idx) => {
                       let btnClass = "";
@@ -4641,7 +4967,15 @@ export default function StudyQuest({
                         <input
                           type="text"
                           ref={practiceInputRef}
-                          placeholder={translateInstructions ? "Escribe la traducción al español... (Type Spanish translation...)" : "Escribe la traducción al español..."}
+                          placeholder={
+                            practiceQuestions[practiceCurrentIdx]?.isConjugation
+                              ? (translateInstructions 
+                                  ? "Escribe la conjugación correcta (ej: hablo, comí)... (Type conjugation...)" 
+                                  : "Escribe la conjugación correcta (ej: hablo, comí)...")
+                              : (translateInstructions 
+                                  ? "Escribe la traducción al español... (Type Spanish translation...)" 
+                                  : "Escribe la traducción al español...")
+                          }
                           value={practiceTyped}
                           onChange={(e) => setPracticeTyped(e.target.value)}
                           disabled={practiceAnswered}
@@ -4678,7 +5012,9 @@ export default function StudyQuest({
 
                       {!practiceAnswered && (
                         <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={!practiceTyped.trim()}>
-                          {translateInstructions ? "Enviar Traducción (Submit Translation)" : "Enviar Traducción"}
+                          {practiceQuestions[practiceCurrentIdx]?.isConjugation
+                            ? (translateInstructions ? "Enviar Conjugación (Submit Conjugation)" : "Enviar Conjugación")
+                            : (translateInstructions ? "Enviar Traducción (Submit Translation)" : "Enviar Traducción")}
                         </button>
                       )}
                     </div>
@@ -4702,7 +5038,9 @@ export default function StudyQuest({
                           : `Incorrect! Correct answer: "${practiceQuestions[practiceCurrentIdx].correct}"`
                   }
                   <button className="btn btn-primary" onClick={handlePracticeNext} style={{ width: '100%', marginTop: '16px' }}>
-                    Next Question <ArrowRight size={16} />
+                    {practiceCurrentIdx === practiceQuestions.length - 1 
+                      ? (translateInstructions ? "Finalizar Práctica (Finish Practice)" : "Finalizar Práctica") 
+                      : (translateInstructions ? "Siguiente Pregunta (Next Question)" : "Siguiente Pregunta")} <ArrowRight size={16} />
                   </button>
                 </div>
               )}

@@ -1017,6 +1017,66 @@ export const INSTRUCTION_TRANSLATIONS = {
   dashMidtermCardDesc: {
     es: "Practica las 10 preguntas del examen oral (PDF) con audio oculto, banco de palabras, traducciones bilingües y el Desafío del Corazón de Titán.",
     en: "Practice the 10 oral exam questions (PDF) with hidden audio, word bank, bilingual reviews, and the Titan's Heart Challenge."
+  },
+  practiceSafeBadge: {
+    es: "🛡️ Práctica Segura (0 Daño)",
+    en: "🛡️ Safe Practice (0 Damage)"
+  },
+  practiceQuestionCountLabel: {
+    es: "Cantidad de Preguntas",
+    en: "Question Count"
+  },
+  practiceAnswerModeLabel: {
+    es: "Formato de Respuesta",
+    en: "Answer Format"
+  },
+  practiceModeChoice: {
+    es: "🔘 Opción Múltiple",
+    en: "🔘 Multiple Choice"
+  },
+  practiceModeTyped: {
+    es: "⌨️ Escribir Respuesta",
+    en: "⌨️ Type Answer"
+  },
+  practiceZeroDamageBanner: {
+    es: "🛡️ ¡Práctica libre sin riesgo de daño! Los errores no reducen tus puntos de vida (HP).",
+    en: "🛡️ Safe practice with zero damage risk! Mistakes do not reduce your HP."
+  },
+  verbLabGroupPresent: {
+    es: "⚡ Tiempo Presente (101)",
+    en: "⚡ Present Tense (101)"
+  },
+  verbLabGroupReflexive: {
+    es: "🪞 Verbos Reflexivos y Rutina",
+    en: "🪞 Reflexive Verbs & Routine"
+  },
+  verbLabGroupPreterite: {
+    es: "⏳ Tiempo Pretérito (Pasado)",
+    en: "⏳ Preterite Tense (Past)"
+  },
+  verbLabSelectAll: {
+    es: "Todos",
+    en: "Select All"
+  },
+  verbLabSelectPresent: {
+    es: "Solo Presente",
+    en: "All Present"
+  },
+  verbLabSelectPreterite: {
+    es: "Solo Pretérito",
+    en: "All Preterite"
+  },
+  verbLabClear: {
+    es: "Limpiar",
+    en: "Clear"
+  },
+  verbLabSelectedCount: {
+    es: (c) => `${c} grupos de verbos seleccionados`,
+    en: (c) => `${c} verb groups selected`
+  },
+  practiceCountAll: {
+    es: "Todos",
+    en: "All"
   }
 };
 

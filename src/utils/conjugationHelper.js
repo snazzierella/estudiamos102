@@ -810,6 +810,319 @@ export function getVerbPracticeCards(subcategory) {
   return result;
 }
 
+export const TWIN_VERBS_LIST = [
+  { spanish: "ser", english: "to be (preterite: was/were)", note: "fui, fuiste, fue, fuimos, fuisteis, fueron" },
+  { spanish: "ir", english: "to go (preterite: went)", note: "fui, fuiste, fue, fuimos, fuisteis, fueron" },
+  { spanish: "dar", english: "to give (preterite: gave)", note: "di, diste, dio, dimos, disteis, dieron" },
+  { spanish: "ver", english: "to see (preterite: saw)", note: "vi, viste, vio, vimos, visteis, vieron" }
+];
+
+export const VERB_LAB_GROUPS = [
+  // --- Present Tense (101) ---
+  {
+    id: "present_regular",
+    labelEn: "Regular -ar, -er, -ir",
+    labelEs: "Regulares -ar, -er, -ir",
+    icon: "🟢",
+    tense: "present",
+    group: "present"
+  },
+  {
+    id: "present_stem_ie",
+    labelEn: "Stem-Changing (e ➔ ie)",
+    labelEs: "Cambio de Raíz (e ➔ ie)",
+    icon: "👢",
+    tense: "present",
+    group: "present"
+  },
+  {
+    id: "present_stem_ue",
+    labelEn: "Stem-Changing (o ➔ ue)",
+    labelEs: "Cambio de Raíz (o ➔ ue)",
+    icon: "👢",
+    tense: "present",
+    group: "present"
+  },
+  {
+    id: "present_stem_i",
+    labelEn: "Stem-Changing (e ➔ i)",
+    labelEs: "Cambio de Raíz (e ➔ i)",
+    icon: "👢",
+    tense: "present",
+    group: "present"
+  },
+  {
+    id: "present_yo_go",
+    labelEn: "\"Yo-Go\" & Irregular Yo",
+    labelEs: "Verbos en \"-go\" y Yo Irregular",
+    icon: "⚡",
+    tense: "present",
+    group: "present"
+  },
+  {
+    id: "present_core_irreg",
+    labelEn: "Core Irregulars (ser, estar, ir, dar, saber...)",
+    labelEs: "Irregulares Puros (ser, estar, ir, dar...)",
+    icon: "⭐",
+    tense: "present",
+    group: "present"
+  },
+  {
+    id: "present_gustar",
+    labelEn: "Verbs Structured Like Gustar",
+    labelEs: "Verbos Tipo Gustar",
+    icon: "❤️",
+    tense: "present",
+    group: "present"
+  },
+
+  // --- Reflexive Verbs ---
+  {
+    id: "reflexive_verbs",
+    labelEn: "Reflexive & Daily Routine",
+    labelEs: "Verbos Reflexivos y Rutina Diaria",
+    icon: "🪞",
+    tense: "both",
+    group: "reflexive"
+  },
+
+  // --- Preterite / Past Tense ---
+  {
+    id: "pret_regular",
+    labelEn: "Regular Preterite (-ar, -er, -ir)",
+    labelEs: "Pretérito Regular (-ar, -er, -ir)",
+    icon: "🟢",
+    tense: "preterite",
+    group: "preterite"
+  },
+  {
+    id: "pret_car_gar_zar",
+    labelEn: "Spell Change (-car, -gar, -zar)",
+    labelEs: "Cambios Ortográficos (-car, -gar, -zar)",
+    icon: "✏️",
+    tense: "preterite",
+    group: "preterite"
+  },
+  {
+    id: "pret_sandal",
+    labelEn: "Sandal Verbs (3rd-Person e➔i, o➔u)",
+    labelEs: "Verbos Sandalia (3ª Persona)",
+    icon: "👡",
+    tense: "preterite",
+    group: "preterite"
+  },
+  {
+    id: "pret_double_vowel",
+    labelEn: "Double Vowel (i ➔ y: leer, creer...)",
+    labelEs: "Doble Vocal (i ➔ y: leer, creer...)",
+    icon: "🌊",
+    tense: "preterite",
+    group: "preterite"
+  },
+  {
+    id: "pret_radical_uij",
+    labelEn: "Radical Stems: U, I, J (tuve, hice, dije...)",
+    labelEs: "Raíces Irregulares: U, I, J",
+    icon: "📦",
+    tense: "preterite",
+    group: "preterite"
+  },
+  {
+    id: "pret_twins",
+    labelEn: "Twin & Irregular Verbs (ser/ir, dar, ver)",
+    labelEs: "Verbos Gemelos (ser/ir, dar, ver)",
+    icon: "⭐",
+    tense: "preterite",
+    group: "preterite"
+  }
+];
+
+export function getVerbsForGroups(groupIds = [], customVocab = []) {
+  if (!Array.isArray(groupIds) || groupIds.length === 0) return [];
+
+  const rawList = [];
+  const selectedSet = new Set(groupIds);
+  const vocab = Array.isArray(customVocab) ? customVocab : [];
+
+  if (selectedSet.has("present_regular")) {
+    const items = vocab
+      .filter(item => ["Regular -ar Verbs", "Regular -er Verbs", "Regular -ir Verbs"].includes(item.subcategory))
+      .map(item => ({ ...item, defaultTense: "present", verbGroup: "present_regular" }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("present_stem_ie")) {
+    const items = vocab
+      .filter(item => item.subcategory === "Stem-Changing Verbs (e -> ie)")
+      .map(item => ({ ...item, defaultTense: "present", verbGroup: "present_stem_ie" }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("present_stem_ue")) {
+    const items = vocab
+      .filter(item => item.subcategory === "Stem-Changing Verbs (o -> ue)")
+      .map(item => ({ ...item, defaultTense: "present", verbGroup: "present_stem_ue" }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("present_stem_i")) {
+    const items = vocab
+      .filter(item => item.subcategory === "Stem-Changing Verbs (e -> i)")
+      .map(item => ({ ...item, defaultTense: "present", verbGroup: "present_stem_i" }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("present_yo_go")) {
+    const items = vocab
+      .filter(item => item.subcategory === "Irregular Yo Form Verbs")
+      .map(item => ({ ...item, defaultTense: "present", verbGroup: "present_yo_go" }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("present_core_irreg")) {
+    const items = vocab
+      .filter(item => ["Core Irregular Verbs", "Verbs for Knowing"].includes(item.subcategory))
+      .map(item => ({ ...item, defaultTense: "present", verbGroup: "present_core_irreg" }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("present_gustar")) {
+    const items = vocab
+      .filter(item => item.subcategory === "Verbs Structured Like Gustar")
+      .map(item => ({ ...item, defaultTense: "present", verbGroup: "present_gustar" }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("reflexive_verbs")) {
+    const items = REFLEXIVE_VERBS_PRACTICE_LIST.map(item => ({
+      spanish: item.spanish,
+      english: item.english,
+      category: "Verbs",
+      subcategory: "Verbos Reflexivos y Rutina Diaria (Reflexive Verbs)",
+      unit: "Unit 2: ¿Qué haces todos los días?",
+      defaultTense: "both",
+      verbGroup: "reflexive_verbs"
+    }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("pret_regular")) {
+    const items = vocab
+      .filter(item => ["Regular -ar Verbs", "Regular -er Verbs", "Regular -ir Verbs"].includes(item.subcategory))
+      .map(item => ({
+        ...item,
+        defaultTense: "preterite",
+        verbGroup: "pret_regular",
+        english: item.english ? `${item.english} (preterite / past)` : item.english
+      }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("pret_car_gar_zar")) {
+    const items = PRETERITE_SPELL_CHANGERS_CAR_GAR_ZAR.map(item => ({
+      spanish: item.spanish,
+      english: item.note ? `${item.english} (${item.note})` : item.english,
+      category: "Verbs",
+      subcategory: "Verbos en Pretérito: Cambios Ortográficos (-car, -gar, -zar)",
+      unit: "Unit 3: Nosotros preferimos ir de compras",
+      defaultTense: "preterite",
+      verbGroup: "pret_car_gar_zar"
+    }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("pret_sandal")) {
+    const items = PRETERITE_STEM_CHANGERS_LIST.map(item => ({
+      spanish: item.spanish,
+      english: item.note ? `${item.english} (${item.note})` : item.english,
+      category: "Verbs",
+      subcategory: "Verbos en Pretérito: Cambio de Raíz (e->i, o->u)",
+      unit: "Unit 3: Nosotros preferimos ir de compras",
+      defaultTense: "preterite",
+      verbGroup: "pret_sandal"
+    }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("pret_double_vowel")) {
+    const items = PRETERITE_DOUBLE_VOWEL_LIST.map(item => ({
+      spanish: item.spanish,
+      english: item.note ? `${item.english} (${item.note})` : item.english,
+      category: "Verbs",
+      subcategory: "Verbos en Pretérito: Doble Vocal (i -> y)",
+      unit: "Unit 4: ¿Adónde fuiste de vacaciones?",
+      defaultTense: "preterite",
+      verbGroup: "pret_double_vowel"
+    }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("pret_radical_uij")) {
+    const items = PRETERITE_RADICAL_IRREGULARS_LIST.map(item => ({
+      spanish: item.spanish,
+      english: item.note ? `${item.english} (${item.note})` : item.english,
+      category: "Verbs",
+      subcategory: "Verbos en Pretérito: Raíces Irregulares (U, I, J)",
+      unit: "Unit 4: ¿Adónde fuiste de vacaciones?",
+      defaultTense: "preterite",
+      verbGroup: "pret_radical_uij"
+    }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("pret_twins")) {
+    const items = TWIN_VERBS_LIST.map(item => ({
+      spanish: item.spanish,
+      english: item.note ? `${item.english} (${item.note})` : item.english,
+      category: "Verbs",
+      subcategory: "Twin Verbs (Irregular)",
+      unit: "Unit 4: ¿Adónde fuiste de vacaciones?",
+      defaultTense: "preterite",
+      verbGroup: "pret_twins"
+    }));
+    rawList.push(...items);
+  }
+
+  // De-duplicate by spanish infinitive + defaultTense so a verb selected in both present and preterite is distinct
+  const seen = new Set();
+  const result = [];
+  for (const item of rawList) {
+    const key = `${item.spanish.toLowerCase()}__${item.defaultTense || "any"}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push({
+        ...item,
+        category: "Verbs",
+        isVerbPracticeDeck: true
+      });
+    }
+  }
+
+  return result;
+}
+
+const SUBJECT_PRONOUNS_CLEAN_REGEX = /^(yo|tú|él|ella|usted|nosotros|nosotras|vosotros|vosotras|ellos|ellas|ustedes)\s+/i;
+
+export function cleanConjugationInput(userStr, correctStr) {
+  if (!userStr || !correctStr) return false;
+  const cleanUser = userStr.trim().replace(/[¿¡!?.“”"'()\-–—,;:]/g, "").replace(/\s+/g, " ");
+  const cleanCorrect = correctStr.trim().replace(/[¿¡!?.“”"'()\-–—,;:]/g, "").replace(/\s+/g, " ");
+
+  if (cleanUser.toLowerCase() === cleanCorrect.toLowerCase()) return true;
+
+  // Try stripping subject pronoun prefix from user input
+  const strippedUser = cleanUser.replace(SUBJECT_PRONOUNS_CLEAN_REGEX, "");
+  if (strippedUser.toLowerCase() === cleanCorrect.toLowerCase()) return true;
+
+  // Try stripping subject pronoun prefix from correct answer if present
+  const strippedCorrect = cleanCorrect.replace(SUBJECT_PRONOUNS_CLEAN_REGEX, "");
+  if (cleanUser.toLowerCase() === strippedCorrect.toLowerCase()) return true;
+  if (strippedUser.toLowerCase() === strippedCorrect.toLowerCase()) return true;
+
+  return false;
+}
+
+
 /**
  * Generates an interactive conjugation question for a given verb item.
  * Automatically handles reflexive pronouns, preterite past tense, and Gustar-structure verbs.

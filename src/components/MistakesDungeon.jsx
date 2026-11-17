@@ -1,17 +1,129 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import vocabularyData from '../data/vocabulary.json';
+import { SENTENCE_POOLS } from '../utils/sentenceBuilderHelper';
 import { generateConjugationQuestion, isPreteriteTense } from '../utils/conjugationHelper';
 import { formatEnglishPrompt } from '../utils/difficultyMapper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { ArrowLeft, Trophy, Volume2 } from 'lucide-react';
 
+// Flatten all syllabus sentence pools across all units
+const ALL_SENTENCE_ITEMS = Object.values(SENTENCE_POOLS || {}).flat();
+
+/**
+ * Robust resolver for words or sentences in state.mistakes.
+ * Finds corresponding vocabulary items or sentences so no ghost is ever unkillable.
+ */
+function resolveMistakeItem(spanishWord) {
+  if (!spanishWord || typeof spanishWord !== 'string') return null;
+  const target = spanishWord.trim().toLowerCase();
+
+  // 1. Direct match in vocabulary
+  const vocabMatch = vocabularyData.find(item => 
+    item.spanish && item.spanish.trim().toLowerCase() === target
+  );
+  if (vocabMatch) return vocabMatch;
+
+  // 2. Syllabus / Stage sentences match
+  const sentenceMatch = ALL_SENTENCE_ITEMS.find(s => 
+    s.spanish && s.spanish.trim().toLowerCase() === target
+  );
+  if (sentenceMatch) {
+    return {
+      spanish: sentenceMatch.spanish,
+      english: sentenceMatch.english,
+      category: "Sentences",
+      subcategory: "Syllabus Sentences",
+      unit: "Sentences",
+      isSentence: true
+    };
+  }
+
+  // 3. Partial or prefix match in vocabulary
+  const partialMatch = vocabularyData.find(item => {
+    if (!item.spanish) return false;
+    const itemNorm = item.spanish.trim().toLowerCase();
+    return itemNorm.startsWith(target) || target.startsWith(itemNorm);
+  });
+  if (partialMatch) return partialMatch;
+
+  // 4. Safe fallback item
+  return {
+    spanish: spanishWord.trim(),
+    english: spanishWord.trim(),
+    category: "Vocabulary",
+    subcategory: "Mistakes Review",
+    unit: "Review"
+  };
+}
+
+const SYNONYM_GROUPS = [
+  ["adiós", "adios", "chao", "bye", "goodbye", "bye-bye"],
+  ["andar", "caminar", "to walk", "walk"],
+  ["bonito", "lindo", "hermoso", "pretty", "beautiful", "lovely"],
+  ["maestro", "profesor", "teacher", "professor"],
+  ["coche", "carro", "auto", "car", "automobile"],
+  ["bolígrafo", "pluma", "pen"],
+  ["conversar", "hablar", "to talk", "to speak", "talk", "speak", "converse"],
+  ["computadora", "ordenador", "computer"],
+  ["estudiante", "alumno", "student"],
+  ["apartamento", "departamento", "apartment"],
+  ["lápiz", "lapiz", "pencil"],
+  ["esposa", "mujer", "wife", "woman"],
+];
+
+const cleanAnswer = (str) => {
+  if (!str) return "";
+  return str
+    .toLowerCase()
+    .replace(/[¿¡!?.“”"'()\-–—,;:]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+const stripArticles = (str) => {
+  if (!str) return "";
+  return cleanAnswer(str).replace(/^(the|a|an|el|la|los|las|un|una|unos|unas)\s+/i, "").trim();
+};
+
+const checkSynonyms = (val1, val2) => {
+  const c1 = cleanAnswer(val1);
+  const c2 = cleanAnswer(val2);
+  if (c1 === c2) return true;
+  
+  for (let group of SYNONYM_GROUPS) {
+    const cleanGroup = group.map(g => cleanAnswer(g));
+    if (cleanGroup.includes(c1) && cleanGroup.includes(c2)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const compareAnswers = (correct, user) => {
+  if (!correct || !user) return false;
+  if (checkSynonyms(correct, user)) return true;
+  if (checkSynonyms(stripArticles(correct), stripArticles(user))) return true;
+
+  if (correct.includes("/")) {
+    const parts = correct.split("/");
+    for (let part of parts) {
+      if (checkSynonyms(part, user)) return true;
+      if (checkSynonyms(stripArticles(part), stripArticles(user))) return true;
+    }
+  }
+  return false;
+};
+
 export default function MistakesDungeon({ state, takeDamage, heal, removeMistake, addXp, addGold, setView }) {
-  const [activeMistakes, setActiveMistakes] = useState([]);
+  // Snapshot of mistake items for the current dungeon run session
+  const [dungeonItems, setDungeonItems] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [clearedWords, setClearedWords] = useState(() => new Set());
   const [question, setQuestion] = useState(null);
   
   // Question states
   const [answered, setAnswered] = useState(false);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [typedAnswer, setTypedAnswer] = useState("");
   const [shakeTrigger, setShakeTrigger] = useState(false);
@@ -20,32 +132,121 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
   const [dungeonFinished, setDungeonFinished] = useState(false);
   const [goldBonusEarned, setGoldBonusEarned] = useState(0);
   const [xpBonusEarned, setXpBonusEarned] = useState(0);
+  const [totalClearedInSession, setTotalClearedInSession] = useState(0);
 
   const audioCtxRef = useRef(null);
   const inputRef = useRef(null);
+  const initializedRef = useRef(false);
 
-  // Load mistake items from vocabulary data on mount
-  useEffect(() => {
-    const list = state.mistakes || [];
-    const mapped = list.map(spanish => {
-      return vocabularyData.find(item => item.spanish.trim().toLowerCase() === spanish.trim().toLowerCase());
-    }).filter(Boolean);
-    setActiveMistakes(mapped);
-    setCurrentIdx(0);
-    setDungeonFinished(false);
-  }, [state.mistakes]);
+  const buildDungeonQuestion = useCallback((item) => {
+    setAnswered(false);
+    setIsAnswerCorrect(false);
+    setSelectedChoice(null);
+    setTypedAnswer("");
 
-  // Generate question for the current active mistake item
-  useEffect(() => {
-    if (activeMistakes.length === 0 || currentIdx >= activeMistakes.length || dungeonFinished) {
-      if (activeMistakes.length > 0 && currentIdx >= activeMistakes.length) {
-        finishDungeon();
+    const isVerb = item.category === "Verbs" && item.subcategory !== "Verbs Structured Like Gustar";
+    // 40% chance of conjugation for verbs, otherwise translation
+    const wantsConjugation = isVerb && Math.random() > 0.6;
+
+    if (wantsConjugation) {
+      const qSpec = generateConjugationQuestion(item, { excludeVosotros: state.excludeVosotros });
+      if (qSpec) {
+        setQuestion({
+          item,
+          isConjugation: true,
+          isGustar: qSpec.isGustar,
+          isReciprocal: qSpec.isReciprocal,
+          isReflexive: qSpec.isReflexive,
+          subjectPronoun: qSpec.subjectPronoun,
+          infinitive: qSpec.infinitive,
+          prompt: qSpec.prompt,
+          tense: qSpec.tense,
+          tenseLabel: qSpec.tenseLabel,
+          questionWord: qSpec.verb,
+          meaning: qSpec.meaning,
+          pronoun: qSpec.pronoun,
+          correct: qSpec.correct,
+          choices: qSpec.choices
+        });
+        return;
       }
-      return;
     }
 
-    buildDungeonQuestion(activeMistakes[currentIdx]);
-  }, [activeMistakes, currentIdx, dungeonFinished]);
+    // Determine question type: 0 = MC es->en, 1 = MC en->es, 2 = typing en->es
+    let qType = Math.floor(Math.random() * 3);
+    if (qType === 2 && (item.isSentence || item.spanish.includes("/") || item.spanish.includes("(") || item.spanish.length > 25)) {
+      qType = Math.random() > 0.5 ? 0 : 1;
+    }
+
+    const isEsToEn = qType === 0;
+    const correctText = isEsToEn ? formatEnglishPrompt(item.spanish, item.english) : item.spanish;
+    const questionText = isEsToEn ? item.spanish : formatEnglishPrompt(item.spanish, item.english);
+
+    // Generate distractors
+    const distractors = [];
+    let attempts = 0;
+    while (distractors.length < 3 && attempts < 50) {
+      attempts++;
+      const rand = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
+      const val = isEsToEn ? formatEnglishPrompt(rand.spanish, rand.english) : rand.spanish;
+      if (
+        val &&
+        val.toLowerCase() !== correctText.toLowerCase() &&
+        !checkSynonyms(val, correctText) &&
+        !distractors.includes(val) &&
+        val.length < 45
+      ) {
+        distractors.push(val);
+      }
+    }
+
+    setQuestion({
+      item,
+      isConjugation: false,
+      type: qType, // 0: MC es->en, 1: MC en->es, 2: typing en->es
+      questionWord: questionText,
+      correct: correctText,
+      choices: [correctText, ...distractors].sort(() => Math.random() - 0.5)
+    });
+  }, [state.excludeVosotros]);
+
+  const startDungeonRun = useCallback(() => {
+    const list = state.mistakes || [];
+    const seen = new Set();
+    const mapped = [];
+
+    for (const word of list) {
+      const item = resolveMistakeItem(word);
+      if (item && item.spanish) {
+        const key = item.spanish.trim().toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          mapped.push(item);
+        }
+      }
+    }
+
+    setDungeonItems(mapped);
+    setCurrentIdx(0);
+    setClearedWords(new Set());
+    setDungeonFinished(false);
+    setAnswered(false);
+    setIsAnswerCorrect(false);
+    setSelectedChoice(null);
+    setTypedAnswer("");
+
+    if (mapped.length > 0) {
+      buildDungeonQuestion(mapped[0]);
+    }
+  }, [state.mistakes, buildDungeonQuestion]);
+
+  // Initialize once on mount with current mistakes snapshot
+  useEffect(() => {
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      startDungeonRun();
+    }
+  }, [startDungeonRun]);
 
   const initAudio = () => {
     if (!audioCtxRef.current) {
@@ -91,175 +292,92 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
     speakSpanishUtil(text, { state });
   };
 
-  const buildDungeonQuestion = (item) => {
-    setAnswered(false);
-    setSelectedChoice(null);
-    setTypedAnswer("");
-
-    const isVerb = item.category === "Verbs" && item.subcategory !== "Verbs Structured Like Gustar";
-    // 40% chance of conjugation for verbs, otherwise translation
-    const wantsConjugation = isVerb && Math.random() > 0.6;
-
-    if (wantsConjugation) {
-      const qSpec = generateConjugationQuestion(item, { excludeVosotros: state.excludeVosotros });
-      if (qSpec) {
-        setQuestion({
-          item,
-          isConjugation: true,
-          isGustar: qSpec.isGustar,
-          isReciprocal: qSpec.isReciprocal,
-          isReflexive: qSpec.isReflexive,
-          subjectPronoun: qSpec.subjectPronoun,
-          infinitive: qSpec.infinitive,
-          prompt: qSpec.prompt,
-          tense: qSpec.tense,
-          tenseLabel: qSpec.tenseLabel,
-          questionWord: qSpec.verb,
-          meaning: qSpec.meaning,
-          pronoun: qSpec.pronoun,
-          correct: qSpec.correct,
-          choices: qSpec.choices
-        });
-        return;
-      }
-    }
-
-    // Determine type: 0 = MC es->en, 1 = MC en->es, 2 = typing en->es
-    let qType = Math.floor(Math.random() * 3);
-    if (qType === 2 && (item.spanish.includes("/") || item.spanish.includes("(") || item.spanish.length > 25)) {
-      qType = Math.random() > 0.5 ? 0 : 1;
-    }
-
-    const isEsToEn = qType === 0;
-    const correctText = isEsToEn ? formatEnglishPrompt(item.spanish, item.english) : item.spanish;
-    const questionText = isEsToEn ? item.spanish : formatEnglishPrompt(item.spanish, item.english);
-
-    // generate distractors
-    const distractors = [];
-    while (distractors.length < 3) {
-      const rand = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
-      const val = isEsToEn ? formatEnglishPrompt(rand.spanish, rand.english) : rand.spanish;
-      if (val.toLowerCase() !== correctText.toLowerCase() && !checkSynonyms(val, correctText) && !distractors.includes(val) && val.length < 35) {
-        distractors.push(val);
-      }
-    }
-
-    setQuestion({
-      item,
-      isConjugation: false,
-      type: qType, // 0: MC es->en, 1: MC en->es, 2: typing en->es
-      questionWord: questionText,
-      correct: correctText,
-      choices: [correctText, ...distractors].sort(() => Math.random() - 0.5)
-    });
-  };
-
-  const SYNONYM_GROUPS = [
-    ["adiós", "adios", "chao", "bye", "goodbye", "bye-bye"],
-    ["andar", "caminar", "to walk", "walk"],
-    ["bonito", "lindo", "hermoso", "pretty", "beautiful", "lovely"],
-    ["maestro", "profesor", "teacher", "professor"],
-    ["coche", "carro", "auto", "car", "automobile"],
-    ["bolígrafo", "pluma", "pen"],
-    ["conversar", "hablar", "to talk", "to speak", "talk", "speak", "converse"],
-    ["computadora", "ordenador", "computer"],
-    ["estudiante", "alumno", "student"],
-    ["apartamento", "departamento", "apartment"],
-    ["lápiz", "lapiz", "pencil"],
-    ["esposa", "mujer", "wife", "woman"],
-  ];
-
-  const cleanAnswer = (str) => {
-    if (!str) return "";
-    return str
-      .toLowerCase()
-      .replace(/[¿¡!?.“”"'()\-–—,;:]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  };
-
-  const checkSynonyms = (val1, val2) => {
-    const c1 = cleanAnswer(val1);
-    const c2 = cleanAnswer(val2);
-    if (c1 === c2) return true;
-    
-    for (let group of SYNONYM_GROUPS) {
-      const cleanGroup = group.map(g => cleanAnswer(g));
-      if (cleanGroup.includes(c1) && cleanGroup.includes(c2)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  const compareAnswers = (correct, user) => {
-    if (checkSynonyms(correct, user)) return true;
-    if (correct && correct.includes("/")) {
-      const parts = correct.split("/");
-      for (let part of parts) {
-        if (checkSynonyms(part, user)) return true;
-      }
-    }
-    return false;
-  };
-
-  const handleChoiceAnswer = (choice) => {
-    if (answered) return;
-    setSelectedChoice(choice);
-    setAnswered(true);
-
-    const isCorrect = choice.trim().toLowerCase() === question.correct.trim().toLowerCase();
-    processAnswerResult(isCorrect);
-  };
-
-  const handleTypedSubmit = (e) => {
-    e.preventDefault();
-    if (answered || !typedAnswer.trim()) return;
-    setAnswered(true);
-
-    const isCorrect = compareAnswers(question.correct, typedAnswer);
-    if (!isCorrect) {
-      setSelectedChoice(typedAnswer);
-    }
-    processAnswerResult(isCorrect);
-  };
-
   const processAnswerResult = (isCorrect) => {
     if (isCorrect) {
       setHealTrigger(true);
       playSound('correct');
-      // heal player +5 HP
-      heal(5);
-      // Remove word from mistake queue
-      removeMistake(question.item.spanish);
+      // Healing +10 HP restores health and revives if fainted
+      heal(10);
+      
+      const spanishKey = question.item.spanish;
+      setClearedWords(prev => {
+        const next = new Set(prev);
+        next.add(spanishKey.trim().toLowerCase());
+        return next;
+      });
+
+      // Safely remove word from global mistake queue in parent state
+      removeMistake(spanishKey);
       setTimeout(() => setHealTrigger(false), 500);
     } else {
       setShakeTrigger(true);
       playSound('wrong');
-      // take standard damage (reduced if shield is equipped)
+      // Take standard damage (reduced if shield is equipped); stays at 0 if already fainted
       takeDamage(15);
       setTimeout(() => setShakeTrigger(false), 500);
     }
   };
 
-  const handleNext = () => {
-    if (currentIdx < activeMistakes.length - 1) {
-      setCurrentIdx(prev => prev + 1);
-    } else {
-      finishDungeon();
-    }
+  const handleChoiceAnswer = (choice) => {
+    if (answered || !question) return;
+    setSelectedChoice(choice);
+    setAnswered(true);
+
+    const isCorrect = choice.trim().toLowerCase() === question.correct.trim().toLowerCase() ||
+                      compareAnswers(question.correct, choice);
+    setIsAnswerCorrect(isCorrect);
+    processAnswerResult(isCorrect);
   };
 
-  const finishDungeon = () => {
-    // Grant bonus gold and XP based on cleared mistakes
-    const goldBonus = activeMistakes.length * 3;
-    const xpBonus = activeMistakes.length * 10;
+  const handleTypedSubmit = (e) => {
+    e.preventDefault();
+    if (answered || !typedAnswer.trim() || !question) return;
+    setAnswered(true);
+
+    const isCorrect = compareAnswers(question.correct, typedAnswer);
+    setIsAnswerCorrect(isCorrect);
+    setSelectedChoice(typedAnswer);
+    processAnswerResult(isCorrect);
+  };
+
+  const finishDungeon = useCallback(() => {
+    const numCleared = clearedWords.size;
+    const goldBonus = Math.max(10, numCleared * 5);
+    const xpBonus = Math.max(20, numCleared * 15);
     addGold(goldBonus);
     addXp(xpBonus);
     setGoldBonusEarned(goldBonus);
     setXpBonusEarned(xpBonus);
+    setTotalClearedInSession(numCleared);
     setDungeonFinished(true);
-  };
+
+    // If player purified at least one ghost, ensure they leave revived with a healthy HP cushion
+    if (numCleared > 0 && (state.fainted || state.hp < 25)) {
+      heal(Math.max(25, numCleared * 10));
+    }
+  }, [clearedWords, addGold, addXp, heal, state.fainted, state.hp]);
+
+  const handleNext = useCallback(() => {
+    const nextIdx = currentIdx + 1;
+    if (nextIdx < dungeonItems.length) {
+      setCurrentIdx(nextIdx);
+      buildDungeonQuestion(dungeonItems[nextIdx]);
+    } else {
+      finishDungeon();
+    }
+  }, [currentIdx, dungeonItems, buildDungeonQuestion, finishDungeon]);
+
+  // Pressing Enter when answer feedback is shown advances to next question
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (answered && e.key === 'Enter') {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [answered, handleNext]);
 
   const handleInsertAccent = (char) => {
     if (!inputRef.current) return;
@@ -273,31 +391,8 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
     }, 0);
   };
 
-  // If fainted or no HP, show fainting panel
-  if (state.fainted || state.hp <= 0) {
-    return (
-      <div className="view-container" style={{ position: 'relative', minHeight: '400px' }}>
-        <div className="glass-panel fainted-overlay">
-          <div className="fainted-icon">💀</div>
-          <h3 className="fainted-title">¡Has caído! (You Fainted)</h3>
-          <p className="fainted-desc">
-            The ghost words in the dungeon were too strong. Eat red potions or use elixirs from the shop to restore health and fight them again!
-          </p>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn btn-secondary" onClick={() => setView('dashboard')}>
-              Back to Hub
-            </button>
-            <button className="btn btn-primary" onClick={() => setView('shop')}>
-              Visit Shop
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // If no mistakes in queue initially
-  if (activeMistakes.length === 0 && !dungeonFinished) {
+  if (dungeonItems.length === 0 && !dungeonFinished) {
     return (
       <div className="view-container">
         <div className="view-header">
@@ -311,14 +406,27 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
         </div>
 
         <div className="glass-panel" style={{ padding: '40px', textAlign: 'center', margin: '40px auto', maxWidth: '500px' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '16px', animation: 'float 3s ease-in-out infinite' }}>🐉💤</div>
-          <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--accent)', fontSize: '1.4rem', marginBottom: '12px' }}>Dungeon Clear!</h3>
+          <div style={{ fontSize: '4rem', marginBottom: '16px', animation: 'float 3s ease-in-out infinite' }}>
+            {state.fainted ? '💀' : '🐉💤'}
+          </div>
+          <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--accent)', fontSize: '1.4rem', marginBottom: '12px' }}>
+            {state.fainted ? 'Dungeon Clear, Pero Estás Debilitado' : 'Dungeon Clear!'}
+          </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5', marginBottom: '24px' }}>
-            The dragon sleeps. You have no active mistakes to clear right now! Go practice quests or mini-games to challenge yourself.
+            {state.fainted
+              ? "You have no active mistakes to fight right now! Since you are fainted, use a Red Potion or Elixir from your bag/shop to restore your health."
+              : "The dragon sleeps. You have no active mistakes to clear right now! Go practice quests or mini-games to challenge yourself."}
           </p>
-          <button className="btn btn-primary" onClick={() => setView('dashboard')}>
-            Continuar Aventura
-          </button>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+            <button className="btn btn-secondary" onClick={() => setView('dashboard')}>
+              Back to Hub
+            </button>
+            {state.fainted && (
+              <button className="btn btn-primary" onClick={() => setView('shop')}>
+                Visit Shop
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -326,6 +434,7 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
 
   // If successfully finished the dungeon clearing session
   if (dungeonFinished) {
+    const unpurifiedCount = dungeonItems.length - totalClearedInSession;
     return (
       <div className="view-container">
         <div className="view-header">
@@ -339,9 +448,13 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
 
         <div className="glass-panel" style={{ padding: '40px', textAlign: 'center', margin: '40px auto', maxWidth: '500px' }}>
           <Trophy size={64} color="var(--gold)" style={{ margin: '0 auto 16px', animation: 'float 3s ease-in-out infinite' }} />
-          <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--accent)', fontSize: '1.6rem', marginBottom: '12px' }}>¡Mazmorra Purificada!</h3>
+          <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--accent)', fontSize: '1.6rem', marginBottom: '12px' }}>
+            {unpurifiedCount === 0 ? "¡Mazmorra Purificada!" : "¡Batalla Completada!"}
+          </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5', marginBottom: '24px' }}>
-            You have successfully cleared your recent mistakes and purified the dungeon! The spirits rest.
+            {unpurifiedCount === 0
+              ? `You have successfully defeated all ${totalClearedInSession} ghost words and purified the dungeon! Your health has been restored.`
+              : `You purified ${totalClearedInSession} of ${dungeonItems.length} ghost words and recovered HP! ${unpurifiedCount} ghost${unpurifiedCount > 1 ? 's' : ''} escaped for now.`}
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '28px' }}>
@@ -353,9 +466,16 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
             </span>
           </div>
 
-          <button className="btn btn-primary" onClick={() => setView('dashboard')} style={{ width: '100%' }}>
-            Regresar al Castillo
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {unpurifiedCount > 0 && state.mistakes && state.mistakes.length > 0 && (
+              <button className="btn btn-accent" onClick={startDungeonRun} style={{ width: '100%' }}>
+                ⚔️ Enfrentar Fantasmas Restantes ({state.mistakes.length})
+              </button>
+            )}
+            <button className="btn btn-primary" onClick={() => setView('dashboard')} style={{ width: '100%' }}>
+              Regresar al Castillo
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -375,7 +495,7 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
         <div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem' }}>La Mazmorra de Errores (Mistakes Dungeon)</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            Defeating Ghost {currentIdx + 1} of {activeMistakes.length}
+            Defeating Ghost {currentIdx + 1} of {dungeonItems.length}
           </p>
         </div>
         <button className="btn btn-secondary" onClick={() => setView('dashboard')}>
@@ -386,19 +506,47 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
       {/* Battleground Console */}
       <div className={`glass-panel quiz-box ${shakeTrigger ? 'shake-anim' : ''} ${healTrigger ? 'heal-pulse' : ''}`} style={{ border: '1px solid rgba(239, 68, 68, 0.2)' }}>
         
+        {/* Recovery Mode Banner when fainted or HP <= 0 */}
+        {(state.fainted || state.hp <= 0) && (
+          <div style={{ 
+            background: 'rgba(16, 185, 129, 0.12)', 
+            border: '1px solid rgba(16, 185, 129, 0.35)', 
+            borderRadius: '12px', 
+            padding: '10px 16px', 
+            marginBottom: '16px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            fontSize: '0.85rem',
+            color: '#a7f3d0'
+          }}>
+            <span style={{ fontSize: '1.2rem' }}>✨</span>
+            <span>
+              <strong>Modo de Recuperación (Soul Recovery):</strong> Cada fantasma purificado restaura <strong>+10 HP</strong> y te revive sin necesidad de pociones.
+            </span>
+          </div>
+        )}
+
         {/* Dungeon Header stats */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '0.85rem' }}>
           <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            👻 Ghost Category: <strong>{currentItem.subcategory}</strong>
+            👻 Ghost Category: <strong>{currentItem.subcategory || currentItem.category}</strong>
           </span>
-          <span style={{ color: 'var(--danger)', fontWeight: 'bold' }}>
-            ❤️ Your HP: {state.hp}/100
+          <span style={{ color: state.hp <= 0 ? 'var(--danger)' : '#10b981', fontWeight: 'bold' }}>
+            {state.hp <= 0 ? '💀 HP: 0/100 (Recovery: +10 HP per correct answer)' : `❤️ Your HP: ${state.hp}/100`}
           </span>
         </div>
 
         {/* Progress Bar */}
         <div className="quiz-progress-track">
-          <div className="quiz-progress-fill" style={{ width: `${((currentIdx) / activeMistakes.length) * 100}%`, background: 'var(--danger)' }}></div>
+          <div 
+            className="quiz-progress-fill" 
+            style={{ 
+              width: `${((currentIdx + (answered && isAnswerCorrect ? 1 : 0)) / dungeonItems.length) * 100}%`, 
+              background: 'var(--danger)',
+              transition: 'width 0.3s ease'
+            }}
+          ></div>
         </div>
 
         {/* Ghost visual box */}
@@ -473,7 +621,7 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
               ) : (
                 <>
                   <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: '4px' }}>
-                    {isTyping ? "Write Translation" : "Translate Word"}
+                    {isTyping ? "Write Translation" : "Translate Word / Sentence"}
                   </div>
                   <div>
                     <div className="quiz-word" style={{ fontSize: '2rem' }}>{currentQ.questionWord}</div>
@@ -497,7 +645,7 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
             <input
               ref={inputRef}
               type="text"
-              className={`quiz-input ${answered ? (compareAnswers(currentQ.correct, typedAnswer) ? 'correct' : 'wrong') : ''}`}
+              className={`quiz-input ${answered ? (isAnswerCorrect ? 'correct' : 'wrong') : ''}`}
               placeholder="Type translation in Spanish..."
               value={typedAnswer}
               onChange={(e) => setTypedAnswer(e.target.value)}
@@ -532,11 +680,12 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
           <div className="quiz-choices-grid">
             {currentQ.choices.map((choice, i) => {
               const isChoiceSelected = selectedChoice === choice;
-              const isChoiceCorrect = choice.trim().toLowerCase() === currentQ.correct.trim().toLowerCase();
+              const isThisCorrect = choice.trim().toLowerCase() === currentQ.correct.trim().toLowerCase() ||
+                                    compareAnswers(currentQ.correct, choice);
               
               let btnClass = "";
               if (answered) {
-                if (isChoiceCorrect) btnClass = "correct";
+                if (isThisCorrect) btnClass = "correct";
                 else if (isChoiceSelected) btnClass = "wrong";
               } else if (isChoiceSelected) {
                 btnClass = "selected";
@@ -559,16 +708,16 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
         {/* Feedback box */}
         {answered && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '20px' }}>
-            <div className={`quiz-feedback-box ${selectedChoice === question.correct || (isTyping && compareAnswers(question.correct, typedAnswer)) ? 'correct' : 'wrong'}`} style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
-              {selectedChoice === question.correct || (isTyping && compareAnswers(question.correct, typedAnswer)) ? (
-                <span>✨ ¡Excelente! Correct answer: <strong>{question.correct}</strong></span>
+            <div className={`quiz-feedback-box ${isAnswerCorrect ? 'correct' : 'wrong'}`} style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
+              {isAnswerCorrect ? (
+                <span>✨ ¡Excelente! Correct answer: <strong>{question.correct}</strong> (Ghost purified! +10 HP restored)</span>
               ) : (
                 <span>⚠️ Incorrect! Correct {isConjugation ? `form (${isPreteriteTense(question) ? 'Pretérito / Past' : 'Presente'}):` : 'translation:'} <strong>{question.correct}</strong></span>
               )}
             </div>
 
             <button className="btn btn-primary" onClick={handleNext} style={{ width: '100%' }}>
-              Continue
+              {currentIdx < dungeonItems.length - 1 ? "Next Ghost (Press Enter)" : "Complete Dungeon (Press Enter)"}
             </button>
           </div>
         )}

@@ -137,7 +137,18 @@ export function useGameState() {
           completedLevels: parsed.completedLevels || [],
           levelRecords: parsed.levelRecords || {},
           hintlessLessonsCount: parsed.hintlessLessonsCount || 0,
-          translateInstructions: Boolean(parsed.translateInstructions)
+          translateInstructions: Boolean(parsed.translateInstructions),
+          mistakes: Array.isArray(parsed.mistakes)
+            ? parsed.mistakes
+                .filter(w => typeof w === 'string' && w.trim().length > 0)
+                .reduce((acc, curr) => {
+                  const trimmed = curr.trim();
+                  if (!acc.some(item => item.toLowerCase() === trimmed.toLowerCase())) {
+                    acc.push(trimmed);
+                  }
+                  return acc;
+                }, [])
+            : []
         };
       }
     } catch (e) {
@@ -262,9 +273,11 @@ export function useGameState() {
   const heal = (amount) => {
     setState(prev => {
       const maxHp = getMaxHp(prev);
+      const newHp = Math.min(maxHp, prev.hp + amount);
       return {
         ...prev,
-        hp: Math.min(maxHp, prev.hp + amount)
+        hp: newHp,
+        fainted: newHp > 0 ? false : prev.fainted
       };
     });
   };
@@ -870,22 +883,29 @@ export function useGameState() {
   };
 
   const addMistake = (spanishWord) => {
+    if (!spanishWord || typeof spanishWord !== 'string') return;
+    const cleanWord = spanishWord.trim();
+    if (!cleanWord) return;
     setState(prev => {
       const list = prev.mistakes || [];
-      if (list.includes(spanishWord)) return prev;
+      if (list.some(w => typeof w === 'string' && w.trim().toLowerCase() === cleanWord.toLowerCase())) {
+        return prev;
+      }
       return {
         ...prev,
-        mistakes: [...list, spanishWord]
+        mistakes: [...list, cleanWord]
       };
     });
   };
 
   const removeMistake = (spanishWord) => {
+    if (!spanishWord || typeof spanishWord !== 'string') return;
+    const target = spanishWord.trim().toLowerCase();
     setState(prev => {
       const list = prev.mistakes || [];
       return {
         ...prev,
-        mistakes: list.filter(w => w !== spanishWord)
+        mistakes: list.filter(w => typeof w === 'string' && w.trim().toLowerCase() !== target)
       };
     });
   };
@@ -1171,7 +1191,17 @@ export function useGameState() {
           ...(rawState.apiKeys || {})
         },
         badges: Array.isArray(rawState.badges) ? rawState.badges : [],
-        mistakes: Array.isArray(rawState.mistakes) ? rawState.mistakes : [],
+        mistakes: Array.isArray(rawState.mistakes)
+          ? rawState.mistakes
+              .filter(w => typeof w === 'string' && w.trim().length > 0)
+              .reduce((acc, curr) => {
+                const trimmed = curr.trim();
+                if (!acc.some(item => item.toLowerCase() === trimmed.toLowerCase())) {
+                  acc.push(trimmed);
+                }
+                return acc;
+              }, [])
+          : [],
         wordMastery: (rawState.wordMastery && typeof rawState.wordMastery === 'object') ? rawState.wordMastery : {},
         hasCompletedPlacement: Boolean(rawState.hasCompletedPlacement),
         hasMidtermHpDoubler: Boolean(rawState.hasMidtermHpDoubler),

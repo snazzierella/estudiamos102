@@ -3209,8 +3209,8 @@ export default function StudyQuest({
                       {/* Start Level Button */}
                       <div>
                         {state.fainted ? (
-                          <button className="btn btn-secondary" disabled style={{ opacity: 0.5 }}>
-                            {showCardTranslate ? "You are fainted. Visit the shop to heal!" : "Estás debilitado. ¡Visita la tienda para curarte!"}
+                          <button className="btn btn-secondary" disabled style={{ opacity: 0.6 }}>
+                            {showCardTranslate ? "You are fainted! Purify mistakes in the Dungeon to heal, or use a potion." : "Estás debilitado. ¡Vence errores en la Mazmorra o toma una poción!"}
                           </button>
                         ) : isEarlyBoss ? (
                           <button 

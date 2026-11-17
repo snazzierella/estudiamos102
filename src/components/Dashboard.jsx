@@ -66,16 +66,31 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
         </div>
 
         {state.fainted && (
-          <div className="glass-panel" style={{ border: '1px solid var(--danger)', background: 'rgba(239, 68, 68, 0.05)', padding: '16px', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="glass-panel" style={{ border: '1px solid var(--danger)', background: 'rgba(239, 68, 68, 0.05)', padding: '16px', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <h4 style={{ color: 'var(--danger)', marginBottom: '4px' }}>⚠️ Has desmayado (You Fainted!)</h4>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>You took too much damage in quizzes. Rest or drink a potion to continue!</p>
+              <h4 style={{ color: 'var(--danger)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                ⚠️ Has desmayado (You Fainted!)
+              </h4>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                {state.mistakes?.length > 0 
+                  ? `Enter the Mistakes Dungeon to defeat your ${state.mistakes.length} ghost word${state.mistakes.length > 1 ? 's' : ''} and recover HP, or use a potion from your bag!`
+                  : "You took too much damage in quizzes. Drink a potion from your bag or shop to continue!"}
+              </p>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {state.mistakes?.length > 0 && (
+                <button 
+                  className="btn btn-accent btn-sm" 
+                  onClick={() => setView('dungeon')}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}
+                >
+                  👻 Recover in Dungeon ({state.mistakes.length} Ghosts)
+                </button>
+              )}
               {hasElixirs ? (
-                <button className="btn btn-accent btn-sm" onClick={handleUseElixir}>Use Golden Elixir</button>
+                <button className="btn btn-secondary btn-sm" onClick={handleUseElixir}>Use Golden Elixir</button>
               ) : hasPotions ? (
-                <button className="btn btn-primary btn-sm" onClick={handleUsePotion}>Use Red Potion</button>
+                <button className="btn btn-secondary btn-sm" onClick={handleUsePotion}>Use Red Potion</button>
               ) : (
                 <button className="btn btn-danger btn-sm" onClick={() => setView('shop')}>Buy Potions</button>
               )}
@@ -309,10 +324,19 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
               ⚔️
             </div>
             <div>
-              <h3 className="menu-card-title">Mazmorra de Errores (Mistakes Dungeon)</h3>
+              <h3 className="menu-card-title">
+                Mazmorra de Errores (Mistakes Dungeon)
+                {state.fainted && state.mistakes?.length > 0 && (
+                  <span style={{ marginLeft: '8px', fontSize: '0.7rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', padding: '2px 8px', borderRadius: '8px', verticalAlign: 'middle' }}>
+                    💚 Revive Here
+                  </span>
+                )}
+              </h3>
               <p className="menu-card-desc">
                 {state.mistakes?.length > 0 
-                  ? `Defeat the ${state.mistakes.length} ghost words you answered incorrectly!` 
+                  ? (state.fainted 
+                      ? `Defeat the ${state.mistakes.length} ghost words to recover HP and revive!` 
+                      : `Defeat the ${state.mistakes.length} ghost words you answered incorrectly!`)
                   : "Dungeon clear! No recent mistakes. Practice quests to find ghost words."}
               </p>
             </div>
@@ -321,13 +345,13 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
                 position: 'absolute', 
                 top: '12px', 
                 right: '12px', 
-                background: 'var(--danger)', 
+                background: state.fainted ? '#10b981' : 'var(--danger)', 
                 color: '#fff', 
                 fontSize: '0.7rem', 
                 fontWeight: 'bold', 
                 padding: '2px 8px', 
                 borderRadius: '10px',
-                boxShadow: '0 0 10px var(--danger-glow)' 
+                boxShadow: state.fainted ? '0 0 10px rgba(16, 185, 129, 0.4)' : '0 0 10px var(--danger-glow)' 
               }}>
                 {state.mistakes.length} GHOSTS
               </span>

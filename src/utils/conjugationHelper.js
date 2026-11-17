@@ -2665,10 +2665,145 @@ export function generateContrastQuestion(stageVal, _levelVal) {
 
 // -------------------------------------------------------------
 // CATEGORIZED IRREGULAR & REGULAR VERBS FOR CONJUGATION HELPER
-// (Radical U-group, I-group, J-group, Spell Change (-car/-gar/-zar),
-// Stem Change (Sandal / Boot), Twin Verbs, Double Vowel, Regulars)
+// Separated cleanly by tense:
+// - Present Tense: Boot Stem Changers (e->ie, o->ue, e->i), "Yo-Go" Verbs, "-zco" Verbs, Core Irregulars, Regular Models
+// - Preterite Tense: Radical U-Group, I-Group, J-Group, Spell Changers (-car/-gar/-zar), Sandal Verbs, Twin Verbs, Double Vowels, Regular Models
 // -------------------------------------------------------------
-export const VERB_CATEGORIES = [
+
+export const PRESENT_VERB_CATEGORIES = [
+  {
+    id: "boot_stem_change",
+    labelEn: "👢 Boot Verbs (Stem Change)",
+    labelEs: "👢 Verbos Bota (Cambio de Raíz)",
+    badge: "Bota",
+    color: "#a855f7",
+    ruleEn: "Present Boot Verbs: The vowel changes in all singular forms (yo, tú, él/ella) and ellos/ellas (forming a boot shape). The nosotros and vosotros forms NEVER change their stem!",
+    ruleEs: "Verbos Bota en Presente: La vocal cambia en todas las formas singulares (yo, tú, él) y ellos (en forma de bota). ¡Nosotros y vosotros NUNCA cambian su raíz!",
+    subcategories: [
+      {
+        id: "boot_e_ie",
+        label: "e ➔ ie",
+        ruleEn: "Stem changes e -> ie in present boot forms (yo pienso, tú piensas, él piensa, ellos piensan). Nosotros (pensamos) and vosotros (pensáis) do not change.",
+        ruleEs: "Cambio e -> ie en las formas de la bota (pienso, piensas, piensa, piensan). Nosotros (pensamos) y vosotros (pensáis) no cambian.",
+        verbs: [
+          { verb: "pensar", stem: "e ➔ ie (pienso)", meaning: "to think" },
+          { verb: "cerrar", stem: "e ➔ ie (cierro)", meaning: "to close" },
+          { verb: "entender", stem: "e ➔ ie (entiendo)", meaning: "to understand" },
+          { verb: "empezar", stem: "e ➔ ie (empiezo)", meaning: "to begin / start" },
+          { verb: "comenzar", stem: "e ➔ ie (comienzo)", meaning: "to start" },
+          { verb: "querer", stem: "e ➔ ie (quiero)", meaning: "to want / love" },
+          { verb: "preferir", stem: "e ➔ ie (prefiero)", meaning: "to prefer" },
+          { verb: "sentir", stem: "e ➔ ie (siento)", meaning: "to feel" },
+          { verb: "perder", stem: "e ➔ ie (pierdo)", meaning: "to lose" },
+          { verb: "despertar", stem: "e ➔ ie (despierto)", meaning: "to wake up" }
+        ]
+      },
+      {
+        id: "boot_o_ue",
+        label: "o ➔ ue (u ➔ ue)",
+        ruleEn: "Stem changes o -> ue (or u -> ue in jugar) in present boot forms (yo puedo, tú puedes, él puede, ellos pueden). Nosotros (podemos) and vosotros (podéis) do not change.",
+        ruleEs: "Cambio o -> ue (o u -> ue en jugar) en las formas de la bota (puedo, puedes, puede, pueden). Nosotros (podemos) y vosotros (podéis) no cambian.",
+        verbs: [
+          { verb: "poder", stem: "o ➔ ue (puedo)", meaning: "to be able / can" },
+          { verb: "dormir", stem: "o ➔ ue (duermo)", meaning: "to sleep" },
+          { verb: "almorzar", stem: "o ➔ ue (almuerzo)", meaning: "to eat lunch" },
+          { verb: "volver", stem: "o ➔ ue (vuelvo)", meaning: "to return (person)" },
+          { verb: "devolver", stem: "o ➔ ue (devuelvo)", meaning: "to return (object)" },
+          { verb: "jugar", stem: "u ➔ ue (juego)", meaning: "to play (game/sport)" },
+          { verb: "costar", stem: "o ➔ ue (cuesta)", meaning: "to cost" },
+          { verb: "recordar", stem: "o ➔ ue (recuerdo)", meaning: "to remember" },
+          { verb: "encontrar", stem: "o ➔ ue (encuentro)", meaning: "to find" },
+          { verb: "acostar", stem: "o ➔ ue (acuesto)", meaning: "to lie down" }
+        ]
+      },
+      {
+        id: "boot_e_i",
+        label: "e ➔ i",
+        ruleEn: "Stem changes e -> i in present boot forms (yo pido, tú pides, él pide, ellos piden). Nosotros (pedimos) and vosotros (pedís) do not change.",
+        ruleEs: "Cambio e -> i en las formas de la bota (pido, pides, pide, piden). Nosotros (pedimos) y vosotros (pedís) no cambian.",
+        verbs: [
+          { verb: "pedir", stem: "e ➔ i (pido)", meaning: "to ask for / order" },
+          { verb: "servir", stem: "e ➔ i (sirvo)", meaning: "to serve" },
+          { verb: "repetir", stem: "e ➔ i (repito)", meaning: "to repeat" },
+          { verb: "seguir", stem: "e ➔ i (sigo)", meaning: "to follow / continue" },
+          { verb: "conseguir", stem: "e ➔ i (consigo)", meaning: "to get / obtain" },
+          { verb: "vestir", stem: "e ➔ i (visto)", meaning: "to dress / wear" },
+          { verb: "medir", stem: "e ➔ i (mido)", meaning: "to measure" },
+          { verb: "despedir", stem: "e ➔ i (despido)", meaning: "to say goodbye / fire" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "yo_go",
+    labelEn: "⚡ \"Yo-Go\" Verbs",
+    labelEs: "⚡ Verbos en \"-go\"",
+    badge: "Yo en -go",
+    color: "#f59e0b",
+    ruleEn: "Irregular 'Yo' in -go: The first-person singular ends in -go (hago, pongo, salgo, traigo). Verbs like tener, venir, and decir also have boot stem changes in tú, él, ellos.",
+    ruleEs: "Verbos con 'Yo' irregular en -go: La primera persona singular termina en -go (hago, pongo, salgo, traigo). Verbos como tener, venir y decir además cambian de raíz en la bota.",
+    verbs: [
+      { verb: "tener", stem: "tengo / e ➔ ie", meaning: "to have" },
+      { verb: "poner", stem: "yo pongo", meaning: "to put / place" },
+      { verb: "hacer", stem: "yo hago", meaning: "to do / make" },
+      { verb: "salir", stem: "yo salgo", meaning: "to leave / go out" },
+      { verb: "venir", stem: "vengo / e ➔ ie", meaning: "to come" },
+      { verb: "traer", stem: "yo traigo", meaning: "to bring" },
+      { verb: "decir", stem: "digo / e ➔ i", meaning: "to say / tell" },
+      { verb: "oír", stem: "oigo / y", meaning: "to hear" },
+      { verb: "valer", stem: "yo valgo", meaning: "to be worth" }
+    ]
+  },
+  {
+    id: "yo_zco",
+    labelEn: "🎭 \"-zco\" Verbs (-cer/-cir)",
+    labelEs: "🎭 Verbos en \"-zco\"",
+    badge: "Yo en -zco",
+    color: "#8b5cf6",
+    ruleEn: "Verbs ending in vowel + -cer/-cir change c -> zc only in the 'yo' form (yo conozco, yo conduzco, yo traduzco) to preserve a soft sound before 'o'. All other forms follow regular -er/-ir endings (conoces, conduce).",
+    ruleEs: "Verbos en vocal + -cer/-cir cambian c -> zc solo en la forma 'yo' (yo conozco, yo conduzco, yo traduzco). El resto son regulares (conoces, conduce).",
+    verbs: [
+      { verb: "conocer", stem: "yo conozco", meaning: "to know / meet (person/place)" },
+      { verb: "conducir", stem: "yo conduzco", meaning: "to drive" },
+      { verb: "traducir", stem: "yo traduzco", meaning: "to translate" },
+      { verb: "producir", stem: "yo produzco", meaning: "to produce" }
+    ]
+  },
+  {
+    id: "core_irregulars",
+    labelEn: "⭐ Core Irregulars",
+    labelEs: "⭐ Irregulares Puros",
+    badge: "Irregulares",
+    color: "#06b6d4",
+    ruleEn: "Highly irregular verbs with unique stems, endings, or accent patterns throughout the present tense: ser, estar, ir, dar, ver, saber, and haber.",
+    ruleEs: "Verbos altamente irregulares con raíces, terminaciones o acentos únicos en el presente: ser, estar, ir, dar, ver, saber y haber.",
+    verbs: [
+      { verb: "ser", stem: "soy, eres, es...", meaning: "to be (essence/traits)" },
+      { verb: "estar", stem: "estoy, estás, está...", meaning: "to be (location/state)" },
+      { verb: "ir", stem: "voy, vas, va...", meaning: "to go" },
+      { verb: "dar", stem: "doy, das, da...", meaning: "to give" },
+      { verb: "ver", stem: "veo, ves, ve...", meaning: "to see / watch" },
+      { verb: "saber", stem: "sé, sabes, sabe...", meaning: "to know (facts/info)" },
+      { verb: "haber", stem: "he, has, ha / hay...", meaning: "to have (auxiliary) / there is" }
+    ]
+  },
+  {
+    id: "regulars",
+    labelEn: "🟢 Regular Models",
+    labelEs: "🟢 Modelos Regulares",
+    badge: "Regular",
+    color: "#10b981",
+    ruleEn: "Regular Verbs: Follow standard, predictable -ar (-o, -as, -a, -amos, -áis, -an), -er (-o, -es, -e, -emos, -éis, -en), and -ir (-o, -es, -e, -imos, -ís, -en) ending patterns.",
+    ruleEs: "Verbos Regulares: Siguen patrones estándar de -ar, -er e -ir en el presente.",
+    verbs: [
+      { verb: "hablar", stem: "Regular -ar", meaning: "to speak / talk" },
+      { verb: "comer", stem: "Regular -er", meaning: "to eat" },
+      { verb: "vivir", stem: "Regular -ir", meaning: "to live" }
+    ]
+  }
+];
+
+export const PRETERITE_VERB_CATEGORIES = [
   {
     id: "u_group",
     labelEn: "📦 U-Group (Radical)",
@@ -2768,13 +2903,13 @@ export const VERB_CATEGORIES = [
     ]
   },
   {
-    id: "stem_change",
-    labelEn: "🔄 Stem Change (Sandal & Boot)",
-    labelEs: "🔄 Cambio de Raíz (Sandalia)",
-    badge: "Raíz",
+    id: "sandal",
+    labelEn: "👡 Sandal Verbs (3rd Person)",
+    labelEs: "👡 Verbos Sandalia (3ª Persona)",
+    badge: "Sandalia",
     color: "#a855f7",
-    ruleEn: "Preterite Sandal Verbs: ONLY -ir verbs change, and ONLY in the 3rd person (él: -ió, ellos: -ieron) with e->i or o->u. In present tense, stem changes occur in the boot (yo, tú, él, ellos).",
-    ruleEs: "Verbos Sandalia en Pretérito: ¡SOLO los verbos -ir cambian y SOLO en 3ª persona (él/ellos) con e->i u o->u! En presente cambian en la bota.",
+    ruleEn: "Preterite Sandal Verbs: ONLY -ir verbs change their stem in the preterite, and ONLY in the 3rd person (él: -ió, ellos: -ieron) with e->i or o->u. Yo, tú, nosotros, and vosotros use standard regular endings!",
+    ruleEs: "Verbos Sandalia en Pretérito: ¡SOLO los verbos -ir cambian de raíz en pretérito, y SOLO en 3ª persona (él: -ió, ellos: -ieron) con e->i u o->u! Las demás formas son regulares.",
     subcategories: [
       {
         id: "sandal_ei",
@@ -2787,7 +2922,8 @@ export const VERB_CATEGORIES = [
           { verb: "preferir", stem: "e ➔ i (prefirió, prefirieron)", meaning: "to prefer" },
           { verb: "repetir", stem: "e ➔ i (repitió, repitieron)", meaning: "to repeat" },
           { verb: "seguir", stem: "e ➔ i (siguió, siguieron)", meaning: "to follow / continue" },
-          { verb: "sentir", stem: "e ➔ i (sintió, sintieron)", meaning: "to feel" }
+          { verb: "sentir", stem: "e ➔ i (sintió, sintieron)", meaning: "to feel" },
+          { verb: "vestir", stem: "e ➔ i (vistió, vistieron)", meaning: "to dress / wear" }
         ]
       },
       {
@@ -2798,19 +2934,6 @@ export const VERB_CATEGORIES = [
         verbs: [
           { verb: "dormir", stem: "o ➔ u (durmió, durmieron)", meaning: "to sleep" },
           { verb: "morir", stem: "o ➔ u (murió, murieron)", meaning: "to die" }
-        ]
-      },
-      {
-        id: "present_boot",
-        label: "Present Boot Changers",
-        ruleEn: "Stem changers in present boot (e->ie, o->ue, e->i)",
-        ruleEs: "Cambio de raíz en presente (e->ie, o->ue, e->i)",
-        verbs: [
-          { verb: "pensar", stem: "e ➔ ie (pienso)", meaning: "to think" },
-          { verb: "cerrar", stem: "e ➔ ie (cierro)", meaning: "to close" },
-          { verb: "entender", stem: "e ➔ ie (entiendo)", meaning: "to understand" },
-          { verb: "volver", stem: "o ➔ ue (vuelvo)", meaning: "to return (person)" },
-          { verb: "devolver", stem: "o ➔ ue (devuelvo)", meaning: "to return (object)" }
         ]
       }
     ]
@@ -2852,8 +2975,8 @@ export const VERB_CATEGORIES = [
     labelEs: "🟢 Modelos Regulares",
     badge: "Regular",
     color: "#10b981",
-    ruleEn: "Regular Verbs: Follow standard, predictable -ar, -er, and -ir ending patterns in both present and preterite.",
-    ruleEs: "Verbos Regulares: Siguen patrones estándar y predecibles en -ar, -er e -ir tanto en presente como en pretérito.",
+    ruleEn: "Regular Preterite Verbs: Follow standard -ar (-é, -aste, -ó, -amos, -asteis, -aron) and -er/-ir (-í, -iste, -ió, -imos, -isteis, -ieron) patterns with written accents on yo and él/ella.",
+    ruleEs: "Verbos Regulares: Patrones estándar de pretérito en -ar y -er/-ir con acentos escritos en yo y él/ella.",
     verbs: [
       { verb: "hablar", stem: "Regular -ar", meaning: "to speak / talk" },
       { verb: "comer", stem: "Regular -er", meaning: "to eat" },
@@ -2862,14 +2985,23 @@ export const VERB_CATEGORIES = [
   }
 ];
 
+export function getVerbCategories(tense = "present") {
+  return tense === "preterite" ? PRETERITE_VERB_CATEGORIES : PRESENT_VERB_CATEGORIES;
+}
+
+// Backwards compatibility alias
+export const VERB_CATEGORIES = PRETERITE_VERB_CATEGORIES;
+
 /**
  * Resolves which grammatical category a verb belongs to for the Conjugation Helper
+ * conditioned on the active tense (present vs preterite).
  */
-export function getVerbCategoryInfo(rawVerb) {
+export function getVerbCategoryInfo(rawVerb, tense = "present") {
   if (!rawVerb) return null;
   const base = parseVerb(rawVerb).base.toLowerCase();
+  const categories = tense === "preterite" ? PRETERITE_VERB_CATEGORIES : PRESENT_VERB_CATEGORIES;
 
-  for (const cat of VERB_CATEGORIES) {
+  for (const cat of categories) {
     if (cat.verbs) {
       const match = cat.verbs.find(v => v.verb === base);
       if (match) {
@@ -2898,46 +3030,49 @@ export function getVerbCategoryInfo(rawVerb) {
     }
   }
 
-  // Fallback checks for -car, -gar, -zar or regular
-  if (base.endsWith("car")) {
-    const spellCat = VERB_CATEGORIES.find(c => c.id === "spell_change");
-    const sub = spellCat?.subcategories?.find(s => s.id === "car");
-    return {
-      categoryId: "spell_change",
-      category: spellCat,
-      subcategoryId: "car",
-      subcategory: sub,
-      verbMeta: { verb: base, stem: "c ➔ qu (yo)", meaning: "" }
-    };
-  }
-  if (base.endsWith("gar")) {
-    const spellCat = VERB_CATEGORIES.find(c => c.id === "spell_change");
-    const sub = spellCat?.subcategories?.find(s => s.id === "gar");
-    return {
-      categoryId: "spell_change",
-      category: spellCat,
-      subcategoryId: "gar",
-      subcategory: sub,
-      verbMeta: { verb: base, stem: "g ➔ gu (yo)", meaning: "" }
-    };
-  }
-  if (base.endsWith("zar")) {
-    const spellCat = VERB_CATEGORIES.find(c => c.id === "spell_change");
-    const sub = spellCat?.subcategories?.find(s => s.id === "zar");
-    return {
-      categoryId: "spell_change",
-      category: spellCat,
-      subcategoryId: "zar",
-      subcategory: sub,
-      verbMeta: { verb: base, stem: "z ➔ c (yo)", meaning: "" }
-    };
+  // Preterite fallback checks for -car, -gar, -zar
+  if (tense === "preterite") {
+    if (base.endsWith("car")) {
+      const spellCat = categories.find(c => c.id === "spell_change");
+      const sub = spellCat?.subcategories?.find(s => s.id === "car");
+      return {
+        categoryId: "spell_change",
+        category: spellCat,
+        subcategoryId: "car",
+        subcategory: sub,
+        verbMeta: { verb: base, stem: "c ➔ qu (yo)", meaning: "" }
+      };
+    }
+    if (base.endsWith("gar")) {
+      const spellCat = categories.find(c => c.id === "spell_change");
+      const sub = spellCat?.subcategories?.find(s => s.id === "gar");
+      return {
+        categoryId: "spell_change",
+        category: spellCat,
+        subcategoryId: "gar",
+        subcategory: sub,
+        verbMeta: { verb: base, stem: "g ➔ gu (yo)", meaning: "" }
+      };
+    }
+    if (base.endsWith("zar")) {
+      const spellCat = categories.find(c => c.id === "spell_change");
+      const sub = spellCat?.subcategories?.find(s => s.id === "zar");
+      return {
+        categoryId: "spell_change",
+        category: spellCat,
+        subcategoryId: "zar",
+        subcategory: sub,
+        verbMeta: { verb: base, stem: "z ➔ c (yo)", meaning: "" }
+      };
+    }
   }
 
+  const regCat = categories.find(c => c.id === "regulars");
   return {
     categoryId: "regulars",
-    category: VERB_CATEGORIES.find(c => c.id === "regulars"),
+    category: regCat,
     subcategoryId: null,
     subcategory: null,
-    verbMeta: { verb: base, stem: base.endsWith("ar") ? "-ar" : base.endsWith("er") ? "-er" : "-ir", meaning: "" }
+    verbMeta: { verb: base, stem: base.endsWith("ar") ? "Regular -ar" : base.endsWith("er") ? "Regular -er" : "Regular -ir", meaning: "" }
   };
 }

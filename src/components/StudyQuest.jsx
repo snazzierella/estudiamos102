@@ -19,7 +19,7 @@ import {
   isPreteriteSpellingChanger,
   isPreteriteStemChanger,
   isPreteriteDoubleVowel,
-  VERB_CATEGORIES,
+  getVerbCategories,
   getVerbCategoryInfo
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
@@ -331,22 +331,20 @@ export default function StudyQuest({
       return;
     }
 
-    setCodexVerb(verbStr);
-    const catInfo = getVerbCategoryInfo(verbStr);
-    if (catInfo) {
-      setCodexVerbCategory(catInfo.categoryId);
-      if (catInfo.subcategoryId) {
-        setCodexVerbSubcategory(catInfo.subcategoryId);
-      }
-    }
-
-    if (targetTense) {
-      setCodexTense(targetTense);
-    } else {
+    let resolvedTense = targetTense;
+    if (!resolvedTense) {
       const isPreterite = typeof verbItemOrString === 'object' && verbItemOrString !== null
         ? (verbItemOrString.subcategory?.includes("Pretérito") || verbItemOrString.unit?.includes("Unit 3") || verbItemOrString.unit?.includes("Unit 4") || verbItemOrString.english?.toLowerCase().includes("preterite") || verbItemOrString.english?.toLowerCase().includes("(past)"))
         : /fui|hice|tuve|estuve|pude|puse|supe|vine|dije|traje|di|vi/i.test(verbStr);
-      setCodexTense(isPreterite ? "preterite" : "present");
+      resolvedTense = isPreterite ? "preterite" : "present";
+    }
+    setCodexTense(resolvedTense);
+
+    setCodexVerb(verbStr);
+    const catInfo = getVerbCategoryInfo(verbStr, resolvedTense);
+    if (catInfo) {
+      setCodexVerbCategory(catInfo.categoryId);
+      setCodexVerbSubcategory(catInfo.subcategoryId || null);
     }
   };
 
@@ -5087,7 +5085,7 @@ export default function StudyQuest({
                     : codexVerb === 'pronombres_objeto'
                       ? (codexLang === 'en' ? "Direct (DOP), Indirect (IOP), and Double Object Pronouns (se lo/la)." : "Pronombres de Objeto Directo, Indirecto y Dobles")
                       : (() => {
-                          const info = getVerbCategoryInfo(codexVerb);
+                          const info = getVerbCategoryInfo(codexVerb, codexTense);
                           const isEn = codexLang === 'en';
                           const catName = info?.category ? (isEn ? info.category.labelEn : info.category.labelEs) : '';
                           const meta = info?.verbMeta;
@@ -5225,12 +5223,17 @@ export default function StudyQuest({
                 }}
                 onClick={() => {
                   if (codexVerb === 'guia_contrastes' || codexVerb === 'pronombres_objeto') {
+                    let targetV = "hablar";
                     if (questStarted && currentQuestQ?.targetVerb) {
-                      setCodexVerb(currentQuestQ.targetVerb);
+                      targetV = currentQuestQ.targetVerb;
                     } else if (questStarted && currentQuestQ?.item && isVerbItem(currentQuestQ.item)) {
-                      setCodexVerb(typeof currentQuestQ.item === 'string' ? currentQuestQ.item : currentQuestQ.item.spanish);
-                    } else {
-                      setCodexVerb("hablar");
+                      targetV = typeof currentQuestQ.item === 'string' ? currentQuestQ.item : currentQuestQ.item.spanish;
+                    }
+                    setCodexVerb(targetV);
+                    const info = getVerbCategoryInfo(targetV, codexTense);
+                    if (info) {
+                      setCodexVerbCategory(info.categoryId);
+                      setCodexVerbSubcategory(info.subcategoryId || null);
                     }
                   }
                 }}
@@ -5256,7 +5259,14 @@ export default function StudyQuest({
                     boxShadow: codexTense === 'present' ? '0 0 12px rgba(16, 185, 129, 0.4)' : 'none',
                     fontWeight: codexTense === 'present' ? '800' : '500'
                   }}
-                  onClick={() => setCodexTense('present')}
+                  onClick={() => {
+                    setCodexTense('present');
+                    const newInfo = getVerbCategoryInfo(codexVerb, 'present');
+                    if (newInfo) {
+                      setCodexVerbCategory(newInfo.categoryId);
+                      setCodexVerbSubcategory(newInfo.subcategoryId || null);
+                    }
+                  }}
                 >
                   {codexLang === 'en' ? '⚡ Present Tense' : '⚡ Presente'}
                 </button>
@@ -5274,22 +5284,36 @@ export default function StudyQuest({
                     boxShadow: codexTense === 'preterite' ? '0 0 12px rgba(249, 115, 22, 0.4)' : 'none',
                     fontWeight: codexTense === 'preterite' ? '800' : '500'
                   }}
-                  onClick={() => setCodexTense('preterite')}
+                  onClick={() => {
+                    setCodexTense('preterite');
+                    const newInfo = getVerbCategoryInfo(codexVerb, 'preterite');
+                    if (newInfo) {
+                      setCodexVerbCategory(newInfo.categoryId);
+                      setCodexVerbSubcategory(newInfo.subcategoryId || null);
+                    }
+                  }}
                 >
                   {codexLang === 'en' ? '⏳ Preterite Tense' : '⏳ Pretérito (Past)'}
                 </button>
               </div>
             )}
 
-            {/* Categorized Verb Explorer (Radical U/I/J Groups, Spell Change (-car/-gar/-zar), Stem Change, etc.) */}
+            {/* Categorized Verb Explorer (Present: Boot, Yo-go, -zco, Core Irregulars, Regulars; Preterite: Radical U/I/J, -car/-gar/-zar, Sandal, Twins, etc.) */}
             {codexVerb !== 'pronombres_objeto' && codexVerb !== 'guia_contrastes' && (() => {
-              const activeCatInfo = getVerbCategoryInfo(codexVerb);
-              const currentCatId = codexVerbCategory || activeCatInfo?.categoryId || 'u_group';
-              const currentCat = VERB_CATEGORIES.find(c => c.id === currentCatId) || VERB_CATEGORIES[0];
+              const categories = getVerbCategories(codexTense);
+              const activeCatInfo = getVerbCategoryInfo(codexVerb, codexTense);
+              const currentCatId = codexVerbCategory && categories.some(c => c.id === codexVerbCategory)
+                ? codexVerbCategory 
+                : (activeCatInfo?.categoryId || categories[0].id);
+              const currentCat = categories.find(c => c.id === currentCatId) || categories[0];
               const isEn = codexLang === 'en';
 
               const subcats = currentCat.subcategories || null;
-              const currentSubId = codexVerbSubcategory || (activeCatInfo?.categoryId === currentCatId ? activeCatInfo?.subcategoryId : null) || (subcats ? subcats[0].id : null);
+              const currentSubId = subcats
+                ? (codexVerbSubcategory && subcats.some(s => s.id === codexVerbSubcategory)
+                    ? codexVerbSubcategory 
+                    : (activeCatInfo?.categoryId === currentCatId && activeCatInfo?.subcategoryId ? activeCatInfo.subcategoryId : subcats[0].id))
+                : null;
               const activeSubcat = subcats ? (subcats.find(s => s.id === currentSubId) || subcats[0]) : null;
               const verbsToDisplay = subcats ? (activeSubcat?.verbs || []) : (currentCat.verbs || []);
 
@@ -5315,7 +5339,7 @@ export default function StudyQuest({
 
                   {/* Horizontal Scrollable Category Selector */}
                   <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '6px', marginBottom: '8px', scrollbarWidth: 'thin' }}>
-                    {VERB_CATEGORIES.map(cat => {
+                    {categories.map(cat => {
                       const isSelected = currentCatId === cat.id;
                       return (
                         <button
@@ -6403,9 +6427,10 @@ export default function StudyQuest({
                   ].map((p, idx) => {
                     const conjugated = conjugate(codexVerb, idx, codexTense);
                     const isVosotros = idx === 4;
-                    const catInfo = getVerbCategoryInfo(codexVerb);
+                    const catInfo = getVerbCategoryInfo(codexVerb, codexTense);
                     const catId = catInfo?.categoryId;
                     const isPreterite = codexTense === 'preterite';
+                    const baseVerb = parseVerb(codexVerb).base.toLowerCase();
                     
                     let isIrregularForm = false;
                     let irregularTag = null;
@@ -6416,7 +6441,7 @@ export default function StudyQuest({
                         isIrregularForm = true;
                         irregularTag = catInfo?.subcategoryId === 'car' ? 'c ➔ qu' : catInfo?.subcategoryId === 'gar' ? 'g ➔ gu' : 'z ➔ c';
                         highlightColor = '#ec4899';
-                      } else if (catId === 'stem_change' && (idx === 2 || idx === 5)) {
+                      } else if ((catId === 'sandal' || catId === 'stem_change') && (idx === 2 || idx === 5)) {
                         isIrregularForm = true;
                         irregularTag = catInfo?.subcategoryId === 'sandal_ou' ? 'sandal: o ➔ u' : 'sandal: e ➔ i';
                         highlightColor = '#a855f7';
@@ -6438,14 +6463,34 @@ export default function StudyQuest({
                       }
                     } else {
                       // Present tense
-                      if (catId === 'stem_change' && idx !== 3 && idx !== 4) {
+                      if ((catId === 'boot_stem_change' || catId === 'stem_change') && idx !== 3 && idx !== 4) {
                         isIrregularForm = true;
-                        irregularTag = 'boot change';
+                        irregularTag = catInfo?.subcategoryId === 'boot_e_ie' ? 'e ➔ ie' : catInfo?.subcategoryId === 'boot_o_ue' ? 'o ➔ ue' : catInfo?.subcategoryId === 'boot_e_i' ? 'e ➔ i' : 'boot change';
                         highlightColor = '#a855f7';
-                      } else if ((catId === 'u_group' || catId === 'i_group' || catId === 'j_group' || catId === 'twin_verbs') && idx === 0) {
+                      } else if (catId === 'yo_go') {
+                        if (idx === 0) {
+                          isIrregularForm = true;
+                          irregularTag = 'yo en -go';
+                          highlightColor = '#f59e0b';
+                        } else if (idx !== 3 && idx !== 4 && (baseVerb === 'tener' || baseVerb === 'venir' || baseVerb === 'decir' || baseVerb === 'oír')) {
+                          isIrregularForm = true;
+                          irregularTag = baseVerb === 'decir' ? 'e ➔ i' : baseVerb === 'oír' ? 'y' : 'e ➔ ie';
+                          highlightColor = '#a855f7';
+                        }
+                      } else if (catId === 'yo_zco') {
+                        if (idx === 0) {
+                          isIrregularForm = true;
+                          irregularTag = 'c ➔ zc';
+                          highlightColor = '#8b5cf6';
+                        }
+                      } else if (catId === 'core_irregulars') {
                         isIrregularForm = true;
-                        irregularTag = 'irregular yo';
-                        highlightColor = '#eab308';
+                        highlightColor = '#06b6d4';
+                        if (baseVerb === 'saber' && idx === 0) irregularTag = 'sé';
+                        else if (baseVerb === 'estar' && idx === 0) irregularTag = 'estoy';
+                        else if (baseVerb === 'estar' && (idx === 1 || idx === 2 || idx === 5)) irregularTag = 'accent mark';
+                        else if (baseVerb === 'ir' || baseVerb === 'ser') irregularTag = 'irregular';
+                        else if (idx === 0) irregularTag = 'irregular yo';
                       }
                     }
 

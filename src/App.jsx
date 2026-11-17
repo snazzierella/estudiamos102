@@ -357,27 +357,6 @@ export default function App() {
               <span>{translate ? "🌐 EN" : "🌐 ES"}</span>
             </button>
 
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => setView('oral-exam')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                fontSize: '0.78rem',
-                padding: '5px 12px',
-                borderRadius: '20px',
-                color: view === 'oral-exam' ? '#fff' : '#f472b6',
-                background: view === 'oral-exam' ? 'rgba(236, 72, 153, 0.4)' : 'rgba(236, 72, 153, 0.12)',
-                border: '1px solid rgba(236, 72, 153, 0.35)',
-                cursor: 'pointer'
-              }}
-              title={translate ? "Midterm Oral Exam Practice (10 questions from syllabus PDF)" : "Práctica para el Examen Oral de Medio Término (10 preguntas del PDF)"}
-            >
-              <span>🎙️</span>
-              <span>{t('headerOralExamBtn', translate)}</span>
-            </button>
-
             <a 
               href="mailto:jsorba@mail.pima.edu?subject=Estudiamos%20102%20Feedback"
               className="btn btn-secondary btn-sm"

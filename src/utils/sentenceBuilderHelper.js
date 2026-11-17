@@ -53,7 +53,7 @@ export const SENTENCE_POOLS = {
       spanish: "Nosotros compramos pan en el mercado",
       english: "We buy bread in the market",
       distractors: ["compro", "la", "compran"],
-      hint: "We buy = nosotros compramos",
+      hint: "Regular -ar verb ending for 1st person plural (nosotros).",
       syntaxBreakdown: "[Subject: Nosotros] + [Present Verb: compramos] + [Direct Object: pan] + [Location: en el mercado]"
     },
     {
@@ -137,7 +137,7 @@ export const SENTENCE_POOLS = {
       spanish: "Mi familia y yo comemos juntos los domingos",
       english: "My family and I eat together on Sundays",
       distractors: ["come", "comen", "junto"],
-      hint: "Mi familia y yo = nosotros (comemos)",
+      hint: "Subject (Mi familia y yo) takes 1st person plural verb ending (-emos).",
       syntaxBreakdown: "[Compound Subject: Mi familia y yo] + [Verb (nosotros): comemos] + [Adjective / Manner: juntos] + [Time: los domingos]"
     },
     {
@@ -151,7 +151,7 @@ export const SENTENCE_POOLS = {
       spanish: "Yo salgo con mis amigos los fines de semana",
       english: "I go out with my friends on the weekends",
       distractors: ["sale", "el", "amigo"],
-      hint: "Irregular yo form of salir: 'salgo'",
+      hint: "Irregular 'yo-go' form of salir in present tense.",
       syntaxBreakdown: "[Subject: Yo] + [Irregular 'yo' Verb: salgo] + [Accompaniment: con mis amigos] + [Time: los fines de semana]"
     },
     {
@@ -186,7 +186,7 @@ export const SENTENCE_POOLS = {
       spanish: "Yo pongo los libros en la mesa",
       english: "I put the books on the table",
       distractors: ["pone", "el", "las"],
-      hint: "Irregular yo form of poner: 'pongo'",
+      hint: "Irregular 'yo-go' form of poner in present tense.",
       syntaxBreakdown: "[Subject: Yo] + [Irregular 'yo' Verb: pongo] + [Direct Object: los libros] + [Location: en la mesa]"
     },
     {
@@ -316,105 +316,105 @@ export const SENTENCE_POOLS = {
       spanish: "Ellos quieren besarse antes de salir",
       english: "They want to kiss each other before leaving",
       distractors: ["besan", "se", "nos"],
-      hint: "Attach pronoun to the infinitive: 'besarse'",
+      hint: "Infinitive with attached reciprocal pronoun following the modal verb querer.",
       syntaxBreakdown: "[Subject: Ellos] + [Modal Verb: quieren] + [Infinitive + Attached Reciprocal Pronoun: besarse] + [Time Clause: antes de salir]"
     },
     {
       spanish: "Nosotros vamos a besarnos antes de salir",
       english: "We are going to kiss each other before leaving",
       distractors: ["se", "besarse", "besarme"],
-      hint: "With nosotros in 'ir a + infinitive', attach 'nos' to the infinitive: besarnos (or say 'nos vamos a besar'). Never use 'se' or 'me' with nosotros!",
+      hint: "With 'ir a + infinitive', attach the 1st person plural reciprocal pronoun to the infinitive without duplicating it.",
       syntaxBreakdown: "[Subject: Nosotros] + [Future Verb Phrase (ir a): vamos a] + [Infinitive + Attached Pronoun: besarnos] + [Time Clause: antes de salir]"
     },
     {
       spanish: "Nosotros nos vamos a besar antes de salir",
       english: "We are going to kiss each other before leaving",
       distractors: ["se", "besarse", "besarme"],
-      hint: "Pronoun in front: 'Nosotros nos vamos a besar'. Since 'nos' is before 'vamos', keep the infinitive plain: 'besar' (never *nos vamos a besarnos or *se vamos a besar)!",
+      hint: "Since the reciprocal pronoun precedes the conjugated verb, keep the infinitive plain without repeating the pronoun.",
       syntaxBreakdown: "[Subject: Nosotros] + [Fronted Reciprocal Pronoun: nos] + [Future Verb Phrase: vamos a besar] + [Time Clause: antes de salir]"
     },
     {
       spanish: "Los novios se van a besar en el altar",
       english: "The sweethearts are going to kiss each other at the altar",
       distractors: ["besarse", "nos", "vamos"],
-      hint: "Pronoun before verb: 'se van a besar'. Since 'se' is already in front, do not attach it again (*se van a besarse) and don't omit 'a' (*se van besarse)!",
+      hint: "Since the reciprocal pronoun is placed before the conjugated verb, keep the infinitive plain and remember the preposition 'a'.",
       syntaxBreakdown: "[Subject: Los novios] + [Fronted Reciprocal Pronoun: se] + [Future Verb Phrase: van a besar] + [Location: en el altar]"
     },
     {
       spanish: "Los novios se quieren besar en el parque",
       english: "The sweethearts want to kiss each other in the park",
       distractors: ["besarse", "quiere", "nos"],
-      hint: "Pronoun before modal verb: 'se quieren besar'. Keep the second verb as plain infinitive 'besar' (never *se quieren besarse)!",
+      hint: "With the pronoun placed before querer, keep the second verb as a plain infinitive.",
       syntaxBreakdown: "[Subject: Los novios] + [Fronted Reciprocal Pronoun: se] + [Modal Verb: quieren] + [Plain Infinitive: besar] + [Location: en el parque]"
     },
     {
       spanish: "Los dos amigos se van a abrazar en el aeropuerto",
       english: "The two friends are going to hug each other at the airport",
       distractors: ["abrazarse", "nos", "vamos"],
-      hint: "Front pronoun: 'se van a abrazar'. Keep the infinitive plain 'abrazar' since 'se' is already before 'van'!",
+      hint: "Since the reciprocal pronoun precedes the auxiliary verb, keep the following infinitive in its simple form.",
       syntaxBreakdown: "[Subject: Los dos amigos] + [Fronted Reciprocal Pronoun: se] + [Future Verb Phrase: van a abrazar] + [Location: en el aeropuerto]"
     },
     {
       spanish: "Nosotros nos vamos a abrazar con alegría",
       english: "We are going to hug each other with joy",
       distractors: ["se", "abrazarse", "abrazarme"],
-      hint: "Nosotros uses 'nos' before the verb: 'nos vamos a abrazar'. Never use 'se' or duplicate the pronoun!",
+      hint: "Place the 1st person plural reciprocal pronoun before the conjugated auxiliary verb.",
       syntaxBreakdown: "[Subject: Nosotros] + [Fronted Reciprocal Pronoun: nos] + [Future Verb Phrase: vamos a abrazar] + [Manner: con alegría]"
     },
     {
       spanish: "Nosotros vamos a abrazarnos con alegría",
       english: "We are going to hug each other with joy",
       distractors: ["se", "abrazarse", "abrazar"],
-      hint: "Attach pronoun 'nos' to the infinitive: 'abrazarnos' (or say 'nos vamos a abrazar').",
+      hint: "Attach the 1st person plural reciprocal pronoun to the end of the infinitive.",
       syntaxBreakdown: "[Subject: Nosotros] + [Verb (ir a): vamos a] + [Infinitive + Attached Pronoun: abrazarnos] + [Manner: con alegría]"
     },
     {
       spanish: "Los dos estudiantes se van a conocer hoy",
       english: "The two students are going to meet each other today",
       distractors: ["conocerse", "nos", "vamos"],
-      hint: "With pronoun before 'van', use plain infinitive: 'se van a conocer' (not *se van a conocerse).",
+      hint: "Since the pronoun is placed before the auxiliary verb, keep the infinitive in its simple form.",
       syntaxBreakdown: "[Subject: Los dos estudiantes] + [Fronted Reciprocal Pronoun: se] + [Future Verb Phrase: van a conocer] + [Time: hoy]"
     },
     {
       spanish: "Nosotros nos tenemos que ayudar con la tarea",
       english: "We have to help each other with the homework",
       distractors: ["se", "ayudarnos", "ayuda"],
-      hint: "Pronoun before modal: 'nos tenemos que ayudar'. Don't repeat 'nos' at the end!",
+      hint: "Since the pronoun precedes 'tener que', keep the following infinitive in its simple form without duplicating the pronoun.",
       syntaxBreakdown: "[Subject: Nosotros] + [Fronted Reciprocal Pronoun: nos] + [Obligation Phrase: tenemos que ayudar] + [Prepositional Phrase: con la tarea]"
     },
     {
       spanish: "Nosotros tenemos que ayudarnos con la tarea",
       english: "We have to help each other with the homework",
       distractors: ["se", "ayudar", "ellos"],
-      hint: "Attach pronoun to infinitive: 'ayudarnos' (or say 'nos tenemos que ayudar').",
+      hint: "Attach the reciprocal pronoun for nosotros directly to the end of the infinitive.",
       syntaxBreakdown: "[Subject: Nosotros] + [Obligation Phrase: tenemos que] + [Infinitive + Attached Pronoun: ayudarnos] + [Prepositional Phrase: con la tarea]"
     },
     {
       spanish: "Los amigos se van a despedir en la estación",
       english: "The friends are going to say goodbye to each other at the station",
       distractors: ["despedirse", "nos", "vamos"],
-      hint: "Pronoun in front: 'se van a despedir'. Avoid double pronoun *se van a despedirse!",
+      hint: "When the reciprocal pronoun is placed before the conjugated verb, avoid duplicating it on the infinitive.",
       syntaxBreakdown: "[Subject: Los amigos] + [Fronted Reciprocal Pronoun: se] + [Future Verb Phrase: van a despedir] + [Location: en la estación]"
     },
     {
       spanish: "Nosotros nos vamos a reunir en la cafetería",
       english: "We are going to meet up in the cafeteria",
       distractors: ["se", "reunirse", "reúnen"],
-      hint: "Reciprocal for nosotros uses 'nos': 'nos vamos a reunir' or 'vamos a reunirnos'.",
+      hint: "Place the reciprocal pronoun for nosotros before the conjugated auxiliary verb.",
       syntaxBreakdown: "[Subject: Nosotros] + [Fronted Reciprocal Pronoun: nos] + [Future Verb Phrase: vamos a reunir] + [Location: en la cafetería]"
     },
     {
       spanish: "Yo me voy a acostar temprano esta noche",
       english: "I am going to go to bed early tonight",
       distractors: ["te", "acostarme", "acuesto"],
-      hint: "With pronoun before 'voy', keep infinitive plain: 'me voy a acostar' (or 'voy a acostarme').",
+      hint: "Since the reflexive pronoun precedes the conjugated verb, keep the infinitive in its plain form.",
       syntaxBreakdown: "[Subject: Yo] + [Fronted Reflexive Pronoun: me] + [Future Verb Phrase: voy a acostar] + [Time / Adverb: temprano esta noche]"
     },
     {
       spanish: "Tú te tienes que lavar las manos antes de comer",
       english: "You have to wash your hands before eating",
       distractors: ["se", "lavarte", "lavas"],
-      hint: "Front pronoun: 'te tienes que lavar'. Don't double the pronoun (*te tienes que lavarte)!",
+      hint: "Since the reflexive pronoun is in front of the conjugated verb, keep the infinitive plain without repeating the pronoun.",
       syntaxBreakdown: "[Subject: Tú] + [Fronted Reflexive Pronoun: te] + [Obligation: tienes que lavar] + [Direct Object: las manos] + [Time Clause: antes de comer]"
     },
     {
@@ -435,14 +435,14 @@ export const SENTENCE_POOLS = {
       spanish: "Mis padres se conocieron en la universidad",
       english: "My parents met each other in college",
       distractors: ["nos", "conoció", "el"],
-      hint: "Preterite reciprocal: 'se conocieron'",
+      hint: "Reciprocal action in preterite for 3rd person plural (ellos).",
       syntaxBreakdown: "[Subject: Mis padres] + [Reciprocal Pronoun: se] + [Preterite Verb: conocieron] + [Location: en la universidad]"
     },
     {
       spanish: "Tú te despiertas temprano por la mañana",
       english: "You wake up early in the morning",
       distractors: ["se", "despierto", "para"],
-      hint: "Stem-changing reflexive (e -> ie): 'te despiertas'",
+      hint: "Stem-changing reflexive verb (e -> ie) for 2nd person singular.",
       syntaxBreakdown: "[Subject: Tú] + [Reflexive Pronoun: te] + [Stem-Changing Verb (e->ie): despiertas] + [Adverb: temprano] + [Time of Day (por): por la mañana]"
     },
     {
@@ -470,35 +470,35 @@ export const SENTENCE_POOLS = {
       spanish: "Ella se viste rápidamente para ir a trabajar",
       english: "She gets dressed quickly to go to work",
       distractors: ["me", "visten", "por"],
-      hint: "Stem-changing reflexive vestir (e -> i): 'se viste'",
+      hint: "Stem-changing reflexive verb vestir (e -> i) for 3rd person singular.",
       syntaxBreakdown: "[Subject: Ella] + [Reflexive Pronoun: se] + [Stem-Changing Verb (e->i): viste] + [Adverb: rápidamente] + [Purpose (para): para ir a trabajar]"
     },
     {
       spanish: "Tú te acuestas temprano cuando tienes examen",
       english: "You go to bed early when you have an exam",
       distractors: ["se", "acuesto", "para"],
-      hint: "Stem-changing reflexive acostar (o -> ue): 'te acuestas'",
+      hint: "Stem-changing reflexive verb acostar (o -> ue) for 2nd person singular.",
       syntaxBreakdown: "[Subject: Tú] + [Reflexive Pronoun: te] + [Stem-Changing Verb (o->ue): acuestas] + [Adverb: temprano] + [Conditional Clause: cuando tienes examen]"
     },
     {
       spanish: "Antes de acostarse los niños leen un cuento",
       english: "Before going to bed the children read a story",
       distractors: ["acostarme", "se acuestan", "acostar"],
-      hint: "After a preposition (antes de), use infinitive with attached pronoun: acostarse",
+      hint: "After a preposition (antes de), use the infinitive with attached reflexive pronoun.",
       syntaxBreakdown: "[Preposition + Attached Pronoun: Antes de acostarse] + [Subject: los niños] + [Verb: leen] + [Direct Object: un cuento]"
     },
     {
       spanish: "Yo voy a lavarme la cara con jabón",
       english: "I am going to wash my face with soap",
       distractors: ["me lavo", "lavarse", "el"],
-      hint: "With 'ir a + infinitive', attach pronoun 'me' to the end: lavarme",
+      hint: "With 'ir a + infinitive', attach the 1st person reflexive pronoun to the end of the infinitive.",
       syntaxBreakdown: "[Subject: Yo] + [Verb (ir a): voy a] + [Infinitive + Attached Reflexive Pronoun: lavarme] + [Direct Object: la cara] + [Instrument: con jabón]"
     },
     {
       spanish: "A mi hermano le duele mucho la garganta hoy",
       english: "My brother's throat hurts a lot today",
       distractors: ["duelen", "me", "el"],
-      hint: "Doler agrees with the singular body part: 'duele'",
+      hint: "Doler agrees in singular with the affected body part.",
       syntaxBreakdown: "[Clarifier: A mi hermano] + [Indirect Object Pronoun: le] + [Verb of Pain: duele] + [Degree: mucho] + [Subject (body part): la garganta] + [Time: hoy]"
     },
     {
@@ -540,21 +540,21 @@ export const SENTENCE_POOLS = {
       spanish: "Mis abuelos se miran con mucho cariño y amor",
       english: "My grandparents look at each other with much affection and love",
       distractors: ["nos", "mira", "mirarse"],
-      hint: "Reciprocal action (they look at each other): 'se miran'",
+      hint: "Reciprocal action in present tense for 3rd person plural.",
       syntaxBreakdown: "[Subject: Mis abuelos] + [Reciprocal Pronoun: se] + [Reciprocal Verb: miran] + [Manner: con mucho cariño y amor]"
     },
     {
       spanish: "Los dos hermanos se abrazan con alegría en el aeropuerto",
       english: "The two brothers hug each other with joy at the airport",
       distractors: ["abrazamos", "abraza", "abrazarse"],
-      hint: "Reciprocal verb 'abrazarse': plural brothers hug each other",
+      hint: "Reciprocal verb expressing mutual action for plural subjects.",
       syntaxBreakdown: "[Subject: Los dos hermanos] + [Reciprocal Pronoun: se] + [Reciprocal Verb: abrazan] + [Manner: con alegría] + [Location: en el aeropuerto]"
     },
     {
       spanish: "Nosotros nos vemos todos los días en la cafetería",
       english: "We see each other every day in the cafeteria",
       distractors: ["se", "ven", "ve"],
-      hint: "Reciprocal action for we: 'nosotros nos vemos'",
+      hint: "Reciprocal action for 1st person plural with subject and pronoun.",
       syntaxBreakdown: "[Subject: Nosotros] + [Reciprocal Pronoun: nos] + [Reciprocal Verb: vemos] + [Frequency: todos los días] + [Location: en la cafetería]"
     }
   ],
@@ -569,7 +569,7 @@ export const SENTENCE_POOLS = {
             "compró",
             "el"
         ],
-        "hint": "Preterite of regular -ar verb comprar for yo (-é): 'compré'",
+        "hint": "Preterite regular -ar verb ending for 1st person singular (-é).",
         "syntaxBreakdown": "[Time Adverb: Ayer] + [Preterite Verb: compré] + [Direct Object: una camisa azul] + [Location: en la tienda]"
     },
     {
@@ -580,7 +580,7 @@ export const SENTENCE_POOLS = {
             "lavo",
             "el"
         ],
-        "hint": "Preterite of regular -ar verb lavar for nosotros (-amos): 'lavamos'",
+        "hint": "Preterite regular -ar verb ending for 1st person plural (-amos).",
         "syntaxBreakdown": "[Subject: Nosotros] + [Preterite Verb: lavamos] + [Direct Object: los platos] + [Time: anoche]"
     },
     {
@@ -591,7 +591,7 @@ export const SENTENCE_POOLS = {
             "fueron",
             "el"
         ],
-        "hint": "Irregular preterite of ir for ella: 'fue'",
+        "hint": "Irregular preterite form of ir for 3rd person singular.",
         "syntaxBreakdown": "[Subject: Ella] + [Preterite Verb: fue] + [Destination: al supermercado] + [Time: ayer por la tarde]"
     },
     {
@@ -602,7 +602,7 @@ export const SENTENCE_POOLS = {
             "limpió",
             "el"
         ],
-        "hint": "Preterite ending for ellos/ellas (-aron): 'limpiaron'",
+        "hint": "Preterite regular -ar verb ending for 3rd person plural (-aron).",
         "syntaxBreakdown": "[Subject: Mis amigos] + [Preterite Verb: limpiaron] + [Direct Object: la casa] + [Time: esta mañana]"
     },
     {
@@ -613,7 +613,7 @@ export const SENTENCE_POOLS = {
             "pagó",
             "por"
         ],
-        "hint": "Preterite -ar verb ending for tú (-aste): 'pagaste'",
+        "hint": "Preterite regular -ar verb ending for 2nd person singular (-aste).",
         "syntaxBreakdown": "[Subject: Tú] + [Preterite Verb: pagaste] + [Direct Object: la ropa] + [Instrumento: con tarjeta de crédito]"
     },
     {
@@ -712,7 +712,7 @@ export const SENTENCE_POOLS = {
             "sirve",
             "les"
         ],
-        "hint": "Preterite stem changer: servir changes e -> i in 3rd person singular: 'sirvió'",
+        "hint": "Preterite stem changer: -ir verb changes e -> i in 3rd person singular.",
         "syntaxBreakdown": "[Subject: El camarero] + [IOP Pronoun: nos] + [Pretérito con cambio de raíz: sirvió] + [Direct Object: la comida caliente]"
     },
     {
@@ -723,7 +723,7 @@ export const SENTENCE_POOLS = {
             "pide",
             "pidieron"
         ],
-        "hint": "Preterite stem changer: pedir changes e -> i in 3rd person singular: 'pidió' (never 'pedió')",
+        "hint": "Preterite stem changer: -ir verb changes e -> i in 3rd person singular.",
         "syntaxBreakdown": "[Subject: El cliente] + [Pretérito con cambio de raíz: pidió] + [Direct Object: salmón con verduras frescas]"
     },
     {
@@ -734,7 +734,7 @@ export const SENTENCE_POOLS = {
             "miden",
             "los"
         ],
-        "hint": "Preterite stem changer: medir changes e -> i in 3rd person plural: 'midieron'",
+        "hint": "Preterite stem changer: -ir verb changes e -> i in 3rd person plural.",
         "syntaxBreakdown": "[Subject: Las dependientas] + [DOP Pronoun: las] + [Pretérito con cambio: midieron] + [Instrumento: con la cinta métrica]"
     },
     {
@@ -745,7 +745,7 @@ export const SENTENCE_POOLS = {
             "duerme",
             "dormiste"
         ],
-        "hint": "Preterite stem changer: dormir changes o -> u in 3rd person singular: 'durmió' (never 'dormió')",
+        "hint": "Preterite stem changer — dormir changes o -> u in 3rd person singular.",
         "syntaxBreakdown": "[Subject: Mi hermano pequeño] + [Pretérito con cambio: durmió] + [Duration: ocho horas] + [Time: anoche]"
     },
     {
@@ -756,7 +756,7 @@ export const SENTENCE_POOLS = {
             "prefiere",
             "el"
         ],
-        "hint": "Preterite stem changer: preferir changes e -> i in 3rd person singular: 'prefirió'",
+        "hint": "Preterite stem changer: -ir verb changes e -> i in 3rd person singular.",
         "syntaxBreakdown": "[Subject: Ella] + [Pretérito con cambio: prefirió] + [Infinitivo: comprar] + [Direct Object: la falda rebajada]"
     },
     {
@@ -767,7 +767,7 @@ export const SENTENCE_POOLS = {
             "buscó",
             "el"
         ],
-        "hint": "Orthographic yo spelling change in preterite: -car changes to -qué: 'busqué'",
+        "hint": "Orthographic spelling change in preterite: -car changes c -> qu in 1st person singular.",
         "syntaxBreakdown": "[Subject: Yo] + [Pretérito ortográfico: busqué] + [Direct Object: un buzón de correos] + [Location: en la calle]"
     },
     {
@@ -778,7 +778,7 @@ export const SENTENCE_POOLS = {
             "pagó",
             "por"
         ],
-        "hint": "Orthographic yo spelling change in preterite: -gar changes to -gué: 'pagué'",
+        "hint": "Orthographic spelling change in preterite: -gar changes g -> gu in 1st person singular.",
         "syntaxBreakdown": "[Time: Ayer] + [Subject: yo] + [Pretérito ortográfico: pagué] + [Direct Object: la cuenta] + [Modo: en efectivo]"
     },
     {
@@ -789,7 +789,7 @@ export const SENTENCE_POOLS = {
             "cruzó",
             "el"
         ],
-        "hint": "Orthographic yo spelling change in preterite: -zar changes to -cé: 'crucé'",
+        "hint": "Orthographic spelling change in preterite: -zar changes z -> c in 1st person singular.",
         "syntaxBreakdown": "[Subject: Yo] + [Pretérito ortográfico: crucé] + [Direct Object: la calle] + [Modo: con mucho cuidado]"
     },
     {
@@ -800,7 +800,7 @@ export const SENTENCE_POOLS = {
             "empezó",
             "por"
         ],
-        "hint": "Orthographic yo spelling change in preterite: empezar -> 'empecé a'",
+        "hint": "Orthographic spelling change in preterite: -zar changes z -> c in 1st person singular before 'a'.",
         "syntaxBreakdown": "[Subject: Yo] + [Pretérito ortográfico: empecé a] + [Infinitivo: estudiar] + [Time: después de cenar]"
     },
     {
@@ -811,7 +811,7 @@ export const SENTENCE_POOLS = {
             "lee",
             "un"
         ],
-        "hint": "Intervocalic i -> y spelling change in preterite 3rd person: leer -> 'leyó'",
+        "hint": "Intervocalic spelling change — double vowels change i -> y in 3rd person singular.",
         "syntaxBreakdown": "[Subject: Ella] + [Pretérito intervocal: leyó] + [Direct Object: el periódico de ayer] + [Time: por la mañana]"
     },
     {
@@ -822,7 +822,7 @@ export const SENTENCE_POOLS = {
             "creen",
             "una"
         ],
-        "hint": "Intervocalic i -> y in preterite 3rd person plural: creer -> 'creyeron'",
+        "hint": "Intervocalic spelling change — double vowels change i -> y in 3rd person plural.",
         "syntaxBreakdown": "[Subject: Ellos] + [Pretérito intervocal: creyeron] + [Direct Object: las noticias de la televisión]"
     },
     {
@@ -833,7 +833,7 @@ export const SENTENCE_POOLS = {
             "oyen",
             "un"
         ],
-        "hint": "Preterite of oír for nosotros: 'oímos' (with accent mark on í)",
+        "hint": "Preterite form of oír for 1st person plural with an accent mark.",
         "syntaxBreakdown": "[Subject: Nosotros] + [Pretérito: oímos] + [Direct Object: la música alegre] + [Location: en el pasillo]"
     },
     {
@@ -844,7 +844,7 @@ export const SENTENCE_POOLS = {
             "le",
             "los"
         ],
-        "hint": "Irregular preterite dar for 3rd person singular: 'dio' (no accent mark)",
+        "hint": "Irregular preterite form of dar for 3rd person singular (monosyllable without accent).",
         "syntaxBreakdown": "[Subject: El cajero] + [IOP Pronoun: me] + [Pretérito irregular: dio] + [Direct Object: el recibo y la vuelta]"
     },
     {
@@ -855,7 +855,7 @@ export const SENTENCE_POOLS = {
             "le",
             "vestidor"
         ],
-        "hint": "Reflexive preterite of probarse for ella: 'se probó'",
+        "hint": "Reflexive preterite form for 3rd person singular.",
         "syntaxBreakdown": "[Subject: Ella] + [Pronombre reflexivo: se] + [Pretérito: probó] + [Direct Object: el vestido rojo] + [Location: en el probador]"
     },
     {
@@ -866,7 +866,7 @@ export const SENTENCE_POOLS = {
             "medio",
             "la"
         ],
-        "hint": "Preterite nosotros form: 'compramos' with quantity 'una docena de'",
+        "hint": "Preterite 1st person plural form with quantity expression.",
         "syntaxBreakdown": "[Preterite Verb: Compramos] + [Cantidad y OD: una docena de huevos] + [Location: en el pasillo central]"
     },
     {
@@ -877,7 +877,7 @@ export const SENTENCE_POOLS = {
             "pide",
             "un"
         ],
-        "hint": "Preterite stem changer: 'pidió' with store vocabulary 'la entrega urgente'",
+        "hint": "Preterite stem changer (e -> i) for 3rd person singular.",
         "syntaxBreakdown": "[Subject: El cliente] + [Pretérito con cambio: pidió] + [Direct Object: la entrega urgente del paquete]"
     },
     {
@@ -888,7 +888,7 @@ export const SENTENCE_POOLS = {
             "por",
             "un"
         ],
-        "hint": "Preterite of separar for nosotros: 'separamos'",
+        "hint": "Preterite regular -ar verb ending for 1st person plural.",
         "syntaxBreakdown": "[Preterite Verb: Separamos] + [Direct Object: el reciclaje de la basura] + [Location: en la cocina]"
     },
     {
@@ -899,7 +899,7 @@ export const SENTENCE_POOLS = {
             "dejó",
             "las"
         ],
-        "hint": "Preterite of dejar for yo (-é): 'dejé'",
+        "hint": "Preterite regular -ar verb ending for 1st person singular (-é).",
         "syntaxBreakdown": "[Preterite Verb: Dejé] + [Direct Object: los trajes limpios] + [Location: en la tintorería]"
     },
     {
@@ -910,7 +910,7 @@ export const SENTENCE_POOLS = {
             "cuestan",
             "el"
         ],
-        "hint": "Stem-changing verb costar in present tense: 'cuesta'",
+        "hint": "Stem-changing verb costar (o -> ue) in 3rd person singular.",
         "syntaxBreakdown": "[Subject: Esta camisa de algodón] + [Verbo: cuesta] + [Price: treinta dólares]"
     },
     {
@@ -921,7 +921,7 @@ export const SENTENCE_POOLS = {
             "compraron",
             "las"
         ],
-        "hint": "Preterite of comprar for nosotros: 'compramos'",
+        "hint": "Preterite regular -ar verb ending for 1st person plural.",
         "syntaxBreakdown": "[Subject: Nosotros] + [Preterite Verb: compramos] + [Direct Object: unos pantalones negros de lana]"
     },
     {
@@ -932,7 +932,7 @@ export const SENTENCE_POOLS = {
             "barrieron",
             "un"
         ],
-        "hint": "Preterite of regular -er verb barrer for ella (-ió): 'barrió'",
+        "hint": "Preterite regular -er verb ending for 3rd person singular (-ió).",
         "syntaxBreakdown": "[Time: Ayer] + [Subject: mi hermana] + [Preterite Verb: barrió] + [Direct Object: el piso de la cocina]"
     },
     {
@@ -943,7 +943,7 @@ export const SENTENCE_POOLS = {
             "pasaron",
             "el"
         ],
-        "hint": "Preterite of pasar for él (-ó): 'pasó la aspiradora'",
+        "hint": "Preterite regular -ar verb ending for 3rd person singular (-ó).",
         "syntaxBreakdown": "[Subject: Mi hermano] + [Preterite Verb: pasó] + [Direct Object: la aspiradora] + [Location: en la sala]"
     }
 ],
@@ -969,7 +969,7 @@ export const SENTENCE_POOLS = {
             "la",
             "mostraron"
         ],
-        "hint": "Past action completed: 'mostró'",
+        "hint": "Completed past action with regular -ar ending for 3rd person singular (-ó).",
         "syntaxBreakdown": "[Subject: El pasajero] + [Preterite Verb: mostró] + [Direct Object: el pasaporte] + [Location: en el mostrador]"
     },
     {
@@ -980,7 +980,7 @@ export const SENTENCE_POOLS = {
             "hizo",
             "los"
         ],
-        "hint": "Irregular preterite stem (hic-): 'hicieron'",
+        "hint": "Irregular preterite stem of hacer (hic-) for 3rd person plural.",
         "syntaxBreakdown": "[Subject: Ellos] + [Pretérito irregular: hicieron] + [Direct Object: las maletas] + [Time: antes del viaje]"
     },
     {
@@ -991,7 +991,7 @@ export const SENTENCE_POOLS = {
             "da",
             "el"
         ],
-        "hint": "Irregular preterite dar: 'yo di' with indirect pronoun 'le'",
+        "hint": "Irregular preterite of dar for 1st person singular with indirect pronoun.",
         "syntaxBreakdown": "[Subject: Yo] + [IOP Pronoun: le] + [Pretérito irregular: di] + [Direct Object: la tarjeta de embarque] + [Destinatario: al agente]"
     },
     {
@@ -1002,7 +1002,7 @@ export const SENTENCE_POOLS = {
             "hizo",
             "pusieron"
         ],
-        "hint": "Use 'ponerse' for sudden emotional change: 'se puso furioso'",
+        "hint": "Use 'ponerse' in preterite 3rd person singular for a sudden emotional change.",
         "syntaxBreakdown": "[Subject: El huésped] + [Pronombre reflexivo: se] + [Verb of Becoming: puso] + [Adjetivo de emoción: furioso] + [Cause: con el retraso del vuelo]"
     },
     {
@@ -1101,7 +1101,7 @@ export const SENTENCE_POOLS = {
             "les las",
             "se los"
         ],
-        "hint": "Double object rule: indirect 'les' changes to 'se' before direct object 'las': 'se las subió'",
+        "hint": "Double object pronoun rule — indirect 'les' becomes 'se' before 3rd person direct object.",
         "syntaxBreakdown": "[Subject: El botones] + [Pronombre OI cambiado: se] + [DOP Pronoun: las] + [Preterite Verb: subió] + [Destinatario aclarado: a los huéspedes]"
     },
     {
@@ -1112,7 +1112,7 @@ export const SENTENCE_POOLS = {
             "les los",
             "se los"
         ],
-        "hint": "Double object order: Indirect (nos) + Direct (los): 'nos los mandó'",
+        "hint": "Double object pronoun order — Indirect pronoun precedes Direct pronoun before the conjugated verb.",
         "syntaxBreakdown": "[Subject: El recepcionista] + [IOP Pronoun: nos] + [DOP Pronoun: los] + [Preterite Verb: mandó] + [Medio: por correo electrónico]"
     },
     {
@@ -1123,7 +1123,7 @@ export const SENTENCE_POOLS = {
             "la le",
             "se lo"
         ],
-        "hint": "Double object pronoun rule: indirect 'le' turns into 'se' before direct 'la': 'se la dije'",
+        "hint": "Double object pronoun rule — indirect 'le' becomes 'se' before 3rd person direct object.",
         "syntaxBreakdown": "[Cláusula 1: Tu padre sabe la noticia] + [Conector: porque] + [IOP Pronoun: se] + [DOP Pronoun: la] + [Preterite Verb: dije] + [Time: ayer]"
     },
     {
@@ -1134,7 +1134,7 @@ export const SENTENCE_POOLS = {
             "darle la",
             "darla me"
         ],
-        "hint": "Attach both pronouns to the infinitive maintaining Indirect + Direct order with accent: 'dármela'",
+        "hint": "Attach both pronouns to the infinitive in Indirect + Direct order with an accent mark.",
         "syntaxBreakdown": "[Subject: Mamá] + [Perífrasis verbal: va a] + [Infinitivo con pronombres adjuntos: dármela] + [Time: al entrar en el puesto de seguridad]"
     },
     {
@@ -1145,7 +1145,7 @@ export const SENTENCE_POOLS = {
             "andaron",
             "para"
         ],
-        "hint": "Irregular preterite stem anduv- for nosotros: 'anduvimos' (no accent)",
+        "hint": "Irregular preterite stem anduv- for 1st person plural.",
         "syntaxBreakdown": "[Time: Ayer] + [Subject: nosotros] + [Pretérito irregular: anduvimos] + [Lugar y ruta: por toda la ciudad histórica]"
     },
     {
@@ -1156,7 +1156,7 @@ export const SENTENCE_POOLS = {
             "conduje",
             "condujeron"
         ],
-        "hint": "Irregular j-stem preterite: conducir -> 'condujo' for 3rd person singular",
+        "hint": "Irregular j-stem preterite — verbs in -ducir take j-stem with -o in 3rd person singular.",
         "syntaxBreakdown": "[Subject: El taxista] + [Pretérito irregular: condujo] + [Modo: con cuidado] + [Destination: hacia la estación de tren]"
     },
     {
@@ -1178,7 +1178,7 @@ export const SENTENCE_POOLS = {
             "trajeron",
             "los"
         ],
-        "hint": "Irregular preterite stem traj- for nosotros: 'trajimos'",
+        "hint": "Irregular preterite stem traj- for 1st person plural.",
         "syntaxBreakdown": "[Subject: Nosotros] + [Pretérito irregular: trajimos] + [Direct Object: las maletas] + [Destination: a la habitación triple]"
     },
     {
@@ -1189,7 +1189,7 @@ export const SENTENCE_POOLS = {
             "despegaron",
             "en"
         ],
-        "hint": "Preterite of despegar for 3rd person singular: 'despegó'",
+        "hint": "Preterite regular -ar verb ending for 3rd person singular (-ó).",
         "syntaxBreakdown": "[Subject: El avión] + [Preterite Verb: despegó] + [Modo: a tiempo] + [Origen: de la pista principal]"
     },
     {
@@ -1200,7 +1200,7 @@ export const SENTENCE_POOLS = {
             "una",
             "por"
         ],
-        "hint": "Preterite of comprar: 'compré' with destination 'para Madrid'",
+        "hint": "Preterite regular -ar verb ending for 1st person singular (-é).",
         "syntaxBreakdown": "[Preterite Verb: Compré] + [Direct Object: un billete de ida y vuelta] + [Destination: para Madrid]"
     },
     {
@@ -1211,7 +1211,7 @@ export const SENTENCE_POOLS = {
             "pudo",
             "el"
         ],
-        "hint": "Irregular preterite stem pud- for yo: 'pude'",
+        "hint": "Irregular preterite stem pud- for 1st person singular (-e).",
         "syntaxBreakdown": "[Time: Ayer] + [Subject: yo] + [Negación: no] + [Pretérito irregular: pude] + [Infinitivo: encontrar] + [Direct Object: mi pasaporte en la mochila]"
     },
     {
@@ -1222,7 +1222,7 @@ export const SENTENCE_POOLS = {
             "para",
             "tuvieron"
         ],
-        "hint": "Irregular preterite stem tuv- for ella: 'tuvo que cancelar'",
+        "hint": "Irregular preterite stem tuv- for 3rd person singular (-o).",
         "syntaxBreakdown": "[Subject: Ella] + [Pretérito irregular: tuvo que] + [Infinitivo: cancelar] + [Direct Object: la reserva] + [Causa con por: por mal tiempo]"
     },
     {
@@ -1233,7 +1233,7 @@ export const SENTENCE_POOLS = {
             "estuvo",
             "por"
         ],
-        "hint": "Irregular preterite stem estuv- for nosotros: 'estuvimos'",
+        "hint": "Irregular preterite stem estuv- for 1st person plural (-imos).",
         "syntaxBreakdown": "[Subject: Nosotros] + [Pretérito irregular: estuvimos] + [Location: en España] + [Time: durante las vacaciones de verano]"
     },
     {
@@ -1244,7 +1244,7 @@ export const SENTENCE_POOLS = {
             "dijo",
             "un"
         ],
-        "hint": "Irregular preterite stem dij- for ellos: 'dijeron' (drops i before eron)",
+        "hint": "Irregular j-stem preterite for 3rd person plural (ending -eron, not -ieron).",
         "syntaxBreakdown": "[Subject: Ellos] + [Pretérito irregular: dijeron] + [Direct Object: la verdad sobre el retraso del vuelo]"
     },
     {
@@ -1255,7 +1255,7 @@ export const SENTENCE_POOLS = {
             "puso",
             "las"
         ],
-        "hint": "Irregular preterite stem pus- for yo: 'puse'",
+        "hint": "Irregular preterite stem pus- for 1st person singular (-e).",
         "syntaxBreakdown": "[Subject: Yo] + [Pretérito irregular: puse] + [Direct Object: los boletos de tren] + [Location: encima del escritorio]"
     },
     {
@@ -1266,7 +1266,7 @@ export const SENTENCE_POOLS = {
             "les",
             "un"
         ],
-        "hint": "Irregular preterite dar for 3rd person singular: 'dio'",
+        "hint": "Irregular preterite of dar for 3rd person singular.",
         "syntaxBreakdown": "[Subject: El recepcionista] + [IOP Pronoun: nos] + [Pretérito irregular: dio] + [Direct Object: la llave de la habitación doble]"
     },
     {
@@ -1277,7 +1277,7 @@ export const SENTENCE_POOLS = {
             "pesado",
             "los"
         ],
-        "hint": "Preterite 3rd person singular: 'llevó'",
+        "hint": "Preterite regular -ar verb ending for 3rd person singular (-ó).",
         "syntaxBreakdown": "[Subject: El botones] + [Preterite Verb: llevó] + [Direct Object: las maletas pesadas] + [Location: en el ascensor]"
     }
 ]

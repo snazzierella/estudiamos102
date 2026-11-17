@@ -23,7 +23,8 @@ import {
   getVerbCategoryInfo,
   VERB_LAB_GROUPS,
   getVerbsForGroups,
-  cleanConjugationInput
+  cleanConjugationInput,
+  sanitizeMeaningForQuiz
 } from '../utils/conjugationHelper';
 import { t } from '../utils/translationsHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
@@ -3659,7 +3660,7 @@ export default function StudyQuest({
                       </h3>
 
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '12px' }}>
-                        ({currentQuestQ.context || currentQuestQ.meaning})
+                        ({currentQuestQ.context || sanitizeMeaningForQuiz(currentQuestQ.meaning)})
                       </p>
 
                       {currentQuestQ.hint && (
@@ -3783,7 +3784,7 @@ export default function StudyQuest({
                       </h3>
 
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '14px' }}>
-                        {currentQuestQ.isGustar ? currentQuestQ.meaning : `${currentQuestQ.pronoun} • ${currentQuestQ.meaning}`}
+                        {currentQuestQ.isGustar ? sanitizeMeaningForQuiz(currentQuestQ.meaning) : `${currentQuestQ.pronoun} • ${sanitizeMeaningForQuiz(currentQuestQ.meaning)}`}
                       </p>
                     </>
                   ) : currentQuestQ.isFillInTheBlank ? (
@@ -3792,7 +3793,7 @@ export default function StudyQuest({
                         {translateInstructions ? "Completar la frase (Fill in the blank):" : "Completar la frase:"}
                       </div>
                       <h3 className="quiz-word" style={{ color: 'var(--accent)' }}>{currentQuestQ.questionWord}</h3>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '8px' }}>({currentQuestQ.meaning})</p>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '8px' }}>({sanitizeMeaningForQuiz(currentQuestQ.meaning)})</p>
                       {currentQuestQ.hint && (
                         <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
                           {!questHintRevealed ? (

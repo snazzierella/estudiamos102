@@ -145,11 +145,11 @@ export const MIDTERM_QUESTIONS = [
       {
         id: "3d",
         label: "Una pulsera de plata",
-        targetSentence: "No compré mucho dinero solo una pulsera de plata",
-        englishMeaning: "I didn't spend much money just a silver bracelet",
-        distractors: ["compré nada", "de el", "oro"],
-        hint: "'una pulsera de plata' (a silver bracelet).",
-        syntaxBreakdown: "[Negación + Verbo: No compré mucho] + [Restricción: solo una pulsera de plata]"
+        targetSentence: "No gasté mucho dinero solo una pulsera de plata",
+        englishMeaning: "I didn't spend much money, just a silver bracelet",
+        distractors: ["gastaron", "de el", "oro"],
+        hint: "Gastar en pretérito (1ª persona singular) y restricción con 'solo'.",
+        syntaxBreakdown: "[Negación + Verbo: No gasté mucho dinero] + [Restricción: solo una pulsera de plata]"
       }
     ]
   },

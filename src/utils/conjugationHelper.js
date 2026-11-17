@@ -1122,6 +1122,24 @@ export function cleanConjugationInput(userStr, correctStr) {
   return false;
 }
 
+/**
+ * Sanitizes an English gloss/meaning string for quiz presentation so that
+ * parenthetical verb conjugations (e.g. "(yo hago)", "(yo salgo)"), irregular stems
+ * (e.g. "(irregular preterite: conduj-)"), stem changes (e.g. "[u -> ue]", "(o -> ue)"),
+ * or tense cues do not spoil the answer to the student during active quizzes.
+ */
+export function sanitizeMeaningForQuiz(text) {
+  if (!text || typeof text !== "string") return text;
+  return text
+    // Remove parentheticals containing yo/tú/él conjugations, stems, or grammar notes
+    .replace(/\s*\([^)]*(?:yo\s+[a-záéíóúñ]+|preterite|past\b|stem|irregular|e\s*->\s*[ie]|o\s*->\s*ue|u\s*->\s*ue|e\s*->\s*i|\b(?:hago|salgo|pongo|traigo|valgo|veo|oigo|conduzco|sé|conozco|estoy|soy|voy|digo|sigo|vengo|tengo|conduj-)\b)[^)]*\)/gi, "")
+    // Remove square brackets containing stem changes or grammar notes
+    .replace(/\s*\[[^\]]*(?:->|stem|irregular|yo)[^\]]*\]/gi, "")
+    // Clean up multiple spaces or dangling slashes/hyphens
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s*[/,-]\s*$/g, "")
+    .trim();
+}
 
 /**
  * Generates an interactive conjugation question for a given verb item.
@@ -1307,7 +1325,7 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     subjectPronoun: chosenSubject,
     subjectMeaning: chosenPronounObj.meaning,
     prompt: prompt,
-    meaning: verbItem.english,
+    meaning: sanitizeMeaningForQuiz(verbItem.english),
     pronoun: pronounLabel,
     tense: targetTense,
     tenseLabel: tenseLabel,
@@ -1503,7 +1521,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "abrazarse",
       tense: "present",
-      hint: "Verbo conjugado principal: los amigos (ellos) realizan la acción directamente."
+      hint: "Verbo recíproco conjugado en presente para la 3ª persona plural."
     },
     "los dos amigos van a abrazarse con alegría": {
       blanked: "los dos amigos van a [_____] con alegría",
@@ -1512,7 +1530,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "abrazarse",
       tense: "present",
-      hint: "Con perífrasis verbal ('van a...'), el pronombre se une al infinitivo: abrazarse."
+      hint: "Con perífrasis verbal ('ir a + infinitivo'), une el pronombre recíproco al final del infinitivo."
     },
     "los dos amigos corrieron para abrazarse con emoción": {
       blanked: "los dos amigos corrieron para [_____] con emoción",
@@ -1521,7 +1539,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "abrazarse",
       tense: "present",
-      hint: "Después de una preposición ('para'), se usa el infinitivo con pronombre unido: abrazarse."
+      hint: "Después de una preposición ('para'), usa el infinitivo con el pronombre recíproco unido."
     },
     "a ellos les encanta abrazarse cuando hace frío": {
       blanked: "a ellos les encanta [_____] cuando hace frío",
@@ -1530,7 +1548,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "abrazarse",
       tense: "present",
-      hint: "Después de 'les encanta', el verbo va en infinitivo con pronombre: abrazarse."
+      hint: "Después de un verbo como encantar, usa el infinitivo con el pronombre recíproco unido."
     },
     "ellos se besan antes de salir": {
       blanked: "ellos [_____] antes de salir",
@@ -1539,7 +1557,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "besarse",
       tense: "present",
-      hint: "Verbo conjugado principal: ellos realizan la acción mutuamente."
+      hint: "Verbo recíproco conjugado en presente para la 3ª persona plural."
     },
     "los novios quieren besarse en el parque": {
       blanked: "los novios quieren [_____] en el parque",
@@ -1548,7 +1566,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "besarse",
       tense: "present",
-      hint: "Con dos verbos ('quieren + ...'), el segundo verbo va en infinitivo con pronombre unido: besarse."
+      hint: "Con dos verbos consecutivos ('querer + verbo'), el segundo verbo va en infinitivo con pronombre unido."
     },
     "los novios van a besarse en el altar": {
       blanked: "los novios van a [_____] en el altar",
@@ -1557,7 +1575,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "besarse",
       tense: "present",
-      hint: "Después de 'van a' (ir a + infinitivo), el pronombre se une al infinitivo: besarse."
+      hint: "En la perífrasis 'ir a + infinitivo' sin pronombre previo, une el pronombre recíproco al final del infinitivo."
     },
     "a ellos les gusta besarse bajo la lluvia": {
       blanked: "a ellos les gusta [_____] bajo la lluvia",
@@ -1566,7 +1584,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "besarse",
       tense: "present",
-      hint: "Después de 'les gusta', el verbo va en infinitivo con pronombre: besarse."
+      hint: "Después de la estructura con gustar, usa el infinitivo con el pronombre recíproco unido."
     },
     "nosotros vamos a besarnos antes de salir": {
       blanked: "nosotros vamos a [_____] antes de salir",
@@ -1575,7 +1593,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "besarse",
       tense: "present",
-      hint: "Con 'nosotros' después de 'vamos a', se une el pronombre 'nos' al infinitivo: besarnos (nunca 'se' ni 'me')."
+      hint: "Para nosotros tras la perífrasis, une el pronombre recíproco correspondiente al final del infinitivo."
     },
     "nosotros nos vamos a besar antes de salir": {
       blanked: "nosotros [_____] a besar antes de salir",
@@ -1584,7 +1602,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "besarse",
       tense: "present",
-      hint: "Pronombre recíproco 'nos' antes de 'vamos': nos vamos a besar (nunca 'se' con nosotros)."
+      hint: "Coloca el pronombre recíproco de 1ª persona plural antes del verbo auxiliar conjugado."
     },
     "nosotros nos vamos a besar antes de salir (inf)": {
       blanked: "nosotros nos vamos a [_____] antes de salir",
@@ -1593,7 +1611,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "besarse",
       tense: "present",
-      hint: "El pronombre 'nos' ya está antes de 'vamos' (nos vamos a...). Por tanto, el infinitivo va solo: besar. ¡Nunca se repite el pronombre (*nos vamos a besarnos)!"
+      hint: "El pronombre ya está colocado antes del verbo conjugado; mantén el infinitivo simple sin duplicar el pronombre."
     },
     "los novios se van a besar en el altar": {
       blanked: "los novios [_____] a besar en el altar",
@@ -1602,7 +1620,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "besarse",
       tense: "present",
-      hint: "Pronombre 'se' colocado antes del verbo conjugado: se van a besar."
+      hint: "Coloca el pronombre recíproco de 3ª persona plural antes del verbo auxiliar conjugado."
     },
     "los novios se van a besar en el altar (inf)": {
       blanked: "los novios se van a [_____] en el altar",
@@ -1611,7 +1629,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "besarse",
       tense: "present",
-      hint: "El pronombre 'se' ya está antes de 'van' (se van a...). El infinitivo va solo: besar. ¡Nunca dupliques el pronombre (*se van a besarse)!"
+      hint: "El pronombre ya precede al verbo conjugado; mantén el infinitivo en su forma simple sin pronombre añadido."
     },
     "los novios se quieren besar en el parque": {
       blanked: "los novios se quieren [_____] en el parque",
@@ -1620,7 +1638,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "besarse",
       tense: "present",
-      hint: "El pronombre 'se' ya está antes del verbo auxiliar (se quieren...). Usa el infinitivo simple: besar."
+      hint: "El pronombre ya precede al verbo querer; usa el infinitivo simple sin duplicar el pronombre."
     },
     "nosotros nos debemos ayudar en la clase": {
       blanked: "nosotros nos debemos [_____] en la clase",
@@ -1629,7 +1647,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "ayudarse",
       tense: "present",
-      hint: "Con 'nos debemos...', el pronombre 'nos' ya está al principio. Usa el infinitivo simple: ayudar (no *nos debemos ayudarnos)."
+      hint: "El pronombre ya está al inicio de la frase verbal; mantén el infinitivo simple sin pronombre añadido."
     },
     "los dos amigos se van a abrazar en el aeropuerto": {
       blanked: "los dos amigos [_____] a abrazar en el aeropuerto",
@@ -1638,7 +1656,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "abrazarse",
       tense: "present",
-      hint: "Pronombre 'se' antes de 'van': se van a abrazar."
+      hint: "Coloca el pronombre recíproco de 3ª persona plural antes del verbo auxiliar conjugado."
     },
     "los dos amigos se van a abrazar en el aeropuerto (inf)": {
       blanked: "los dos amigos se van a [_____] en el aeropuerto",
@@ -1647,7 +1665,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "abrazarse",
       tense: "present",
-      hint: "El pronombre 'se' ya está antes de 'van' (se van a...). El infinitivo va solo: abrazar (¡nunca *se van a abrazarse)!"
+      hint: "El pronombre ya está antes del verbo auxiliar; mantén el infinitivo simple sin duplicarlo."
     },
     "nosotros nos vamos a abrazar con alegría": {
       blanked: "nosotros [_____] a abrazar con alegría",
@@ -1656,7 +1674,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "abrazarse",
       tense: "present",
-      hint: "Pronombre 'nos' para nosotros antes del verbo: nos vamos a abrazar."
+      hint: "Coloca el pronombre recíproco de 1ª persona plural antes del verbo auxiliar conjugado."
     },
     "nosotros nos vamos a abrazar con alegría (inf)": {
       blanked: "nosotros nos vamos a [_____] con alegría",
@@ -1665,7 +1683,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "abrazarse",
       tense: "present",
-      hint: "El pronombre 'nos' ya está antes de 'vamos'. El infinitivo va solo: abrazar (¡nunca *nos vamos a abrazarnos)!"
+      hint: "El pronombre ya precede a la perífrasis verbal; usa el infinitivo simple sin pronombre adherido."
     },
     "nosotros vamos a abrazarnos con alegría": {
       blanked: "nosotros vamos a [_____] con alegría",
@@ -1674,7 +1692,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "abrazarse",
       tense: "present",
-      hint: "Sin pronombre antes de 'vamos', se une 'nos' al infinitivo: abrazarnos (nunca 'se' con nosotros)."
+      hint: "Sin pronombre previo a la perífrasis, une el pronombre recíproco de 1ª persona plural al final del infinitivo."
     },
     "los dos estudiantes se van a conocer hoy": {
       blanked: "los dos estudiantes [_____] a conocer hoy",
@@ -1683,7 +1701,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "conocerse",
       tense: "present",
-      hint: "Pronombre 'se' antes de 'van': se van a conocer."
+      hint: "Coloca el pronombre recíproco de 3ª persona plural antes de la forma conjugada de ir."
     },
     "los dos estudiantes se van a conocer hoy (inf)": {
       blanked: "los dos estudiantes se van a [_____] hoy",
@@ -1692,7 +1710,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "conocerse",
       tense: "present",
-      hint: "El pronombre 'se' ya está antes de 'van'. Usa el infinitivo simple: conocer."
+      hint: "El pronombre ya precede a la perífrasis verbal; mantén el infinitivo en su forma simple."
     },
     "nosotros nos queremos conocer mejor": {
       blanked: "nosotros [_____] conocer mejor",
@@ -1701,7 +1719,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "conocerse",
       tense: "present",
-      hint: "Pronombre 'nos' colocado antes del verbo querer: nos queremos conocer."
+      hint: "Coloca el pronombre recíproco de 1ª persona plural antes del verbo querer conjugado."
     },
     "nosotros nos queremos conocer mejor (inf)": {
       blanked: "nosotros nos queremos [_____] mejor",
@@ -1710,7 +1728,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "conocerse",
       tense: "present",
-      hint: "El pronombre 'nos' ya está antes de 'queremos'. Usa el infinitivo simple: conocer."
+      hint: "El pronombre ya antecede al verbo querer; usa el infinitivo simple sin pronombre añadido."
     },
     "nosotros queremos conocernos mejor": {
       blanked: "nosotros queremos [_____] mejor",
@@ -1719,7 +1737,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "conocerse",
       tense: "present",
-      hint: "Une 'nos' al final del infinitivo: conocernos."
+      hint: "Une el pronombre recíproco de 1ª persona plural directamente al final del infinitivo."
     },
     "los amigos se van a despedir en la estación": {
       blanked: "los amigos [_____] a despedir en la estación",
@@ -1728,7 +1746,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "despedirse",
       tense: "present",
-      hint: "Pronombre 'se' antes de 'van': se van a despedir."
+      hint: "Coloca el pronombre recíproco de 3ª persona plural antes del verbo auxiliar conjugado."
     },
     "los amigos se van a despedir en la estación (inf)": {
       blanked: "los amigos se van a [_____] en la estación",
@@ -1737,7 +1755,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "despedirse",
       tense: "present",
-      hint: "El pronombre 'se' ya está antes de 'van'. Usa el infinitivo simple: despedir."
+      hint: "El pronombre ya está situado antes del verbo auxiliar; mantén el infinitivo simple."
     },
     "los amigos van a despedirse en la estación": {
       blanked: "los amigos van a [_____] en la estación",
@@ -1746,7 +1764,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "despedirse",
       tense: "present",
-      hint: "Sin pronombre antes del verbo, se une 'se' al infinitivo: despedirse."
+      hint: "Sin pronombre antes de la perífrasis, une el pronombre recíproco de 3ª persona plural al final del infinitivo."
     },
     "nosotros nos tenemos que despedir ahora": {
       blanked: "nosotros nos tenemos que [_____] ahora",
@@ -1755,7 +1773,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "despedirse",
       tense: "present",
-      hint: "El pronombre 'nos' ya está antes de 'tenemos'. Usa el infinitivo simple: despedir."
+      hint: "El pronombre ya precede al verbo tener; usa el infinitivo simple sin duplicar el pronombre."
     },
     "nosotros tenemos que despedirnos ahora": {
       blanked: "nosotros tenemos que [_____] ahora",
@@ -1764,7 +1782,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "despedirse",
       tense: "present",
-      hint: "Une 'nos' al final del infinitivo: despedirnos."
+      hint: "Une el pronombre reflexivo/recíproco de 1ª persona plural al final del infinitivo tras 'que'."
     },
     "nosotros nos vamos a reunir en la cafetería": {
       blanked: "nosotros [_____] a reunir en la cafetería",
@@ -1773,7 +1791,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "reunirse",
       tense: "present",
-      hint: "Pronombre 'nos' antes de 'vamos': nos vamos a reunir."
+      hint: "Coloca el pronombre recíproco de 1ª persona plural antes del verbo auxiliar conjugado."
     },
     "nosotros nos vamos a reunir en la cafetería (inf)": {
       blanked: "nosotros nos vamos a [_____] en la cafetería",
@@ -1782,7 +1800,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "reunirse",
       tense: "present",
-      hint: "El pronombre 'nos' ya está al frente: 'nos vamos a...'. Usa el infinitivo simple: reunir."
+      hint: "El pronombre ya precede a la perífrasis verbal; usa el infinitivo simple."
     },
     "nosotros vamos a reunirnos en la cafetería": {
       blanked: "nosotros vamos a [_____] en la cafetería",
@@ -1791,7 +1809,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "reunirse",
       tense: "present",
-      hint: "Une el pronombre 'nos' al infinitivo: reunirnos."
+      hint: "Une el pronombre recíproco de 1ª persona plural directamente al final del infinitivo."
     },
     "nosotros nos tenemos que ayudar con la tarea": {
       blanked: "nosotros nos tenemos que [_____] con la tarea",
@@ -1800,7 +1818,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "ayudarse",
       tense: "present",
-      hint: "El pronombre 'nos' ya está antes de 'tenemos'. Usa el infinitivo simple: ayudar."
+      hint: "El pronombre ya precede al verbo tener; usa el infinitivo simple sin duplicar el pronombre."
     },
     "nosotros tenemos que ayudarnos con la tarea": {
       blanked: "nosotros tenemos que [_____] con la tarea",
@@ -1809,7 +1827,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "ayudarse",
       tense: "present",
-      hint: "Une el pronombre 'nos' al infinitivo: ayudarnos."
+      hint: "Une el pronombre recíproco de 1ª persona plural directamente al final del infinitivo."
     },
     "yo me voy a acostar temprano esta noche": {
       blanked: "yo me voy a [_____] temprano esta noche",
@@ -1818,7 +1836,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "acostarse",
       tense: "present",
-      hint: "El pronombre 'me' ya está antes de 'voy'. Usa el infinitivo simple: acostar (no dupliques *me voy a acostarme)."
+      hint: "El pronombre reflexivo ya precede al verbo conjugado; mantén el infinitivo simple sin duplicarlo."
     },
     "yo voy a acostarme temprano esta noche": {
       blanked: "yo voy a [_____] temprano esta noche",
@@ -1827,7 +1845,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "acostarse",
       tense: "present",
-      hint: "Une 'me' al final del infinitivo: acostarme."
+      hint: "Con perífrasis sin pronombre previo, une el pronombre reflexivo de 1ª persona singular al infinitivo."
     },
     "tú te tienes que lavar las manos antes de comer": {
       blanked: "tú te tienes que [_____] las manos antes de comer",
@@ -1836,7 +1854,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "lavarse",
       tense: "present",
-      hint: "El pronombre 'te' ya está antes de 'tienes'. Usa el infinitivo simple: lavar."
+      hint: "El pronombre reflexivo ya precede al verbo conjugado; mantén el infinitivo simple sin duplicarlo."
     },
     "tú tienes que lavarte las manos antes de comer": {
       blanked: "tú tienes que [_____] las manos antes de comer",
@@ -1845,7 +1863,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "lavarse",
       tense: "present",
-      hint: "Une 'te' al final del infinitivo: lavarte."
+      hint: "Con perífrasis sin pronombre previo, une el pronombre reflexivo de 2ª persona singular al infinitivo."
     },
     "los amigos se despiden en la estación": {
       blanked: "los amigos [_____] en la estación",
@@ -1854,7 +1872,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "despedirse",
       tense: "present",
-      hint: "Verbo conjugado principal: los amigos realizan la acción."
+      hint: "Verbo recíproco conjugado en presente para la 3ª persona plural."
     },
     "antes de despedirse los estudiantes se dieron un abrazo": {
       blanked: "antes de [_____] los estudiantes se dieron un abrazo",
@@ -1863,7 +1881,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "despedirse",
       tense: "present",
-      hint: "Después de una preposición ('antes de'), el verbo SIEMPRE va en infinitivo: despedirse."
+      hint: "Después de una preposición ('antes de'), el verbo recíproco va en infinitivo con su pronombre unido."
     },
     "nosotros nos ayudamos con la tarea de español": {
       blanked: "nosotros [_____] con la tarea de español",
@@ -1872,7 +1890,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "ayudarse",
       tense: "present",
-      hint: "Verbo conjugado: nosotros realizamos la acción."
+      hint: "Verbo recíproco conjugado en presente para la 1ª persona plural."
     },
     "nosotros debemos ayudarnos en la clase": {
       blanked: "nosotros debemos [_____] en la clase",
@@ -1881,7 +1899,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "ayudarse",
       tense: "present",
-      hint: "Después de un verbo modal ('debemos'), el pronombre 'nos' se une al infinitivo: ayudarnos."
+      hint: "Tras el verbo modal sin pronombre previo, une el pronombre recíproco de 1ª persona plural al infinitivo."
     },
     "es muy importante ayudarse entre compañeros": {
       blanked: "es muy importante [_____] entre compañeros",
@@ -1890,7 +1908,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "ayudarse",
       tense: "present",
-      hint: "En expresiones impersonales ('es importante...'), se usa el infinitivo general: ayudarse."
+      hint: "En expresiones impersonales, usa el infinitivo con el pronombre reflexivo/recíproco general de 3ª persona."
     },
     "mis padres se conocieron en la universidad": {
       blanked: "mis padres [_____] en la universidad",
@@ -1899,7 +1917,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "conocerse",
       tense: "preterite",
-      hint: "Verbo conjugado en pretérito (pasado): acción completada."
+      hint: "Acción completada en el pasado con el pronombre recíproco y la terminación de pretérito para ellos."
     },
     "los dos estudiantes van a conocerse hoy": {
       blanked: "los dos estudiantes van a [_____] hoy",
@@ -1908,7 +1926,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "conocerse",
       tense: "present",
-      hint: "Después de 'van a' (ir a + infinitivo), el pronombre se une al infinitivo: conocerse."
+      hint: "En la perífrasis 'ir a + infinitivo' sin pronombre previo, une el pronombre recíproco al final."
     },
     "los hermanos a veces se pelean por los juguetes": {
       blanked: "los hermanos a veces [_____] por los juguetes",
@@ -1917,7 +1935,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "pelearse",
       tense: "present",
-      hint: "Verbo conjugado principal: los hermanos realizan la acción."
+      hint: "Verbo recíproco conjugado en presente correspondiente a ellos."
     },
     "después de pelearse los niños pidieron perdón": {
       blanked: "después de [_____] los niños pidieron perdón",
@@ -1926,7 +1944,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "pelearse",
       tense: "present",
-      hint: "Después de una preposición ('después de'), se usa el infinitivo con pronombre unido: pelearse."
+      hint: "Después de una preposición ('después de'), el verbo recíproco va en infinitivo con pronombre unido."
     },
     "yo me lavo las manos antes de comer": {
       blanked: "yo [_____] las manos antes de comer",
@@ -1935,14 +1953,14 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "lavarse",
       tense: "present",
-      hint: "Verbo reflexivo conjugado para 'yo' con objeto directo ('las manos')."
+      hint: "Verbo reflexivo regular en presente conjugado para la 1ª persona singular."
     },
     "yo me lavo las manos antes de comer (obj)": {
       blanked: "yo me lavo [_____] antes de comer",
       correct: "las manos",
       choices: ["las manos", "los dientes", "la chaqueta", "el pelo"],
       type: "noun",
-      hint: "Objeto directo: la parte del cuerpo sobre la que recae la acción."
+      hint: "Identifica el objeto directo que indica la parte del cuerpo sobre la que recae la acción."
     },
     "yo necesito lavarme las manos": {
       blanked: "yo necesito [_____] las manos",
@@ -1951,7 +1969,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "lavarse",
       tense: "present",
-      hint: "Con 'necesito + infinitivo' para 'yo', el pronombre 'me' se une al infinitivo: lavarme."
+      hint: "Con infinitivo tras verbo modal para 'yo', une el pronombre reflexivo de 1ª persona singular al final."
     },
     "antes de comer es necesario lavarse las manos": {
       blanked: "antes de comer es necesario [_____] las manos",
@@ -1960,7 +1978,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "lavarse",
       tense: "present",
-      hint: "Frase impersonal ('es necesario...'): se usa el infinitivo general con pronombre unido: lavarse."
+      hint: "En frases impersonales ('es necesario...'), usa el infinitivo con el pronombre reflexivo general de 3ª persona."
     },
     "él se cepilla los dientes después de cenar": {
       blanked: "él [_____] los dientes después de cenar",
@@ -1983,14 +2001,14 @@ export const BLANK_SPECS = {
       correct: "a",
       choices: ["a", "de", "en", "con"],
       type: "preposition",
-      hint: "Se usa la 'a' personal porque el objeto directo es una persona específica."
+      hint: "Preposición requerida ante un objeto directo de persona específica."
     },
     "nosotros ayudamos a nuestros amigos": {
       blanked: "nosotros ayudamos [_____] nuestros amigos",
       correct: "a",
       choices: ["a", "de", "con", "por"],
       type: "preposition",
-      hint: "Se usa la 'a' personal porque el objeto directo son personas específicas."
+      hint: "Preposición requerida ante objetos directos humanos definidos."
     },
     "yo me despierto a las siete de la mañana": {
       blanked: "yo [_____] a las siete de la mañana",
@@ -1999,7 +2017,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "despertarse",
       tense: "present",
-      hint: "Verbo reflexivo con cambio de raíz (e -> ie) conjugado para 'yo'."
+      hint: "Verbo reflexivo con cambio de raíz (e -> ie) conjugado para la 1ª persona singular."
     },
     "mi hermano se levanta tarde los fines de semana": {
       blanked: "mi hermano [_____] tarde los fines de semana",
@@ -2024,7 +2042,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "doler",
       tense: "present",
-      hint: "Doler concuerda con el sujeto singular ('la garganta'): duele."
+      hint: "El verbo doler concuerda en singular con la parte del cuerpo afectada ('la garganta')."
     },
     "nosotros nos sentimos muy cansados": {
       blanked: "nosotros nos [_____] muy cansados",
@@ -2041,7 +2059,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "saludarse",
       tense: "present",
-      hint: "Acción recíproca entre amigos (ellos): se saludan."
+      hint: "Acción recíproca entre amigos expresada con pronombre y verbo conjugado para ellos."
     },
     "ayer compré una camisa azul en la tienda": {
       blanked: "ayer [_____] una camisa azul en la tienda",
@@ -2050,7 +2068,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "comprar",
       tense: "preterite",
-      hint: "Pretérito regular de -ar para 'yo': compré."
+      hint: "Usa la terminación regular de 1ª persona singular para verbos en -ar en pretérito (-é)."
     },
     "nosotros lavamos los platos anoche": {
       blanked: "nosotros [_____] los platos anoche",
@@ -2067,7 +2085,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "ir",
       tense: "preterite",
-      hint: "Pretérito irregular del verbo ir para 'ella': fue."
+      hint: "Usa la forma irregular de 3ª persona singular en pretérito para el verbo ir."
     },
     "mis amigos limpiaron la casa esta mañana": {
       blanked: "mis amigos [_____] la casa esta mañana",
@@ -2092,7 +2110,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "buscar",
       tense: "preterite",
-      hint: "Cambio ortográfico en pretérito (c -> qu) para 'yo': busqué."
+      hint: "Verbos en -car cambian ortográficamente a -qué en la 1ª persona singular del pretérito."
     },
     "esta camisa de algodón cuesta treinta dólares": {
       blanked: "esta camisa de algodón [_____] treinta dólares",
@@ -2133,7 +2151,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "hacer",
       tense: "preterite",
-      hint: "Pretérito irregular de hacer con raíz 'hic-': hicieron."
+      hint: "Usa la raíz irregular hic- de hacer con la terminación de 3ª persona plural en pretérito."
     },
     "yo le di la tarjeta de embarque al agente": {
       blanked: "yo le [_____] la tarjeta de embarque al agente",
@@ -2142,7 +2160,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "dar",
       tense: "preterite",
-      hint: "Pretérito irregular de dar para 'yo': di."
+      hint: "Forma irregular de pretérito de 1ª persona singular para dar (monosílabo sin tilde)."
     },
     "nosotros nos quedamos en un hotel cómodo": {
       blanked: "nosotros [_____] en un hotel cómodo",
@@ -2167,7 +2185,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "poder",
       tense: "preterite",
-      hint: "Pretérito irregular de poder para 'yo': pude."
+      hint: "Usa la raíz irregular pud- de poder con la terminación de 1ª persona singular (-e)."
     },
     "ella tuvo que cancelar la reserva": {
       blanked: "ella [_____] que cancelar la reserva",
@@ -2176,7 +2194,7 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "tener",
       tense: "preterite",
-      hint: "Pretérito irregular de tener para 'ella': tuvo."
+      hint: "Usa la raíz irregular tuv- de tener con la terminación de 3ª persona singular (-o)."
     },
     "nosotros estuvimos en españa durante las vacaciones": {
       blanked: "nosotros [_____] en España durante las vacaciones",
@@ -2185,14 +2203,14 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "estar",
       tense: "preterite",
-      hint: "Pretérito irregular de estar con raíz 'estuv-': estuvimos."
+      hint: "Usa la raíz irregular estuv- de estar con la terminación de 1ª persona plural (-imos)."
     },
     "ella me lo explicó con calma": {
       blanked: "ella me [_____] explicó con calma",
       correct: "lo",
       choices: ["lo", "la", "los", "las"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo masculino singular: lo."
+      hint: "Identifica el pronombre de objeto directo masculino singular."
     },
 
     // Spanish 102 Direct Object Pronoun (DOP) sentence drills:
@@ -2201,21 +2219,21 @@ export const BLANK_SPECS = {
       correct: "lo",
       choices: ["lo", "la", "los", "las"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo masculino singular (reemplaza 'el pasaporte'): lo tengo."
+      hint: "Usa el pronombre de objeto directo masculino singular que sustituye a 'el pasaporte'."
     },
     "yo la compré ayer": {
       blanked: "yo [_____] compré ayer",
       correct: "la",
       choices: ["la", "lo", "las", "le"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo femenino singular (reemplaza 'la maleta'): la compré."
+      hint: "Identifica el pronombre de objeto directo femenino singular."
     },
     "nosotros los vamos a guardar": {
       blanked: "nosotros [_____] vamos a guardar",
       correct: "los",
       choices: ["los", "las", "les", "lo"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo masculino plural (reemplaza 'los boletos'): los vamos a guardar."
+      hint: "Usa el pronombre de objeto directo masculino plural colocado antes de la perífrasis verbal."
     },
     "nosotros vamos a guardarlos": {
       blanked: "nosotros vamos a [_____]",
@@ -2224,28 +2242,28 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "guardar",
       tense: "present",
-      hint: "Con infinitivo, el pronombre de objeto directo masculino plural '-los' se une al final: guardarlos."
+      hint: "Con infinitivo, une el pronombre de objeto directo masculino plural al final del verbo."
     },
     "ella las encontró en la habitación": {
       blanked: "ella [_____] encontró en la habitación",
       correct: "las",
       choices: ["las", "los", "la", "les"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo femenino plural (reemplaza 'las llaves'): las encontró."
+      hint: "Identifica el pronombre de objeto directo femenino plural."
     },
     "el botones lo sube en el ascensor": {
       blanked: "el botones [_____] sube en el ascensor",
       correct: "lo",
       choices: ["lo", "la", "los", "le"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo masculino singular (reemplaza 'el equipaje'): lo sube."
+      hint: "Usa el pronombre de objeto directo masculino singular que sustituye a 'el equipaje'."
     },
     "nosotros las queremos ver": {
       blanked: "nosotros [_____] queremos ver",
       correct: "las",
       choices: ["las", "los", "la", "les"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo femenino plural (reemplaza 'las fotos') antes del verbo querer: las queremos ver."
+      hint: "Usa el pronombre de objeto directo femenino plural colocado antes del verbo querer."
     },
     "nosotros queremos verlas": {
       blanked: "nosotros queremos [_____]",
@@ -2254,35 +2272,35 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "ver",
       tense: "present",
-      hint: "Pronombre de objeto directo femenino plural '-las' unido al final del infinitivo: verlas."
+      hint: "Une el pronombre de objeto directo femenino plural al final del infinitivo."
     },
     "mi hermana las tiene": {
       blanked: "mi hermana [_____] tiene",
       correct: "las",
       choices: ["las", "los", "la", "le"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo femenino plural (reemplaza 'las tarjetas de embarque'): las tiene."
+      hint: "Identifica el pronombre de objeto directo femenino plural."
     },
     "nosotros lo encontramos cerca del centro": {
       blanked: "nosotros [_____] encontramos cerca del centro",
       correct: "lo",
       choices: ["lo", "la", "los", "le"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo masculino singular (reemplaza 'el hotel'): lo encontramos."
+      hint: "Usa el pronombre de objeto directo masculino singular que sustituye a 'el hotel'."
     },
     "yo te escucho claramente": {
       blanked: "yo [_____] escucho claramente",
       correct: "te",
       choices: ["te", "me", "le", "lo"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo de 2ª persona singular (a ti): te escucho."
+      hint: "Usa el pronombre de objeto directo de 2ª persona singular (para 'tú')."
     },
     "el profesor nos ayuda con la lección": {
       blanked: "el profesor [_____] ayuda con la lección",
       correct: "nos",
       choices: ["nos", "les", "me", "se"],
       type: "pronoun",
-      hint: "Pronombre de objeto directo de 1ª persona plural (a nosotros): nos ayuda."
+      hint: "Pronombre de objeto directo de 1ª persona plural."
     },
 
     // Spanish 102 Indirect Object Pronouns (IOP) & Double Object Drills:
@@ -2291,77 +2309,77 @@ export const BLANK_SPECS = {
       correct: "me",
       choices: ["me", "le", "te", "lo"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto de 1ª persona singular (a mí): me dio."
+      hint: "Usa el pronombre de objeto indirecto que corresponde a la 1ª persona singular ('a mí')."
     },
     "te dije la verdad": {
       blanked: "[_____] dije la verdad",
       correct: "te",
       choices: ["te", "le", "me", "lo"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto de 2ª persona singular (a ti): te dije."
+      hint: "Usa el pronombre de objeto indirecto que corresponde a la 2ª persona singular ('a ti')."
     },
     "le di las maletas": {
       blanked: "[_____] di las maletas",
       correct: "le",
       choices: ["le", "les", "lo", "la"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto singular (a él/ella): le di."
+      hint: "Usa el pronombre de objeto indirecto de 3ª persona singular ('a él / ella')."
     },
     "nos mandaron los pasajes": {
       blanked: "[_____] mandaron los pasajes",
       correct: "nos",
       choices: ["nos", "les", "me", "los"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto plural (a nosotros): nos mandaron."
+      hint: "Pronombre de objeto indirecto de 1ª persona plural."
     },
     "les pidió un taxi": {
       blanked: "[_____] pidió un taxi",
       correct: "les",
       choices: ["les", "le", "los", "se"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto plural (a ellos/ellas/ustedes): les pidió."
+      hint: "Usa el pronombre de objeto indirecto de 3ª persona plural ('a ellos / ellas')."
     },
     "se lo compré": {
       blanked: "[_____] lo compré",
       correct: "se",
       choices: ["se", "le", "me", "te"],
       type: "pronoun",
-      hint: "En pronombres dobles, 'le' se transforma en 'se' antes de 'lo' (nunca *le lo compré): se lo compré."
+      hint: "En combinación de pronombres, el indirecto de 3ª persona cambia por eufonía antes de un pronombre directo con l-."
     },
     "te lo presto": {
       blanked: "[_____] lo presto",
       correct: "te",
       choices: ["te", "me", "le", "se"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto (a ti) antes del objeto directo (lo): te lo presto."
+      hint: "En combinación de pronombres, el indirecto de 2ª persona singular precede al pronombre de objeto directo."
     },
     "nos lo explicaron": {
       blanked: "[_____] lo explicaron",
       correct: "nos",
       choices: ["nos", "les", "me", "los"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto (a nosotros) antes del objeto directo (lo): nos lo explicaron."
+      hint: "En combinación de pronombres, el indirecto de 1ª persona plural precede al pronombre de objeto directo."
     },
     "yo le di la tarjeta de embarque al agente (iop)": {
       blanked: "yo [_____] di la tarjeta de embarque al agente",
       correct: "le",
       choices: ["le", "les", "lo", "la"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto singular (al agente): le di."
+      hint: "Usa el pronombre de objeto indirecto singular que corresponde al destinatario ('al agente')."
     },
     "el recepcionista nos dio la llave de la habitación (iop)": {
       blanked: "el recepcionista [_____] dio la llave de la habitación",
       correct: "nos",
       choices: ["nos", "les", "me", "los"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto plural (a nosotros): nos dio."
+      hint: "Usa el pronombre de objeto indirecto de 1ª persona plural."
     },
     "el botones les subió las maletas a los huéspedes": {
       blanked: "el botones [_____] subió las maletas a los huéspedes",
       correct: "les",
       choices: ["les", "le", "los", "se"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto plural (a los huéspedes): les subió."
+      hint: "Usa el pronombre de objeto indirecto plural correspondiente al destinatario 'a los huéspedes'."
     },
     "ella va a mostrarme las fotos del viaje": {
       blanked: "ella va a [_____] las fotos del viaje",
@@ -2370,14 +2388,14 @@ export const BLANK_SPECS = {
       type: "verb",
       targetVerb: "mostrar",
       tense: "present",
-      hint: "Con infinitivo, el pronombre de objeto indirecto '-me' (a mí) se une al final: mostrarme."
+      hint: "Con infinitivo tras perífrasis, une el pronombre indirecto de 1ª persona singular al final del verbo."
     },
     "ella me va a mostrar las fotos del viaje": {
       blanked: "ella [_____] va a mostrar las fotos del viaje",
       correct: "me",
       choices: ["me", "te", "le", "lo"],
       type: "pronoun",
-      hint: "Pronombre de objeto indirecto 'me' (a mí) colocado antes de 'va a': me va a mostrar."
+      hint: "Coloca el pronombre de objeto indirecto de 1ª persona singular antes de la perífrasis verbal conjugada."
     }
   };
 

@@ -18,7 +18,9 @@ import {
   generateContrastQuestion, 
   conjugate, 
   isSentenceItem,
-  PRONOUNS
+  PRONOUNS,
+  BLANK_SPECS,
+  sanitizeMeaningForQuiz
 } from '../src/utils/conjugationHelper.js';
 import { getLevelInfo } from '../src/utils/levelInfoHelper.js';
 import { STAGES } from '../src/utils/difficultyMapper.js';
@@ -277,6 +279,54 @@ for (let stage = 1; stage <= 4; stage++) {
     console.log(`  Stage 1 (Repaso 101) Playtest Passed: All 25 levels verified.`);
   }
 }
+
+// -------------------------------------------------------------
+// 6. ANSWER GIVEAWAY & SPOILER AUDIT
+// -------------------------------------------------------------
+console.log("\n--- [6/6] Auditing Answer Giveaways in Hints & Quiz Prompts ---");
+
+// Test sanitizeMeaningForQuiz
+const sampleSpoilers = [
+  "to do / make (yo hago)",
+  "to leave / go out (yo salgo)",
+  "to drive (irregular preterite: conduj-)",
+  "to play [u -> ue]",
+  "to hurt / be painful (o -> ue)"
+];
+sampleSpoilers.forEach(sp => {
+  const sanitized = sanitizeMeaningForQuiz(sp);
+  assert(!/\(yo\s+[a-z]+\)/i.test(sanitized), `Sanitization failed to strip parenthetical conjugation: '${sanitized}' from '${sp}'`);
+  assert(!/irregular/i.test(sanitized), `Sanitization failed to strip irregular stem note: '${sanitized}' from '${sp}'`);
+  assert(!/->/.test(sanitized), `Sanitization failed to strip stem change arrow: '${sanitized}' from '${sp}'`);
+});
+
+// Verify no BLANK_SPECS hint leaks target token
+let blankHintAudits = 0;
+for (const [key, spec] of Object.entries(BLANK_SPECS)) {
+  if (spec.hint) {
+    blankHintAudits++;
+    assert(!spec.hint.includes(":"), `BLANK_SPECS hint for '${key}' contains a colon: "${spec.hint}"`);
+    const escaped = spec.correct ? spec.correct.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : "";
+    if (escaped) {
+      const leaksWord = new RegExp(`(?:^|[\\s"':;,.¿?¡!])${escaped}(?:$|[\\s"':;,.¿?¡!])`, 'i').test(spec.hint);
+      assert(!leaksWord, `BLANK_SPECS hint for '${key}' leaks target token '${spec.correct}': "${spec.hint}"`);
+    }
+  }
+}
+console.log(`  ✓ Audited ${blankHintAudits} BLANK_SPECS hints: zero answer giveaways.`);
+
+// Verify no SENTENCE_POOLS hint leaks target token via colon or direct quoting
+let sbHintAudits = 0;
+for (const [unitStr, pool] of Object.entries(SENTENCE_POOLS)) {
+  pool.forEach(sItem => {
+    if (sItem.hint) {
+      sbHintAudits++;
+      assert(!/:\s*['"`]/i.test(sItem.hint) && !/->\s*['"`]/i.test(sItem.hint) && !/:\s*[a-záéíóúñ]+/i.test(sItem.hint),
+        `Sentence Builder hint in Unit ${unitStr} for '${sItem.spanish}' leaks token: "${sItem.hint}"`);
+    }
+  });
+}
+console.log(`  ✓ Audited ${sbHintAudits} Sentence Builder hints: zero colon giveaways or quoted answers.`);
 
 console.log("\n===================================================================");
 console.log(`🎉 AUDIT COMPLETE: ${totalPassed} / ${totalAudits} checks passed.`);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   BookOpen, 
   Swords, 
@@ -11,7 +11,8 @@ import {
   Settings, 
   Heart,
   Mail,
-  Mic
+  Mic,
+  Sparkles
 } from 'lucide-react';
 import NarfySprite from './NarfySprite';
 import { getMaxHp } from '../hooks/useGameState';
@@ -30,6 +31,13 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
   const translate = Boolean(state.translateInstructions);
   const rank = [...RANKS].reverse().find(r => state.level >= r.level) || RANKS[0];
   
+  const [dashTab, setDashTab] = useState('study'); // 'study' | 'fun'
+
+  const questClaimable = !state.dailyBounties?.claimed?.quest && (state.dailyBounties?.questCount || 0) >= 2;
+  const chatClaimable = !state.dailyBounties?.claimed?.chat && (state.dailyBounties?.chatMessageCount || 0) >= 3;
+  const minigameClaimable = !state.dailyBounties?.claimed?.minigame && Boolean(state.dailyBounties?.perfectMiniGame);
+  const hasClaimableBounty = questClaimable || chatClaimable || minigameClaimable;
+
   const xpNeeded = state.level * 100;
   const xpPercentage = Math.min(100, Math.floor((state.xp / xpNeeded) * 100));
   
@@ -98,266 +106,413 @@ export default function Dashboard({ state, consumeItem, claimBounty, feedNarfy, 
           </div>
         )}
 
-        {/* Daily Bounties Checklist */}
-        <div className="glass-panel" style={{ padding: '20px', border: '1px solid rgba(250, 204, 21, 0.15)', background: 'rgba(250, 204, 21, 0.02)' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: 'var(--gold)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            ⚔️ Desafíos Diarios (Daily Bounties)
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '16px' }}>Complete daily tasks to earn bonus Gold Coins (+50 G each)! Resets daily.</p>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
-            {/* Quest bounty */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.01)', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
-              <div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>Doble Esfuerzo</span>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Complete 2 quest levels: <strong>{Math.min(2, state.dailyBounties?.questCount || 0)} / 2</strong></p>
-              </div>
-              <div>
-                {state.dailyBounties?.claimed?.quest ? (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 'bold' }}>Claimed ✓</span>
-                ) : (state.dailyBounties?.questCount || 0) >= 2 ? (
-                  <button className="btn btn-accent btn-sm" onClick={() => claimBounty("quest")} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>Claim 50 G</button>
-                ) : (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Locked</span>
-                )}
-              </div>
-            </div>
-
-            {/* Chat bounty */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.01)', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
-              <div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>Habla con Elena</span>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Send 3 chat messages: <strong>{Math.min(3, state.dailyBounties?.chatMessageCount || 0)} / 3</strong></p>
-              </div>
-              <div>
-                {state.dailyBounties?.claimed?.chat ? (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 'bold' }}>Claimed ✓</span>
-                ) : (state.dailyBounties?.chatMessageCount || 0) >= 3 ? (
-                  <button className="btn btn-accent btn-sm" onClick={() => claimBounty("chat")} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>Claim 50 G</button>
-                ) : (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Locked</span>
-                )}
-              </div>
-            </div>
-
-            {/* Minigame bounty */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.01)', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
-              <div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>Victoria Impecable</span>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Win a mini-game: <strong>{state.dailyBounties?.perfectMiniGame ? "1 / 1" : "0 / 1"}</strong></p>
-              </div>
-              <div>
-                {state.dailyBounties?.claimed?.minigame ? (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 'bold' }}>Claimed ✓</span>
-                ) : state.dailyBounties?.perfectMiniGame ? (
-                  <button className="btn btn-accent btn-sm" onClick={() => claimBounty("minigame")} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>Claim 50 G</button>
-                ) : (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Locked</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="menu-grid">
-          {/* Card 1: Continue Quest */}
-          <div 
-            className={`glass-panel menu-card accent-card ${state.fainted ? 'disabled' : ''}`}
-            onClick={() => {
-              if (!state.fainted) {
-                setStudyQuestTab("quest");
-                setView("study-quest");
-              }
-            }}
-            style={{ opacity: state.fainted ? 0.6 : 1, cursor: state.fainted ? 'not-allowed' : 'pointer' }}
-          >
-            <div className="menu-card-icon">
-              <Swords size={24} />
-            </div>
-            <div>
-              <h3 className="menu-card-title">Continuar Búsqueda (Continue Quest)</h3>
-              <p className="menu-card-desc">Embark on progressive stage levels. Mixes new word flashcards with active battle quizzes.</p>
-            </div>
-          </div>
-
-          {/* Card 2: Practice Deck */}
-          <div 
-            className="glass-panel menu-card" 
-            onClick={() => {
-              setStudyQuestTab("practice");
-              setView("study-quest");
-            }}
-          >
-            <div className="menu-card-icon">
-              <BookOpen size={24} />
-            </div>
-            <div>
-              <h3 className="menu-card-title">Práctica Libre (Practice Deck)</h3>
-              <p className="menu-card-desc">Choose vocabulary units freely. Review using safe flashcards or custom quiz challenges.</p>
-            </div>
-          </div>
-
-          {/* Card 2.5: Guía de Contrastes */}
-          <div 
-            className="glass-panel menu-card accent-card" 
-            onClick={() => {
-              setStudyQuestTab("contrasts");
-              setView("study-quest");
-            }}
+        {/* Section Navigation Tabs: Estudio vs Diversión */}
+        <div style={{ display: 'flex', gap: '10px', marginTop: '16px', marginBottom: '20px', borderBottom: '1px solid var(--card-border)', paddingBottom: '12px' }}>
+          <button
+            type="button"
+            className={`btn ${dashTab === 'study' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setDashTab('study')}
             style={{
-              borderColor: 'rgba(139, 92, 246, 0.4)',
-              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%)',
-              cursor: 'pointer'
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              padding: '10px 20px',
+              borderRadius: '12px',
+              transition: 'var(--transition-smooth)'
             }}
           >
-            <div className="menu-card-icon" style={{ background: 'rgba(139, 92, 246, 0.2)', color: '#c4b5fd', borderColor: 'rgba(139, 92, 246, 0.4)' }}>
-              ⚖️
-            </div>
-            <div>
-              <h3 className="menu-card-title">Guía de Contrastes (Which One to Use When)</h3>
-              <p className="menu-card-desc">Master key contrast rules: Por vs Para, To Become, To Realize, Pronombres Dobles, Personal "a", and Irregular Preterites.</p>
-            </div>
-          </div>
+            <span>📚</span>
+            <span>{translate ? "Estudio (Core Learning)" : "Estudio (Aprendizaje Principal)"}</span>
+          </button>
 
-          {/* Card: Examen Oral Midterm Simulator */}
-          <div 
-            className="glass-panel menu-card accent-card" 
-            onClick={() => setView('oral-exam')}
+          <button
+            type="button"
+            className={`btn ${dashTab === 'fun' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setDashTab('fun')}
             style={{
-              borderColor: 'rgba(236, 72, 153, 0.45)',
-              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%)',
-              cursor: 'pointer',
-              position: 'relative'
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              padding: '10px 20px',
+              borderRadius: '12px',
+              position: 'relative',
+              transition: 'var(--transition-smooth)'
             }}
           >
-            <div className="menu-card-icon" style={{ background: 'rgba(236, 72, 153, 0.2)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.4)' }}>
-              <Mic size={24} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                <h3 className="menu-card-title" style={{ margin: 0 }}>{t('dashMidtermCardTitle', translate)}</h3>
-                <span style={{ 
-                  background: 'rgba(236, 72, 153, 0.25)', 
-                  color: '#f472b6', 
-                  fontSize: '0.68rem', 
-                  fontWeight: 700, 
-                  padding: '2px 6px', 
-                  borderRadius: '6px',
-                  border: '1px solid rgba(236, 72, 153, 0.4)'
-                }}>
-                  {t('dashMidtermCardBadge', translate, state.oralExamProgress?.completedQuestions?.length || 0)}
-                </span>
-                {state.hasMidtermHpDoubler && (
-                  <span style={{ 
-                    background: 'rgba(245, 158, 11, 0.2)', 
-                    color: '#fbbf24', 
-                    fontSize: '0.68rem', 
-                    fontWeight: 700, 
-                    padding: '2px 6px', 
-                    borderRadius: '6px',
-                    border: '1px solid rgba(245, 158, 11, 0.4)'
-                  }}>
-                    👑 {translate ? "Titan (200 HP)" : "Titán (200 HP)"}
-                  </span>
-                )}
-              </div>
-              <p className="menu-card-desc">
-                {t('dashMidtermCardDesc', translate)}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3: AI Chat */}
-          <div className="glass-panel menu-card" onClick={() => setView('chat')}>
-            <div className="menu-card-icon">
-              <MessageSquare size={24} />
-            </div>
-            <div>
-              <h3 className="menu-card-title">Charla AI (AI Chat)</h3>
-              <p className="menu-card-desc">Practice conversing with an AI companion restricted ONLY to Spanish 102 vocabulary.</p>
-            </div>
-          </div>
-
-          {/* Card 4: Mini-Games */}
-          <div className="glass-panel menu-card accent-card" onClick={() => setView('games')}>
-            <div className="menu-card-icon">
-              <Gamepad2 size={24} />
-            </div>
-            <div>
-              <h3 className="menu-card-title">Aventuras (Text RPG)</h3>
-              <p className="menu-card-desc">Story adventures: Clinic triage, daily routines, partner chats, Narfy's day, plus 101 classics!</p>
-            </div>
-          </div>
-
-          {/* Card 5: Shop */}
-          <div className="glass-panel menu-card" onClick={() => setView('shop')}>
-            <div className="menu-card-icon">
-              <ShoppingBag size={24} />
-            </div>
-            <div>
-              <h3 className="menu-card-title">Tienda (Item Shop)</h3>
-              <p className="menu-card-desc">Spend gold coins on health potions, streak shields, and mystery grimoires.</p>
-            </div>
-          </div>
-
-          {/* Card 6: Badges */}
-          <div className="glass-panel menu-card accent-card" onClick={() => setView('badges')}>
-            <div className="menu-card-icon">
-              <Trophy size={24} />
-            </div>
-            <div>
-              <h3 className="menu-card-title">Logros (Achievements)</h3>
-              <p className="menu-card-desc">View your trophy room and check which milestones and badges you have unlocked.</p>
-            </div>
-          </div>
-
-          {/* Card 7: Mistakes Dungeon */}
-          <div 
-            className="glass-panel menu-card" 
-            onClick={() => setView('dungeon')}
-            style={{ 
-              border: state.mistakes?.length > 0 ? '1.5px solid var(--danger)' : '1px solid var(--card-border)',
-              position: 'relative'
-            }}
-          >
-            <div className="menu-card-icon" style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
-              ⚔️
-            </div>
-            <div>
-              <h3 className="menu-card-title">
-                Mazmorra de Errores (Mistakes Dungeon)
-                {state.fainted && state.mistakes?.length > 0 && (
-                  <span style={{ marginLeft: '8px', fontSize: '0.7rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', padding: '2px 8px', borderRadius: '8px', verticalAlign: 'middle' }}>
-                    💚 Revive Here
-                  </span>
-                )}
-              </h3>
-              <p className="menu-card-desc">
-                {state.mistakes?.length > 0 
-                  ? (state.fainted 
-                      ? `Defeat the ${state.mistakes.length} ghost words to recover HP and revive!` 
-                      : `Defeat the ${state.mistakes.length} ghost words you answered incorrectly!`)
-                  : "Dungeon clear! No recent mistakes. Practice quests to find ghost words."}
-              </p>
-            </div>
-            {state.mistakes?.length > 0 && (
-              <span style={{ 
-                position: 'absolute', 
-                top: '12px', 
-                right: '12px', 
-                background: state.fainted ? '#10b981' : 'var(--danger)', 
-                color: '#fff', 
-                fontSize: '0.7rem', 
-                fontWeight: 'bold', 
-                padding: '2px 8px', 
-                borderRadius: '10px',
-                boxShadow: state.fainted ? '0 0 10px rgba(16, 185, 129, 0.4)' : '0 0 10px var(--danger-glow)' 
-              }}>
-                {state.mistakes.length} GHOSTS
+            <span>🎮</span>
+            <span>{translate ? "Diversión (Arcade & Extras)" : "Diversión (Juegos y Extras)"}</span>
+            {hasClaimableBounty && (
+              <span 
+                style={{ 
+                  background: 'var(--gold)', 
+                  color: '#000', 
+                  fontSize: '0.65rem', 
+                  fontWeight: 800, 
+                  padding: '2px 7px', 
+                  borderRadius: '10px',
+                  marginLeft: '4px'
+                }}
+              >
+                ¡+50 G!
               </span>
             )}
-          </div>
+          </button>
         </div>
+
+        {dashTab === 'study' ? (
+          <>
+            {/* Unobtrusive Bounty Notification Chip if claimable */}
+            {hasClaimableBounty && (
+              <div 
+                className="glass-panel"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 18px',
+                  marginBottom: '16px',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(250, 204, 21, 0.45)',
+                  background: 'linear-gradient(135deg, rgba(250, 204, 21, 0.12) 0%, rgba(234, 179, 8, 0.04) 100%)',
+                  flexWrap: 'wrap',
+                  gap: '10px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '1.3rem' }}>⚔️</span>
+                  <div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--gold)' }}>
+                      {translate ? "Daily Bounty Ready to Claim (+50 Gold)!" : "¡Desafío Diario listo para reclamar (+50 Monedas)!"}
+                    </span>
+                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      {translate ? "Visit the Diversión tab to claim your reward and feed Narfy!" : "¡Visita la pestaña Diversión para reclamar tu recompensa y alimentar a Narfy!"}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  className="btn btn-accent btn-sm"
+                  onClick={() => setDashTab('fun')}
+                  style={{ padding: '6px 14px', fontSize: '0.8rem', fontWeight: 700 }}
+                >
+                  {translate ? "Go to Diversión 🎮" : "Ir a Diversión 🎮"}
+                </button>
+              </div>
+            )}
+
+            {/* Core Learning Cards Grid */}
+            <div className="menu-grid">
+              {/* Card 1: Continue Quest */}
+              <div 
+                className={`glass-panel menu-card accent-card ${state.fainted ? 'disabled' : ''}`}
+                onClick={() => {
+                  if (!state.fainted) {
+                    setStudyQuestTab("quest");
+                    setView("study-quest");
+                  }
+                }}
+                style={{ opacity: state.fainted ? 0.6 : 1, cursor: state.fainted ? 'not-allowed' : 'pointer' }}
+              >
+                <div className="menu-card-icon">
+                  <Swords size={24} />
+                </div>
+                <div>
+                  <h3 className="menu-card-title">Continuar Búsqueda (Continue Quest)</h3>
+                  <p className="menu-card-desc">Embark on progressive stage levels. Mixes new word flashcards with active battle quizzes.</p>
+                </div>
+              </div>
+
+              {/* Card 2: Practice Deck */}
+              <div 
+                className="glass-panel menu-card" 
+                onClick={() => {
+                  setStudyQuestTab("practice");
+                  setView("study-quest");
+                }}
+              >
+                <div className="menu-card-icon">
+                  <BookOpen size={24} />
+                </div>
+                <div>
+                  <h3 className="menu-card-title">Práctica Libre (Practice Deck)</h3>
+                  <p className="menu-card-desc">Choose vocabulary units freely. Review using safe flashcards or custom quiz challenges.</p>
+                </div>
+              </div>
+
+              {/* Card 3: Examen Oral Midterm Simulator */}
+              <div 
+                className="glass-panel menu-card accent-card" 
+                onClick={() => setView('oral-exam')}
+                style={{
+                  borderColor: 'rgba(236, 72, 153, 0.45)',
+                  background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%)',
+                  cursor: 'pointer',
+                  position: 'relative'
+                }}
+              >
+                <div className="menu-card-icon" style={{ background: 'rgba(236, 72, 153, 0.2)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.4)' }}>
+                  <Mic size={24} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                    <h3 className="menu-card-title" style={{ margin: 0 }}>{t('dashMidtermCardTitle', translate)}</h3>
+                    <span style={{ 
+                      background: 'rgba(236, 72, 153, 0.25)', 
+                      color: '#f472b6', 
+                      fontSize: '0.68rem', 
+                      fontWeight: 700, 
+                      padding: '2px 6px', 
+                      borderRadius: '6px',
+                      border: '1px solid rgba(236, 72, 153, 0.4)'
+                    }}>
+                      {t('dashMidtermCardBadge', translate, state.oralExamProgress?.completedQuestions?.length || 0)}
+                    </span>
+                    {state.hasMidtermHpDoubler && (
+                      <span style={{ 
+                        background: 'rgba(245, 158, 11, 0.2)', 
+                        color: '#fbbf24', 
+                        fontSize: '0.68rem', 
+                        fontWeight: 700, 
+                        padding: '2px 6px', 
+                        borderRadius: '6px',
+                        border: '1px solid rgba(245, 158, 11, 0.4)'
+                      }}>
+                        👑 {translate ? "Titan (200 HP)" : "Titán (200 HP)"}
+                      </span>
+                    )}
+                  </div>
+                  <p className="menu-card-desc">
+                    {t('dashMidtermCardDesc', translate)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 4: Guía de Contrastes */}
+              <div 
+                className="glass-panel menu-card accent-card" 
+                onClick={() => {
+                  setStudyQuestTab("contrasts");
+                  setView("study-quest");
+                }}
+                style={{
+                  borderColor: 'rgba(139, 92, 246, 0.4)',
+                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%)',
+                  cursor: 'pointer'
+                }}
+              >
+                <div className="menu-card-icon" style={{ background: 'rgba(139, 92, 246, 0.2)', color: '#c4b5fd', borderColor: 'rgba(139, 92, 246, 0.4)' }}>
+                  ⚖️
+                </div>
+                <div>
+                  <h3 className="menu-card-title">Guía de Contrastes (Which One to Use When)</h3>
+                  <p className="menu-card-desc">Master key contrast rules: Por vs Para, To Become, To Realize, Pronombres Dobles, Personal "a", and Irregular Preterites.</p>
+                </div>
+              </div>
+
+              {/* Card 5: Mistakes Dungeon */}
+              <div 
+                className="glass-panel menu-card" 
+                onClick={() => setView('dungeon')}
+                style={{ 
+                  border: state.mistakes?.length > 0 ? '1.5px solid var(--danger)' : '1px solid var(--card-border)',
+                  position: 'relative'
+                }}
+              >
+                <div className="menu-card-icon" style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+                  ⚔️
+                </div>
+                <div>
+                  <h3 className="menu-card-title">
+                    Mazmorra de Errores (Mistakes Dungeon)
+                    {state.fainted && state.mistakes?.length > 0 && (
+                      <span style={{ marginLeft: '8px', fontSize: '0.7rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', padding: '2px 8px', borderRadius: '8px', verticalAlign: 'middle' }}>
+                        💚 Revive Here
+                      </span>
+                    )}
+                  </h3>
+                  <p className="menu-card-desc">
+                    {state.mistakes?.length > 0 
+                      ? (state.fainted 
+                          ? `Defeat the ${state.mistakes.length} ghost words to recover HP and revive!` 
+                          : `Defeat the ${state.mistakes.length} ghost words you answered incorrectly!`)
+                      : "Dungeon clear! No recent mistakes. Practice quests to find ghost words."}
+                  </p>
+                </div>
+                {state.mistakes?.length > 0 && (
+                  <span style={{ 
+                    position: 'absolute', 
+                    top: '12px', 
+                    right: '12px', 
+                    background: state.fainted ? '#10b981' : 'var(--danger)', 
+                    color: '#fff', 
+                    fontSize: '0.7rem', 
+                    fontWeight: 'bold', 
+                    padding: '2px 8px', 
+                    borderRadius: '10px',
+                    boxShadow: state.fainted ? '0 0 10px rgba(16, 185, 129, 0.4)' : '0 0 10px var(--danger-glow)' 
+                  }}>
+                    {state.mistakes.length} GHOSTS
+                  </span>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Diversión Section: Bounties + Mini-games + AI Chat + Shop + Badges + Narfy */}
+            <div className="glass-panel" style={{ padding: '20px', border: '1px solid rgba(250, 204, 21, 0.25)', background: 'rgba(250, 204, 21, 0.03)', marginBottom: '20px' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: 'var(--gold)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ⚔️ Desafíos Diarios (Daily Bounties)
+              </h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '16px' }}>Complete daily tasks to earn bonus Gold Coins (+50 G each)! Resets daily.</p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
+                {/* Quest bounty */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.01)', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+                  <div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>Doble Esfuerzo</span>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Complete 2 quest levels: <strong>{Math.min(2, state.dailyBounties?.questCount || 0)} / 2</strong></p>
+                  </div>
+                  <div>
+                    {state.dailyBounties?.claimed?.quest ? (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 'bold' }}>Claimed ✓</span>
+                    ) : (state.dailyBounties?.questCount || 0) >= 2 ? (
+                      <button className="btn btn-accent btn-sm" onClick={() => claimBounty("quest")} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>Claim 50 G</button>
+                    ) : (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Locked</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Chat bounty */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.01)', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+                  <div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>Habla con Elena</span>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Send 3 chat messages: <strong>{Math.min(3, state.dailyBounties?.chatMessageCount || 0)} / 3</strong></p>
+                  </div>
+                  <div>
+                    {state.dailyBounties?.claimed?.chat ? (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 'bold' }}>Claimed ✓</span>
+                    ) : (state.dailyBounties?.chatMessageCount || 0) >= 3 ? (
+                      <button className="btn btn-accent btn-sm" onClick={() => claimBounty("chat")} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>Claim 50 G</button>
+                    ) : (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Locked</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Minigame bounty */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.01)', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+                  <div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>Victoria Impecable</span>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Win a mini-game: <strong>{state.dailyBounties?.perfectMiniGame ? "1 / 1" : "0 / 1"}</strong></p>
+                  </div>
+                  <div>
+                    {state.dailyBounties?.claimed?.minigame ? (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 'bold' }}>Claimed ✓</span>
+                    ) : state.dailyBounties?.perfectMiniGame ? (
+                      <button className="btn btn-accent btn-sm" onClick={() => claimBounty("minigame")} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>Claim 50 G</button>
+                    ) : (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Locked</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="menu-grid">
+              {/* Card: Text RPG Mini-Games */}
+              <div className="glass-panel menu-card accent-card" onClick={() => setView('games')}>
+                <div className="menu-card-icon">
+                  <Gamepad2 size={24} />
+                </div>
+                <div>
+                  <h3 className="menu-card-title">Aventuras (Text RPG)</h3>
+                  <p className="menu-card-desc">Story adventures: Clinic triage, daily routines, partner chats, Narfy's day, plus 101 classics!</p>
+                </div>
+              </div>
+
+              {/* Card: AI Chat */}
+              <div className="glass-panel menu-card" onClick={() => setView('chat')}>
+                <div className="menu-card-icon">
+                  <MessageSquare size={24} />
+                </div>
+                <div>
+                  <h3 className="menu-card-title">Charla AI (AI Chat)</h3>
+                  <p className="menu-card-desc">Practice conversing with Elena, an AI companion restricted ONLY to Spanish 102 vocabulary.</p>
+                </div>
+              </div>
+
+              {/* Card: Shop */}
+              <div className="glass-panel menu-card" onClick={() => setView('shop')}>
+                <div className="menu-card-icon">
+                  <ShoppingBag size={24} />
+                </div>
+                <div>
+                  <h3 className="menu-card-title">Tienda (Item Shop)</h3>
+                  <p className="menu-card-desc">Spend gold coins on health potions, streak shields, gear equipment, and dog treats.</p>
+                </div>
+              </div>
+
+              {/* Card: Badges */}
+              <div className="glass-panel menu-card accent-card" onClick={() => setView('badges')}>
+                <div className="menu-card-icon">
+                  <Trophy size={24} />
+                </div>
+                <div>
+                  <h3 className="menu-card-title">Logros (Achievements)</h3>
+                  <p className="menu-card-desc">View your trophy room and check which milestones and badges you have unlocked.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Narfy Companion Interactive Lounge */}
+            <div className="glass-panel" style={{ marginTop: '20px', padding: '24px', border: '1px solid rgba(59, 130, 246, 0.25)', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(139, 92, 246, 0.04) 100%)', borderRadius: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: '80px', height: '80px', background: 'rgba(255,255,255,0.04)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ transform: 'scale(0.8)' }}>
+                      <NarfySprite action="sit" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--primary)', margin: '0 0 4px 0' }}>
+                      Narfy — {translate ? "Companion Lounge" : "Zona de Mascota"} 🐾
+                    </h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, maxWidth: '420px' }}>
+                      {translate 
+                        ? "Your loyal Red Heeler companion! Feed him juicy bones to heal HP, or play fetch to earn bonus XP."
+                        : "¡Tu fiel compañero pastor ganadero! Aliméntalo con huesos jugosos para curar salud o juega con la pelota para ganar XP."}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <button 
+                    className="btn btn-primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 16px', fontSize: '0.85rem' }}
+                    disabled={(state.inventory?.juicyBone || 0) <= 0 || state.hp >= maxHp || state.fainted}
+                    onClick={feedNarfy}
+                  >
+                    <span>🍖</span>
+                    <span>{translate ? `Feed Bone (${state.inventory?.juicyBone || 0})` : `Alimentar Hueso (${state.inventory?.juicyBone || 0})`}</span>
+                  </button>
+                  <button 
+                    className="btn btn-accent"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 16px', fontSize: '0.85rem' }}
+                    disabled={(state.inventory?.funBall || 0) <= 0}
+                    onClick={playWithNarfy}
+                  >
+                    <span>🥎</span>
+                    <span>{translate ? `Play Fetch (${state.inventory?.funBall || 0})` : `Lanzar Pelota (${state.inventory?.funBall || 0})`}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Sidebar stats panel */}

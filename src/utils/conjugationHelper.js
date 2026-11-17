@@ -88,13 +88,30 @@ export const PRESENT_IRREGULARS = {
   "pedir": ["pido", "pides", "pide", "pedimos", "pedís", "piden"],
   "servir": ["sirvo", "sirves", "sirve", "servimos", "servís", "sirven"],
   "reír": ["río", "ríes", "ríe", "reímos", "reís", "ríen"],
+  "reir": ["río", "ríes", "ríe", "reímos", "reís", "ríen"],
   "sonreír": ["sonrío", "sonríes", "sonríe", "sonreímos", "sonreís", "sonríen"],
+  "sonreir": ["sonrío", "sonríes", "sonríe", "sonreímos", "sonreís", "sonríen"],
   "repetir": ["repito", "repites", "repite", "repetimos", "repetís", "repiten"],
+  "conseguir": ["consigo", "consigues", "consigue", "conseguimos", "conseguís", "consiguen"],
   "vestir": ["visto", "vistes", "viste", "vestimos", "vestís", "visten"],
   "desvestir": ["desvisto", "desvistes", "desviste", "desvestimos", "desvestís", "desvisten"],
   "medir": ["mido", "mides", "mide", "medimos", "medís", "miden"],
   "despedir": ["despido", "despides", "despide", "despedimos", "despedís", "despiden"],
-  "reunir": ["reúno", "reúnes", "reúne", "reunimos", "reunís", "reúnen"]
+  "reunir": ["reúno", "reúnes", "reúne", "reunimos", "reunís", "reúnen"],
+  "mentir": ["miento", "mientes", "miente", "mentimos", "mentís", "mienten"],
+  "divertir": ["divierto", "diviertes", "divierte", "divertimos", "divertís", "divierten"],
+  "sugerir": ["sugiero", "sugieres", "sugiere", "sugerimos", "sugerís", "sugieren"],
+
+  // Double vowel & -uir present verbs
+  "caer": ["caigo", "caes", "cae", "caemos", "caéis", "caen"],
+  "poseer": ["poseo", "posees", "posee", "poseemos", "poseéis", "poseen"],
+  "proveer": ["proveo", "provees", "provee", "proveemos", "proveéis", "proveen"],
+  "construir": ["construyo", "construyes", "construye", "construimos", "construís", "construyen"],
+  "destruir": ["destruyo", "destruyes", "destruye", "destruimos", "destruís", "destruyen"],
+  "incluir": ["incluyo", "incluyes", "incluye", "incluimos", "incluís", "incluyen"],
+  "contribuir": ["contribuyo", "contribuyes", "contribuye", "contribuimos", "contribuís", "contribuyen"],
+  "huir": ["huyo", "huyes", "huye", "huimos", "huís", "huyen"],
+  "concluir": ["concluyo", "concluyes", "concluye", "concluimos", "concluís", "concluyen"]
 };
 
 // -------------------------------------------------------------
@@ -118,13 +135,14 @@ export const PRETERITE_IRREGULARS = {
   "querer": ["quise", "quisiste", "quiso", "quisimos", "quisisteis", "quisieron"],
   "haber": ["hube", "hubiste", "hubo", "hubimos", "hubisteis", "hubieron"],
 
-  // Preterite 3rd-person stem changers (e->i, o->u in Unit 3/4)
+  // Preterite 3rd-person stem changers (e->i, o->u in Unit 3/4 - Sandal Verbs)
   "pedir": ["pedí", "pediste", "pidió", "pedimos", "pedisteis", "pidieron"],
   "servir": ["serví", "serviste", "sirvió", "servimos", "servisteis", "sirvieron"],
   "dormir": ["dormí", "dormiste", "durmió", "dormimos", "dormisteis", "durmieron"],
   "preferir": ["preferí", "preferiste", "prefirió", "preferimos", "preferisteis", "prefirieron"],
   "repetir": ["repetí", "repetiste", "repitió", "repetimos", "repetisteis", "repitieron"],
   "seguir": ["seguí", "seguiste", "siguió", "seguimos", "seguisteis", "siguieron"],
+  "conseguir": ["conseguí", "conseguiste", "consiguió", "conseguimos", "conseguisteis", "consiguieron"],
   "sentir": ["sentí", "sentiste", "sintió", "sentimos", "sentisteis", "sintieron"],
   "vestir": ["vestí", "vestiste", "vistió", "vestimos", "vestisteis", "vistieron"],
   "desvestir": ["desvestí", "desvestiste", "desvistió", "desvestimos", "desvestisteis", "desvistieron"],
@@ -132,6 +150,13 @@ export const PRETERITE_IRREGULARS = {
   "morir": ["morí", "moriste", "murió", "morimos", "moristeis", "murieron"],
   "despedir": ["despedí", "despediste", "despidió", "despedimos", "despedisteis", "despidieron"],
   "reunir": ["reuní", "reuniste", "reunió", "reunimos", "reunisteis", "reunieron"],
+  "mentir": ["mentí", "mentiste", "mintió", "mentimos", "mentisteis", "mintieron"],
+  "divertir": ["divertí", "divertiste", "divirtió", "divertimos", "divertisteis", "divirtieron"],
+  "sugerir": ["sugerí", "sugeriste", "sugirió", "sugerimos", "sugeristeis", "sugirieron"],
+  "reír": ["reí", "reíste", "rió", "reímos", "reísteis", "rieron"],
+  "reir": ["reí", "reíste", "rió", "reímos", "reísteis", "rieron"],
+  "sonreír": ["sonreí", "sonreíste", "sonrió", "sonreímos", "sonreísteis", "sonrieron"],
+  "sonreir": ["sonreí", "sonreíste", "sonrió", "sonreímos", "sonreísteis", "sonrieron"],
 
   // Orthographic spelling changers in yo form (-car, -gar, -zar in Unit 3)
   "abrazar": ["abracé", "abrazaste", "abrazó", "abrazamos", "abrazasteis", "abrazaron"],
@@ -147,14 +172,35 @@ export const PRETERITE_IRREGULARS = {
   "comenzar": ["comencé", "comenzaste", "comenzó", "comenzamos", "comenzasteis", "comenzaron"],
   "cruzar": ["crucé", "cruzaste", "cruzó", "cruzamos", "cruzasteis", "cruzaron"],
   "regar": ["regué", "regaste", "regó", "regamos", "regasteis", "regaron"],
+  "explicar": ["expliqué", "explicaste", "explicó", "explicamos", "explicasteis", "explicaron"],
+  "pescar": ["pesqué", "pescaste", "pescó", "pescamos", "pescasteis", "pescaron"],
+  "secar": ["sequé", "secaste", "secó", "secamos", "secasteis", "secaron"],
+  "marcar": ["marqué", "marcaste", "marcó", "marcamos", "marcasteis", "marcaron"],
+  "apagar": ["apagué", "apagaste", "apagó", "apagamos", "apagasteis", "apagaron"],
+  "entregar": ["entregué", "entregaste", "entregó", "entregamos", "entregasteis", "entregaron"],
+  "cargar": ["cargué", "cargaste", "cargó", "cargamos", "cargasteis", "cargaron"],
+  "organizar": ["organicé", "organizaste", "organizó", "organizamos", "organizasteis", "organizaron"],
+  "alcanzar": ["alcancé", "alcanzaste", "alcanzó", "alcanzamos", "alcanzasteis", "alcanzaron"],
+  "utilizar": ["utilicé", "utilizaste", "utilizó", "utilizamos", "utilizasteis", "utilizaron"],
 
   // Irregular stems & intervocalic i->y (Unit 3 & 4)
   "andar": ["anduve", "anduviste", "anduvo", "anduvimos", "anduvisteis", "anduvieron"],
   "conducir": ["conduje", "condujiste", "condujo", "condujimos", "condujisteis", "condujeron"],
+  "traducir": ["traduje", "tradujiste", "tradujo", "tradujimos", "tradujisteis", "tradujeron"],
+  "producir": ["produje", "produjiste", "produjo", "produjimos", "produjisteis", "produjeron"],
   "leer": ["leí", "leíste", "leyó", "leímos", "leísteis", "leyeron"],
   "creer": ["creí", "creíste", "creyó", "creímos", "creísteis", "creyeron"],
   "oír": ["oí", "oíste", "oyó", "oímos", "oísteis", "oyeron"],
-  "destruir": ["destruí", "destruiste", "destruyó", "destruimos", "destruisteis", "destruyeron"]
+  "oir": ["oí", "oíste", "oyó", "oímos", "oísteis", "oyeron"],
+  "caer": ["caí", "caíste", "cayó", "caímos", "caísteis", "cayeron"],
+  "poseer": ["poseí", "poseíste", "poseyó", "poseímos", "poseísteis", "poseyeron"],
+  "proveer": ["proveí", "proveíste", "proveyó", "proveímos", "proveísteis", "proveyeron"],
+  "destruir": ["destruí", "destruiste", "destruyó", "destruimos", "destruisteis", "destruyeron"],
+  "construir": ["construí", "construiste", "construyó", "construimos", "construisteis", "construyeron"],
+  "incluir": ["incluí", "incluiste", "incluyó", "incluimos", "incluisteis", "incluyeron"],
+  "contribuir": ["contribuí", "contribuiste", "contribuyó", "contribuimos", "contribuisteis", "contribuyeron"],
+  "huir": ["huí", "huiste", "huyó", "huimos", "huisteis", "huyeron"],
+  "concluir": ["concluí", "concluiste", "concluyó", "concluimos", "concluisteis", "concluyeron"]
 };
 
 // Endings arrays for regular verbs
@@ -206,6 +252,14 @@ export function parseVerb(rawVerb) {
     if (first === "midió") return { base: "medir", isReflexive: false, suffix: "" };
     if (first === "repitió") return { base: "repetir", isReflexive: false, suffix: "" };
     if (first === "siguió") return { base: "seguir", isReflexive: false, suffix: "" };
+    if (first === "sonreí" || first === "sonrió") return { base: "sonreír", isReflexive: false, suffix: "" };
+    if (first === "reí" || first === "rió") return { base: "reír", isReflexive: false, suffix: "" };
+    if (first === "caí" || first === "cayó") return { base: "caer", isReflexive: false, suffix: "" };
+    if (first === "construí" || first === "construyó") return { base: "construir", isReflexive: false, suffix: "" };
+    if (first === "destruí" || first === "destruyó") return { base: "destruir", isReflexive: false, suffix: "" };
+    if (first === "almorcé") return { base: "almorzar", isReflexive: false, suffix: "" };
+    if (first === "empecé") return { base: "empezar", isReflexive: false, suffix: "" };
+    if (first === "comencé") return { base: "comenzar", isReflexive: false, suffix: "" };
     return { base: first, isReflexive: false, suffix: "" };
   }
 
@@ -429,16 +483,30 @@ export function conjugate(rawVerb, pronounIdx, tense = "present") {
   }
 
   let conjugatedBase = "";
+  const deaccentBase = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   if (tense === "preterite" || tense === "past") {
-    if (PRETERITE_IRREGULARS[base]) {
-      conjugatedBase = PRETERITE_IRREGULARS[base][pronounIdx];
+    const pretForms = PRETERITE_IRREGULARS[base] || PRETERITE_IRREGULARS[deaccentBase];
+    if (pretForms) {
+      conjugatedBase = pretForms[pronounIdx];
     } else {
       const stem = base.slice(0, -2);
-      const ending = base.slice(-2);
-      if (ending === "ar") {
-        conjugatedBase = stem + PRET_AR_ENDINGS[pronounIdx];
-      } else if (ending === "er" || ending === "ir") {
+      const normEnding = deaccentBase.slice(-2);
+      if (normEnding === "ar") {
+        if (pronounIdx === 0) {
+          if (deaccentBase.endsWith("car")) {
+            conjugatedBase = base.slice(0, -3) + "qué";
+          } else if (deaccentBase.endsWith("gar")) {
+            conjugatedBase = base.slice(0, -3) + "gué";
+          } else if (deaccentBase.endsWith("zar")) {
+            conjugatedBase = base.slice(0, -3) + "cé";
+          } else {
+            conjugatedBase = stem + PRET_AR_ENDINGS[pronounIdx];
+          }
+        } else {
+          conjugatedBase = stem + PRET_AR_ENDINGS[pronounIdx];
+        }
+      } else if (normEnding === "er" || normEnding === "ir") {
         conjugatedBase = stem + PRET_ER_IR_ENDINGS[pronounIdx];
       } else {
         conjugatedBase = base;
@@ -446,16 +514,17 @@ export function conjugate(rawVerb, pronounIdx, tense = "present") {
     }
   } else {
     // Present tense
-    if (PRESENT_IRREGULARS[base]) {
-      conjugatedBase = PRESENT_IRREGULARS[base][pronounIdx];
+    const presForms = PRESENT_IRREGULARS[base] || PRESENT_IRREGULARS[deaccentBase];
+    if (presForms) {
+      conjugatedBase = presForms[pronounIdx];
     } else {
       const stem = base.slice(0, -2);
-      const ending = base.slice(-2);
-      if (ending === "ar") {
+      const normEnding = deaccentBase.slice(-2);
+      if (normEnding === "ar") {
         conjugatedBase = stem + PRES_AR_ENDINGS[pronounIdx];
-      } else if (ending === "er") {
+      } else if (normEnding === "er") {
         conjugatedBase = stem + PRES_ER_ENDINGS[pronounIdx];
-      } else if (ending === "ir") {
+      } else if (normEnding === "ir") {
         conjugatedBase = stem + PRES_IR_ENDINGS[pronounIdx];
       } else {
         conjugatedBase = base;
@@ -537,6 +606,206 @@ const GUSTAR_PRACTICE_TEMPLATES = [
     tense: "preterite"
   }
 ];
+
+// -------------------------------------------------------------
+// VERB CATEGORY CLASSIFIERS & DEDICATED PRACTICE DECKS
+// -------------------------------------------------------------
+export function isPreteriteSpellingChanger(itemOrStr) {
+  if (!itemOrStr) return false;
+  const raw = typeof itemOrStr === "object" ? (itemOrStr.spanish || "") : String(itemOrStr);
+  const { base } = parseVerb(raw);
+  const norm = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return norm.endsWith("car") || norm.endsWith("gar") || norm.endsWith("zar");
+}
+
+export function isPreteriteStemChanger(itemOrStr) {
+  if (!itemOrStr) return false;
+  const raw = typeof itemOrStr === "object" ? (itemOrStr.spanish || "") : String(itemOrStr);
+  const { base } = parseVerb(raw);
+  const norm = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const list = [
+    "pedir", "servir", "dormir", "morir", "preferir", "repetir", "seguir",
+    "conseguir", "sentir", "vestir", "desvestir", "medir", "despedir",
+    "mentir", "divertir", "sugerir", "sonreir", "sonreír", "reir", "reír"
+  ];
+  return list.includes(norm) || list.includes(base);
+}
+
+export function isPreteriteDoubleVowel(itemOrStr) {
+  if (!itemOrStr) return false;
+  const raw = typeof itemOrStr === "object" ? (itemOrStr.spanish || "") : String(itemOrStr);
+  const { base } = parseVerb(raw);
+  const norm = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const list = [
+    "leer", "creer", "oir", "oír", "caer", "poseer", "proveer",
+    "destruir", "construir", "incluir", "contribuir", "huir", "concluir"
+  ];
+  return list.includes(norm) || list.includes(base);
+}
+
+export function isReflexiveVerb(itemOrStr) {
+  if (!itemOrStr) return false;
+  const raw = typeof itemOrStr === "object" ? (itemOrStr.spanish || "") : String(itemOrStr);
+  return parseVerb(raw).isReflexive;
+}
+
+export const PRETERITE_SPELL_CHANGERS_CAR_GAR_ZAR = [
+  { spanish: "buscar", english: "to look for / to search", note: "c -> qu in yo (yo busqué)" },
+  { spanish: "pagar", english: "to pay", note: "g -> gu in yo (yo pagué)" },
+  { spanish: "almorzar", english: "to eat lunch", note: "z -> c in yo (yo almorcé)" },
+  { spanish: "tocar", english: "to touch / play instrument", note: "c -> qu in yo (yo toqué)" },
+  { spanish: "sacar", english: "to take out / take photos", note: "c -> qu in yo (yo saqué)" },
+  { spanish: "practicar", english: "to practice", note: "c -> qu in yo (yo practiqué)" },
+  { spanish: "explicar", english: "to explain", note: "c -> qu in yo (yo expliqué)" },
+  { spanish: "pescar", english: "to fish", note: "c -> qu in yo (yo pesqué)" },
+  { spanish: "secar", english: "to dry", note: "c -> qu in yo (yo sequé)" },
+  { spanish: "llegar", english: "to arrive", note: "g -> gu in yo (yo llegué)" },
+  { spanish: "jugar", english: "to play (sports/games)", note: "g -> gu in yo (yo jugué)" },
+  { spanish: "regar", english: "to water plants", note: "g -> gu in yo (yo regué)" },
+  { spanish: "apagar", english: "to turn off / extinguish", note: "g -> gu in yo (yo apagué)" },
+  { spanish: "entregar", english: "to deliver / turn in", note: "g -> gu in yo (yo entregué)" },
+  { spanish: "empezar", english: "to begin / start", note: "z -> c in yo (yo empecé)" },
+  { spanish: "comenzar", english: "to start / commence", note: "z -> c in yo (yo comencé)" },
+  { spanish: "cruzar", english: "to cross", note: "z -> c in yo (yo crucé)" },
+  { spanish: "abrazar", english: "to hug / embrace", note: "z -> c in yo (yo abracé)" },
+  { spanish: "organizar", english: "to organize", note: "z -> c in yo (yo organicé)" },
+  { spanish: "alcanzar", english: "to reach / attain", note: "z -> c in yo (yo alcancé)" }
+];
+
+export const PRETERITE_STEM_CHANGERS_LIST = [
+  { spanish: "sonreír", english: "to smile", note: "e -> i in 3rd person (él sonrió, ellos sonrieron)" },
+  { spanish: "reír", english: "to laugh", note: "e -> i in 3rd person (él rió, ellos rieron)" },
+  { spanish: "pedir", english: "to ask for / order", note: "e -> i in 3rd person (él pidió, ellos pidieron)" },
+  { spanish: "servir", english: "to serve", note: "e -> i in 3rd person (él sirvió, ellos sirvieron)" },
+  { spanish: "dormir", english: "to sleep", note: "o -> u in 3rd person (él durmió, ellos durmieron)" },
+  { spanish: "morir", english: "to die", note: "o -> u in 3rd person (él murió, ellos murieron)" },
+  { spanish: "preferir", english: "to prefer", note: "e -> i in 3rd person (él prefirió, ellos prefirieron)" },
+  { spanish: "repetir", english: "to repeat", note: "e -> i in 3rd person (él repitió, ellos repitieron)" },
+  { spanish: "seguir", english: "to follow / continue", note: "e -> i in 3rd person (él siguió, ellos siguieron)" },
+  { spanish: "conseguir", english: "to get / obtain", note: "e -> i in 3rd person (él consiguió, ellos consiguieron)" },
+  { spanish: "sentir", english: "to feel / regret", note: "e -> i in 3rd person (él sintió, ellos sintieron)" },
+  { spanish: "vestir", english: "to dress", note: "e -> i in 3rd person (él vistió, ellos vistieron)" },
+  { spanish: "desvestir", english: "to undress", note: "e -> i in 3rd person (él desvistió, ellos desvistieron)" },
+  { spanish: "medir", english: "to measure", note: "e -> i in 3rd person (él midió, ellos midieron)" },
+  { spanish: "despedir", english: "to say goodbye to / fire", note: "e -> i in 3rd person (él despidió, ellos despidieron)" },
+  { spanish: "mentir", english: "to lie", note: "e -> i in 3rd person (él mintió, ellos mintieron)" },
+  { spanish: "sugerir", english: "to suggest", note: "e -> i in 3rd person (él sugirió, ellos sugirieron)" }
+];
+
+export const PRETERITE_DOUBLE_VOWEL_LIST = [
+  { spanish: "leer", english: "to read", note: "double vowel root (leí, leíste, leyó, leímos, leyeron)" },
+  { spanish: "creer", english: "to believe / think", note: "double vowel root (creí, creíste, creyó, creyeron)" },
+  { spanish: "oír", english: "to hear", note: "double vowel root (oí, oíste, oyó, oímos, oyeron)" },
+  { spanish: "caer", english: "to fall", note: "double vowel root (caí, caíste, cayó, caímos, cayeron)" },
+  { spanish: "caerse", english: "to fall down (reflexive)", note: "reflexive + double vowel (me caí, se cayó, se cayeron)" },
+  { spanish: "poseer", english: "to possess / own", note: "double vowel root (poseí, poseyó, poseyeron)" },
+  { spanish: "proveer", english: "to provide", note: "double vowel root (proveí, proveyó, proveyeron)" },
+  { spanish: "destruir", english: "to destroy", note: "-uir verb: i -> y (destruí, destruyó, destruyeron)" },
+  { spanish: "construir", english: "to build / construct", note: "-uir verb: i -> y (construí, construyó, construyeron)" },
+  { spanish: "incluir", english: "to include", note: "-uir verb: i -> y (incluí, incluyó, incluyeron)" },
+  { spanish: "contribuir", english: "to contribute", note: "-uir verb: i -> y (contribuí, contribuyó, contribuyeron)" },
+  { spanish: "huir", english: "to flee / run away", note: "-uir verb: i -> y (huí, huyó, huyeron)" },
+  { spanish: "concluir", english: "to conclude", note: "-uir verb: i -> y (concluí, concluyó, concluyeron)" }
+];
+
+export const REFLEXIVE_VERBS_PRACTICE_LIST = [
+  { spanish: "levantarse", english: "to get up / stand up", note: "reflexive pronoun: me levanto, te levantas, se levanta..." },
+  { spanish: "acostarse", english: "to go to bed", note: "stem-changing (o->ue): me acuesto, te acuestas; pret: me acosté" },
+  { spanish: "despertarse", english: "to wake up", note: "stem-changing (e->ie): me despierto, te despiertas; pret: me desperté" },
+  { spanish: "lavarse", english: "to wash oneself", note: "reflexive: me lavo, te lavas, se lava; pret: me lavé" },
+  { spanish: "ducharse", english: "to take a shower", note: "daily routine: me ducho, te duchas, se ducha; pret: me duché" },
+  { spanish: "bañarse", english: "to take a bath", note: "daily routine: me baño, te bañas, se baña; pret: me bañé" },
+  { spanish: "cepillarse", english: "to brush oneself (teeth/hair)", note: "daily routine: me cepillo, te cepillas, se cepilla" },
+  { spanish: "peinarse", english: "to comb one's hair", note: "daily routine: me peino, te peinas, se peina" },
+  { spanish: "vestirse", english: "to get dressed", note: "e->i stem changer: me visto, te vistes; pret: se vistió" },
+  { spanish: "desvestirse", english: "to get undressed", note: "e->i stem changer: me desvisto; pret: se desvistió" },
+  { spanish: "ponerse", english: "to put on (clothes) / become", note: "yo me pongo; pret: me puse, se puso contento" },
+  { spanish: "secarse", english: "to dry oneself", note: "yo form preterite spelling change: me sequé" },
+  { spanish: "afeitarse", english: "to shave oneself", note: "daily routine: me afeito, te afeitas, se afeita" },
+  { spanish: "maquillarse", english: "to put on makeup", note: "daily routine: me maquillo, te maquillas" },
+  { spanish: "sentarse", english: "to sit down", note: "stem-changing (e->ie): me siento, te sientas; pret: me senté" },
+  { spanish: "sentirse", english: "to feel (emotion/health)", note: "e->ie pres / e->i pret: me siento bien; se sintió mal" },
+  { spanish: "dormirse", english: "to fall asleep", note: "o->ue pres / o->u pret: me duermo; él se durmió" },
+  { spanish: "despedirse", english: "to say goodbye", note: "e->i stem changer: me despido; pret: se despidió" },
+  { spanish: "divertirse", english: "to have fun / enjoy oneself", note: "e->ie pres / e->i pret: me divierto; se divirtió" },
+  { spanish: "acordarse", english: "to remember", note: "stem-changing (o->ue): me acuerdo de..." },
+  { spanish: "llamarse", english: "to be called / named", note: "me llamo, te llamas, se llama..." },
+  { spanish: "caerse", english: "to fall down", note: "double vowel reflexive: me caigo; pret: se cayó" },
+  { spanish: "reírse", english: "to laugh to oneself", note: "stem-changing reflexive: me río; pret: se rió" },
+  { spanish: "sonreírse", english: "to smile to oneself", note: "stem-changing reflexive: me sonrío; pret: se sonrió" }
+];
+
+export const PRETERITE_RADICAL_IRREGULARS_LIST = [
+  { spanish: "tener", english: "to have (preterite: had)", note: "U-stem: tuve, tuviste, tuvo, tuvimos, tuvieron" },
+  { spanish: "estar", english: "to be (location/condition)", note: "U-stem: estuve, estuviste, estuvo, estuvimos, estuvieron" },
+  { spanish: "andar", english: "to walk / wander", note: "U-stem: anduve, anduviste, anduvo, anduvimos, anduvieron" },
+  { spanish: "poder", english: "to manage / succeed (in past)", note: "U-stem: pude, pudiste, pudo, pudimos, pudieron" },
+  { spanish: "poner", english: "to put / place", note: "U-stem: puse, pusiste, puso, pusimos, pusieron" },
+  { spanish: "saber", english: "to find out (in past)", note: "U-stem: supe, supiste, supo, supimos, supieron" },
+  { spanish: "hacer", english: "to do / to make", note: "I-stem: hice, hiciste, hizo (z!), hicimos, hicieron" },
+  { spanish: "querer", english: "to try / refuse (in past)", note: "I-stem: quise, quisiste, quiso, quisimos, quisieron" },
+  { spanish: "venir", english: "to come", note: "I-stem: vine, viniste, vino, vinimos, vinieron" },
+  { spanish: "decir", english: "to say / to tell", note: "J-stem: dije, dijiste, dijo, dijimos, dijeron (-eron!)" },
+  { spanish: "traer", english: "to bring", note: "J-stem: traje, trajiste, trajo, trajimos, trajeron (-eron!)" },
+  { spanish: "conducir", english: "to drive", note: "J-stem: conduje, condujiste, condujo, condujimos, condujeron (-eron!)" },
+  { spanish: "dar", english: "to give", note: "unaccented: di, diste, dio, dimos, disteis, dieron" },
+  { spanish: "ver", english: "to see", note: "unaccented: vi, viste, vio, vimos, visteis, vieron" },
+  { spanish: "ir", english: "to go (shared with ser)", note: "fui, fuiste, fue, fuimos, fuisteis, fueron" },
+  { spanish: "ser", english: "to be (shared with ir)", note: "fui, fuiste, fue, fuimos, fuisteis, fueron" }
+];
+
+export function getVerbPracticeCards(subcategory) {
+  if (!subcategory) return [];
+  const s = subcategory.toLowerCase();
+  let list = [];
+  let defaultUnit = "Unit 3: Nosotros preferimos ir de compras";
+
+  if (s.includes("ortográfico") || s.includes("-car, -gar, -zar") || s.includes("spelling")) {
+    list = PRETERITE_SPELL_CHANGERS_CAR_GAR_ZAR;
+    defaultUnit = "Unit 3: Nosotros preferimos ir de compras";
+  } else if (s.includes("cambio de raíz") || s.includes("e->i, o->u") || s.includes("stem")) {
+    list = PRETERITE_STEM_CHANGERS_LIST;
+    defaultUnit = "Unit 3: Nosotros preferimos ir de compras";
+  } else if (s.includes("doble vocal") || s.includes("i -> y") || s.includes("double vowel")) {
+    list = PRETERITE_DOUBLE_VOWEL_LIST;
+    defaultUnit = "Unit 4: ¿Adónde fuiste de vacaciones?";
+  } else if (s.includes("reflexivo") || s.includes("rutina") || s.includes("reflexive")) {
+    list = REFLEXIVE_VERBS_PRACTICE_LIST;
+    defaultUnit = "Unit 2: ¿Qué haces todos los días?";
+  } else if (s.includes("raíces irregulares") || s.includes("u, i, j") || s.includes("radical")) {
+    list = PRETERITE_RADICAL_IRREGULARS_LIST;
+    defaultUnit = "Unit 4: ¿Adónde fuiste de vacaciones?";
+  } else if (s.includes("todos") || s.includes("all verbs")) {
+    list = [
+      ...PRETERITE_SPELL_CHANGERS_CAR_GAR_ZAR,
+      ...PRETERITE_STEM_CHANGERS_LIST,
+      ...PRETERITE_DOUBLE_VOWEL_LIST,
+      ...REFLEXIVE_VERBS_PRACTICE_LIST,
+      ...PRETERITE_RADICAL_IRREGULARS_LIST
+    ];
+    defaultUnit = "Unit 3: Nosotros preferimos ir de compras";
+  } else {
+    return [];
+  }
+
+  // De-duplicate by spanish infinitive
+  const seen = new Set();
+  const result = [];
+  for (const item of list) {
+    if (!seen.has(item.spanish)) {
+      seen.add(item.spanish);
+      result.push({
+        spanish: item.spanish,
+        english: item.note ? `${item.english} (${item.note})` : item.english,
+        category: "Verbs",
+        subcategory: subcategory,
+        unit: defaultUnit,
+        isVerbPracticeDeck: true
+      });
+    }
+  }
+  return result;
+}
 
 /**
  * Generates an interactive conjugation question for a given verb item.
@@ -639,7 +908,7 @@ export function generateConjugationQuestion(verbItem, options = {}) {
 
   const prompt = `${chosenSubject} (${verbItem.spanish})`;
 
-  // Generate 3 plausible distractors
+  // Generate plausible distractors
   const distractors = new Set();
   const alternateTense = targetTense === "preterite" ? "present" : "preterite";
 
@@ -678,6 +947,36 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     if (isReflexive) {
       const wrongReflexive = REFLEXIVE_PRONOUNS[(randPronoun.idx + 2) % 6];
       distractors.add(`${wrongReflexive} ${conjugate(base, randPronoun.idx, targetTense)}${suffix}`);
+      // Bare verb without reflexive pronoun (critical student distractor!)
+      distractors.add(`${conjugate(base, randPronoun.idx, targetTense)}${suffix}`);
+      // Another common wrong reflexive pronoun
+      const wrongReflexive2 = randPronoun.idx === 0 ? "se" : (randPronoun.idx === 3 ? "te" : "me");
+      distractors.add(`${wrongReflexive2} ${conjugate(base, randPronoun.idx, targetTense)}${suffix}`);
+    }
+
+    // Distractor source 4: Grammatical distractors for past tense special categories
+    if (targetTense === "preterite") {
+      const normBase = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      // Spell changers in yo form: unspelled regular form (e.g. buscé, pagé, almorzé)
+      if (randPronoun.idx === 0) {
+        if (normBase.endsWith("car") || normBase.endsWith("gar") || normBase.endsWith("zar")) {
+          distractors.add(base.slice(0, -2) + "é" + suffix);
+        }
+      }
+      // Preterite stem changers in 3rd person: un-stem-changed form (e.g. pedió, dormió, sonreió)
+      if (randPronoun.idx === 2 || randPronoun.idx === 5) {
+        if (isPreteriteStemChanger(base)) {
+          const fakeEnding = randPronoun.idx === 2 ? "ió" : "ieron";
+          distractors.add(base.slice(0, -2) + fakeEnding + suffix);
+        }
+      }
+      // Preterite double vowel in 3rd person: un-y form (e.g. leió, creieron, caió)
+      if (randPronoun.idx === 2 || randPronoun.idx === 5) {
+        if (isPreteriteDoubleVowel(base)) {
+          const fakeEnding = randPronoun.idx === 2 ? "ió" : "ieron";
+          distractors.add(base.slice(0, -2) + fakeEnding + suffix);
+        }
+      }
     }
   }
 
@@ -698,6 +997,9 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     tenseLabel: tenseLabel,
     isReflexive,
     isReciprocal,
+    isSpellChanger: isPreteriteSpellingChanger(verbItem) && targetTense === "preterite",
+    isStemChangerPreterite: isPreteriteStemChanger(verbItem) && targetTense === "preterite",
+    isDoubleVowel: isPreteriteDoubleVowel(verbItem) && targetTense === "preterite",
     isGustar: false,
     questionWord: prompt,
     correct: correctForm,

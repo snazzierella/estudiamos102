@@ -14,7 +14,11 @@ import {
   isEligibleForFlashcard,
   isSentenceItem,
   BLANK_SPECS,
-  generateContrastQuestion
+  generateContrastQuestion,
+  getVerbPracticeCards,
+  isPreteriteSpellingChanger,
+  isPreteriteStemChanger,
+  isPreteriteDoubleVowel
 } from '../utils/conjugationHelper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { generateSentenceBuilderQuestion, SENTENCE_POOLS } from '../utils/sentenceBuilderHelper';
@@ -381,6 +385,16 @@ export default function StudyQuest({
     });
 
     const formatted = {};
+    // 0. Verb Practice Lab
+    formatted["⚡ Práctica de Verbos (Verb Practice Lab)"] = [
+      "Todos los Verbos (All Verbs Mixed)",
+      "Verbos en Pretérito: Cambios Ortográficos (-car, -gar, -zar)",
+      "Verbos en Pretérito: Cambio de Raíz (e->i, o->u)",
+      "Verbos en Pretérito: Doble Vocal (i -> y)",
+      "Verbos Reflexivos y Rutina Diaria (Reflexive Verbs)",
+      "Verbos en Pretérito: Raíces Irregulares (U, I, J)"
+    ];
+
     // 1. Repaso 101
     formatted["Repaso 101"] = [
       "All of Unit 1 (Todo el Repaso)",
@@ -391,6 +405,7 @@ export default function StudyQuest({
     if (grouped["Unidad 2"]) {
       formatted["Unidad 2"] = [
         "All of Unit 2 (Todo Unidad 2)",
+        "Verbos Reflexivos y Rutina Diaria (Reflexive Verbs)",
         ...Array.from(grouped["Unidad 2"])
       ];
     }
@@ -399,6 +414,8 @@ export default function StudyQuest({
     if (grouped["Unidad 3"]) {
       formatted["Unidad 3"] = [
         "All of Unit 3 (Todo Unidad 3)",
+        "Verbos en Pretérito: Cambios Ortográficos (-car, -gar, -zar)",
+        "Verbos en Pretérito: Cambio de Raíz (e->i, o->u)",
         ...Array.from(grouped["Unidad 3"])
       ];
     }
@@ -407,6 +424,8 @@ export default function StudyQuest({
     if (grouped["Unidad 4"]) {
       formatted["Unidad 4"] = [
         "All of Unit 4 (Todo Unidad 4)",
+        "Verbos en Pretérito: Doble Vocal (i -> y)",
+        "Verbos en Pretérito: Raíces Irregulares (U, I, J)",
         ...Array.from(grouped["Unidad 4"])
       ];
     }
@@ -430,6 +449,7 @@ export default function StudyQuest({
 
     // Fallback for any other categories
     const handledKeys = new Set([
+      "⚡ Práctica de Verbos (Verb Practice Lab)",
       "Repaso 101",
       "Unidad 2",
       "Unidad 3",
@@ -488,7 +508,12 @@ export default function StudyQuest({
   useEffect(() => {
     if (!selectedSubcategory) return;
     let filtered;
-    if (selectedCategory === "Repaso 101") {
+    const verbCards = getVerbPracticeCards(selectedSubcategory);
+    if (verbCards && verbCards.length > 0) {
+      filtered = verbCards;
+    } else if (selectedCategory.includes("Práctica de Verbos") || selectedCategory.includes("Verb Practice Lab")) {
+      filtered = getVerbPracticeCards("Todos los Verbos");
+    } else if (selectedCategory === "Repaso 101") {
       if (selectedSubcategory === "All of Unit 1 (Todo el Repaso)") {
         filtered = vocabularyData.filter(item => item.unit === "Unit 1: Repaso 101" || !item.unit);
       } else {
@@ -797,6 +822,9 @@ export default function StudyQuest({
           isConjugation: true,
           isGustar: qSpec.isGustar,
           isReciprocal: qSpec.isReciprocal,
+          isSpellChanger: qSpec.isSpellChanger,
+          isStemChangerPreterite: qSpec.isStemChangerPreterite,
+          isDoubleVowel: qSpec.isDoubleVowel,
           subjectPronoun: qSpec.subjectPronoun,
           infinitive: qSpec.infinitive,
           prompt: qSpec.prompt,
@@ -1142,6 +1170,9 @@ export default function StudyQuest({
               isConjugation: true,
               isGustar: qSpec.isGustar,
               isReciprocal: qSpec.isReciprocal,
+              isSpellChanger: qSpec.isSpellChanger,
+              isStemChangerPreterite: qSpec.isStemChangerPreterite,
+              isDoubleVowel: qSpec.isDoubleVowel,
               subjectPronoun: qSpec.subjectPronoun,
               infinitive: qSpec.infinitive,
               prompt: qSpec.prompt,
@@ -1198,6 +1229,9 @@ export default function StudyQuest({
             isConjugation: true,
             isGustar: qSpec.isGustar,
             isReciprocal: qSpec.isReciprocal,
+            isSpellChanger: qSpec.isSpellChanger,
+            isStemChangerPreterite: qSpec.isStemChangerPreterite,
+            isDoubleVowel: qSpec.isDoubleVowel,
             subjectPronoun: qSpec.subjectPronoun,
             infinitive: qSpec.infinitive,
             prompt: qSpec.prompt,
@@ -1302,6 +1336,9 @@ export default function StudyQuest({
               isConjugation: true,
               isGustar: qSpec.isGustar,
               isReciprocal: qSpec.isReciprocal,
+              isSpellChanger: qSpec.isSpellChanger,
+              isStemChangerPreterite: qSpec.isStemChangerPreterite,
+              isDoubleVowel: qSpec.isDoubleVowel,
               subjectPronoun: qSpec.subjectPronoun,
               infinitive: qSpec.infinitive,
               prompt: qSpec.prompt,
@@ -1471,6 +1508,9 @@ export default function StudyQuest({
               isConjugation: true,
               isGustar: qSpec.isGustar,
               isReciprocal: qSpec.isReciprocal,
+              isSpellChanger: qSpec.isSpellChanger,
+              isStemChangerPreterite: qSpec.isStemChangerPreterite,
+              isDoubleVowel: qSpec.isDoubleVowel,
               subjectPronoun: qSpec.subjectPronoun,
               infinitive: qSpec.infinitive,
               prompt: qSpec.prompt,
@@ -2167,6 +2207,9 @@ export default function StudyQuest({
               item.category === "Unidad 3" || 
               item.category === "Unidad 4" || 
               item.subcategory?.includes("Pretérito") ||
+              item.subcategory?.includes("Preterite") ||
+              selectedSubcategory?.includes("Pretérito") ||
+              selectedSubcategory?.includes("Preterite") ||
               item.english?.toLowerCase().includes("preterite") ||
               item.english?.toLowerCase().includes("(past)")
             ) {
@@ -2187,6 +2230,9 @@ export default function StudyQuest({
               isConjugation: true,
               isGustar: qSpec.isGustar,
               isReciprocal: qSpec.isReciprocal,
+              isSpellChanger: qSpec.isSpellChanger,
+              isStemChangerPreterite: qSpec.isStemChangerPreterite,
+              isDoubleVowel: qSpec.isDoubleVowel,
               subjectPronoun: qSpec.subjectPronoun,
               infinitive: qSpec.infinitive,
               prompt: qSpec.prompt,
@@ -2328,6 +2374,9 @@ export default function StudyQuest({
               item.category === "Unidad 3" || 
               item.category === "Unidad 4" || 
               item.subcategory?.includes("Pretérito") ||
+              item.subcategory?.includes("Preterite") ||
+              selectedSubcategory?.includes("Pretérito") ||
+              selectedSubcategory?.includes("Preterite") ||
               item.english?.toLowerCase().includes("preterite") ||
               item.english?.toLowerCase().includes("(past)")
             ) {
@@ -2348,6 +2397,9 @@ export default function StudyQuest({
               isConjugation: true,
               isGustar: qSpec.isGustar,
               isReciprocal: qSpec.isReciprocal,
+              isSpellChanger: qSpec.isSpellChanger,
+              isStemChangerPreterite: qSpec.isStemChangerPreterite,
+              isDoubleVowel: qSpec.isDoubleVowel,
               subjectPronoun: qSpec.subjectPronoun,
               infinitive: qSpec.infinitive,
               prompt: qSpec.prompt,
@@ -3618,17 +3670,32 @@ export default function StudyQuest({
                           : (translateInstructions ? "Conjuga para el pronombre (Conjugate for the subject pronoun):" : "Conjuga para el pronombre:")}
                       </div>
 
-                      {(currentQuestQ.isReciprocal || currentQuestQ.isReflexive) && (
+                      {(currentQuestQ.isReciprocal || currentQuestQ.isReflexive || currentQuestQ.isSpellChanger || currentQuestQ.isStemChangerPreterite || currentQuestQ.isDoubleVowel) && (
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
                           {currentQuestQ.isReciprocal ? (
                             <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
                               {translateInstructions ? '🤝 Acción Recíproca ("Each Other")' : '🤝 Acción Recíproca'}
                             </span>
                           ) : currentQuestQ.isReflexive ? (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px' }}>
-                              {translateInstructions ? 'Reflexivo (me, te, se, nos, os, se)' : 'Reflexivo (me, te, se, nos, os, se)'}
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc', borderColor: 'rgba(99, 102, 241, 0.3)' }}>
+                              {translateInstructions ? '🪞 Reflexivo (me, te, se, nos, os, se)' : '🪞 Reflexivo (me, te, se, nos, os, se)'}
                             </span>
                           ) : null}
+                          {currentQuestQ.isSpellChanger && (
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
+                              {translateInstructions ? '✍️ Cambio Ortográfico (-car/-gar/-zar)' : '✍️ Cambio Ortográfico (-car/-gar/-zar)'}
+                            </span>
+                          )}
+                          {currentQuestQ.isStemChangerPreterite && (
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', borderColor: 'rgba(168, 85, 247, 0.3)' }}>
+                              {translateInstructions ? '👟 Verbo Sandalia (e➔i / o➔u)' : '👟 Verbo Sandalia (e➔i / o➔u)'}
+                            </span>
+                          )}
+                          {currentQuestQ.isDoubleVowel && (
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                              {translateInstructions ? '📖 Doble Vocal (i ➔ y)' : '📖 Doble Vocal (i ➔ y)'}
+                            </span>
+                          )}
                         </div>
                       )}
 
@@ -4364,10 +4431,25 @@ export default function StudyQuest({
                             🤝 Acción Recíproca ("Each Other")
                           </span>
                         ) : currQ.isReflexive ? (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px' }}>
-                            Reflexivo (me, te, se, nos, os, se)
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc', borderColor: 'rgba(99, 102, 241, 0.3)' }}>
+                            🪞 Reflexivo (me, te, se, nos, os, se)
                           </span>
                         ) : null}
+                        {currQ.isSpellChanger && (
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
+                            ✍️ Cambio Ortográfico (-car/-gar/-zar)
+                          </span>
+                        )}
+                        {currQ.isStemChangerPreterite && (
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', borderColor: 'rgba(168, 85, 247, 0.3)' }}>
+                            👟 Verbo Sandalia (e➔i / o➔u)
+                          </span>
+                        )}
+                        {currQ.isDoubleVowel && (
+                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                            📖 Doble Vocal (i ➔ y)
+                          </span>
+                        )}
                         {currQ.isGustar && (
                           <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.15)', color: 'var(--gold)', borderColor: 'rgba(234, 179, 8, 0.3)' }}>
                             ✨ Tipo Gustar ({isPret ? 'gustó vs gustaron' : 'gusta vs gustan'})
@@ -4718,17 +4800,32 @@ export default function StudyQuest({
                         {currentQ.isGustar ? "Select the correct form of gustar:" : "Conjugate for the subject pronoun:"}
                       </div>
 
-                      {(currentQ.isReciprocal || currentQ.isReflexive) && (
+                      {(currentQ.isReciprocal || currentQ.isReflexive || currentQ.isSpellChanger || currentQ.isStemChangerPreterite || currentQ.isDoubleVowel) && (
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
                           {currentQ.isReciprocal ? (
                             <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
                               🤝 Acción Recíproca ("Each Other")
                             </span>
                           ) : currentQ.isReflexive ? (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px' }}>
-                              Reflexivo (me, te, se, nos, os, se)
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc', borderColor: 'rgba(99, 102, 241, 0.3)' }}>
+                              🪞 Reflexivo (me, te, se, nos, os, se)
                             </span>
                           ) : null}
+                          {currentQ.isSpellChanger && (
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
+                              ✍️ Cambio Ortográfico (-car/-gar/-zar)
+                            </span>
+                          )}
+                          {currentQ.isStemChangerPreterite && (
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', borderColor: 'rgba(168, 85, 247, 0.3)' }}>
+                              👟 Verbo Sandalia (e➔i / o➔u)
+                            </span>
+                          )}
+                          {currentQ.isDoubleVowel && (
+                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                              📖 Doble Vocal (i ➔ y)
+                            </span>
+                          )}
                         </div>
                       )}
 
@@ -5234,6 +5331,63 @@ export default function StudyQuest({
                   {codexLang === 'en' ? '✨ Reflexive Verb (me, te, se, nos, os, se)' : '✨ Verbo Reflexivo (me, te, se, nos, os, se)'}
                 </div>
               ) : null
+            )}
+
+            {/* Preterite Special Verb Rules (Spelling Changers, Sandal Verbs, Double Vowels) */}
+            {codexVerb !== 'pronombres_objeto' && codexVerb !== 'guia_contrastes' && codexTense === 'preterite' && (
+              <>
+                {isPreteriteSpellingChanger(codexVerb) && (
+                  <div style={{
+                    background: 'rgba(59, 130, 246, 0.12)',
+                    color: '#60a5fa',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: '8px',
+                    padding: '7px 12px',
+                    fontSize: '0.78rem',
+                    marginBottom: '12px',
+                    textAlign: 'center',
+                    fontWeight: 600
+                  }}>
+                    {codexLang === 'en' 
+                      ? '✍️ Preterite Spelling Changer: -car ➔ qué, -gar ➔ gué, -zar ➔ cé (Yo form only)' 
+                      : '✍️ Cambio Ortográfico en Pretérito: -car ➔ qué, -gar ➔ gué, -zar ➔ cé (solo forma Yo)'}
+                  </div>
+                )}
+                {isPreteriteStemChanger(codexVerb) && (
+                  <div style={{
+                    background: 'rgba(168, 85, 247, 0.12)',
+                    color: '#c084fc',
+                    border: '1px solid rgba(168, 85, 247, 0.3)',
+                    borderRadius: '8px',
+                    padding: '7px 12px',
+                    fontSize: '0.78rem',
+                    marginBottom: '12px',
+                    textAlign: 'center',
+                    fontWeight: 600
+                  }}>
+                    {codexLang === 'en'
+                      ? '👟 Sandal Verb: Stem changes e ➔ i or o ➔ u in 3rd person (él/ella/ellos)'
+                      : '👟 Verbo Sandalia: Cambio de raíz e ➔ i u o ➔ u en 3ª persona (él/ella/ellos)'}
+                  </div>
+                )}
+                {isPreteriteDoubleVowel(codexVerb) && (
+                  <div style={{
+                    background: 'rgba(16, 185, 129, 0.12)',
+                    color: '#34d399',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    borderRadius: '8px',
+                    padding: '7px 12px',
+                    fontSize: '0.78rem',
+                    marginBottom: '12px',
+                    textAlign: 'center',
+                    fontWeight: 600
+                  }}>
+                    {codexLang === 'en'
+                      ? '📖 Double Vowel Verb: Unaccented i changes to y between vowels (e.g. leyó, leyeron, cayó)'
+                      : '📖 Doble Vocal: La i átona cambia a y entre vocales (ej. leyó, leyeron, cayó)'}
+                  </div>
+                )}
+              </>
             )}
             
             {codexVerb === 'guia_contrastes' ? (

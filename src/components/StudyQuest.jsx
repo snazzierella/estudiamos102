@@ -4978,7 +4978,21 @@ export default function StudyQuest({
                         : "Reglas contrastivas de decisión: matrices comparativas y ejemplos de Español 102.")
                     : codexVerb === 'pronombres_objeto'
                       ? (codexLang === 'en' ? "Direct (DOP), Indirect (IOP), and Double Object Pronouns (se lo/la)." : "Pronombres de Objeto Directo, Indirecto y Dobles")
-                      : (codexLang === 'en' ? <>Verb: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong></> : <>Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong></>)}
+                      : (codexLang === 'en' ? (
+                          <>
+                            Verb: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong>
+                            {codexVerb === 'hablar' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (to speak / to talk — regular -ar)</span>}
+                            {codexVerb === 'comer' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (to eat — regular -er)</span>}
+                            {codexVerb === 'vivir' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (to live — regular -ir)</span>}
+                          </>
+                        ) : (
+                          <>
+                            Verbo: <strong style={{ color: 'var(--text-primary)' }}>"{codexVerb}"</strong>
+                            {codexVerb === 'hablar' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (hablar — regular -ar)</span>}
+                            {codexVerb === 'comer' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (comer — regular -er)</span>}
+                            {codexVerb === 'vivir' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}> (vivir — regular -ir)</span>}
+                          </>
+                        ))}
                 </p>
               </div>
               <button 
@@ -5099,7 +5113,13 @@ export default function StudyQuest({
                 }}
                 onClick={() => {
                   if (codexVerb === 'guia_contrastes' || codexVerb === 'pronombres_objeto') {
-                    setCodexVerb("tener");
+                    if (questStarted && currentQuestQ?.targetVerb) {
+                      setCodexVerb(currentQuestQ.targetVerb);
+                    } else if (questStarted && currentQuestQ?.item && isVerbItem(currentQuestQ.item)) {
+                      setCodexVerb(typeof currentQuestQ.item === 'string' ? currentQuestQ.item : currentQuestQ.item.spanish);
+                    } else {
+                      setCodexVerb("hablar");
+                    }
                   }
                 }}
               >
@@ -5109,7 +5129,7 @@ export default function StudyQuest({
 
             {/* Dual Tense Switcher Tabs (Only for Verbs) */}
             {codexVerb !== 'pronombres_objeto' && codexVerb !== 'guia_contrastes' && (
-              <div style={{ display: 'flex', gap: '8px', margin: '0 0 12px', background: 'rgba(0,0,0,0.25)', padding: '5px', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', gap: '8px', margin: '0 0 10px', background: 'rgba(0,0,0,0.25)', padding: '5px', borderRadius: '12px' }}>
                 <button
                   type="button"
                   className="btn btn-sm"
@@ -5146,6 +5166,40 @@ export default function StudyQuest({
                 >
                   {codexLang === 'en' ? '⏳ Preterite Tense' : '⏳ Pretérito (Past)'}
                 </button>
+              </div>
+            )}
+
+            {/* Quick Regular Model Verb Selector (Only for Verbs) */}
+            {codexVerb !== 'pronombres_objeto' && codexVerb !== 'guia_contrastes' && (
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'center', margin: '0 0 12px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.73rem', color: 'var(--text-muted)' }}>
+                  {codexLang === 'en' ? 'Regular Model Verbs:' : 'Verbos Modelo Regulares:'}
+                </span>
+                {[
+                  { verb: 'hablar', label: 'hablar (-ar)', meaning: 'to speak' },
+                  { verb: 'comer', label: 'comer (-er)', meaning: 'to eat' },
+                  { verb: 'vivir', label: 'vivir (-ir)', meaning: 'to live' }
+                ].map(m => (
+                  <button
+                    key={m.verb}
+                    type="button"
+                    className="btn btn-sm"
+                    style={{
+                      fontSize: '0.72rem',
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      background: codexVerb === m.verb ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255,255,255,0.05)',
+                      color: codexVerb === m.verb ? '#34d399' : 'var(--text-secondary)',
+                      border: codexVerb === m.verb ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
+                      fontWeight: codexVerb === m.verb ? 700 : 500,
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setCodexVerb(m.verb)}
+                    title={codexLang === 'en' ? `${m.verb} (${m.meaning})` : m.verb}
+                  >
+                    {m.label}
+                  </button>
+                ))}
               </div>
             )}
 
@@ -5283,7 +5337,26 @@ export default function StudyQuest({
                             if (contrastCodexTab === 'saber_conocer_ser_estar') {
                               return (
                                 <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                  <td style={{ padding: '8px', color: '#60a5fa', fontWeight: 700 }}>{r.pair}</td>
+                                  <td style={{ padding: '8px', color: '#60a5fa', fontWeight: 700 }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                      <span>{r.pair}</span>
+                                      {r.meaningEn && (
+                                        <span style={{ 
+                                          fontSize: '0.74rem', 
+                                          color: '#34d399', 
+                                          background: 'rgba(16, 185, 129, 0.12)', 
+                                          border: '1px solid rgba(16, 185, 129, 0.25)',
+                                          padding: '1px 6px', 
+                                          borderRadius: '4px',
+                                          fontWeight: 600,
+                                          display: 'inline-block',
+                                          width: 'fit-content'
+                                        }}>
+                                          "{isEn ? r.meaningEn : (r.meaningEs || r.meaningEn)}"
+                                        </span>
+                                      )}
+                                    </div>
+                                  </td>
                                   <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>{isEn ? r.useEn : r.useEs}</td>
                                   <td style={{ padding: '8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.pret}</td>
                                 </tr>
@@ -5311,6 +5384,23 @@ export default function StudyQuest({
                           })}
                         </tbody>
                       </table>
+
+                      {/* Explanatory Note Callout (e.g. English Meanings Note) */}
+                      {content.noteEn && (
+                        <div style={{ 
+                          background: 'rgba(59, 130, 246, 0.08)', 
+                          border: '1px solid rgba(59, 130, 246, 0.28)', 
+                          borderRadius: '8px', 
+                          padding: '10px 12px', 
+                          fontSize: '0.8rem', 
+                          color: '#bfdbfe', 
+                          marginBottom: '12px', 
+                          lineHeight: '1.5',
+                          whiteSpace: 'pre-line' 
+                        }}>
+                          {isEn ? content.noteEn : content.noteEs}
+                        </div>
+                      )}
 
                       {/* Footer Tip or Warning */}
                       {content.tipEn && (

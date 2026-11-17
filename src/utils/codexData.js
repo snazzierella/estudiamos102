@@ -95,16 +95,46 @@ export const CONTRAST_TABS_CONTENT = {
   },
 
   saber_conocer_ser_estar: {
-    bannerEn: "Contrasting foundational verb pairs and their special meanings in the preterite tense.",
-    bannerEs: "Pares fundamentales de verbos y sus significados especiales en el tiempo pretérito.",
-    headersEn: ["Pair", "Fundamental Usage", "In Preterite (Special Meaning)"],
-    headersEs: ["Par", "Uso Fundamental", "En Pretérito (Significado Especial)"],
+    bannerEn: "Contrasting foundational verb pairs (Saber & Conocer = \"to know\", Ser & Estar = \"to be\") and their special meanings in the preterite tense.",
+    bannerEs: "Pares fundamentales de verbos (Saber y Conocer = \"to know\", Ser y Estar = \"to be\") y sus significados especiales en el tiempo pretérito.",
+    headersEn: ["Pair & Meaning", "Fundamental Usage", "In Preterite (Special Meaning)"],
+    headersEs: ["Par y Significado", "Uso Fundamental", "En Pretérito (Significado Especial)"],
     rows: [
-      { pair: "Saber", useEn: "Facts, data, information, how-to (+ inf.)", useEs: "Datos, hechos, información, cómo hacer algo (+ inf.)", pret: "\"Supe la noticia ayer\" (I found out / learned)" },
-      { pair: "Conocer", useEn: "People (with 'a'), places, familiarity", useEs: "Personas (con 'a'), lugares, familiaridad", pret: "\"Conocí a María anoche\" (I met for the first time)" },
-      { pair: "Ser (DOCTOR)", useEn: "Description, Occupation, Characteristic, Time/Date, Origin, Material", useEs: "Descripción, Ocupación, Característica, Hora, Origen, Material", pret: "\"Fue una fiesta divertida\"" },
-      { pair: "Estar (PLACE)", useEn: "Position, Location, Action (-ndo), Condition, Emotion", useEs: "Posición, Ubicación, Acción (-ndo), Condición, Emoción", pret: "\"Estuve en el hotel tres días\"" }
+      { 
+        pair: "Saber", 
+        meaningEn: "to know", 
+        meaningEs: "to know", 
+        useEn: "Facts, data, information, how-to (+ inf.)", 
+        useEs: "Datos, hechos, información, cómo hacer algo (+ inf.)", 
+        pret: "\"Supe la noticia ayer\" (I found out / learned)" 
+      },
+      { 
+        pair: "Conocer", 
+        meaningEn: "to know / be familiar with", 
+        meaningEs: "to know / be familiar with", 
+        useEn: "People (with 'a'), places, familiarity", 
+        useEs: "Personas (con 'a'), lugares, familiaridad", 
+        pret: "\"Conocí a María anoche\" (I met for the first time)" 
+      },
+      { 
+        pair: "Ser (DOCTOR)", 
+        meaningEn: "to be", 
+        meaningEs: "to be", 
+        useEn: "Description, Occupation, Characteristic, Time/Date, Origin, Material", 
+        useEs: "Descripción, Ocupación, Característica, Hora, Origen, Material", 
+        pret: "\"Fue una fiesta divertida\"" 
+      },
+      { 
+        pair: "Estar (PLACE)", 
+        meaningEn: "to be", 
+        meaningEs: "to be", 
+        useEn: "Position, Location, Action (-ndo), Condition, Emotion", 
+        useEs: "Posición, Ubicación, Acción (-ndo), Condición, Emoción", 
+        pret: "\"Estuve en el hotel tres días\"" 
+      }
     ],
+    noteEn: "📌 English Meanings Note:\n• Saber & Conocer both mean \"to know\" in English: Saber is for facts, data, and skills (how-to); Conocer is for people (with personal 'a') and places (familiarity).\n• Ser & Estar both mean \"to be\" in English: Ser is for inherent identity, occupation, traits, origin, and time (DOCTOR); Estar is for position, location, action (-ndo), condition, and emotions (PLACE).",
+    noteEs: "📌 Nota sobre significados en inglés:\n• Saber y Conocer significan ambos \"to know\" en inglés: Saber se usa para hechos, datos y habilidades; Conocer se usa para personas (con 'a' personal) y lugares (familiaridad).\n• Ser y Estar significan ambos \"to be\" en inglés: Ser se usa para identidad inherente, ocupación, origen y hora (DOCTOR); Estar se usa para posición, ubicación, estados y emociones (PLACE).",
     tipEn: "💡 In the preterite: Saber = found out / learned news; Conocer = met someone for the first time.",
     tipEs: "💡 En pretérito: Saber = enterarse de algo; Conocer = conocer a alguien por primera vez."
   },

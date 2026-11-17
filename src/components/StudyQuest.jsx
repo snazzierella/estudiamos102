@@ -2196,7 +2196,7 @@ export default function StudyQuest({
 
     let questions = [];
 
-    if (practiceQuizMode === "mixed") {
+    if (practiceQuizMode === "mixed" && !isVerbLab) {
       // MIX OF FLASHCARDS AND CONJUGATIONS (with translations for non-verbs)
       const verbItems = practiceCards.filter(item => isVerbItem(item) && !isSentenceItem(item));
       const otherItems = practiceCards.filter(item => !isVerbItem(item) || isSentenceItem(item));
@@ -2346,7 +2346,7 @@ export default function StudyQuest({
       }];
 
       questions = [...cardSteps, ...quizSteps, ...sentenceSteps].slice(0, targetCount);
-    } else if (practiceQuizMode === "sentence") {
+    } else if (practiceQuizMode === "sentence" && !isVerbLab) {
       questions = Array.from({ length: Math.min(targetCount, 25) }).map(() => {
         const sSpec = generateSentenceBuilderQuestion({ unit: state.questStage || 1 });
         return {
@@ -2389,7 +2389,27 @@ export default function StudyQuest({
 
         if (wantsConjugation) {
           let chosenTense = practiceTense;
-          if (chosenTense === "both") {
+          if (isVerbLab) {
+            if (item.defaultTense && item.defaultTense !== "both") {
+              chosenTense = item.defaultTense;
+            } else if (item.verbGroup?.startsWith("pret_")) {
+              chosenTense = "preterite";
+            } else if (item.verbGroup?.startsWith("present_")) {
+              chosenTense = "present";
+            } else if (item.defaultTense === "both") {
+              const hasPreterite = selectedVerbGroups.some(g => g.startsWith("pret_"));
+              const hasPresent = selectedVerbGroups.some(g => g.startsWith("present_"));
+              if (hasPreterite && !hasPresent) {
+                chosenTense = "preterite";
+              } else if (hasPresent && !hasPreterite) {
+                chosenTense = "present";
+              } else {
+                chosenTense = Math.random() > 0.5 ? "present" : "preterite";
+              }
+            } else {
+              chosenTense = "present";
+            }
+          } else if (chosenTense === "both") {
             chosenTense = Math.random() > 0.5 ? "present" : "preterite";
           } else if (chosenTense === "auto") {
             if (item.defaultTense) {
@@ -4459,7 +4479,7 @@ export default function StudyQuest({
                     </div>
                   </div>
 
-                  {practiceCards.some(item => isVerbItem(item)) && (
+                  {!isVerbLab && practiceCards.some(item => isVerbItem(item)) && (
                     <>
                       <div className="form-group" style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
                         <label className="form-label" style={{ marginBottom: '6px', fontSize: '0.8rem' }}>Quiz Type</label>

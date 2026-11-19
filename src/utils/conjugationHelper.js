@@ -3137,6 +3137,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "When I was a little girl, I always used to watch cartoons on the television.",
       choices: ["veía", "vi", "veo", "vería"],
       correct: "veía",
+      hint: "Think about whether this action was a completed one-time event or a recurring childhood habit.",
       ruleExplanation: "Childhood routine with 'siempre' expresses a habitual past action, requiring the imperfect form.",
       ruleExplanationEs: "La rutina en la niñez con 'siempre' expresa una acción habitual en el pasado, exigiendo el imperfecto."
     },
@@ -3146,6 +3147,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Yesterday my brother watched a horror movie at the movie theater.",
       choices: ["vio", "veía", "ve", "veían"],
       correct: "vio",
+      hint: "Identify the time marker 'ayer' to determine whether this action was completed at a specific past point.",
       ruleExplanation: "Specific completed action in the past ('ayer') requires the preterite tense.",
       ruleExplanationEs: "Una acción completada en un momento específico ('ayer') requiere el tiempo pretérito."
     },
@@ -3155,6 +3157,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "In those days, we used to rent movies at the video store every Friday.",
       choices: ["alquilábamos", "alquilamos", "alquilaron", "alquilaban"],
       correct: "alquilábamos",
+      hint: "Look for recurring past frequency cues ('en aquellos tiempos', 'todos los viernes') and match the first person plural.",
       ruleExplanation: "Repetitive habitual past actions with 'en aquellos tiempos' and 'todos los viernes' use imperfect -ar ending (-ábamos).",
       ruleExplanationEs: "Las acciones habituales con 'en aquellos tiempos' y 'todos los viernes' usan imperfecto en -ábamos."
     },
@@ -3164,6 +3167,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "When my grandfather was a boy, smartphones did not exist.",
       choices: ["era", "fue", "es", "sería"],
       correct: "era",
+      hint: "Recur to the irregular imperfect paradigm of ser used to describe past background identity or childhood.",
       ruleExplanation: "Describing background conditions or age/identity in childhood uses the imperfect of ser.",
       ruleExplanationEs: "Describir condiciones de fondo o la niñez en el pasado usa el imperfecto de ser."
     },
@@ -3173,6 +3177,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Every summer, my family and I used to go to the beach by car.",
       choices: ["íbamos", "fuimos", "vamos", "ibais"],
       correct: "íbamos",
+      hint: "Pay attention to the habitual time marker 'cada verano' and the written accent on the nosotros form of ir.",
       ruleExplanation: "Recurring summer trips ('cada verano') express habitual past action, requiring the imperfect of ir with accent on 'í'.",
       ruleExplanationEs: "Viajes recurrentes ('cada verano') expresan hábito en el pasado, requiriendo el imperfecto de ir con tilde en la 'í'."
     },
@@ -3182,6 +3187,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "In the 1990s there were no electronic tablets.",
       choices: ["había", "hubo", "hay", "habían"],
       correct: "había",
+      hint: "Remember that impersonal ongoing past existence in Spanish is always singular in this tense.",
       ruleExplanation: "Impersonal ongoing past existence ('there was / there were') uses the singular imperfect form.",
       ruleExplanationEs: "La existencia continua en el pasado ('había') se usa únicamente en forma singular."
     },
@@ -3191,7 +3197,8 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Did you see anyone you know at the cinema? No, I didn't see anyone.",
       choices: ["alguien", "nadie", "algo", "nada"],
       correct: "alguien",
-      ruleExplanation: "Affirmative questions asking about a person use the indefinite personal pronoun.",
+      hint: "Notice that this question is in the affirmative before the negative reply appears.",
+      ruleExplanation: "Affirmative questions asking about an unspecified person use the indefinite personal pronoun.",
       ruleExplanationEs: "Las preguntas afirmativas sobre personas usan el pronombre indefinido correspondiente."
     },
     {
@@ -3200,6 +3207,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I have nothing in the pockets of my jacket.",
       choices: ["nada", "algo", "alguien", "nadie"],
       correct: "nada",
+      hint: "Observe the negative verb 'no tengo' and consider whether you are referring to a person or a thing.",
       ruleExplanation: "Following a negative verb ('no tengo'), use the negative pronoun referring to inanimate things.",
       ruleExplanationEs: "Tras un verbo negado ('no tengo'), se usa el pronombre negativo para cosas inanimadas."
     },
@@ -3209,6 +3217,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Nobody buys printed newspapers on the street nowadays.",
       choices: ["Nadie", "Alguien", "Ninguno", "Nada"],
       correct: "Nadie",
+      hint: "Determine which word functions as a negative personal subject placed directly before the verb.",
       ruleExplanation: "When a negative word precedes the verb as the grammatical subject, 'no' is omitted.",
       ruleExplanationEs: "Cuando la palabra negativa antecede al verbo como sujeto, se omite el 'no'."
     },
@@ -3218,6 +3227,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I do not have any e-book on my new tablet.",
       choices: ["ningún", "ninguno", "ninguna", "alguno"],
       correct: "ningún",
+      hint: "Check the gender and number of 'libro' and remember how modifying adjectives change form before a masculine singular noun.",
       ruleExplanation: "Before a masculine singular noun ('libro'), the negative adjective shortens and adds a written accent.",
       ruleExplanationEs: "Delante de un sustantivo masculino singular ('libro'), el adjetivo negativo se apocopa con tilde."
     },
@@ -3227,6 +3237,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "I don't use social networks and my grandfather doesn't use them either.",
       choices: ["tampoco", "también", "nada", "nunca"],
       correct: "tampoco",
+      hint: "Look at the preceding clause: when agreeing with a negative statement ('neither / not either'), select the proper negative adverb.",
       ruleExplanation: "To agree with a negative statement ('neither / not either'), use this negative adverb.",
       ruleExplanationEs: "Para concordar con una declaración negativa ('not either'), se usa este adverbio negativo."
     },
@@ -3236,6 +3247,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "A nurse is as important as a doctor in the hospital.",
       choices: ["tan", "tanto", "tanta", "más"],
       correct: "tan",
+      hint: "Identify the word following the blank ('importante'): adjectives require an invariant comparative modifier before 'como'.",
       ruleExplanation: "For comparisons of equality with adjectives or adverbs, use the invariant modifier before 'como'.",
       ruleExplanationEs: "Para comparaciones de igualdad con adjetivos o adverbios, se usa la forma invariable antes de 'como'."
     },
@@ -3245,6 +3257,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "The musician has as many instruments as the singer.",
       choices: ["tantos", "tan", "tanto", "tantas"],
       correct: "tantos",
+      hint: "Match the gender and plural number of the noun 'instrumentos' when expressing 'as many... as'.",
       ruleExplanation: "When modifying a masculine plural noun ('instrumentos'), match gender and number before 'como'.",
       ruleExplanationEs: "Al modificar a un sustantivo masculino plural ('instrumentos'), concuerda en género y número antes de 'como'."
     },
@@ -3254,8 +3267,149 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "That latest-generation laptop costs more than five hundred dollars.",
       choices: ["más de", "más que", "tan", "como"],
       correct: "más de",
+      hint: "When comparing numerical quantities or prices directly before a number, note the specific preposition needed instead of 'que'.",
       ruleExplanation: "When expressing comparative inequality with numerical quantities or figures, use this prepositional comparative.",
       ruleExplanationEs: "Al expresar desigualdad comparativa con cifras numéricas, se usa la preposición correspondiente."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto (Interrupción)",
+      sentenceWithBlank: "Yo miraba mi serie favorita cuando de repente se [_____] la luz.",
+      englishMeaning: "I was watching my favorite show when suddenly the power went out.",
+      choices: ["cortó", "cortaba", "corta", "cortaría"],
+      correct: "cortó",
+      hint: "Identify the sudden interruption ('de repente') that cuts into the ongoing background action.",
+      ruleExplanation: "An interrupting event that breaks an ongoing background action requires the preterite tense.",
+      ruleExplanationEs: "Un evento que interrumpe una acción en progreso requiere el pretérito."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto (Simultaneidad con Mientras)",
+      sentenceWithBlank: "Mientras mi papá [_____] el noticiero, mi mamá navegaba por internet.",
+      englishMeaning: "While my dad was listening to the news, my mom was browsing the internet.",
+      choices: ["escuchaba", "escuchó", "escucha", "escucharía"],
+      correct: "escuchaba",
+      hint: "Notice 'mientras' connecting two ongoing, simultaneous past actions without a defined completion boundary.",
+      ruleExplanation: "Two simultaneous ongoing actions in the past linked by 'mientras' both use the imperfect.",
+      ruleExplanationEs: "Dos acciones simultáneas en curso en el pasado unidas por 'mientras' usan el imperfecto."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto (Hora en el Pasado)",
+      sentenceWithBlank: "Cuando empezó la película en el cine, [_____] las ocho de la noche.",
+      englishMeaning: "When the movie started at the cinema, it was eight o'clock at night.",
+      choices: ["eran", "fueron", "son", "serían"],
+      correct: "eran",
+      hint: "Recall that telling time in the past sets background context and takes the imperfect form of ser.",
+      ruleExplanation: "Telling time in the past is treated as descriptive background condition and takes the imperfect of ser.",
+      ruleExplanationEs: "Expresar la hora en el pasado es una descripción de fondo que requiere el imperfecto de ser."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto (Edad en el Pasado)",
+      sentenceWithBlank: "Mi hermana [_____] diez años cuando recibió su primera tableta digital.",
+      englishMeaning: "My sister was ten years old when she received her first digital tablet.",
+      choices: ["tenía", "tuvo", "tiene", "tendría"],
+      correct: "tenía",
+      hint: "Stating someone's age during past events describes an ongoing condition, requiring the imperfect of tener.",
+      ruleExplanation: "Describing age in the past expresses ongoing background state and uses the imperfect of tener.",
+      ruleExplanationEs: "Expresar la edad en el pasado describe un estado continuo y usa el imperfecto de tener."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto (Irregulares: Ver)",
+      sentenceWithBlank: "Todos los domingos, nosotros [_____] documentales de animales en el televisor.",
+      englishMeaning: "Every Sunday, we used to watch animal documentaries on the television.",
+      choices: ["veíamos", "vimos", "vemos", "veríamos"],
+      correct: "veíamos",
+      hint: "Examine the routine trigger 'todos los domingos' and apply the irregular imperfect ending for ver with nosotros.",
+      ruleExplanation: "Habitual Sunday routines use the imperfect of ver, keeping the 'e' from the stem and adding -íamos.",
+      ruleExplanationEs: "Las rutinas dominicales usan el imperfecto de ver, manteniendo la 'e' de la raíz con -íamos."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto (Estado Mental / Saber)",
+      sentenceWithBlank: "El director de la película no [_____] qué final elegir para la historia.",
+      englishMeaning: "The film director did not know which ending to choose for the story.",
+      choices: ["sabía", "supo", "sabe", "sabrá"],
+      correct: "sabía",
+      hint: "Ongoing mental state ('didn't know') takes the imperfect, whereas the preterite of saber means 'found out'.",
+      ruleExplanation: "An ongoing mental state in the past uses the imperfect of saber; in the preterite, saber means 'found out'.",
+      ruleExplanationEs: "Un estado mental continuo usa el imperfecto de saber; en pretérito significa 'descubrió / se enteró'."
+    },
+    {
+      contrastPair: "Palabras Indefinidas vs Negativas ('a' personal)",
+      sentenceWithBlank: "Fui al festival de cine pero no conocí [_____] allí.",
+      englishMeaning: "I went to the film festival but I didn't meet anyone there.",
+      choices: ["a nadie", "a alguien", "nadie", "alguien"],
+      correct: "a nadie",
+      hint: "Remember that people acting as direct objects require the personal preposition along with the negative pronoun.",
+      ruleExplanation: "When negative words referring to people act as direct objects, the personal 'a' is required.",
+      ruleExplanationEs: "Cuando las palabras negativas sobre personas funcionan como objeto directo, requieren la 'a' personal."
+    },
+    {
+      contrastPair: "Doble Negación (Conjunción Correlativa Ni... Ni)",
+      sentenceWithBlank: "Ese teléfono viejo no tiene [_____] cámara ni pantalla táctil.",
+      englishMeaning: "That old phone has neither a camera nor a touch screen.",
+      choices: ["ni", "o", "tan", "más"],
+      correct: "ni",
+      hint: "Notice the correlative pair used to deny both elements: 'neither... nor'.",
+      ruleExplanation: "The correlative negative conjunction 'ni... ni' coordinates multiple negative items following a negated verb.",
+      ruleExplanationEs: "La conjunción correlativa 'ni... ni' coordina elementos negativos tras un verbo negado."
+    },
+    {
+      contrastPair: "Algún vs Ningún (Concordancia Femenina)",
+      sentenceWithBlank: "¿Tienes [_____] pregunta sobre la contraseña de la red Wi-Fi?",
+      englishMeaning: "Do you have any question about the Wi-Fi network password?",
+      choices: ["alguna", "algún", "ningún", "ninguno"],
+      correct: "alguna",
+      hint: "Look at the noun 'pregunta': it is feminine singular, and the clause is an affirmative inquiry.",
+      ruleExplanation: "In an affirmative question with a feminine singular noun ('pregunta'), use the feminine indefinite adjective.",
+      ruleExplanationEs: "En una pregunta afirmativa con sustantivo femenino singular ('pregunta'), se usa 'alguna'."
+    },
+    {
+      contrastPair: "Algún vs Ningún (Apócope Afirmativo)",
+      sentenceWithBlank: "¿Conoces [_____] sitio web confiable para descargar podcasts?",
+      englishMeaning: "Do you know any reliable website to download podcasts?",
+      choices: ["algún", "alguno", "ningún", "ninguno"],
+      correct: "algún",
+      hint: "Consider the affirmative context and apply apocopation before the masculine singular noun 'sitio'.",
+      ruleExplanation: "Before a masculine singular noun in an affirmative question, 'alguno' shortens to 'algún' with a written accent.",
+      ruleExplanationEs: "Antes de un sustantivo masculino singular en contexto afirmativo, 'alguno' se apocopa a 'algún'."
+    },
+    {
+      contrastPair: "Comparaciones de Igualdad (Concordancia Femenina de Tanto)",
+      sentenceWithBlank: "La diseñadora gráfica tiene [_____] paciencia como la arquitecta.",
+      englishMeaning: "The graphic designer has as much patience as the architect.",
+      choices: ["tanta", "tanto", "tan", "tantas"],
+      correct: "tanta",
+      hint: "Match the gender and singular number of the noun 'paciencia' when stating 'as much... as'.",
+      ruleExplanation: "When modifying a feminine singular noun ('paciencia'), 'tanto' agrees in gender and number before 'como'.",
+      ruleExplanationEs: "Al modificar un sustantivo femenino singular ('paciencia'), concuerda en género y número antes de 'como'."
+    },
+    {
+      contrastPair: "Comparaciones de Igualdad con Verbos (Tanto Como)",
+      sentenceWithBlank: "Ese teléfono inteligente cuesta [_____] una computadora portátil moderna.",
+      englishMeaning: "That smartphone costs as much as a modern laptop.",
+      choices: ["tanto como", "tan como", "más de", "menos de"],
+      correct: "tanto como",
+      hint: "When comparing the action of a verb directly without an intervening adjective or noun, use the fixed comparative unit.",
+      ruleExplanation: "Comparing verb action directly uses the unchanging phrase 'tanto como' immediately after the verb.",
+      ruleExplanationEs: "Comparar directamente la acción de un verbo usa la locución invariable 'tanto como' tras el verbo."
+    },
+    {
+      contrastPair: "Comparaciones Irregulares (Mejor / Peor)",
+      sentenceWithBlank: "En mi opinión, la primera temporada fue mucho [_____] que la segunda.",
+      englishMeaning: "In my opinion, the first season was much better than the second.",
+      choices: ["mejor", "más buena", "tan buena", "bien"],
+      correct: "mejor",
+      hint: "Spanish uses a single irregular comparative word for 'better' instead of combining 'más' with 'bueno'.",
+      ruleExplanation: "The irregular comparative of 'bueno' is 'mejor' (never *'más bueno'* for quality).",
+      ruleExplanationEs: "El comparativo irregular de 'bueno' es 'mejor' (nunca *'más bueno'* para calidad)."
+    },
+    {
+      contrastPair: "Comparaciones Irregulares (Mayor / Menor)",
+      sentenceWithBlank: "Mi hermano tiene 20 años y yo tengo 15; él es cinco años [_____] que yo.",
+      englishMeaning: "My brother is 20 years old and I am 15; he is five years older than I am.",
+      choices: ["mayor", "más viejo", "más grande", "menor"],
+      correct: "mayor",
+      hint: "When comparing human age ('older'), Spanish uses a dedicated irregular comparative adjective rather than 'más viejo'.",
+      ruleExplanation: "To express 'older' when referring to people's ages, use the irregular comparative 'mayor'.",
+      ruleExplanationEs: "Para expresar mayor edad entre personas ('older'), se usa el comparativo irregular 'mayor'."
     }
   ]
 };
@@ -3283,7 +3437,7 @@ export function generateContrastQuestion(stageVal, _levelVal) {
     choices: [...chosen.choices].sort(() => Math.random() - 0.5),
     ruleExplanation: chosen.ruleExplanation,
     ruleExplanationEs: chosen.ruleExplanationEs || chosen.ruleExplanation,
-    hint: chosen.ruleExplanation
+    hint: chosen.hint || chosen.ruleExplanation
   };
 }
 

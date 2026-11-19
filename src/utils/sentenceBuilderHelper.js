@@ -1633,6 +1633,118 @@ export const SENTENCE_POOLS = {
     ],
     "hint": "Irregular comparative form of bien is used with adverbial modifier and que.",
     "syntaxBreakdown": "[Subject: Esta nueva aplicación] + [Verb: funciona] + [Irregular Comparative: mucho mejor que] + [Reference: la versión anterior]"
+  },
+  {
+    "spanish": "El usuario crea una contraseña segura para desbloquear su cuenta",
+    "english": "The user creates a secure password to unlock their account",
+    "distractors": ["bloquear", "seguro", "la"],
+    "hint": "Third person singular verb with feminine direct object and purpose clause.",
+    "syntaxBreakdown": "[Subject: El usuario] + [Verb: crea] + [Direct Object: una contraseña segura] + [Purpose: para desbloquear su cuenta]"
+  },
+  {
+    "spanish": "Los jóvenes graban videos divertidos y los suben a internet",
+    "english": "The youth record fun videos and upload them to the internet",
+    "distractors": ["graba", "las", "un"],
+    "hint": "Coordinated third person plural clauses with direct object pronoun replacement.",
+    "syntaxBreakdown": "[Subject: Los jóvenes] + [Verb 1: graban] + [Direct Object: videos divertidos] + [Conjunction: y] + [Direct Object Pronoun: los] + [Verb 2: suben] + [Destination: a internet]"
+  },
+  {
+    "spanish": "Mi prima ve el documental completo en su pantalla táctil",
+    "english": "My cousin watches the full documentary on her touch screen",
+    "distractors": ["ven", "un", "los"],
+    "hint": "Singular subject pronoun agreement with masculine documentary object and location phrase.",
+    "syntaxBreakdown": "[Subject: Mi prima] + [Verb: ve] + [Direct Object: el documental completo] + [Location: en su pantalla táctil]"
+  },
+  {
+    "spanish": "Nosotros apagamos el televisor antes de ir a dormir",
+    "english": "We turn off the television set before going to sleep",
+    "distractors": ["apaga", "la", "un"],
+    "hint": "First person plural present verb with direct object device and temporal prepositional infinitive.",
+    "syntaxBreakdown": "[Subject: Nosotros] + [Verb: apagamos] + [Direct Object: el televisor] + [Time: antes de ir a dormir]"
+  },
+  {
+    "spanish": "Cuando hacía frío en invierno nosotros nos quedábamos en casa",
+    "english": "When it was cold in winter we used to stay at home",
+    "distractors": ["hizo", "quedamos", "el"],
+    "hint": "Imperfect weather expression with hacer paired with reflexive imperfect habitual verb.",
+    "syntaxBreakdown": "[Time Clause: Cuando hacía frío en invierno] + [Subject: nosotros] + [Reflexive Verb: nos quedábamos] + [Location: en casa]"
+  },
+  {
+    "spanish": "De niña mi hermana pequeña siempre tenía miedo de la oscuridad",
+    "english": "As a little girl my little sister was always afraid of the dark",
+    "distractors": ["tuvo", "tienen", "el"],
+    "hint": "Idiomatic expression of physical or emotional sensation in the past with tener.",
+    "syntaxBreakdown": "[Time Phrase: De niña] + [Subject: mi hermana pequeña] + [Adverb: siempre] + [Imperfect Verb: tenía] + [Object: miedo de la oscuridad]"
+  },
+  {
+    "spanish": "El tren salía a las tres mientras los pasajeros esperaban",
+    "english": "The train was departing at three while the passengers were waiting",
+    "distractors": ["salió", "esperó", "un"],
+    "hint": "Two simultaneous ongoing background actions in the past joined by the conjunction mientras.",
+    "syntaxBreakdown": "[Subject 1: El tren] + [Imperfect Verb 1: salía] + [Time: a las tres] + [Conjunction: mientras] + [Subject 2: los pasajeros] + [Imperfect Verb 2: esperaban]"
+  },
+  {
+    "spanish": "Mi abuela era muy generosa y siempre nos contaba historias",
+    "english": "My grandmother was very generous and always used to tell us stories",
+    "distractors": ["fue", "contó", "los"],
+    "hint": "Descriptive character trait with imperfect ser paired with indirect object pronoun and habitual past telling.",
+    "syntaxBreakdown": "[Subject: Mi abuela] + [Imperfect Copula: era] + [Predicate Adjective: muy generosa] + [Conjunction: y] + [Adverb: siempre] + [Indirect Pronoun: nos] + [Imperfect Verb: contaba] + [Direct Object: historias]"
+  },
+  {
+    "spanish": "Nosotros no encontramos ninguna información útil en ese sitio web",
+    "english": "We did not find any useful information on that website",
+    "distractors": ["ningún", "alguna", "el"],
+    "hint": "Negative adjective agrees with feminine singular noun información following a negated verb.",
+    "syntaxBreakdown": "[Subject: Nosotros] + [Negation: no] + [Verb: encontramos] + [Direct Object (fem.): ninguna información útil] + [Location: en ese sitio web]"
+  },
+  {
+    "spanish": "Nadie contestó el teléfono durante toda la tarde",
+    "english": "Nobody answered the phone during the whole afternoon",
+    "distractors": ["alguien", "contestaron", "un"],
+    "hint": "Negative personal pronoun functions as pre-verbal subject and takes singular agreement without no.",
+    "syntaxBreakdown": "[Subject: Nadie] + [Preterite Verb: contestó] + [Direct Object: el teléfono] + [Time: durante toda la tarde]"
+  },
+  {
+    "spanish": "Mi hermano no quiere comer nada ni beber nada",
+    "english": "My brother does not want to eat anything nor drink anything",
+    "distractors": ["algo", "o", "un"],
+    "hint": "Double negative construction coordinating two negated infinitives with the conjunction ni.",
+    "syntaxBreakdown": "[Subject: Mi hermano] + [Negation: no] + [Verb: quiere] + [Infinitive 1: comer nada] + [Conjunction: ni] + [Infinitive 2: beber nada]"
+  },
+  {
+    "spanish": "Viste algún mensaje nuevo en tu correo electrónico",
+    "english": "You saw some new message in your email",
+    "distractors": ["alguno", "ningún", "una"],
+    "hint": "Affirmative statement before a masculine singular noun uses shortened apocopated adjective with written accent.",
+    "syntaxBreakdown": "[Verb: Viste] + [Direct Object (masc. sing.): algún mensaje nuevo] + [Location: en tu correo electrónico]"
+  },
+  {
+    "spanish": "El cocinero prepara tanta comida como la pastelera del restaurante",
+    "english": "The cook prepares as much food as the restaurant pastry chef",
+    "distractors": ["tanto", "tan", "que"],
+    "hint": "Comparative adjective matches feminine singular noun comida in gender and number before como.",
+    "syntaxBreakdown": "[Subject: El cocinero] + [Verb: prepara] + [Comparative Noun (fem. sing.): tanta comida como] + [Reference: la pastelera del restaurante]"
+  },
+  {
+    "spanish": "Los bomberos son tan valientes como los policías de la ciudad",
+    "english": "The firefighters are as brave as the city police officers",
+    "distractors": ["tantos", "más", "el"],
+    "hint": "Comparison of equality modifying a plural adjective uses invariant comparative word before como.",
+    "syntaxBreakdown": "[Subject: Los bomberos] + [Copula: son] + [Comparative Adjective: tan valientes como] + [Reference: los policías de la ciudad]"
+  },
+  {
+    "spanish": "Mi abuelo es mayor que mi padre por veinticinco años",
+    "english": "My grandfather is older than my father by twenty-five years",
+    "distractors": ["viejo", "como", "el"],
+    "hint": "Irregular comparative adjective of age followed by comparative conjunction que and prepositional difference.",
+    "syntaxBreakdown": "[Subject: Mi abuelo] + [Copula: es] + [Irregular Comparative: mayor que] + [Reference: mi padre] + [Difference: por veinticinco años]"
+  },
+  {
+    "spanish": "El veterinario atiende a más de veinte animales cada día",
+    "english": "The veterinarian cares for more than twenty animals every day",
+    "distractors": ["que", "como", "un"],
+    "hint": "Comparative expression of inequality directly modifying a numerical quantity requires preposition de.",
+    "syntaxBreakdown": "[Subject: El veterinario] + [Verb: atiende] + [Comparative Quantity: a más de veinte animales] + [Frequency: cada día]"
   }
 ]
 };

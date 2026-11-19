@@ -1447,7 +1447,7 @@ export default function StudyQuest({
         } else if (stageVal === 4) {
           taperSchedule = [9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6, 5, 5, 5, 4, 4];
         } else if (stageVal === 5) {
-          taperSchedule = [8, 8, 7, 7, 6, 6, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 3, 2, 2];
+          taperSchedule = [8, 8, 8, 8, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 3];
         }
         targetCardCount = taperSchedule[levelVal - 1] || 0;
         // On level 19 (final vocab introduction level before synthesis), guarantee all remaining unseen words are consumed:
@@ -1455,8 +1455,8 @@ export default function StudyQuest({
           targetCardCount = Math.max(targetCardCount, unseenStageItems.length);
         }
       }
-      const cardCount = Math.min(targetCardCount, unseenStageItems.length);
-      const quizCount = 20 - cardCount;
+      const cardCount = Math.min(targetCardCount, unseenStageItems.length, 12);
+      const quizCount = Math.max(8, 20 - cardCount);
 
       const selectedFlashcards = [];
 

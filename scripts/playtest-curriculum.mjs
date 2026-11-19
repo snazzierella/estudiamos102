@@ -107,12 +107,14 @@ for (const [unitStr, pool] of Object.entries(SENTENCE_POOLS)) {
     }
   });
 }
-console.log(`  ✓ Checked ${totalSentencesChecked} sentence construction puzzles with zero token ambiguity.\n`);
+assert(SENTENCE_POOLS[5] && SENTENCE_POOLS[5].length >= 48, `Stage 5 sentence pool must have at least 48 sentences, found ${SENTENCE_POOLS[5]?.length}`);
+console.log(`  ✓ Checked ${totalSentencesChecked} sentence construction puzzles with zero token ambiguity (Stage 5 has ${SENTENCE_POOLS[5].length} sentences).\n`);
 
 // -------------------------------------------------------------
 // 3. CONTRAST DECISION AUDIT (CONTRAST_QUESTIONS)
 // -------------------------------------------------------------
 console.log("--- [3/5] Auditing Contrast Decision Engine (Which One to Use When) ---");
+assert(CONTRAST_QUESTIONS[5] && CONTRAST_QUESTIONS[5].length >= 28, `Stage 5 contrast questions must have at least 28 questions, found ${CONTRAST_QUESTIONS[5]?.length}`);
 let totalContrastsChecked = 0;
 
 for (const [stageKey, qList] of Object.entries(CONTRAST_QUESTIONS)) {
@@ -124,6 +126,13 @@ for (const [stageKey, qList] of Object.entries(CONTRAST_QUESTIONS)) {
     assert(cQ.choices.includes(cQ.correct), `Correct answer '${cQ.correct}' not in choices [${cQ.choices.join(', ')}]: "${cQ.sentenceWithBlank}"`);
     assert(cQ.ruleExplanation && cQ.ruleExplanation.length > 10, `Contrast question missing explanation banner: "${cQ.sentenceWithBlank}"`);
     assert(cQ.contrastPair && cQ.contrastPair.length > 3, `Contrast question missing contrastPair: "${cQ.sentenceWithBlank}"`);
+
+    // Verify hint does not leak the exact answer directly
+    if (cQ.hint) {
+      const escaped = cQ.correct.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const leaksWord = new RegExp(`(?:^|[\\s"':;,.¿?¡!])${escaped}(?:$|[\\s"':;,.¿?¡!])`, 'i').test(cQ.hint);
+      assert(!leaksWord, `Contrast hint leaks target token '${cQ.correct}': "${cQ.hint}"`);
+    }
 
     // Linguistic checks on specific high-stakes contrasts:
     if (cQ.contrastPair.includes("Realizar")) {
@@ -266,7 +275,7 @@ for (let stage = 1; stage <= 5; stage++) {
   if (stage === 2) taperSchedule = [10, 10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 6, 6, 6, 5, 5];
   else if (stage === 3) taperSchedule = [9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 2];
   else if (stage === 4) taperSchedule = [9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6, 5, 5, 5, 4, 4];
-  else if (stage === 5) taperSchedule = [8, 8, 7, 7, 6, 6, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 3, 2, 2];
+  else if (stage === 5) taperSchedule = [8, 8, 8, 8, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 3];
 
   let seenInStage = new Set();
   let remainingUnseen = [...stageVocab];

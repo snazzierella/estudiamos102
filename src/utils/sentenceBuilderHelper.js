@@ -1280,6 +1280,360 @@ export const SENTENCE_POOLS = {
         "hint": "Preterite regular -ar verb ending for 3rd person singular (-ó).",
         "syntaxBreakdown": "[Subject: El botones] + [Preterite Verb: llevó] + [Direct Object: las maletas pesadas] + [Location: en el ascensor]"
     }
+  ],
+  5: [
+  {
+    "spanish": "Mi hermano mira los dibujos animados en el televisor",
+    "english": "My brother watches cartoons on the television set",
+    "distractors": [
+      "miran",
+      "la",
+      "animado"
+    ],
+    "hint": "Subject and verb agreement for third person singular with direct object noun phrase.",
+    "syntaxBreakdown": "[Subject: Mi hermano] + [Verb: mira] + [Direct Object: los dibujos animados] + [Location: en el televisor]"
+  },
+  {
+    "spanish": "Nosotros descargamos aplicaciones nuevas en el portátil",
+    "english": "We download new applications on the laptop",
+    "distractors": [
+      "descarga",
+      "nuevo",
+      "la"
+    ],
+    "hint": "First person plural nosotros verb ending in present tense and feminine plural adjective agreement.",
+    "syntaxBreakdown": "[Subject: Nosotros] + [Verb: descargamos] + [Direct Object (fem. pl.): aplicaciones nuevas] + [Location: en el portátil]"
+  },
+  {
+    "spanish": "Ella prefiere ver una película romántica en el cine",
+    "english": "She prefers to watch a romantic movie at the movie theater",
+    "distractors": [
+      "prefiero",
+      "un",
+      "romántico"
+    ],
+    "hint": "Stem-changing modal verb followed directly by an infinitive verb.",
+    "syntaxBreakdown": "[Subject: Ella] + [Stem-Changing Verb: prefiere] + [Infinitive: ver] + [Direct Object: una película romántica] + [Location: en el cine]"
+  },
+  {
+    "spanish": "Los estudiantes buscan información en los sitios web",
+    "english": "The students search for information on websites",
+    "distractors": [
+      "busca",
+      "el",
+      "sitio"
+    ],
+    "hint": "Third person plural verb ending with plural prepositional phrase.",
+    "syntaxBreakdown": "[Subject: Los estudiantes] + [Verb: buscan] + [Direct Object: información] + [Prepositional Phrase: en los sitios web]"
+  },
+  {
+    "spanish": "Mi papá escucha el noticiero en la radio por la mañana",
+    "english": "My dad listens to the news on the radio in the morning",
+    "distractors": [
+      "escucho",
+      "un",
+      "los"
+    ],
+    "hint": "Third person singular verb with feminine radio signal and time expression.",
+    "syntaxBreakdown": "[Subject: Mi papá] + [Verb: escucha] + [Direct Object: el noticiero] + [Location: en la radio] + [Time: por la mañana]"
+  },
+  {
+    "spanish": "Yo leo novelas interesantes en mi libro electrónico",
+    "english": "I read interesting novels on my e-book reader",
+    "distractors": [
+      "lee",
+      "interesante",
+      "el"
+    ],
+    "hint": "First person yo form with plural adjective modifying novelas.",
+    "syntaxBreakdown": "[Subject: Yo] + [Verb: leo] + [Direct Object: novelas interesantes] + [Location: en mi libro electrónico]"
+  },
+  {
+    "spanish": "Nosotros disfrutamos de videos divertidos en la tableta",
+    "english": "We enjoy fun videos on the tablet",
+    "distractors": [
+      "disfruto",
+      "divertido",
+      "el"
+    ],
+    "hint": "Verb disfrutar followed by preposition de and masculine plural adjective agreement.",
+    "syntaxBreakdown": "[Subject: Nosotros] + [Verb Phrase: disfrutamos de] + [Direct Object: videos divertidos] + [Location: en la tableta]"
+  },
+  {
+    "spanish": "Ella chatea con sus amigas por las redes sociales",
+    "english": "She chats with her friends through social networks",
+    "distractors": [
+      "chateo",
+      "su",
+      "los"
+    ],
+    "hint": "Third person singular verb with plural possessive and medium preposition.",
+    "syntaxBreakdown": "[Subject: Ella] + [Verb: chatea] + [Prepositional Phrase: con sus amigas] + [Means (por): por las redes sociales]"
+  },
+  {
+    "spanish": "Cuando era niña yo siempre veía los dibujos animados",
+    "english": "When I was a little girl I always used to watch cartoons",
+    "distractors": [
+      "fui",
+      "vi",
+      "el"
+    ],
+    "hint": "Imperfect tense of ser and ver for ongoing background descriptions and childhood routines.",
+    "syntaxBreakdown": "[Time Clause: Cuando era niña] + [Subject: yo] + [Frequency: siempre] + [Imperfect Verb: veía] + [Direct Object: los dibujos animados]"
+  },
+  {
+    "spanish": "En aquellos tiempos la gente alquilaba películas en la tienda",
+    "english": "In those days people used to rent movies at the store",
+    "distractors": [
+      "alquiló",
+      "el",
+      "tiendas"
+    ],
+    "hint": "Time expression indicating past era paired with imperfect verb for collective singular noun.",
+    "syntaxBreakdown": "[Time Phrase: En aquellos tiempos] + [Subject: la gente] + [Imperfect Verb (-aba): alquilaba] + [Direct Object: películas] + [Location: en la tienda]"
+  },
+  {
+    "spanish": "Mi abuelo no usaba ni computadora ni teléfono móvil",
+    "english": "My grandfather used neither a computer nor a cell phone",
+    "distractors": [
+      "usó",
+      "o",
+      "un"
+    ],
+    "hint": "Correlative negative conjunction paired with pre-verbal negative adverb and imperfect verb.",
+    "syntaxBreakdown": "[Subject: Mi abuelo] + [Negative + Imperfect: no usaba] + [Correlative Negatives: ni computadora ni teléfono móvil]"
+  },
+  {
+    "spanish": "Mi familia siempre pasaba las vacaciones de verano en la playa",
+    "english": "My family always spent summer vacation at the beach",
+    "distractors": [
+      "pasó",
+      "el",
+      "veranos"
+    ],
+    "hint": "Imperfect past tense for recurring annual family vacations.",
+    "syntaxBreakdown": "[Subject: Mi familia] + [Frequency: siempre] + [Imperfect Verb: pasaba] + [Direct Object: las vacaciones de verano] + [Location: en la playa]"
+  },
+  {
+    "spanish": "Yo chateaba por internet mientras mi hermano montaba en bicicleta",
+    "english": "I was chatting online while my brother was riding a bicycle",
+    "distractors": [
+      "chateé",
+      "montó",
+      "un"
+    ],
+    "hint": "Two simultaneous ongoing past actions connected by the conjunction mientras.",
+    "syntaxBreakdown": "[Clause 1: Yo chateaba por internet] + [Conjunction: mientras] + [Clause 2: mi hermano montaba en bicicleta]"
+  },
+  {
+    "spanish": "Cuando éramos pequeños nosotros jugábamos videojuegos en el Atari",
+    "english": "When we were little we used to play video games on the Atari",
+    "distractors": [
+      "fuimos",
+      "jugamos",
+      "los"
+    ],
+    "hint": "Written accent mark on the nosotros imperfect forms for both ser and jugar.",
+    "syntaxBreakdown": "[Time Clause: Cuando éramos pequeños] + [Subject: nosotros] + [Imperfect Verb: jugábamos] + [Direct Object: videojuegos] + [Location: en el Atari]"
+  },
+  {
+    "spanish": "Antes del internet los estudiantes tenían que ir a la biblioteca",
+    "english": "Before the internet students had to go to the library",
+    "distractors": [
+      "tuvieron",
+      "el",
+      "bibliotecas"
+    ],
+    "hint": "Imperfect form of tener que expressing past routine obligation.",
+    "syntaxBreakdown": "[Time Phrase: Antes del internet] + [Subject: los estudiantes] + [Imperfect Obligation: tenían que ir] + [Destination: a la biblioteca]"
+  },
+  {
+    "spanish": "En aquellos años no había teléfonos móviles con pantalla táctil",
+    "english": "In those years there were no mobile phones with touch screens",
+    "distractors": [
+      "hubo",
+      "el",
+      "pantallas"
+    ],
+    "hint": "Impersonal imperfect haber describes ongoing past existence and takes singular form.",
+    "syntaxBreakdown": "[Time Phrase: En aquellos años] + [Imperfect Haber: no había] + [Noun Phrase: teléfonos móviles] + [Prepositional Modifier: con pantalla táctil]"
+  },
+  {
+    "spanish": "Nadie compra libros impresos en la tienda hoy en día",
+    "english": "Nobody buys printed books in the store nowadays",
+    "distractors": [
+      "alguien",
+      "compran",
+      "el"
+    ],
+    "hint": "Negative subject preceding the verb takes singular third person agreement without no.",
+    "syntaxBreakdown": "[Negative Subject: Nadie] + [Verb (sing.): compra] + [Direct Object: libros impresos] + [Location: en la tienda] + [Time: hoy en día]"
+  },
+  {
+    "spanish": "Yo no tengo ningún libro electrónico en mi tableta",
+    "english": "I do not have any e-book on my tablet",
+    "distractors": [
+      "ninguno",
+      "tienen",
+      "una"
+    ],
+    "hint": "Apocopation of negative adjective before a masculine singular noun.",
+    "syntaxBreakdown": "[Subject: Yo] + [Negative Verb: no tengo] + [Apocopated Adjective: ningún libro electrónico] + [Location: en mi tableta]"
+  },
+  {
+    "spanish": "Mi hermano no quiere ver nada en la televisión",
+    "english": "My brother does not want to watch anything on television",
+    "distractors": [
+      "algo",
+      "quieren",
+      "un"
+    ],
+    "hint": "Double negative construction with negative pronoun placed after the infinitive verb.",
+    "syntaxBreakdown": "[Subject: Mi hermano] + [Negative Modal: no quiere] + [Infinitive: ver] + [Negative Pronoun: nada] + [Location: en la televisión]"
+  },
+  {
+    "spanish": "Nosotros no tenemos ni computadora portátil ni tableta",
+    "english": "We have neither a laptop nor a tablet",
+    "distractors": [
+      "o",
+      "tenéis",
+      "un"
+    ],
+    "hint": "Correlative negative conjunction joins two coordinated noun objects.",
+    "syntaxBreakdown": "[Subject: Nosotros] + [Negative Verb: no tenemos] + [Correlative Conjunctions: ni computadora portátil ni tableta]"
+  },
+  {
+    "spanish": "No conozco a nadie en esta clase de tecnología",
+    "english": "I do not know anyone in this technology class",
+    "distractors": [
+      "alguien",
+      "conoce",
+      "este"
+    ],
+    "hint": "Personal a precedes the negative personal pronoun when functioning as a direct object.",
+    "syntaxBreakdown": "[Negative Verb: No conozco] + [Personal a + Direct Object: a nadie] + [Location: en esta clase de tecnología]"
+  },
+  {
+    "spanish": "Ella no escucha la radio y yo no la escucho tampoco",
+    "english": "She does not listen to the radio and I do not listen to it either",
+    "distractors": [
+      "también",
+      "lo",
+      "escuchas"
+    ],
+    "hint": "Negative adverb agrees with a preceding negative clause and uses direct object pronoun.",
+    "syntaxBreakdown": "[Clause 1: Ella no escucha la radio] + [Connector: y] + [Clause 2: yo no la escucho tampoco]"
+  },
+  {
+    "spanish": "Alguien llamó por teléfono pero nadie contestó la llamada",
+    "english": "Someone called by phone but nobody answered the call",
+    "distractors": [
+      "ninguno",
+      "llamaron",
+      "el"
+    ],
+    "hint": "Contrast between affirmative personal pronoun and negative personal pronoun in preterite.",
+    "syntaxBreakdown": "[Clause 1: Alguien llamó por teléfono] + [Connector: pero] + [Clause 2: nadie contestó la llamada]"
+  },
+  {
+    "spanish": "El abuelo nunca usa las aplicaciones de mensajería instantánea",
+    "english": "Grandfather never uses instant messaging applications",
+    "distractors": [
+      "siempre",
+      "usó",
+      "los"
+    ],
+    "hint": "Negative time adverb precedes the verb as a pre-verbal modifier.",
+    "syntaxBreakdown": "[Subject: El abuelo] + [Negative Adverb: nunca] + [Verb: usa] + [Direct Object: las aplicaciones de mensajería instantánea]"
+  },
+  {
+    "spanish": "Un enfermero es tan importante como un médico",
+    "english": "A nurse is as important as a doctor",
+    "distractors": [
+      "tanto",
+      "más",
+      "el"
+    ],
+    "hint": "Comparison of equality with an adjective uses invariant comparative before como.",
+    "syntaxBreakdown": "[Subject: Un enfermero] + [Copula: es] + [Comparative Equality: tan importante como] + [Reference: un médico]"
+  },
+  {
+    "spanish": "El músico tiene tantos instrumentos como el cantante",
+    "english": "The musician has as many instruments as the singer",
+    "distractors": [
+      "tan",
+      "tanta",
+      "que"
+    ],
+    "hint": "Comparative adjective matches masculine plural noun in gender and number before como.",
+    "syntaxBreakdown": "[Subject: El músico] + [Verb: tiene] + [Comparative Noun: tantos instrumentos como] + [Reference: el cantante]"
+  },
+  {
+    "spanish": "La trabajadora social tiene tanta paciencia como el psicólogo",
+    "english": "The social worker has as much patience as the psychologist",
+    "distractors": [
+      "tanto",
+      "tan",
+      "que"
+    ],
+    "hint": "Comparative adjective matches feminine singular noun in gender and number.",
+    "syntaxBreakdown": "[Subject: La trabajadora social] + [Verb: tiene] + [Comparative Noun: tanta paciencia como] + [Reference: el psicólogo]"
+  },
+  {
+    "spanish": "Yo corro tanto como un deportista profesional",
+    "english": "I run as much as a professional athlete",
+    "distractors": [
+      "tan",
+      "más",
+      "el"
+    ],
+    "hint": "Comparative equality directly following a verb uses fixed comparative phrase.",
+    "syntaxBreakdown": "[Subject: Yo] + [Verb: corro] + [Verb Comparative: tanto como] + [Reference: un deportista profesional]"
+  },
+  {
+    "spanish": "Rita Moreno tiene más premios que otras actrices",
+    "english": "Rita Moreno has more awards than other actresses",
+    "distractors": [
+      "como",
+      "menos",
+      "el"
+    ],
+    "hint": "Comparative of inequality with a noun uses comparative word paired with que.",
+    "syntaxBreakdown": "[Subject: Rita Moreno] + [Verb: tiene] + [Comparative Inequality: más premios que] + [Reference: otras actrices]"
+  },
+  {
+    "spanish": "La enfermera estudia menos años que la médica especialista",
+    "english": "The nurse studies fewer years than the specialist physician",
+    "distractors": [
+      "como",
+      "poco",
+      "el"
+    ],
+    "hint": "Comparative of inequality expressing fewer units uses comparative word paired with que.",
+    "syntaxBreakdown": "[Subject: La enfermera] + [Verb: estudia] + [Comparative Inequality: menos años que] + [Reference: la médica especialista]"
+  },
+  {
+    "spanish": "Ese portátil moderno cuesta más de quinientos dólares",
+    "english": "That modern laptop costs more than five hundred dollars",
+    "distractors": [
+      "que",
+      "como",
+      "el"
+    ],
+    "hint": "Comparative of inequality modifying a numerical quantity requires preposition de instead of que.",
+    "syntaxBreakdown": "[Subject: Ese portátil moderno] + [Verb: cuesta] + [Comparative with Number: más de quinientos dólares]"
+  },
+  {
+    "spanish": "Esta nueva aplicación funciona mucho mejor que la versión anterior",
+    "english": "This new application works much better than the previous version",
+    "distractors": [
+      "bien",
+      "como",
+      "el"
+    ],
+    "hint": "Irregular comparative form of bien is used with adverbial modifier and que.",
+    "syntaxBreakdown": "[Subject: Esta nueva aplicación] + [Verb: funciona] + [Irregular Comparative: mucho mejor que] + [Reference: la versión anterior]"
+  }
 ]
 };
 

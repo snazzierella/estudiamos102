@@ -3,6 +3,30 @@
 
 export const MULTI_WORD_EXPRESSIONS = [
   [
+    "tantos instrumentos como",
+    "as many instruments as"
+  ],
+  [
+    "dispositivo electrónico",
+    "electronic device"
+  ],
+  [
+    "dispositivo electronico",
+    "electronic device"
+  ],
+  [
+    "mensajería instantánea",
+    "instant messaging"
+  ],
+  [
+    "mensajeria instantanea",
+    "instant messaging"
+  ],
+  [
+    "personajes principales",
+    "main characters"
+  ],
+  [
     "mercado de artesanías",
     "artisan craft market"
   ],
@@ -15,12 +39,72 @@ export const MULTI_WORD_EXPRESSIONS = [
     "open-air market"
   ],
   [
+    "película de misterio",
+    "mystery movie"
+  ],
+  [
+    "pelicula de misterio",
+    "mystery movie"
+  ],
+  [
+    "tanta paciencia como",
+    "as much patience as"
+  ],
+  [
+    "en aquellos tiempos",
+    "in those days"
+  ],
+  [
+    "personaje principal",
+    "main character"
+  ],
+  [
+    "tan importante como",
+    "as important as"
+  ],
+  [
+    "no estar de acuerdo",
+    "disagree"
+  ],
+  [
     "tarjeta de crédito",
     "credit card"
   ],
   [
     "tarjeta de credito",
     "credit card"
+  ],
+  [
+    "alquilar películas",
+    "rent movies"
+  ],
+  [
+    "alquilar peliculas",
+    "rent movies"
+  ],
+  [
+    "tecnología digital",
+    "digital technology"
+  ],
+  [
+    "tecnologia digital",
+    "digital technology"
+  ],
+  [
+    "película de horror",
+    "horror movie"
+  ],
+  [
+    "pelicula de horror",
+    "horror movie"
+  ],
+  [
+    "película romántica",
+    "romantic movie"
+  ],
+  [
+    "pelicula romantica",
+    "romantic movie"
   ],
   [
     "con mi mejor amigo",
@@ -41,6 +125,22 @@ export const MULTI_WORD_EXPRESSIONS = [
   [
     "el domingo pasado",
     "last Sunday"
+  ],
+  [
+    "reproducir música",
+    "play music"
+  ],
+  [
+    "reproducir musica",
+    "play music"
+  ],
+  [
+    "libro electrónico",
+    "e-book"
+  ],
+  [
+    "libro electronico",
+    "e-book"
   ],
   [
     "me quedó apretado",
@@ -69,6 +169,18 @@ export const MULTI_WORD_EXPRESSIONS = [
   [
     "el sabado pasado",
     "last Saturday"
+  ],
+  [
+    "tienda de videos",
+    "video rental store"
+  ],
+  [
+    "dibujos animados",
+    "cartoons"
+  ],
+  [
+    "estar de acuerdo",
+    "agree"
   ],
   [
     "con mis hermanos",
@@ -111,6 +223,26 @@ export const MULTI_WORD_EXPRESSIONS = [
     "central market"
   ],
   [
+    "cuando era niño",
+    "when I was a child"
+  ],
+  [
+    "cuando era niña",
+    "when I was a child"
+  ],
+  [
+    "pantalla táctil",
+    "touch screen"
+  ],
+  [
+    "pantalla tactil",
+    "touch screen"
+  ],
+  [
+    "sonar un timbre",
+    "ring a chime"
+  ],
+  [
     "me quedó grande",
     "it was too big for me"
   ],
@@ -133,6 +265,14 @@ export const MULTI_WORD_EXPRESSIONS = [
   [
     "todos los dias",
     "every day"
+  ],
+  [
+    "redes sociales",
+    "social networks"
+  ],
+  [
+    "faltar a clase",
+    "miss class"
   ],
   [
     "con mi familia",
@@ -183,6 +323,14 @@ export const MULTI_WORD_EXPRESSIONS = [
     "last month"
   ],
   [
+    "en mi opinión",
+    "in my opinion"
+  ],
+  [
+    "en mi opinion",
+    "in my opinion"
+  ],
+  [
     "pensé que fue",
     "I thought it was"
   ],
@@ -229,6 +377,10 @@ export const MULTI_WORD_EXPRESSIONS = [
   [
     "por supuesto",
     "of course"
+  ],
+  [
+    "guardar cama",
+    "stay in bed"
   ],
   [
     "nos probamos",
@@ -315,6 +467,14 @@ export const MULTI_WORD_EXPRESSIONS = [
     "a bit of"
   ],
   [
+    "sitios web",
+    "websites"
+  ],
+  [
+    "tanto como",
+    "as much as"
+  ],
+  [
     "de algodón",
     "cotton"
   ],
@@ -333,6 +493,14 @@ export const MULTI_WORD_EXPRESSIONS = [
   [
     "me encanto",
     "I loved"
+  ],
+  [
+    "sitio web",
+    "website"
+  ],
+  [
+    "menos que",
+    "less than"
   ],
   [
     "fui a una",
@@ -365,6 +533,10 @@ export const MULTI_WORD_EXPRESSIONS = [
   [
     "otra vez",
     "again"
+  ],
+  [
+    "menos de",
+    "less than"
   ],
   [
     "de cuero",
@@ -443,6 +615,22 @@ export const MULTI_WORD_EXPRESSIONS = [
     "maybe"
   ],
   [
+    "de niño",
+    "as a child"
+  ],
+  [
+    "de niña",
+    "as a child"
+  ],
+  [
+    "más que",
+    "more than"
+  ],
+  [
+    "mas que",
+    "more than"
+  ],
+  [
     "de lana",
     "wool"
   ],
@@ -469,6 +657,14 @@ export const MULTI_WORD_EXPRESSIONS = [
   [
     "nos dio",
     "gave us"
+  ],
+  [
+    "más de",
+    "more than"
+  ],
+  [
+    "mas de",
+    "more than"
   ],
   [
     "de oro",
@@ -524,11 +720,11 @@ export const CURRICULUM_DICTIONARY = {
   "fue": "it was",
   "fuimos": "we went",
   "fueron": "they went",
-  "iba": "I used to go",
-  "ibas": "you used to go",
-  "íbamos": "we used to go",
-  "ibamos": "we used to go",
-  "iban": "they used to go",
+  "iba": "was going/used to go",
+  "ibas": "you were going",
+  "íbamos": "we were going",
+  "ibamos": "we were going",
+  "iban": "they were going",
   "compré": "I bought",
   "compre": "I bought",
   "compraste": "you bought",
@@ -803,6 +999,97 @@ export const CURRICULUM_DICTIONARY = {
   "pareció": "seemed",
   "parecio": "seemed",
   "parecieron": "seemed",
+  "era": "was/used to be",
+  "eras": "you were",
+  "éramos": "we were",
+  "eramos": "we were",
+  "erais": "you all were",
+  "eran": "they were",
+  "ibais": "you all were going",
+  "veía": "was watching/used to see",
+  "veia": "was watching/used to see",
+  "veías": "you watched",
+  "veias": "you watched",
+  "veíamos": "we watched",
+  "veiamos": "we watched",
+  "veíais": "you all watched",
+  "veían": "they watched",
+  "veian": "they watched",
+  "había": "there was/there were",
+  "habia": "there was/there were",
+  "hablaba": "was speaking/used to speak",
+  "hablabas": "you spoke",
+  "hablábamos": "we spoke",
+  "hablabamos": "we spoke",
+  "hablaban": "they spoke",
+  "comía": "was eating/used to eat",
+  "comia": "was eating/used to eat",
+  "comías": "you ate",
+  "comias": "you ate",
+  "comíamos": "we ate",
+  "comiamos": "we ate",
+  "comían": "they ate",
+  "comian": "they ate",
+  "vivía": "was living/used to live",
+  "vivia": "was living/used to live",
+  "vivías": "you lived",
+  "vivias": "you lived",
+  "vivíamos": "we lived",
+  "viviamos": "we lived",
+  "vivían": "they lived",
+  "vivian": "they lived",
+  "tenía": "had/used to have",
+  "tenia": "had/used to have",
+  "tenías": "you had",
+  "tenias": "you had",
+  "teníamos": "we had",
+  "teniamos": "we had",
+  "tenían": "they had",
+  "tenian": "they had",
+  "hacía": "was making/used to do",
+  "hacia": "was making/used to do",
+  "hacías": "you made",
+  "hacias": "you made",
+  "hacíamos": "we made",
+  "haciamos": "we made",
+  "hacían": "they made",
+  "hacian": "they made",
+  "jugaba": "was playing/used to play",
+  "jugabas": "you played",
+  "jugábamos": "we played",
+  "jugabamos": "we played",
+  "jugaban": "they played",
+  "estudiaba": "was studying/used to study",
+  "estudiabas": "you studied",
+  "estudiábamos": "we studied",
+  "estudiabamos": "we studied",
+  "estudiaban": "they studied",
+  "usaba": "was using/used to use",
+  "usabas": "you used",
+  "usábamos": "we used",
+  "usabamos": "we used",
+  "usaban": "they used",
+  "miraba": "was watching/used to watch",
+  "mirabas": "you watched",
+  "mirábamos": "we watched",
+  "mirabamos": "we watched",
+  "miraban": "they watched",
+  "chateaba": "was chatting/used to chat",
+  "chateabas": "you chatted",
+  "chateábamos": "we chatted",
+  "chateabamos": "we chatted",
+  "chateaban": "they chatted",
+  "escuchaba": "was listening/used to listen",
+  "escuchabas": "you listened",
+  "escuchábamos": "we listened",
+  "escuchabamos": "we listened",
+  "escuchaban": "they listened",
+  "gustaba": "liked/used to like",
+  "gustaban": "liked/used to like",
+  "encantaba": "loved/used to love",
+  "encantaban": "loved/used to love",
+  "fascinaba": "fascinated",
+  "fascinaban": "fascinated",
   "voy": "I go",
   "vas": "you go",
   "va": "goes",
@@ -2826,7 +3113,6 @@ export const CURRICULUM_DICTIONARY = {
   "yo te escucho claramente": "I hear you clearly",
   "el profesor nos ayuda con la lección": "the professor helps us with the lesson",
   "profesor nos ayuda con la lección": "the professor helps us with the lesson",
-  "[unidad 5 próximamente]": "[Unit 5: Coming Soon in Class]",
   "[unidad 6 próximamente]": "[Unit 6: Coming Soon in Class]",
   "[unidad 7 próximamente]": "[Unit 7: Coming Soon in Class]",
   "[unidad 8 próximamente]": "[Unit 8: Coming Soon in Class]",
@@ -2860,7 +3146,161 @@ export const CURRICULUM_DICTIONARY = {
   "llegar a ser": "become",
   "realizar": "achieve",
   "el mostrador": "service counter",
-  "mostrador": "service counter"
+  "mostrador": "service counter",
+  "la televisión": "television",
+  "televisión": "television",
+  "el televisor": "television set",
+  "televisor": "television set",
+  "la radio": "radio",
+  "radio": "radio",
+  "el radio": "radio",
+  "el canal": "channel",
+  "canal": "channel",
+  "la serie": "series",
+  "serie": "series",
+  "la comedia": "comedy",
+  "comedia": "comedy",
+  "el drama": "drama",
+  "drama": "drama",
+  "el documental": "documentary",
+  "documental": "documentary",
+  "la telenovela": "soap opera",
+  "telenovela": "soap opera",
+  "los dibujos animados": "cartoons",
+  "dibujos animados": "cartoons",
+  "el noticiero": "news program",
+  "noticiero": "news program",
+  "la película": "movie",
+  "película": "movie",
+  "la película de horror": "horror movie",
+  "película de horror": "horror movie",
+  "la película de misterio": "mystery movie",
+  "película de misterio": "mystery movie",
+  "la película romántica": "romantic movie",
+  "película romántica": "romantic movie",
+  "la clasificación": "rating",
+  "clasificación": "rating",
+  "la tecnología digital": "digital technology",
+  "tecnología digital": "digital technology",
+  "la pantalla táctil": "touch screen",
+  "pantalla táctil": "touch screen",
+  "la aplicación": "application",
+  "aplicación": "application",
+  "las redes sociales": "social networks",
+  "redes sociales": "social networks",
+  "el sitio web": "website",
+  "sitio web": "website",
+  "la tableta": "tablet",
+  "tableta": "tablet",
+  "el libro electrónico": "e-book",
+  "libro electrónico": "e-book",
+  "el mp3": "MP3 player",
+  "mp3": "MP3 player",
+  "el portátil": "laptop computer",
+  "portátil": "laptop computer",
+  "la mensajería instantánea": "instant messaging",
+  "mensajería instantánea": "instant messaging",
+  "el capítulo": "episode",
+  "capítulo": "episode",
+  "la temporada": "season",
+  "temporada": "season",
+  "el personaje principal": "main character",
+  "personaje principal": "main character",
+  "la alerta": "alert",
+  "alerta": "alert",
+  "chatear": "chat online",
+  "textear": "text",
+  "mensajear": "message",
+  "grabar en audio": "record audio",
+  "grabar un video": "record a video",
+  "disfrutar": "enjoy",
+  "entretenerse": "be entertained",
+  "digitar": "type",
+  "teclear": "type on a keyboard",
+  "pulsar": "click",
+  "mover el cursor": "move the cursor",
+  "conectarse": "connect",
+  "conectarse al wifi": "connect to Wi-Fi",
+  "desbloquear": "unblock",
+  "bloquear": "block",
+  "descargar": "download",
+  "el tiempo imperfecto": "the imperfect past tense",
+  "tiempo imperfecto": "the imperfect past tense",
+  "acostumbrar": "be accustomed to",
+  "de niño": "as a child",
+  "de niña": "as a child",
+  "cuando era niño": "when I was a child",
+  "en aquellos tiempos": "in those days",
+  "guardar cama": "stay in bed",
+  "alquilar películas": "rent movies",
+  "la tienda de videos": "video rental store",
+  "tienda de videos": "video rental store",
+  "reproducir música": "play",
+  "el dispositivo electrónico": "electronic device",
+  "dispositivo electrónico": "electronic device",
+  "con frecuencia": "frequently",
+  "en ocasiones": "on occasion",
+  "algún": "some",
+  "alguna": "some",
+  "algunos": "some",
+  "algunas": "some",
+  "ningún": "no",
+  "ninguna": "none",
+  "o o": "either... or",
+  "ni ni": "neither... nor",
+  "sonar un timbre": "ring",
+  "faltar a clase": "miss class",
+  "tan como": "as... as",
+  "tanto como": "as much... as",
+  "tanta como": "as much... as",
+  "tantos como": "as many... as",
+  "tantas como": "as many... as",
+  "más que": "more... than",
+  "menos que": "less",
+  "más de": "more than",
+  "menos de": "less than",
+  "peor": "worse",
+  "mayor": "older",
+  "menor": "younger",
+  "el diseñador": "designer",
+  "diseñador": "designer",
+  "la diseñadora": "designer",
+  "el arquitecto": "architect",
+  "arquitecto": "architect",
+  "la arquitecta": "architect",
+  "el cantante": "singer",
+  "cantante": "singer",
+  "la cantante": "singer",
+  "el músico": "musician",
+  "músico": "musician",
+  "el trabajador social": "social worker",
+  "trabajador social": "social worker",
+  "la trabajadora social": "social worker",
+  "el consejero de carreras": "career counselor",
+  "consejero de carreras": "career counselor",
+  "la consejera de carreras": "career counselor",
+  "la asistente de vuelo": "flight attendant",
+  "el peluquero": "hairdresser",
+  "peluquero": "hairdresser",
+  "la peluquera": "hairdresser",
+  "el mecánico": "mechanic",
+  "mecánico": "mechanic",
+  "la mecánica": "mechanic",
+  "el bombero": "firefighter",
+  "bombero": "firefighter",
+  "la bombera": "firefighter",
+  "el pintor": "painter",
+  "pintor": "painter",
+  "la pintora": "painter",
+  "el psicólogo": "psychologist",
+  "psicólogo": "psychologist",
+  "la psicóloga": "psychologist",
+  "el veterinario": "veterinarian",
+  "veterinario": "veterinarian",
+  "la veterinaria": "veterinarian",
+  "en mi opinión": "in my opinion",
+  "estar de acuerdo": "agree",
+  "no estar de acuerdo": "disagree"
 };
 
 export function translateSpanishTextToEnglish(input) {

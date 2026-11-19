@@ -79,9 +79,12 @@ export const STAGES = {
     ]
   },
   5: {
-    name: "Unidad 5: Próximamente (Coming Soon in Class)",
+    name: "Unidad 5: ¡Luces, cámara, acción! (Tech, Imperfect & Comparatives)",
     subcategories: [
-      "Unidad 5: Próximamente"
+      "Tecnología y Entretenimiento",
+      "El Tiempo Imperfecto",
+      "Palabras Indefinidas y Negativas",
+      "Comparaciones de Igualdad y Desigualdad"
     ]
   },
   6: {

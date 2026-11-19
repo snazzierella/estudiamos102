@@ -698,6 +698,10 @@ export function useGameState() {
         newBadges.push("game_beaten");
       }
 
+      if (prev.questStage === 5 && !newBadges.includes("stage_5_champion")) {
+        newBadges.push("stage_5_champion");
+      }
+
       if (isEarlySkip && !newBadges.includes("unit_skip_master")) {
         newBadges.push("unit_skip_master");
       }

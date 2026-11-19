@@ -11,7 +11,10 @@ export const CONTRAST_CODEX_TABS = [
   { id: 'reciprocal_reflexive', labelEn: '🤝 Reciprocal vs Reflexive', labelEs: '🤝 Recíproco vs Reflexivo' },
   { id: 'saber_conocer_ser_estar', labelEn: '🔍 Saber & Ser', labelEs: '🔍 Saber & Ser' },
   { id: 'preterite_families', labelEn: '📦 Preterite Families', labelEs: '📦 Familias Pretérito' },
-  { id: 'devolver_volver', labelEn: '🔄 Devolver vs Volver', labelEs: '🔄 Devolver vs Volver' }
+  { id: 'devolver_volver', labelEn: '🔄 Devolver vs Volver', labelEs: '🔄 Devolver vs Volver' },
+  { id: 'preterite_imperfect', labelEn: '⏳ Preterite vs Imperfect', labelEs: '⏳ Pretérito vs Imperfecto' },
+  { id: 'indefinite_negative', labelEn: '🚫 Indefinite & Negative Words', labelEs: '🚫 Palabras Indefinidas y Negativas' },
+  { id: 'comparatives', labelEn: '⚖️ Comparatives (Tan/Tanto vs Más/Menos)', labelEs: '⚖️ Comparaciones (Tan/Tanto vs Más/Menos)' }
 ];
 
 export const CONTRAST_TABS_CONTENT = {
@@ -168,5 +171,55 @@ export const CONTRAST_TABS_CONTENT = {
     ],
     tipEn: "💡 Quick test: If you are returning an object, use DEVOLVER. If a human is returning, use VOLVER.",
     tipEs: "💡 Prueba rápida: Si devuelves una cosa, usa DEVOLVER. Si una persona regresa, usa VOLVER."
+  },
+
+  preterite_imperfect: {
+    bannerEn: "PRETERITE narrates completed past actions, specific events, or interruptions. IMPERFECT describes ongoing background actions, habitual routines ('used to / was -ing'), weather, age, time, and emotional states.",
+    bannerEs: "El PRETÉRITO narra acciones completadas en un momento puntual. El IMPERFECTO describe acciones habituales ('used to do'), procesos en curso en el pasado ('was doing'), descripciones, hora, edad y estados emocionales.",
+    headersEn: ["Tense / Aspect", "Usage / Trigger Phrases", "Key Example"],
+    headersEs: ["Tiempo / Aspecto", "Uso / Frases Clave", "Ejemplo Clave"],
+    rows: [
+      { ruleEn: "Preterite: Completed action at specific past time", ruleEs: "Pretérito: Acción completada en tiempo específico", prep: "ayer, anoche, una vez", ex: "Ayer vi una película de horror en el cine." },
+      { ruleEn: "Imperfect: Habitual, repeated or usual actions in past", ruleEs: "Imperfecto: Acciones habituales o repetidas", prep: "siempre, todos los días", ex: "Cuando era niña, siempre veía dibujos animados." },
+      { ruleEn: "Imperfect: Ongoing action in progress ('while / was -ing')", ruleEs: "Imperfecto: Acción en proceso ('mientras')", prep: "mientras", ex: "Yo chateaba por internet mientras mi hermano montaba en bicicleta." },
+      { ruleEn: "Imperfect: The 3 Irregulars (ser, ir, ver)", ruleEs: "Imperfecto: Los 3 Irregulares (ser, ir, ver)", prep: "era, iba, veía", ex: "Mi abuela era muy sabia y siempre iba a la biblioteca." },
+      { ruleEn: "Imperfect: Haber (ongoing existence in past)", ruleEs: "Imperfecto: Haber (existencia continua en pasado)", prep: "había (singular only)", ex: "En aquellos tiempos no había teléfonos inteligentes." }
+    ],
+    tipEn: "💡 Golden Rule: If it's a specific completed event with a clear beginning and end, use PRETERITE. If it's a routine, description, or ongoing background, use IMPERFECT.",
+    tipEs: "💡 Regla de Oro: Evento puntual completado = PRETÉRITO. Rutina, hábito o descripción de fondo = IMPERFECTO."
+  },
+
+  indefinite_negative: {
+    bannerEn: "In Spanish, negative words require double negatives when placed after the verb ('No' + verb + negative). Words placed before the verb act as subjects and do not take 'no'.",
+    bannerEs: "En español se usa la doble negación cuando la palabra negativa va después del verbo ('No' + verbo + negativa). Si va antes del verbo como sujeto, no se usa 'no'.",
+    headersEn: ["Affirmative (Indefinite)", "Negative Equivalent", "Key Example"],
+    headersEs: ["Afirmativa (Indefinida)", "Equivalente Negativa", "Ejemplo Clave"],
+    rows: [
+      { ruleEn: "Alguien (Someone / Anyone)", ruleEs: "Alguien (Alguien)", prep: "Nadie (No one / Nobody)", ex: "\"Nadie compra periódicos hoy en día.\" / \"No vi a nadie.\"" },
+      { ruleEn: "Algo (Something / Anything)", ruleEs: "Algo (Algo)", prep: "Nada (Nothing / Not anything)", ex: "\"Nada es fácil.\" / \"No tengo nada en los bolsillos.\"" },
+      { ruleEn: "Siempre (Always)", ruleEs: "Siempre (Siempre)", prep: "Nunca / Jamás (Never)", ex: "\"Nunca compro ropa en la tienda.\" / \"No voy nunca.\"" },
+      { ruleEn: "También (Also / Too)", ruleEs: "También (También)", prep: "Tampoco (Neither / Not either)", ex: "\"No uso esa aplicación tampoco.\"" },
+      { ruleEn: "Algún / alguno/a/os/as (Some / Any)", ruleEs: "Algún / alguno/a/os/as", prep: "Ningún / ninguno/a (None / Not any)", ex: "\"No tengo ningún libro en mi tableta.\"" },
+      { ruleEn: "O... o (Either... or)", ruleEs: "O... o", prep: "Ni... ni (Neither... nor)", ex: "\"No tenemos ni computadora ni tableta.\"" }
+    ],
+    warningEn: "⚠️ Double Negative Rule: When a negative word follows the verb, you MUST place 'no' before the verb (e.g., \"No vi a nadie\", NEVER *\"Vi a nadie\"*). When the negative word is before the verb, do NOT use 'no' (\"Nadie vino\").",
+    warningEs: "⚠️ Regla de Doble Negación: Si la palabra negativa va después del verbo, es OBLIGATORIO poner 'no' antes del verbo (\"No vi a nadie\"). Si va antes del verbo, NO uses 'no' (\"Nadie vino\")."
+  },
+
+  comparatives: {
+    bannerEn: "Comparisons of equality use TAN (with adjectives/adverbs) or TANTO/A/OS/AS (matching nouns) + COMO. Comparisons of inequality use MÁS / MENOS + QUE (or DE before numbers).",
+    bannerEs: "Las comparaciones de igualdad usan TAN (adjetivos/adverbios) o TANTO/A/OS/AS (sustantivos) + COMO. Las de desigualdad usan MÁS / MENOS + QUE (o DE con números).",
+    headersEn: ["Type of Comparison", "Grammar Structure", "Key Example"],
+    headersEs: ["Tipo de Comparación", "Estructura Gramatical", "Ejemplo Clave"],
+    rows: [
+      { ruleEn: "Equality: Adjectives / Adverbs", ruleEs: "Igualdad: Adjetivos / Adverbios", prep: "tan + adj/adv + como", ex: "\"Un enfermero es tan importante como un médico.\"" },
+      { ruleEn: "Equality: Nouns (Gender/Number Agreement)", ruleEs: "Igualdad: Sustantivos (Concordancia)", prep: "tanto/a/os/as + sust. + como", ex: "\"El músico tiene tantos instrumentos como el cantante.\"" },
+      { ruleEn: "Equality: Verbs", ruleEs: "Igualdad: Verbos", prep: "verbo + tanto como", ex: "\"Yo corro tanto como un futbolista.\"" },
+      { ruleEn: "Inequality: Adjectives / Adverbs / Nouns", ruleEs: "Desigualdad: Adjetivos / Sustantivos", prep: "más / menos + palabra + que", ex: "\"Ella camina más que yo.\" / \"Estudia menos horas que tú.\"" },
+      { ruleEn: "Inequality: Numbers (Quantity)", ruleEs: "Desigualdad: Cifras Numéricas", prep: "más de / menos de + número", ex: "\"El portátil cuesta más de quinientos dólares.\"" },
+      { ruleEn: "Irregular Comparatives", ruleEs: "Comparativos Irregulares", prep: "mejor, peor, mayor, menor", ex: "\"Esta serie es mejor que la otra.\" / \"Mi hermano es menor que yo.\"" }
+    ],
+    tipEn: "💡 Number Alert: Always use 'más de' or 'menos de' when comparing numerical quantities (e.g., 'más de 10 dólares', never *'más que 10 dólares'*).",
+    tipEs: "💡 Alerta de Números: Usa 'más de' o 'menos de' con cantidades numéricas ('más de 10 dólares', nunca *'más que 10 dólares'*)."
   }
 };

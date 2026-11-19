@@ -447,8 +447,18 @@ export default function StudyQuest({
       ];
     }
 
-    // 5-8. Coming soon units
-    for (let u = 5; u <= 8; u++) {
+    // 5. Unidad 5
+    if (grouped["Unidad 5"]) {
+      formatted["Unidad 5"] = [
+        "All of Unit 5 (Todo Unidad 5)",
+        "Verbos en Imperfecto: Regulares (-ar, -er, -ir)",
+        "Verbos en Imperfecto: Irregulares (ser, ir, ver)",
+        ...Array.from(grouped["Unidad 5"])
+      ];
+    }
+
+    // 6-8. Coming soon units
+    for (let u = 6; u <= 8; u++) {
       const catKey = `Unidad ${u}`;
       const displayKey = `Unidad ${u} (Próximamente)`;
       if (grouped[catKey]) {
@@ -563,6 +573,14 @@ export default function StudyQuest({
         } else {
           filtered = vocabularyData.filter(item => 
             item.subcategory === selectedSubcategory && (item.category === "Unidad 4" || (item.unit && item.unit.startsWith("Unit 4")))
+          );
+        }
+      } else if (selectedCategory === "Unidad 5") {
+        if (selectedSubcategory.startsWith("All of Unit 5")) {
+          filtered = vocabularyData.filter(item => item.category === "Unidad 5" || (item.unit && item.unit.startsWith("Unit 5")));
+        } else {
+          filtered = vocabularyData.filter(item => 
+            item.subcategory === selectedSubcategory && (item.category === "Unidad 5" || (item.unit && item.unit.startsWith("Unit 5")))
           );
         }
       } else if (selectedCategory.startsWith("Unidad 5")) {
@@ -1343,7 +1361,7 @@ export default function StudyQuest({
         activeStage.subcategories.includes(item.subcategory) && isVerbItem(item) && !isSentenceItem(item)
       ).sort(() => Math.random() - 0.5);
 
-      const stageTense = (stageVal >= 3) ? "preterite" : "present";
+      const stageTense = (stageVal === 5) ? "imperfect" : ((stageVal >= 3) ? "preterite" : "present");
       const chosenConjugations = [];
       const seenStageVerbs = new Set();
       for (const vItem of stageVerbs) {
@@ -1418,6 +1436,7 @@ export default function StudyQuest({
       // Stage 2 (147 words): Levels 1-19 introduce all 147 words ([10,10,10,10,9,9,9,8,8,8,8,7,7,7,6,6,5,5,5]). Levels 20-25 have strictly 0 flashcards.
       // Stage 3 (83 words): Levels 1-14 introduce all 83 words ([9,9,8,8,7,7,6,6,5,5,4,4,3,2]). Levels 15-25 have strictly 0 flashcards.
       // Stage 4 (104 words): Levels 1-16 introduce all 104 words ([9,9,8,8,8,7,7,7,6,6,6,5,5,5,4,4]). Levels 17-25 have strictly 0 flashcards.
+      // Stage 5 (121 words): Levels 1-19 introduce words via taperSchedule. Levels 20-25 have strictly 0 flashcards.
       let targetCardCount = 0;
       if (!isReview && !isReplay) {
         let taperSchedule = [];
@@ -1427,6 +1446,8 @@ export default function StudyQuest({
           taperSchedule = [9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 2];
         } else if (stageVal === 4) {
           taperSchedule = [9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6, 5, 5, 5, 4, 4];
+        } else if (stageVal === 5) {
+          taperSchedule = [8, 8, 7, 7, 6, 6, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 3, 2, 2];
         }
         targetCardCount = taperSchedule[levelVal - 1] || 0;
         // On level 19 (final vocab introduction level before synthesis), guarantee all remaining unseen words are consumed:
@@ -1517,7 +1538,7 @@ export default function StudyQuest({
 
       // 3. Verb Conjugations (strictly for verbs that have been introduced)
       const eligibleVerbs = eligibleStageItems.filter(item => isVerbItem(item) && !isSentenceItem(item)).sort(() => Math.random() - 0.5);
-      const stageTense = (stageVal >= 3) ? "preterite" : "present";
+      const stageTense = (stageVal === 5) ? "imperfect" : ((stageVal >= 3) ? "preterite" : "present");
       const targetConjugationCount = isReview ? 4 : (levelVal >= 6 ? 3 : 2);
       const chosenConjugations = [];
       const seenVerbNames = new Set();
@@ -5654,6 +5675,31 @@ export default function StudyQuest({
                 >
                   {codexLang === 'en' ? '⏳ Preterite Tense' : '⏳ Pretérito (Past)'}
                 </button>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  style={{ 
+                    flex: 1, 
+                    fontSize: '0.82rem', 
+                    padding: '8px 12px', 
+                    borderRadius: '9px',
+                    background: codexTense === 'imperfect' ? '#8b5cf6' : 'rgba(255,255,255,0.05)',
+                    color: codexTense === 'imperfect' ? '#ffffff' : 'var(--text-secondary)',
+                    border: codexTense === 'imperfect' ? '2px solid #a78bfa' : '1px solid transparent',
+                    boxShadow: codexTense === 'imperfect' ? '0 0 12px rgba(139, 92, 246, 0.4)' : 'none',
+                    fontWeight: codexTense === 'imperfect' ? '800' : '500'
+                  }}
+                  onClick={() => {
+                    setCodexTense('imperfect');
+                    const newInfo = getVerbCategoryInfo(codexVerb, 'imperfect');
+                    if (newInfo) {
+                      setCodexVerbCategory(newInfo.categoryId);
+                      setCodexVerbSubcategory(newInfo.subcategoryId || null);
+                    }
+                  }}
+                >
+                  {codexLang === 'en' ? '📜 Imperfect Tense' : '📜 Imperfecto (Past)'}
+                </button>
               </div>
             )}
 
@@ -5917,6 +5963,25 @@ export default function StudyQuest({
                   </div>
                 )}
               </>
+            )}
+
+            {/* Imperfect Special Verb Rules */}
+            {codexVerb !== 'pronombres_objeto' && codexVerb !== 'guia_contrastes' && codexTense === 'imperfect' && (
+              <div style={{
+                background: 'rgba(139, 92, 246, 0.12)',
+                color: '#c084fc',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                borderRadius: '8px',
+                padding: '7px 12px',
+                fontSize: '0.78rem',
+                marginBottom: '12px',
+                textAlign: 'center',
+                fontWeight: 600
+              }}>
+                {codexLang === 'en'
+                  ? '📜 Imperfect Tense: Habitual past actions, ongoing descriptions & only 3 irregular verbs (ser, ir, ver)!'
+                  : '📜 Tiempo Imperfecto: Acciones habituales, descripciones pasadas y ¡solo 3 verbos irregulares (ser, ir, ver)!'}
+              </div>
             )}
             
             {codexVerb === 'guia_contrastes' ? (
@@ -6518,12 +6583,14 @@ export default function StudyQuest({
                       {codexLang === 'en' ? 'Singular Thing or Verb' : 'Cosa Singular o Verbo'}
                     </span>
                     <strong style={{ fontSize: '1.4rem', color: 'var(--primary)', display: 'block', margin: '4px 0' }}>
-                      {codexTense === 'preterite' ? 'gustó' : 'gusta'}
+                      {codexTense === 'imperfect' ? 'gustaba' : (codexTense === 'preterite' ? 'gustó' : 'gusta')}
                     </strong>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                      {codexTense === 'preterite' 
-                        ? (codexLang === 'en' ? 'e.g. Me gustó la fiesta' : 'ej: Me gustó la fiesta') 
-                        : (codexLang === 'en' ? 'e.g. Me gusta el café / bailar' : 'ej: Me gusta el café / bailar')}
+                      {codexTense === 'imperfect'
+                        ? (codexLang === 'en' ? 'e.g. De niño me gustaba jugar' : 'ej: De niño me gustaba jugar')
+                        : (codexTense === 'preterite' 
+                          ? (codexLang === 'en' ? 'e.g. Me gustó la fiesta' : 'ej: Me gustó la fiesta') 
+                          : (codexLang === 'en' ? 'e.g. Me gusta el café / bailar' : 'ej: Me gusta el café / bailar'))}
                     </span>
                   </div>
                   <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px 8px', borderRadius: '10px', border: '1px solid var(--card-border)' }}>
@@ -6531,12 +6598,14 @@ export default function StudyQuest({
                       {codexLang === 'en' ? 'Plural Things' : 'Cosas Plurales'}
                     </span>
                     <strong style={{ fontSize: '1.4rem', color: 'var(--accent)', display: 'block', margin: '4px 0' }}>
-                      {codexTense === 'preterite' ? 'gustaron' : 'gustan'}
+                      {codexTense === 'imperfect' ? 'gustaban' : (codexTense === 'preterite' ? 'gustaron' : 'gustan')}
                     </strong>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                      {codexTense === 'preterite' 
-                        ? (codexLang === 'en' ? 'e.g. Me gustaron las fotos' : 'ej: Me gustaron las fotos') 
-                        : (codexLang === 'en' ? 'e.g. Nos gustan los libros' : 'ej: Nos gustan los libros')}
+                      {codexTense === 'imperfect'
+                        ? (codexLang === 'en' ? 'e.g. Me gustaban los dibujos animados' : 'ej: Me gustaban los dibujos animados')
+                        : (codexTense === 'preterite' 
+                          ? (codexLang === 'en' ? 'e.g. Me gustaron las fotos' : 'ej: Me gustaron las fotos') 
+                          : (codexLang === 'en' ? 'e.g. Nos gustan los libros' : 'ej: Nos gustan los libros'))}
                     </span>
                   </div>
                 </div>
@@ -6549,8 +6618,8 @@ export default function StudyQuest({
                   <tbody>
                     {INDIRECT_OBJECT_PRONOUNS.map((p, idx) => {
                       const isVosotros = idx === 4;
-                      const singForm = codexTense === 'preterite' ? 'gustó' : 'gusta';
-                      const plurForm = codexTense === 'preterite' ? 'gustaron' : 'gustan';
+                      const singForm = codexTense === 'imperfect' ? 'gustaba' : (codexTense === 'preterite' ? 'gustó' : 'gusta');
+                      const plurForm = codexTense === 'imperfect' ? 'gustaban' : (codexTense === 'preterite' ? 'gustaron' : 'gustan');
                       return (
                         <tr 
                           key={idx} 
@@ -6608,9 +6677,11 @@ export default function StudyQuest({
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                       <th style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>{codexLang === 'en' ? 'Plural Pronoun' : 'Pronombre Plural'}</th>
                       <th style={{ padding: '8px 10px', color: '#f472b6', fontWeight: 'bold' }}>
-                        {codexTense === 'preterite' 
-                          ? (codexLang === 'en' ? 'Preterite Form (Past mutual action)' : 'Forma Pretérito (Acción mutua pasada)') 
-                          : (codexLang === 'en' ? 'Present Form (Mutual action)' : 'Forma Presente (Acción mutua)')}
+                        {codexTense === 'imperfect'
+                          ? (codexLang === 'en' ? 'Imperfect Form (Habitual mutual action)' : 'Forma Imperfecto (Acción mutua habitual)')
+                          : (codexTense === 'preterite' 
+                            ? (codexLang === 'en' ? 'Preterite Form (Past mutual action)' : 'Forma Pretérito (Acción mutua pasada)') 
+                            : (codexLang === 'en' ? 'Present Form (Mutual action)' : 'Forma Presente (Acción mutua)'))}
                       </th>
                     </tr>
                   </thead>
@@ -6771,7 +6842,11 @@ export default function StudyQuest({
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                     <th style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>{codexLang === 'en' ? 'Pronoun' : 'Pronombre'}</th>
                     <th style={{ padding: '8px 10px', color: 'var(--primary)', fontWeight: 'bold' }}>
-                      {codexTense === 'preterite' ? (codexLang === 'en' ? 'Preterite Form' : 'Forma Pretérito') : (codexLang === 'en' ? 'Present Form' : 'Forma Presente')}
+                      {codexTense === 'imperfect'
+                        ? (codexLang === 'en' ? 'Imperfect Form' : 'Forma Imperfecto')
+                        : (codexTense === 'preterite' 
+                          ? (codexLang === 'en' ? 'Preterite Form' : 'Forma Pretérito') 
+                          : (codexLang === 'en' ? 'Present Form' : 'Forma Presente'))}
                     </th>
                   </tr>
                 </thead>
@@ -6788,6 +6863,7 @@ export default function StudyQuest({
                     const isVosotros = idx === 4;
                     const catInfo = getVerbCategoryInfo(codexVerb, codexTense);
                     const catId = catInfo?.categoryId;
+                    const isImperfect = codexTense === 'imperfect';
                     const isPreterite = codexTense === 'preterite';
                     const baseVerb = parseVerb(codexVerb).base.toLowerCase();
                     
@@ -6795,7 +6871,21 @@ export default function StudyQuest({
                     let irregularTag = null;
                     let highlightColor = catInfo?.category?.color || '#38bdf8';
 
-                    if (isPreterite) {
+                    if (isImperfect) {
+                      if (catId === 'imp_irregulars') {
+                        isIrregularForm = true;
+                        irregularTag = 'irregular imperfect';
+                        highlightColor = '#ec4899';
+                      } else if (catId === 'imp_ar' && idx === 3) {
+                        isIrregularForm = true;
+                        irregularTag = '-ábamos';
+                        highlightColor = '#a855f7';
+                      } else if (catId === 'imp_er_ir') {
+                        isIrregularForm = true;
+                        irregularTag = '-ía accent';
+                        highlightColor = '#818cf8';
+                      }
+                    } else if (isPreterite) {
                       if (catId === 'spell_change' && idx === 0) {
                         isIrregularForm = true;
                         irregularTag = catInfo?.subcategoryId === 'car' ? 'c ➔ qu' : catInfo?.subcategoryId === 'gar' ? 'g ➔ gu' : 'z ➔ c';

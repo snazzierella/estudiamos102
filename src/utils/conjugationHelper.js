@@ -214,6 +214,16 @@ const PRES_IR_ENDINGS = ["o", "es", "e", "imos", "ís", "en"];
 const PRET_AR_ENDINGS = ["é", "aste", "ó", "amos", "asteis", "aron"];
 const PRET_ER_IR_ENDINGS = ["í", "iste", "ió", "imos", "isteis", "ieron"];
 
+export const IMP_AR_ENDINGS = ["aba", "abas", "aba", "ábamos", "abais", "aban"];
+export const IMP_ER_IR_ENDINGS = ["ía", "ías", "ía", "íamos", "íais", "ían"];
+
+export const IMPERFECT_IRREGULARS = {
+  "ser": ["era", "eras", "era", "éramos", "erais", "eran"],
+  "ir": ["iba", "ibas", "iba", "íbamos", "ibais", "iban"],
+  "ver": ["veía", "veías", "veía", "veíamos", "veíais", "veían"],
+  "haber": ["había", "habías", "había", "habíamos", "habíais", "habían"]
+};
+
 /**
  * Parses raw verb inputs (including reflexives, slash variants, and multi-word phrases)
  */
@@ -293,35 +303,43 @@ export const GUSTAR_VERBS = [
 export const GUSTAR_FORMS = {
   "gustar": {
     present: { singular: "gusta", plural: "gustan" },
-    preterite: { singular: "gustó", plural: "gustaron" }
+    preterite: { singular: "gustó", plural: "gustaron" },
+    imperfect: { singular: "gustaba", plural: "gustaban" }
   },
   "encantar": {
     present: { singular: "encanta", plural: "encantan" },
-    preterite: { singular: "encantó", plural: "encantaron" }
+    preterite: { singular: "encantó", plural: "encantaron" },
+    imperfect: { singular: "encantaba", plural: "encantaban" }
   },
   "doler": {
     present: { singular: "duele", plural: "duelen" },
-    preterite: { singular: "dolió", plural: "dolieron" }
+    preterite: { singular: "dolió", plural: "dolieron" },
+    imperfect: { singular: "dolía", plural: "dolían" }
   },
   "molestar": {
     present: { singular: "molesta", plural: "molestan" },
-    preterite: { singular: "molestó", plural: "molestaron" }
+    preterite: { singular: "molestó", plural: "molestaron" },
+    imperfect: { singular: "molestaba", plural: "molestaban" }
   },
   "fascinar": {
-    present: { singular: "fascinan", plural: "fascinan" },
-    preterite: { singular: "fascinó", plural: "fascinaron" }
+    present: { singular: "fascina", plural: "fascinan" },
+    preterite: { singular: "fascinó", plural: "fascinaron" },
+    imperfect: { singular: "fascinaba", plural: "fascinaban" }
   },
   "importar": {
     present: { singular: "importa", plural: "importan" },
-    preterite: { singular: "importó", plural: "importaron" }
+    preterite: { singular: "importó", plural: "importaron" },
+    imperfect: { singular: "importaba", plural: "importaban" }
   },
   "faltar": {
     present: { singular: "falta", plural: "faltan" },
-    preterite: { singular: "faltó", plural: "faltaron" }
+    preterite: { singular: "faltó", plural: "faltaron" },
+    imperfect: { singular: "faltaba", plural: "faltaban" }
   },
   "quedar": {
     present: { singular: "queda", plural: "quedan" },
-    preterite: { singular: "quedó", plural: "quedaron" }
+    preterite: { singular: "quedó", plural: "quedaron" },
+    imperfect: { singular: "quedaba", plural: "quedaban" }
   }
 };
 
@@ -469,9 +487,23 @@ export function isPreteriteTense(questionOrItem) {
 }
 
 /**
- * Conjugates any Spanish 101 or 102 verb in Present or Preterite (Past Tense).
+ * Determines whether a question or item targets Imperfecto (Past Tense).
+ */
+export function isImperfectTense(questionOrItem) {
+  if (!questionOrItem) return false;
+  if (questionOrItem.tense === "imperfect") return true;
+  if (typeof questionOrItem.tenseLabel === "string" && questionOrItem.tenseLabel.includes("Imperfecto")) return true;
+  if (questionOrItem.item) {
+    if (questionOrItem.item.subcategory?.includes("Imperfecto")) return true;
+    if (questionOrItem.item.english?.toLowerCase().includes("imperfect")) return true;
+  }
+  return false;
+}
+
+/**
+ * Conjugates any Spanish 101 or 102 verb in Present, Preterite, or Imperfect (Past Tense).
  * Automatically prepending reflexive pronouns (me, te, se, nos, os, se) for reflexive verbs.
- * For gustar and gustar-like verbs, returns indirect object pronoun + gusta / gustan.
+ * For gustar and gustar-like verbs, returns indirect object pronoun + gusta / gustan (or gustó/gustaron, gustaba/gustaban).
  */
 export function conjugate(rawVerb, pronounIdx, tense = "present") {
   const { base, isReflexive, suffix } = parseVerb(rawVerb);
@@ -480,7 +512,12 @@ export function conjugate(rawVerb, pronounIdx, tense = "present") {
   // Gustar does NOT conjugate by person. It only uses 3rd-person singular/plural with IOPs!
   if (isGustarVerb(rawVerb)) {
     const forms = GUSTAR_FORMS[base] || GUSTAR_FORMS["gustar"];
-    const tenseForms = (tense === "preterite" || tense === "past") ? forms.preterite : forms.present;
+    let tenseForms = forms.present;
+    if (tense === "imperfect") {
+      tenseForms = forms.imperfect || forms.present;
+    } else if (tense === "preterite" || tense === "past") {
+      tenseForms = forms.preterite;
+    }
     const iop = INDIRECT_OBJECT_PRONOUNS[pronounIdx]?.iop || "le";
     return `${iop} ${tenseForms.singular} (sing.) / ${iop} ${tenseForms.plural} (pl.)`;
   }
@@ -488,7 +525,22 @@ export function conjugate(rawVerb, pronounIdx, tense = "present") {
   let conjugatedBase = "";
   const deaccentBase = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-  if (tense === "preterite" || tense === "past") {
+  if (tense === "imperfect") {
+    const impForms = IMPERFECT_IRREGULARS[base] || IMPERFECT_IRREGULARS[deaccentBase];
+    if (impForms) {
+      conjugatedBase = impForms[pronounIdx];
+    } else {
+      const stem = base.slice(0, -2);
+      const normEnding = deaccentBase.slice(-2);
+      if (normEnding === "ar") {
+        conjugatedBase = stem + IMP_AR_ENDINGS[pronounIdx];
+      } else if (normEnding === "er" || normEnding === "ir") {
+        conjugatedBase = stem + IMP_ER_IR_ENDINGS[pronounIdx];
+      } else {
+        conjugatedBase = base;
+      }
+    }
+  } else if (tense === "preterite" || tense === "past") {
     const pretForms = PRETERITE_IRREGULARS[base] || PRETERITE_IRREGULARS[deaccentBase];
     if (pretForms) {
       conjugatedBase = pretForms[pronounIdx];
@@ -607,6 +659,32 @@ const GUSTAR_PRACTICE_TEMPLATES = [
     isPlural: true,
     meaning: "They liked the new songs on the album (plural past)",
     tense: "preterite"
+  },
+  // Imperfect - Singular
+  {
+    sentence: "De niño me [_____] mucho la música de los años ochenta.",
+    isPlural: false,
+    meaning: "As a child I used to like 80s music a lot (singular imperfect)",
+    tense: "imperfect"
+  },
+  {
+    sentence: "Cuando éramos pequeños, a mi hermano le [_____] comer helado.",
+    isPlural: false,
+    meaning: "When we were little, my brother liked eating ice cream (infinitive imperfect)",
+    tense: "imperfect"
+  },
+  // Imperfect - Plural
+  {
+    sentence: "A mis primos les [_____] las películas de dibujos animados.",
+    isPlural: true,
+    meaning: "My cousins used to like animated cartoons (plural imperfect)",
+    tense: "imperfect"
+  },
+  {
+    sentence: "A nosotros nos [_____] los videojuegos en el Atari.",
+    isPlural: true,
+    meaning: "We used to love video games on the Atari (plural imperfect)",
+    tense: "imperfect"
   }
 ];
 
@@ -934,6 +1012,24 @@ export const VERB_LAB_GROUPS = [
     icon: "⭐",
     tense: "preterite",
     group: "preterite"
+  },
+
+  // --- Imperfect / Past Tense (Unidad 5) ---
+  {
+    id: "imp_regular",
+    labelEn: "Regular Imperfect (-aba, -ía)",
+    labelEs: "Imperfecto Regular (-aba, -ía)",
+    icon: "📜",
+    tense: "imperfect",
+    group: "imperfect"
+  },
+  {
+    id: "imp_irregulars",
+    labelEn: "The 3 Irregulars (ser, ir, ver) & haber",
+    labelEs: "Los 3 Irregulares (ser, ir, ver) y haber",
+    icon: "👑",
+    tense: "imperfect",
+    group: "imperfect"
   }
 ];
 
@@ -1083,6 +1179,50 @@ export function getVerbsForGroups(groupIds = [], customVocab = []) {
     rawList.push(...items);
   }
 
+  if (selectedSet.has("imp_regular")) {
+    const regularModels = [
+      { spanish: "hablar", english: "to speak / talk (imperfect: hablaba...)" },
+      { spanish: "comer", english: "to eat (imperfect: comía...)" },
+      { spanish: "vivir", english: "to live (imperfect: vivía...)" },
+      { spanish: "estudiar", english: "to study (imperfect: estudiaba...)" },
+      { spanish: "jugar", english: "to play (imperfect: jugaba...)" },
+      { spanish: "chatear", english: "to chat online (imperfect: chateaba...)" },
+      { spanish: "teclear", english: "to type (imperfect: tecleaba...)" },
+      { spanish: "descargar", english: "to download (imperfect: descargaba...)" },
+      { spanish: "mirar", english: "to watch (imperfect: miraba...)" },
+      { spanish: "escuchar", english: "to listen (imperfect: escuchaba...)" }
+    ];
+    const items = regularModels.map(item => ({
+      spanish: item.spanish,
+      english: item.english,
+      category: "Unidad 5",
+      subcategory: "El Tiempo Imperfecto",
+      unit: "Unit 5: ¡Luces, cámara, acción!",
+      defaultTense: "imperfect",
+      verbGroup: "imp_regular"
+    }));
+    rawList.push(...items);
+  }
+
+  if (selectedSet.has("imp_irregulars")) {
+    const irregModels = [
+      { spanish: "ser", english: "to be (imperfect: era, eras, era, éramos, erais, eran)" },
+      { spanish: "ir", english: "to go (imperfect: iba, ibas, iba, íbamos, ibais, iban)" },
+      { spanish: "ver", english: "to see / watch (imperfect: veía, veías, veía, veíamos, veíais, veían)" },
+      { spanish: "haber", english: "there was / there were (imperfect: había)" }
+    ];
+    const items = irregModels.map(item => ({
+      spanish: item.spanish,
+      english: item.english,
+      category: "Unidad 5",
+      subcategory: "El Tiempo Imperfecto",
+      unit: "Unit 5: ¡Luces, cámara, acción!",
+      defaultTense: "imperfect",
+      verbGroup: "imp_irregulars"
+    }));
+    rawList.push(...items);
+  }
+
   // De-duplicate by spanish infinitive + defaultTense so a verb selected in both present and preterite is distinct
   const seen = new Set();
   const result = [];
@@ -1162,15 +1302,22 @@ export function generateConjugationQuestion(verbItem, options = {}) {
   // Determine target tense: check options first, then infer from subcategory
   let targetTense = options.tense || "present";
   if (!options.tense) {
-    if (verbItem.subcategory?.includes("Pretérito") || verbItem.english?.toLowerCase().includes("preterite") || verbItem.english?.toLowerCase().includes("(past)")) {
+    if (verbItem.subcategory?.includes("Imperfecto") || verbItem.english?.toLowerCase().includes("imperfect")) {
+      targetTense = "imperfect";
+    } else if (verbItem.subcategory?.includes("Pretérito") || verbItem.english?.toLowerCase().includes("preterite") || verbItem.english?.toLowerCase().includes("(past)")) {
       targetTense = "preterite";
     }
   }
 
-  const tenseLabel = targetTense === "preterite" ? "Pretérito (Past Tense)" : "Presente";
+  let tenseLabel = "Presente";
+  if (targetTense === "imperfect") {
+    tenseLabel = "Imperfecto (Past Tense)";
+  } else if (targetTense === "preterite") {
+    tenseLabel = "Pretérito (Past Tense)";
+  }
 
   // SPECIAL: Verbs Structured Like Gustar
-  // Gustar does NOT conjugate by pronoun (yo/tú/él). It tests singular (gusta/gustó) vs plural (gustan/gustaron)!
+  // Gustar does NOT conjugate by pronoun (yo/tú/él). It tests singular vs plural with IOPs!
   if (isGustar) {
     const templates = GUSTAR_PRACTICE_TEMPLATES.filter(t => t.tense === targetTense);
     const pool = templates.length > 0 ? templates : GUSTAR_PRACTICE_TEMPLATES;
@@ -1178,7 +1325,12 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     
     let correct = "";
     let choices = [];
-    if (tpl.tense === "preterite") {
+    if (tpl.tense === "imperfect") {
+      correct = tpl.isPlural ? "gustaban" : "gustaba";
+      choices = tpl.isPlural 
+        ? ["gustaban", "gustaba", "gustaron", "gustan"] 
+        : ["gustaba", "gustaban", "gustó", "gusta"];
+    } else if (tpl.tense === "preterite") {
       correct = tpl.isPlural ? "gustaron" : "gustó";
       choices = tpl.isPlural 
         ? ["gustaron", "gustó", "gustan", "gustaronte"] 
@@ -1200,7 +1352,7 @@ export function generateConjugationQuestion(verbItem, options = {}) {
       subjectMeaning: tpl.isPlural ? "plural object" : "singular object",
       prompt: tpl.sentence,
       meaning: tpl.meaning,
-      pronoun: tpl.isPlural ? "Objeto Plural (¿gusta o gustan?)" : "Objeto Singular / Verbo (¿gusta o gustan?)",
+      pronoun: tpl.isPlural ? "Objeto Plural (¿gusta, gustó o gustaban?)" : "Objeto Singular / Verbo",
       tense: tpl.tense,
       tenseLabel: tenseLabel,
       isReflexive: false,
@@ -1244,7 +1396,7 @@ export function generateConjugationQuestion(verbItem, options = {}) {
 
   // Generate plausible distractors
   const distractors = new Set();
-  const alternateTense = targetTense === "preterite" ? "present" : "preterite";
+  const alternateTense = targetTense === "imperfect" ? "preterite" : (targetTense === "preterite" ? "present" : "preterite");
 
   if (isReciprocal) {
     // Only plural distractors (nosotros, vosotros, ellos)
@@ -1270,7 +1422,7 @@ export function generateConjugationQuestion(verbItem, options = {}) {
       }
     }
 
-    // Distractor source 2: Forms from the alternate tense (e.g. Present vs Preterite confusion)
+    // Distractor source 2: Forms from the alternate tense (e.g. Present vs Preterite vs Imperfect confusion)
     for (let i = 0; i < 6; i++) {
       if (!(options.excludeVosotros && i === 4)) {
         distractors.add(conjugate(verbItem.spanish, i, alternateTense));
@@ -1289,7 +1441,17 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     }
 
     // Distractor source 4: Grammatical distractors for past tense special categories
-    if (targetTense === "preterite") {
+    if (targetTense === "imperfect") {
+      const normBase = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      // Add preterite equivalent as distractor (pretérito vs imperfecto confusion)
+      distractors.add(conjugate(verbItem.spanish, randPronoun.idx, "preterite"));
+      // Add cross-ending distractor (-ar with -ía, or -er/-ir with -aba)
+      if (normBase.endsWith("ar")) {
+        distractors.add(base.slice(0, -2) + IMP_ER_IR_ENDINGS[randPronoun.idx] + suffix);
+      } else if (normBase.endsWith("er") || normBase.endsWith("ir")) {
+        distractors.add(base.slice(0, -2) + IMP_AR_ENDINGS[randPronoun.idx] + suffix);
+      }
+    } else if (targetTense === "preterite") {
       const normBase = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
       // Spell changers in yo form: unspelled regular form (e.g. buscé, pagé, almorzé)
       if (randPronoun.idx === 0) {
@@ -1334,6 +1496,7 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     isSpellChanger: isPreteriteSpellingChanger(verbItem) && targetTense === "preterite",
     isStemChangerPreterite: isPreteriteStemChanger(verbItem) && targetTense === "preterite",
     isDoubleVowel: isPreteriteDoubleVowel(verbItem) && targetTense === "preterite",
+    isImperfect: targetTense === "imperfect",
     isGustar: false,
     questionWord: prompt,
     correct: correctForm,
@@ -2964,6 +3127,136 @@ export const CONTRAST_QUESTIONS = {
       ruleExplanation: "Verbs ending in -ducir have 'j' stems in the preterite: condujo (3rd person singular, no written accent).",
       ruleExplanationEs: "Los verbos en -ducir tienen raíz en 'j' en el pretérito: condujo (3ª pers. sing. sin tilde)."
     }
+  ],
+
+  // UNIT 5: Pretérito vs Imperfecto, Indefinite vs Negative Words, Comparatives (Tan/Tanto vs Más/Menos)
+  5: [
+    {
+      contrastPair: "Pretérito vs Imperfecto",
+      sentenceWithBlank: "Cuando era niña, yo siempre [_____] los dibujos animados en el televisor.",
+      englishMeaning: "When I was a little girl, I always used to watch cartoons on the television.",
+      choices: ["veía", "vi", "veo", "vería"],
+      correct: "veía",
+      ruleExplanation: "Childhood routine with 'siempre' expresses a habitual past action, requiring the imperfect form.",
+      ruleExplanationEs: "La rutina en la niñez con 'siempre' expresa una acción habitual en el pasado, exigiendo el imperfecto."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto",
+      sentenceWithBlank: "Ayer mi hermano [_____] una película de horror en el cine.",
+      englishMeaning: "Yesterday my brother watched a horror movie at the movie theater.",
+      choices: ["vio", "veía", "ve", "veían"],
+      correct: "vio",
+      ruleExplanation: "Specific completed action in the past ('ayer') requires the preterite tense.",
+      ruleExplanationEs: "Una acción completada en un momento específico ('ayer') requiere el tiempo pretérito."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto",
+      sentenceWithBlank: "En aquellos tiempos, nosotros [_____] películas en la tienda de videos todos los viernes.",
+      englishMeaning: "In those days, we used to rent movies at the video store every Friday.",
+      choices: ["alquilábamos", "alquilamos", "alquilaron", "alquilaban"],
+      correct: "alquilábamos",
+      ruleExplanation: "Repetitive habitual past actions with 'en aquellos tiempos' and 'todos los viernes' use imperfect -ar ending (-ábamos).",
+      ruleExplanationEs: "Las acciones habituales con 'en aquellos tiempos' y 'todos los viernes' usan imperfecto en -ábamos."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto (Irregulares: Ser)",
+      sentenceWithBlank: "Cuando mi abuelo [_____] niño, no existían los teléfonos inteligentes.",
+      englishMeaning: "When my grandfather was a boy, smartphones did not exist.",
+      choices: ["era", "fue", "es", "sería"],
+      correct: "era",
+      ruleExplanation: "Describing background conditions or age/identity in childhood uses the imperfect of ser.",
+      ruleExplanationEs: "Describir condiciones de fondo o la niñez en el pasado usa el imperfecto de ser."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto (Irregulares: Ir)",
+      sentenceWithBlank: "Cada verano, mi familia y yo [_____] a la playa en coche.",
+      englishMeaning: "Every summer, my family and I used to go to the beach by car.",
+      choices: ["íbamos", "fuimos", "vamos", "ibais"],
+      correct: "íbamos",
+      ruleExplanation: "Recurring summer trips ('cada verano') express habitual past action, requiring the imperfect of ir with accent on 'í'.",
+      ruleExplanationEs: "Viajes recurrentes ('cada verano') expresan hábito en el pasado, requiriendo el imperfecto de ir con tilde en la 'í'."
+    },
+    {
+      contrastPair: "Pretérito vs Imperfecto (Haber)",
+      sentenceWithBlank: "En los años noventa no [_____] tabletas electrónicas.",
+      englishMeaning: "In the 1990s there were no electronic tablets.",
+      choices: ["había", "hubo", "hay", "habían"],
+      correct: "había",
+      ruleExplanation: "Impersonal ongoing past existence ('there was / there were') uses the singular imperfect form.",
+      ruleExplanationEs: "La existencia continua en el pasado ('había') se usa únicamente en forma singular."
+    },
+    {
+      contrastPair: "Palabras Indefinidas vs Negativas",
+      sentenceWithBlank: "¿Viste a [_____] conocido en el cine? No, no vi a nadie.",
+      englishMeaning: "Did you see anyone you know at the cinema? No, I didn't see anyone.",
+      choices: ["alguien", "nadie", "algo", "nada"],
+      correct: "alguien",
+      ruleExplanation: "Affirmative questions asking about a person use the indefinite personal pronoun.",
+      ruleExplanationEs: "Las preguntas afirmativas sobre personas usan el pronombre indefinido correspondiente."
+    },
+    {
+      contrastPair: "Palabras Indefinidas vs Negativas",
+      sentenceWithBlank: "No tengo [_____] en los bolsillos de mi chaqueta.",
+      englishMeaning: "I have nothing in the pockets of my jacket.",
+      choices: ["nada", "algo", "alguien", "nadie"],
+      correct: "nada",
+      ruleExplanation: "Following a negative verb ('no tengo'), use the negative pronoun referring to inanimate things.",
+      ruleExplanationEs: "Tras un verbo negado ('no tengo'), se usa el pronombre negativo para cosas inanimadas."
+    },
+    {
+      contrastPair: "Doble Negación en Español",
+      sentenceWithBlank: "[_____] compra periódicos impresos en la calle hoy en día.",
+      englishMeaning: "Nobody buys printed newspapers on the street nowadays.",
+      choices: ["Nadie", "Alguien", "Ninguno", "Nada"],
+      correct: "Nadie",
+      ruleExplanation: "When a negative word precedes the verb as the grammatical subject, 'no' is omitted.",
+      ruleExplanationEs: "Cuando la palabra negativa antecede al verbo como sujeto, se omite el 'no'."
+    },
+    {
+      contrastPair: "Algún / Ningún (Apócope)",
+      sentenceWithBlank: "No tengo [_____] libro electrónico en mi nueva tableta.",
+      englishMeaning: "I do not have any e-book on my new tablet.",
+      choices: ["ningún", "ninguno", "ninguna", "alguno"],
+      correct: "ningún",
+      ruleExplanation: "Before a masculine singular noun ('libro'), the negative adjective shortens and adds a written accent.",
+      ruleExplanationEs: "Delante de un sustantivo masculino singular ('libro'), el adjetivo negativo se apocopa con tilde."
+    },
+    {
+      contrastPair: "También vs Tampoco",
+      sentenceWithBlank: "Yo no uso las redes sociales y mi abuelo no las usa [_____].",
+      englishMeaning: "I don't use social networks and my grandfather doesn't use them either.",
+      choices: ["tampoco", "también", "nada", "nunca"],
+      correct: "tampoco",
+      ruleExplanation: "To agree with a negative statement ('neither / not either'), use this negative adverb.",
+      ruleExplanationEs: "Para concordar con una declaración negativa ('not either'), se usa este adverbio negativo."
+    },
+    {
+      contrastPair: "Comparaciones de Igualdad (Tan vs Tanto)",
+      sentenceWithBlank: "Un enfermero es [_____] importante como un médico en el hospital.",
+      englishMeaning: "A nurse is as important as a doctor in the hospital.",
+      choices: ["tan", "tanto", "tanta", "más"],
+      correct: "tan",
+      ruleExplanation: "For comparisons of equality with adjectives or adverbs, use the invariant modifier before 'como'.",
+      ruleExplanationEs: "Para comparaciones de igualdad con adjetivos o adverbios, se usa la forma invariable antes de 'como'."
+    },
+    {
+      contrastPair: "Comparaciones de Igualdad (Concordancia de Tanto)",
+      sentenceWithBlank: "El músico tiene [_____] instrumentos como el cantante.",
+      englishMeaning: "The musician has as many instruments as the singer.",
+      choices: ["tantos", "tan", "tanto", "tantas"],
+      correct: "tantos",
+      ruleExplanation: "When modifying a masculine plural noun ('instrumentos'), match gender and number before 'como'.",
+      ruleExplanationEs: "Al modificar a un sustantivo masculino plural ('instrumentos'), concuerda en género y número antes de 'como'."
+    },
+    {
+      contrastPair: "Comparaciones con Números",
+      sentenceWithBlank: "Ese portátil de última generación cuesta [_____] quinientos dólares.",
+      englishMeaning: "That latest-generation laptop costs more than five hundred dollars.",
+      choices: ["más de", "más que", "tan", "como"],
+      correct: "más de",
+      ruleExplanation: "When expressing comparative inequality with numerical quantities or figures, use this prepositional comparative.",
+      ruleExplanationEs: "Al expresar desigualdad comparativa con cifras numéricas, se usa la preposición correspondiente."
+    }
   ]
 };
 
@@ -3316,7 +3609,60 @@ export const PRETERITE_VERB_CATEGORIES = [
   }
 ];
 
+export const IMPERFECT_VERB_CATEGORIES = [
+  {
+    id: "imp_irregulars",
+    labelEn: "👑 The 3 Irregulars: ser, ir, ver (+ haber)",
+    labelEs: "👑 Los 3 Irregulares: ser, ir, ver (+ haber)",
+    badge: "Irregulares",
+    color: "#ef4444",
+    ruleEn: "In the Imperfect tense, there are ONLY three irregular verbs in all of Spanish: ser (era...), ir (iba...), and ver (veía...), plus haber (había).",
+    ruleEs: "En el imperfecto SOLO hay tres verbos irregulares en todo el idioma: ser (era...), ir (iba...) y ver (veía...), más haber (había).",
+    verbs: [
+      { verb: "ser", stem: "era, eras, era, éramos, erais, eran", meaning: "to be (descriptions, identity, time, age in past)" },
+      { verb: "ir", stem: "iba, ibas, iba, íbamos, ibais, iban", meaning: "to go (habitual past movement, was going)" },
+      { verb: "ver", stem: "veía, veías, veía, veíamos, veíais, veían", meaning: "to see / watch (habitual viewing, was watching)" },
+      { verb: "haber", stem: "había (strictly singular)", meaning: "there was / there were (ongoing past existence)" }
+    ]
+  },
+  {
+    id: "imp_ar_regulars",
+    labelEn: "🟢 Regular -ar Verbs (-aba)",
+    labelEs: "🟢 Regulares -ar (-aba)",
+    badge: "-AR",
+    color: "#10b981",
+    ruleEn: "Regular -ar verbs in the imperfect: add -aba, -abas, -aba, -ábamos, -abais, -aban. Note: only nosotros carries a written accent (-ábamos).",
+    ruleEs: "Verbos regulares en -ar en imperfecto: añaden -aba, -abas, -aba, -ábamos, -abais, -aban. Nota: solo nosotros lleva tilde (-ábamos).",
+    verbs: [
+      { verb: "hablar", stem: "hablaba, hablabas, hablaba...", meaning: "to speak / talk" },
+      { verb: "jugar", stem: "jugaba, jugabas, jugaba...", meaning: "to play" },
+      { verb: "estudiar", stem: "estudiaba, estudiabas, estudiaba...", meaning: "to study" },
+      { verb: "chatear", stem: "chateaba, chateabas, chateaba...", meaning: "to chat online" },
+      { verb: "mirar", stem: "miraba, mirabas, miraba...", meaning: "to watch / look at" },
+      { verb: "escuchar", stem: "escuchaba, escuchabas, escuchaba...", meaning: "to listen" },
+      { verb: "usar", stem: "usaba, usabas, usaba...", meaning: "to use" }
+    ]
+  },
+  {
+    id: "imp_er_ir_regulars",
+    labelEn: "🔵 Regular -er / -ir Verbs (-ía)",
+    labelEs: "🔵 Regulares -er / -ir (-ía)",
+    badge: "-ER / -IR",
+    color: "#3b82f6",
+    ruleEn: "Regular -er and -ir verbs in the imperfect: add -ía, -ías, -ía, -íamos, -íais, -ían. Every person carries a written accent on the 'í'.",
+    ruleEs: "Verbos regulares en -er e -ir en imperfecto: añaden -ía, -ías, -ía, -íamos, -íais, -ían. Todas las formas llevan tilde en la 'í'.",
+    verbs: [
+      { verb: "comer", stem: "comía, comías, comía...", meaning: "to eat" },
+      { verb: "vivir", stem: "vivía, vivías, vivía...", meaning: "to live" },
+      { verb: "tener", stem: "tenía, tenías, tenía...", meaning: "to have / used to have" },
+      { verb: "hacer", stem: "hacía, hacías, hacía...", meaning: "to do / make" },
+      { verb: "escribir", stem: "escribía, escribías, escribía...", meaning: "to write" }
+    ]
+  }
+];
+
 export function getVerbCategories(tense = "present") {
+  if (tense === "imperfect") return IMPERFECT_VERB_CATEGORIES;
   return tense === "preterite" ? PRETERITE_VERB_CATEGORIES : PRESENT_VERB_CATEGORIES;
 }
 
@@ -3325,12 +3671,14 @@ export const VERB_CATEGORIES = PRETERITE_VERB_CATEGORIES;
 
 /**
  * Resolves which grammatical category a verb belongs to for the Conjugation Helper
- * conditioned on the active tense (present vs preterite).
+ * conditioned on the active tense (present, preterite, or imperfect).
  */
 export function getVerbCategoryInfo(rawVerb, tense = "present") {
   if (!rawVerb) return null;
   const base = parseVerb(rawVerb).base.toLowerCase();
-  const categories = tense === "preterite" ? PRETERITE_VERB_CATEGORIES : PRESENT_VERB_CATEGORIES;
+  const categories = tense === "imperfect"
+    ? IMPERFECT_VERB_CATEGORIES
+    : (tense === "preterite" ? PRETERITE_VERB_CATEGORIES : PRESENT_VERB_CATEGORIES);
 
   for (const cat of categories) {
     if (cat.verbs) {

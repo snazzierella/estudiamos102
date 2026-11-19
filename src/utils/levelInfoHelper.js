@@ -285,7 +285,45 @@ export function getLevelInfo(stageNum, levelNum, isEarlyBoss = false, translate 
       return {
         title: translate ? "🛡️ Puerta de Revisión (Jefe de Unidad 4) • Review Gate" : "🛡️ Puerta de Revisión (Jefe de Unidad 4)",
         focus: "Boss Battle: Unidad 4 Review Gate",
-        desc: "Final evaluation for Unidad 4. Requires 80% (16/20) to complete current class content."
+        desc: "Final evaluation for Unidad 4. Requires 80% (16/20) to unlock Unidad 5."
+      };
+    }
+  } else if (stageNum === 5) {
+    if (levelNum <= 5) {
+      return {
+        title: translate ? `Tecnología y Entretenimiento (Technology & Entertainment) (Pt. ${levelNum})` : `Tecnología y Entretenimiento (Pt. ${levelNum})`,
+        focus: "Tech Devices, Media, Internet & Digital Actions",
+        desc: "Vocabulary for electronics, smartphones, apps, television, movies, and computing actions (bajar, grabar, funcionar, apagar)."
+      };
+    } else if (levelNum <= 10) {
+      return {
+        title: translate ? `El Tiempo Imperfecto y la Niñez (Imperfect Tense & Childhood) (Pt. ${levelNum - 5})` : `El Tiempo Imperfecto y la Niñez (Pt. ${levelNum - 5})`,
+        focus: "Imperfect Tense (-aba, -ía), Irregulars (ser, ir, ver) & Habitual Past",
+        desc: "Regular imperfect conjugations, the 3 irregular verbs (era, iba, veía), childhood habits, descriptions in the past, and ongoing background actions."
+      };
+    } else if (levelNum <= 15) {
+      return {
+        title: translate ? `Palabras Indefinidas y Negativas (Indefinite & Negative Words) (Pt. ${levelNum - 10})` : `Palabras Indefinidas y Negativas (Pt. ${levelNum - 10})`,
+        focus: "Affirmative vs Negative Pairs & Double Negatives",
+        desc: "Mastering negative syntax (no + verb + negative word), either/or (o... o), neither/nor (ni... ni), and 'alguno'/'ninguno' shortening (algún/ningún)."
+      };
+    } else if (levelNum <= 19) {
+      return {
+        title: translate ? `Comparaciones y Maestría Léxica (Comparisons & Lexical Mastery) (Pt. ${levelNum - 15})` : `Comparaciones y Maestría Léxica (Pt. ${levelNum - 15})`,
+        focus: "Inequality (más/menos que), Equality (tan/tanto como) & Irregular Comparatives",
+        desc: "Comparisons of inequality, equality (tan... como, tanto/a/os/as... como), irregular comparatives (mejor, peor, mayor, menor), and completing all 121 unit words by Level 19!"
+      };
+    } else if (levelNum <= 24) {
+      return {
+        title: translate ? `Síntesis de Unidad 5: Maestría Activa (Unidad 5 Active Synthesis) (Pt. ${levelNum - 19})` : `Síntesis de Unidad 5: Maestría Activa (Pt. ${levelNum - 19})`,
+        focus: "100% Active Challenge • Zero Flashcards",
+        desc: "Pure active mastery: complex past narrative sentence builder puzzles, imperfect vs preterite contrast decisions, double negative formations, and comparative constructions with zero flashcards."
+      };
+    } else {
+      return {
+        title: translate ? "🛡️ Puerta de Revisión (Jefe de Unidad 5) • Review Gate" : "🛡️ Puerta de Revisión (Jefe de Unidad 5)",
+        focus: "Boss Battle: Unidad 5 Review Gate",
+        desc: "Comprehensive final evaluation across all Unidad 5 topics: technology vocabulary, imperfect conjugations, preterite vs imperfect usage, indefinite/negative words, and comparisons. Requires 80% (16/20) to master Unidad 5."
       };
     }
   }

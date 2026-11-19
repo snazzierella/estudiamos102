@@ -129,6 +129,12 @@ const BADGES_LIST = [
     icon: "⚡"
   },
   {
+    id: "stage_5_champion",
+    name: "Cibernauta Conquistador (Cyber Explorer)",
+    desc: "Conquer Stage 5 (Unidad 5) and defeat the Unit 5 Boss.",
+    icon: "💻"
+  },
+  {
     id: "game_beaten",
     name: "Maestro de Estudiamos 102 (Game Champion)",
     desc: "Complete all campaign stages and reviews.",

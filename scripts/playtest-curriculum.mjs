@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // PLAYTEST CURRICULUM & LINGUISTIC AUDIT HARNESS
-// Exhaustively tests all 100 levels (Stages 1-4, Levels 1-25),
-// all 1,151 vocabulary words, 143+ sentence builders, 43 contrast decisions,
+// Exhaustively tests all 125 levels (Stages 1-5, Levels 1-25),
+// all 1,271 vocabulary words, 175+ sentence builders, 57 contrast decisions,
 // and verb conjugations across the entire Spanish 102 curriculum.
 // -------------------------------------------------------------
 
@@ -136,8 +136,8 @@ for (const [stageKey, qList] of Object.entries(CONTRAST_QUESTIONS)) {
   });
 }
 
-// Test generator across all 4 stages
-for (let stage = 1; stage <= 4; stage++) {
+// Test generator across all 5 stages
+for (let stage = 1; stage <= 5; stage++) {
   for (let lvl = 1; lvl <= 25; lvl++) {
     const q = generateContrastQuestion(stage, lvl);
     assert(q !== null, `generateContrastQuestion failed for stage ${stage} level ${lvl}`);
@@ -212,14 +212,52 @@ preteriteChecks.forEach(check => {
   const result = conjugate(check.verb, check.person, "preterite");
   assert(result === check.expected, `Preterite conjugation mismatch for '${check.verb}' (person ${PRONOUNS[check.person]}): got '${result}', expected '${check.expected}'`);
 });
-console.log(`  ✓ All ${preteriteChecks.length} preterite irregular stems, stem-changers, and spelling-changers verified.\n`);
+console.log(`  ✓ All ${preteriteChecks.length} preterite irregular stems, stem-changers, and spelling-changers verified.`);
+
+// Imperfect conjugations and the 3 irregular verbs (ser, ir, ver) + haber
+const imperfectChecks = [
+  // Regular -ar: ending in -aba, -ábamos with tilde
+  { verb: "hablar", person: 0, expected: "hablaba" },
+  { verb: "hablar", person: 1, expected: "hablabas" },
+  { verb: "hablar", person: 2, expected: "hablaba" },
+  { verb: "hablar", person: 3, expected: "hablábamos" },
+  { verb: "hablar", person: 5, expected: "hablaban" },
+  // Regular -er/-ir: ending in -ía (accented throughout)
+  { verb: "comer", person: 0, expected: "comía" },
+  { verb: "comer", person: 3, expected: "comíamos" },
+  { verb: "vivir", person: 0, expected: "vivía" },
+  { verb: "vivir", person: 3, expected: "vivíamos" },
+  // The ONLY 3 irregulars in Spanish imperfect: ser, ir, ver (+ impersonal haber)
+  { verb: "ser", person: 0, expected: "era" },
+  { verb: "ser", person: 1, expected: "eras" },
+  { verb: "ser", person: 2, expected: "era" },
+  { verb: "ser", person: 3, expected: "éramos" },
+  { verb: "ser", person: 5, expected: "eran" },
+  { verb: "ir", person: 0, expected: "iba" },
+  { verb: "ir", person: 1, expected: "ibas" },
+  { verb: "ir", person: 2, expected: "iba" },
+  { verb: "ir", person: 3, expected: "íbamos" },
+  { verb: "ir", person: 5, expected: "iban" },
+  { verb: "ver", person: 0, expected: "veía" },
+  { verb: "ver", person: 1, expected: "veías" },
+  { verb: "ver", person: 2, expected: "veía" },
+  { verb: "ver", person: 3, expected: "veíamos" },
+  { verb: "ver", person: 5, expected: "veían" },
+  { verb: "haber", person: 2, expected: "había" }
+];
+
+imperfectChecks.forEach(check => {
+  const result = conjugate(check.verb, check.person, "imperfect");
+  assert(result === check.expected, `Imperfect conjugation mismatch for '${check.verb}' (person ${PRONOUNS[check.person]}): got '${result}', expected '${check.expected}'`);
+});
+console.log(`  ✓ All ${imperfectChecks.length} imperfect conjugations (regular -ar, -er/-ir, and irregulars ser/ir/ver/haber) verified.\n`);
 
 // -------------------------------------------------------------
-// 5. 100-LEVEL FULL CAMPAIGN SIMULATION
+// 5. 125-LEVEL FULL CAMPAIGN SIMULATION
 // -------------------------------------------------------------
-console.log("--- [5/5] Full 100-Level Campaign Playtest (Stages 1-4, Levels 1-25) ---");
+console.log("--- [5/5] Full 125-Level Campaign Playtest (Stages 1-5, Levels 1-25) ---");
 
-for (let stage = 1; stage <= 4; stage++) {
+for (let stage = 1; stage <= 5; stage++) {
   const activeStage = STAGES[stage];
   const stageVocab = vocabData.filter(item => activeStage.subcategories.includes(item.subcategory) && !isSentenceItem(item));
   const totalEligibleVocab = stageVocab.length;
@@ -228,6 +266,7 @@ for (let stage = 1; stage <= 4; stage++) {
   if (stage === 2) taperSchedule = [10, 10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 6, 6, 6, 5, 5];
   else if (stage === 3) taperSchedule = [9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 2];
   else if (stage === 4) taperSchedule = [9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6, 5, 5, 5, 4, 4];
+  else if (stage === 5) taperSchedule = [8, 8, 7, 7, 6, 6, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 3, 2, 2];
 
   let seenInStage = new Set();
   let remainingUnseen = [...stageVocab];

@@ -7954,13 +7954,6 @@
     "isSentence": true
   },
   {
-    "spanish": "[Unidad 5: Próximamente]",
-    "english": "[Unit 5: Coming Soon in Class]",
-    "category": "Unidad 5",
-    "subcategory": "Unidad 5: Próximamente",
-    "unit": "Unit 5: Próximamente (Coming Soon)"
-  },
-  {
     "spanish": "[Unidad 6: Próximamente]",
     "english": "[Unit 6: Coming Soon in Class]",
     "category": "Unidad 6",
@@ -8141,5 +8134,852 @@
     "category": "Unidad 4",
     "subcategory": "Hoteles y Alojamiento",
     "unit": "Unit 4: ¿Adónde fuiste de vacaciones?"
+  },
+  {
+    "spanish": "la televisión",
+    "english": "television (broadcast/signal)",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el televisor",
+    "english": "television set (physical device)",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la radio",
+    "english": "radio (broadcast/signal)",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el radio",
+    "english": "radio (physical device)",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el canal",
+    "english": "channel",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la serie",
+    "english": "series / TV show",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la comedia",
+    "english": "comedy",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el drama",
+    "english": "drama",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el documental",
+    "english": "documentary",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la telenovela",
+    "english": "soap opera",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "los dibujos animados",
+    "english": "cartoons",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el noticiero",
+    "english": "news program",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la película",
+    "english": "movie / film",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el cine",
+    "english": "cinema / movie theater",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la película de horror",
+    "english": "horror movie",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la película de misterio",
+    "english": "mystery movie",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la película romántica",
+    "english": "romantic movie",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la clasificación",
+    "english": "rating / film classification",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la tecnología digital",
+    "english": "digital technology",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la pantalla táctil",
+    "english": "touch screen",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la aplicación",
+    "english": "application / app",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "las redes sociales",
+    "english": "social networks / social media",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el sitio web",
+    "english": "website",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la tableta",
+    "english": "tablet",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el libro electrónico",
+    "english": "e-book / e-reader",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el MP3",
+    "english": "MP3 player",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el portátil",
+    "english": "laptop computer",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la mensajería instantánea",
+    "english": "instant messaging",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el capítulo",
+    "english": "episode / chapter",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la temporada",
+    "english": "season (of a TV show)",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el personaje principal",
+    "english": "main character",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el correo",
+    "english": "email / mail",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la alerta",
+    "english": "alert / notification",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "chatear",
+    "english": "to chat online",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "textear",
+    "english": "to text",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "mensajear",
+    "english": "to message / send IMs",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "grabar en audio",
+    "english": "to record audio",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "grabar un video",
+    "english": "to record a video / film",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "disfrutar",
+    "english": "to enjoy",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "entretenerse",
+    "english": "to be entertained",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "digitar",
+    "english": "to type / enter digits",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "teclear",
+    "english": "to type on a keyboard",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "pulsar",
+    "english": "to click / to press",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "mover el cursor",
+    "english": "to move the cursor",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "conectarse",
+    "english": "to connect",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "conectarse al Wi-Fi",
+    "english": "to connect to Wi-Fi",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "desbloquear",
+    "english": "to unblock / unlock",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "bloquear",
+    "english": "to block",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "descargar",
+    "english": "to download",
+    "subcategory": "Tecnología y Entretenimiento",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el tiempo imperfecto",
+    "english": "the imperfect past tense",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "hablaba",
+    "english": "I / he / she used to speak / was speaking",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "comía",
+    "english": "I / he / she used to eat / was eating",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "vivía",
+    "english": "I / he / she used to live / was living",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "era",
+    "english": "I / he / she used to be / was (ser imperfect)",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "iba",
+    "english": "I / he / she used to go / was going (ir imperfect)",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "veía",
+    "english": "I / he / she used to see / watch (ver imperfect)",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "había",
+    "english": "there was / there were (ongoing past existence)",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "acostumbrar",
+    "english": "to be accustomed to / used to",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "de niño / de niña",
+    "english": "as a child (boy / girl)",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "cuando era niño",
+    "english": "when I was a child / boy",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "en aquellos tiempos",
+    "english": "in those days / back then",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "guardar cama",
+    "english": "to stay in bed (when sick)",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "alquilar películas",
+    "english": "to rent movies",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "la tienda de videos",
+    "english": "video rental store",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "reproducir música",
+    "english": "to play / reproduce music",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el dispositivo electrónico",
+    "english": "electronic device",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "con frecuencia",
+    "english": "frequently / often",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "en ocasiones",
+    "english": "on occasion / sometimes",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "casi nunca",
+    "english": "hardly ever / almost never",
+    "subcategory": "El Tiempo Imperfecto",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "alguien",
+    "english": "someone / somebody / anyone",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "nadie",
+    "english": "no one / nobody",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "algo",
+    "english": "something / anything",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "nada",
+    "english": "nothing / not anything",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "siempre",
+    "english": "always",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "nunca",
+    "english": "never",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "jamás",
+    "english": "never / ever",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "también",
+    "english": "also / too",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "tampoco",
+    "english": "neither / not either",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "algún",
+    "english": "some / any (before masc. sing. noun)",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "alguno / alguna",
+    "english": "some / any / someone (pronoun)",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "algunos / algunas",
+    "english": "some / a few",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "ningún",
+    "english": "no / not any (before masc. sing. noun)",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "ninguno / ninguna",
+    "english": "none / not any / no one (pronoun)",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "o... o",
+    "english": "either... or",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "ni... ni",
+    "english": "neither... nor",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "sonar un timbre",
+    "english": "to ring / chime",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "faltar a clase",
+    "english": "to miss class / be absent",
+    "subcategory": "Palabras Indefinidas y Negativas",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "tan... como",
+    "english": "as... as (with adjectives / adverbs)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "tanto... como",
+    "english": "as much... as (masc. singular noun)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "tanta... como",
+    "english": "as much... as (fem. singular noun)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "tantos... como",
+    "english": "as many... as (masc. plural noun)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "tantas... como",
+    "english": "as many... as (fem. plural noun)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "tanto como",
+    "english": "as much as (with verbs)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "más... que",
+    "english": "more... than",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "menos... que",
+    "english": "less / fewer... than",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "más que",
+    "english": "more than (with verbs)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "menos que",
+    "english": "less than (with verbs)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "más de",
+    "english": "more than (with numbers)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "menos de",
+    "english": "less than (with numbers)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "mejor",
+    "english": "better (irregular comparative of bueno/bien)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "peor",
+    "english": "worse (irregular comparative of malo/mal)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "mayor",
+    "english": "older (irregular comparative of viejo/grande)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "menor",
+    "english": "younger (irregular comparative of joven/pequeño)",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el diseñador / la diseñadora",
+    "english": "designer",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el arquitecto / la arquitecta",
+    "english": "architect",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el cantante / la cantante",
+    "english": "singer",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el músico / la música",
+    "english": "musician",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el trabajador social / la trabajadora social",
+    "english": "social worker",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el consejero de carreras / la consejera de carreras",
+    "english": "career counselor",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el asistente de vuelo / la asistente de vuelo",
+    "english": "flight attendant",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el peluquero / la peluquera",
+    "english": "hairdresser / barber",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el mecánico / la mecánica",
+    "english": "mechanic",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el cocinero / la cocinera",
+    "english": "cook / chef",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el bombero / la bombera",
+    "english": "firefighter",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el pintor / la pintora",
+    "english": "painter",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el periodista / la periodista",
+    "english": "journalist",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el psicólogo / la psicóloga",
+    "english": "psychologist",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "el veterinario / la veterinaria",
+    "english": "veterinarian",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "en mi opinión",
+    "english": "in my opinion",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "estar de acuerdo",
+    "english": "to agree / be in agreement",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
+  },
+  {
+    "spanish": "no estar de acuerdo",
+    "english": "to disagree / not be in agreement",
+    "subcategory": "Comparaciones de Igualdad y Desigualdad",
+    "category": "Unidad 5",
+    "unit": "Unit 5: ¡Luces, cámara, acción!"
   }
 ]

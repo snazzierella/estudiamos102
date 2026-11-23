@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "test:playtest": "node scripts/playtest-curriculum.mjs",
     "test:oral-exam": "node scripts/test-oral-exam.mjs",
+    "test:level20": "node scripts/test-level20-fix.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

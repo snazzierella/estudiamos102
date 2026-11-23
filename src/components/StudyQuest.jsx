@@ -133,9 +133,9 @@ export default function StudyQuest({
 
   // Level select & replay state
   const [selectedStage, setSelectedStage] = useState(state.questStage || 1);
-  const [selectedLevel, setSelectedLevel] = useState(state.isReviewReady ? 20 : (state.questLevel || 1));
+  const [selectedLevel, setSelectedLevel] = useState(state.isReviewReady ? 25 : (state.questLevel || 1));
   const [activeQuestStage, setActiveQuestStage] = useState(state.questStage || 1);
-  const [activeQuestLevel, setActiveQuestLevel] = useState(state.isReviewReady ? 20 : (state.questLevel || 1));
+  const [activeQuestLevel, setActiveQuestLevel] = useState(state.isReviewReady ? 25 : (state.questLevel || 1));
   const [activeQuestIsReview, setActiveQuestIsReview] = useState(state.isReviewReady || false);
   const [activeQuestIsReplay, setActiveQuestIsReplay] = useState(false);
   const [activeQuestIsEarlyBoss, setActiveQuestIsEarlyBoss] = useState(false);
@@ -163,8 +163,6 @@ export default function StudyQuest({
   };
 
   const isLevelPassed = (stageNum, levelNum) => {
-    const levelKey = `${stageNum}-${levelNum}`;
-    if (state.completedLevels?.includes(levelKey)) return true;
     if (stageNum < state.questStage) return true;
     if (stageNum > state.questStage) return false;
     // For current stage:
@@ -982,7 +980,8 @@ export default function StudyQuest({
     let levelVal = targetLevel !== undefined ? targetLevel : (selectedLevel || (state.isReviewReady ? 25 : state.questLevel));
     const isEarlyBoss = stageVal === state.questStage && levelVal === 25 && !state.isReviewReady;
     const isReview = levelVal === 25;
-    const isReplay = isLevelPassed(stageVal, levelVal);
+    const isCurrent = isLevelCurrent(stageVal, levelVal);
+    const isReplay = !isCurrent && isLevelPassed(stageVal, levelVal);
 
     setActiveQuestStage(stageVal);
     setActiveQuestLevel(levelVal);
@@ -2796,7 +2795,7 @@ export default function StudyQuest({
                     <div style={{ borderLeft: '1px solid rgba(255,255,255,0.1)' }}></div>
                     <div>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>{translateInstructions ? "Botín Ganado (Loot Gained)" : "Botín Ganado"}</span>
-                      <strong style={{ fontSize: '1.2rem', color: 'var(--gold)' }}>+{activeQuestIsEarlyBoss ? 100 : state.isReviewReady ? 50 : 12} Gold</strong>
+                      <strong style={{ fontSize: '1.2rem', color: 'var(--gold)' }}>+{activeQuestIsEarlyBoss ? 100 : activeQuestIsReview ? 50 : 12} Gold</strong>
                     </div>
                   </>
                 )}
@@ -2856,7 +2855,16 @@ export default function StudyQuest({
                 ) : (
                   <button 
                     className="btn btn-primary" 
-                    onClick={() => { setQuestFinished(false); startQuestLevel(); }}
+                    onClick={() => { 
+                      setQuestFinished(false); 
+                      if (questSuccessMsg) {
+                        const nextStage = state.questStage;
+                        const nextLvl = state.isReviewReady ? 25 : state.questLevel;
+                        startQuestLevel(nextStage, nextLvl);
+                      } else {
+                        startQuestLevel(activeQuestStage, activeQuestLevel);
+                      }
+                    }}
                     style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                   >
                     {questSuccessMsg 
@@ -2871,9 +2879,9 @@ export default function StudyQuest({
           {!questFinished && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
-              {/* Stage Navigator (Stages 1 through 4) */}
+              {/* Stage Navigator (Stages 1 through 5) */}
               <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
-                {[1, 2, 3, 4].map(sNum => {
+                {[1, 2, 3, 4, 5].map(sNum => {
                   const isStageUnlocked = sNum <= state.questStage;
                   const isStageCurrent = sNum === state.questStage;
                   const isStageCompleted = sNum < state.questStage;
@@ -2903,7 +2911,7 @@ export default function StudyQuest({
                         whiteSpace: 'nowrap'
                       }}
                     >
-                      <span>{sNum === 1 ? '🏰' : sNum === 2 ? '🩺' : sNum === 3 ? '🛍️' : '✈️'}</span>
+                      <span>{sNum === 1 ? '🏰' : sNum === 2 ? '🩺' : sNum === 3 ? '🛍️' : sNum === 4 ? '✈️' : '💻'}</span>
                       <span>{translateInstructions ? `Stage ${sNum}` : `Etapa ${sNum}`}</span>
                       {isStageCompleted && (
                         <span style={{ fontSize: '0.7rem', background: 'rgba(16, 185, 129, 0.2)', color: 'var(--accent)', padding: '2px 6px', borderRadius: '8px', fontWeight: 'bold' }}>

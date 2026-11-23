@@ -116,9 +116,40 @@ export function useGameState() {
           wordsAnsweredCorrectly = [...new Set([...wordsAnsweredCorrectly, ...unit1Words])];
         }
 
+        let questStage = Math.max(1, Number(parsed.questStage) || 1);
+        let questLevel = Math.max(1, Number(parsed.questLevel) || 1);
+        let isReviewReady = Boolean(parsed.isReviewReady);
+        let completedLevels = Array.isArray(parsed.completedLevels) ? [...parsed.completedLevels] : [];
+
+        // Pre-25-level architecture migration:
+        // In older versions, each stage only had 20 levels (Level 20 was the Boss Review Gate).
+        // Completing level 19 marked isReviewReady = true.
+        // With the 25-level architecture (levels 20-24 active synthesis, level 25 Review Gate),
+        // any save with isReviewReady === true on a stage before reaching level 24
+        // is from the old 20-level system. Unset isReviewReady and set questLevel to 20
+        // so the player can play the newly added levels.
+        if (isReviewReady && questLevel < 24) {
+          isReviewReady = false;
+          questLevel = Math.max(questLevel, 20);
+        }
+
+        // Clean up legacy Review Gate completedLevels key for the current stage:
+        // In the old system, playing or attempting the old review gate recorded "${questStage}-20".
+        // In the new 25-level system, Level 20 is a regular curriculum level.
+        // If the player is on questStage and hasn't yet completed Level 20 in campaign mode
+        // (i.e. questLevel <= 20 and !isReviewReady), remove "${questStage}-20" from completedLevels
+        // so Level 20 is not treated as an already-passed replay level.
+        if (!isReviewReady && questLevel <= 20) {
+          completedLevels = completedLevels.filter(k => k !== `${questStage}-20`);
+        }
+
         return {
           ...INITIAL_STATE,
           ...parsed,
+          questStage,
+          questLevel,
+          isReviewReady,
+          completedLevels,
           inventory: {
             ...INITIAL_STATE.inventory,
             ...(parsed.inventory || {})
@@ -134,7 +165,6 @@ export function useGameState() {
           excludeVosotros,
           stageFlashcardsSeen,
           wordsAnsweredCorrectly,
-          completedLevels: parsed.completedLevels || [],
           levelRecords: parsed.levelRecords || {},
           hintlessLessonsCount: parsed.hintlessLessonsCount || 0,
           translateInstructions: Boolean(parsed.translateInstructions),
@@ -1156,7 +1186,19 @@ export function useGameState() {
       const unit1Words = getStageWords(1);
       let stageFlashcardsSeen = [...new Set([...(rawState.stageFlashcardsSeen || []), ...unit1Words])];
       let wordsAnsweredCorrectly = Array.isArray(rawState.wordsAnsweredCorrectly) ? rawState.wordsAnsweredCorrectly : [];
-      const questStage = Number(rawState.questStage) || 1;
+      const questStage = Math.max(1, Number(rawState.questStage) || 1);
+      let questLevel = Math.max(1, Number(rawState.questLevel) || 1);
+      let isReviewReady = Boolean(rawState.isReviewReady);
+      let completedLevels = Array.isArray(rawState.completedLevels) ? [...rawState.completedLevels] : [];
+
+      if (isReviewReady && questLevel < 24) {
+        isReviewReady = false;
+        questLevel = Math.max(questLevel, 20);
+      }
+      if (!isReviewReady && questLevel <= 20) {
+        completedLevels = completedLevels.filter(k => k !== `${questStage}-20`);
+      }
+
       if (questStage > 1) {
         wordsAnsweredCorrectly = [...new Set([...wordsAnsweredCorrectly, ...unit1Words])];
       }
@@ -1173,10 +1215,11 @@ export function useGameState() {
         gold,
         streak: Math.max(0, Number(rawState.streak) || 0),
         questStage,
-        questLevel: Math.max(1, Number(rawState.questLevel) || 1),
+        questLevel,
+        isReviewReady,
         stageFlashcardsSeen,
         wordsAnsweredCorrectly,
-        completedLevels: Array.isArray(rawState.completedLevels) ? rawState.completedLevels : [],
+        completedLevels,
         levelRecords: (rawState.levelRecords && typeof rawState.levelRecords === 'object') ? rawState.levelRecords : {},
         inventory: {
           ...INITIAL_STATE.inventory,

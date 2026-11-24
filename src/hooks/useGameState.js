@@ -101,6 +101,26 @@ const INITIAL_STATE = {
   translateInstructions: false
 };
 
+export function sanitizeMistakeEntry(w) {
+  if (!w || typeof w !== 'string') return '';
+  const trimmed = w.trim();
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('a,') || lower.startsWith('a :') || lower.startsWith('a:') || lower === 'a, to/at' || lower === 'a, to / at') {
+    return 'a';
+  }
+  if (lower.startsWith('me,') || lower.startsWith('me :') || lower.startsWith('me:') || lower.startsWith('me, indirect object') || lower === 'me, (to) me') {
+    return 'me';
+  }
+  if (trimmed.includes(',')) {
+    const parts = trimmed.split(',');
+    const head = parts[0].trim();
+    if (head && head.length < 30 && !head.includes(' ')) {
+      return head;
+    }
+  }
+  return trimmed;
+}
+
 export function useGameState() {
   const [state, setState] = useState(() => {
     try {
@@ -170,6 +190,7 @@ export function useGameState() {
           translateInstructions: Boolean(parsed.translateInstructions),
           mistakes: Array.isArray(parsed.mistakes)
             ? parsed.mistakes
+                .map(sanitizeMistakeEntry)
                 .filter(w => typeof w === 'string' && w.trim().length > 0)
                 .reduce((acc, curr) => {
                   const trimmed = curr.trim();
@@ -935,11 +956,59 @@ export function useGameState() {
   const removeMistake = (spanishWord) => {
     if (!spanishWord || typeof spanishWord !== 'string') return;
     const target = spanishWord.trim().toLowerCase();
+    const cleanTarget = sanitizeMistakeEntry(spanishWord).toLowerCase();
     setState(prev => {
       const list = prev.mistakes || [];
       return {
         ...prev,
-        mistakes: list.filter(w => typeof w === 'string' && w.trim().toLowerCase() !== target)
+        mistakes: list.filter(w => {
+          if (typeof w !== 'string') return false;
+          const norm = w.trim().toLowerCase();
+          const cleanNorm = sanitizeMistakeEntry(w).toLowerCase();
+
+          // 1. Direct or sanitized exact match
+          if (norm === target || cleanNorm === target || norm === cleanTarget || cleanNorm === cleanTarget) {
+            return false;
+          }
+
+          // 2. Composite string starts with target/cleanTarget followed by punctuation
+          if (
+            norm.startsWith(target + ",") ||
+            norm.startsWith(target + ":") ||
+            norm.startsWith(target + " /") ||
+            norm.startsWith(target + " (") ||
+            norm.startsWith(cleanTarget + ",") ||
+            norm.startsWith(cleanTarget + ":") ||
+            norm.startsWith(cleanTarget + " /") ||
+            norm.startsWith(cleanTarget + " (")
+          ) {
+            return false;
+          }
+
+          // 3. Headword before comma or colon matches target or cleanTarget
+          if (norm.includes(',')) {
+            const beforeComma = norm.split(',')[0].trim().toLowerCase();
+            if (beforeComma === target || beforeComma === cleanTarget) {
+              return false;
+            }
+          }
+          if (norm.includes(':')) {
+            const beforeColon = norm.split(':')[0].trim().toLowerCase();
+            if (beforeColon === target || beforeColon === cleanTarget) {
+              return false;
+            }
+          }
+
+          // 4. Target itself contains punctuation and headword matches
+          if (target.includes(',')) {
+            const targetBeforeComma = target.split(',')[0].trim().toLowerCase();
+            if (targetBeforeComma && (norm === targetBeforeComma || cleanNorm === targetBeforeComma)) {
+              return false;
+            }
+          }
+
+          return true;
+        })
       };
     });
   };
@@ -1240,6 +1309,7 @@ export function useGameState() {
         badges: Array.isArray(rawState.badges) ? rawState.badges : [],
         mistakes: Array.isArray(rawState.mistakes)
           ? rawState.mistakes
+              .map(sanitizeMistakeEntry)
               .filter(w => typeof w === 'string' && w.trim().length > 0)
               .reduce((acc, curr) => {
                 const trimmed = curr.trim();

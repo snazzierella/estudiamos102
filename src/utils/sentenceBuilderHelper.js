@@ -320,34 +320,6 @@ export const SENTENCE_POOLS = {
       syntaxBreakdown: "[Subject: Ellos] + [Modal Verb: quieren] + [Infinitive + Attached Reciprocal Pronoun: besarse] + [Time Clause: antes de salir]"
     },
     {
-      spanish: "Nosotros vamos a besarnos antes de salir",
-      english: "We are going to kiss each other before leaving",
-      distractors: ["se", "besarse", "besarme"],
-      hint: "With 'ir a + infinitive', attach the 1st person plural reciprocal pronoun to the infinitive without duplicating it.",
-      syntaxBreakdown: "[Subject: Nosotros] + [Future Verb Phrase (ir a): vamos a] + [Infinitive + Attached Pronoun: besarnos] + [Time Clause: antes de salir]"
-    },
-    {
-      spanish: "Nosotros nos vamos a besar antes de salir",
-      english: "We are going to kiss each other before leaving",
-      distractors: ["se", "besarse", "besarme"],
-      hint: "Since the reciprocal pronoun precedes the conjugated verb, keep the infinitive plain without repeating the pronoun.",
-      syntaxBreakdown: "[Subject: Nosotros] + [Fronted Reciprocal Pronoun: nos] + [Future Verb Phrase: vamos a besar] + [Time Clause: antes de salir]"
-    },
-    {
-      spanish: "Los novios se van a besar en el altar",
-      english: "The sweethearts are going to kiss each other at the altar",
-      distractors: ["besarse", "nos", "vamos"],
-      hint: "Since the reciprocal pronoun is placed before the conjugated verb, keep the infinitive plain and remember the preposition 'a'.",
-      syntaxBreakdown: "[Subject: Los novios] + [Fronted Reciprocal Pronoun: se] + [Future Verb Phrase: van a besar] + [Location: en el altar]"
-    },
-    {
-      spanish: "Los novios se quieren besar en el parque",
-      english: "The sweethearts want to kiss each other in the park",
-      distractors: ["besarse", "quiere", "nos"],
-      hint: "With the pronoun placed before querer, keep the second verb as a plain infinitive.",
-      syntaxBreakdown: "[Subject: Los novios] + [Fronted Reciprocal Pronoun: se] + [Modal Verb: quieren] + [Plain Infinitive: besar] + [Location: en el parque]"
-    },
-    {
       spanish: "Los dos amigos se van a abrazar en el aeropuerto",
       english: "The two friends are going to hug each other at the airport",
       distractors: ["abrazarse", "nos", "vamos"],
@@ -355,53 +327,186 @@ export const SENTENCE_POOLS = {
       syntaxBreakdown: "[Subject: Los dos amigos] + [Fronted Reciprocal Pronoun: se] + [Future Verb Phrase: van a abrazar] + [Location: en el aeropuerto]"
     },
     {
-      spanish: "Nosotros nos vamos a abrazar con alegría",
-      english: "We are going to hug each other with joy",
-      distractors: ["se", "abrazarse", "abrazarme"],
-      hint: "Place the 1st person plural reciprocal pronoun before the conjugated auxiliary verb.",
-      syntaxBreakdown: "[Subject: Nosotros] + [Fronted Reciprocal Pronoun: nos] + [Future Verb Phrase: vamos a abrazar] + [Manner: con alegría]"
-    },
-    {
-      spanish: "Nosotros vamos a abrazarnos con alegría",
-      english: "We are going to hug each other with joy",
-      distractors: ["se", "abrazarse", "abrazar"],
-      hint: "Attach the 1st person plural reciprocal pronoun to the end of the infinitive.",
-      syntaxBreakdown: "[Subject: Nosotros] + [Verb (ir a): vamos a] + [Infinitive + Attached Pronoun: abrazarnos] + [Manner: con alegría]"
-    },
-    {
-      spanish: "Los dos estudiantes se van a conocer hoy",
-      english: "The two students are going to meet each other today",
-      distractors: ["conocerse", "nos", "vamos"],
-      hint: "Since the pronoun is placed before the auxiliary verb, keep the infinitive in its simple form.",
-      syntaxBreakdown: "[Subject: Los dos estudiantes] + [Fronted Reciprocal Pronoun: se] + [Future Verb Phrase: van a conocer] + [Time: hoy]"
-    },
-    {
-      spanish: "Nosotros nos tenemos que ayudar con la tarea",
-      english: "We have to help each other with the homework",
-      distractors: ["se", "ayudarnos", "ayuda"],
-      hint: "Since the pronoun precedes 'tener que', keep the following infinitive in its simple form without duplicating the pronoun.",
-      syntaxBreakdown: "[Subject: Nosotros] + [Fronted Reciprocal Pronoun: nos] + [Obligation Phrase: tenemos que ayudar] + [Prepositional Phrase: con la tarea]"
-    },
-    {
-      spanish: "Nosotros tenemos que ayudarnos con la tarea",
-      english: "We have to help each other with the homework",
-      distractors: ["se", "ayudar", "ellos"],
-      hint: "Attach the reciprocal pronoun for nosotros directly to the end of the infinitive.",
-      syntaxBreakdown: "[Subject: Nosotros] + [Obligation Phrase: tenemos que] + [Infinitive + Attached Pronoun: ayudarnos] + [Prepositional Phrase: con la tarea]"
-    },
-    {
-      spanish: "Los amigos se van a despedir en la estación",
-      english: "The friends are going to say goodbye to each other at the station",
-      distractors: ["despedirse", "nos", "vamos"],
-      hint: "When the reciprocal pronoun is placed before the conjugated verb, avoid duplicating it on the infinitive.",
-      syntaxBreakdown: "[Subject: Los amigos] + [Fronted Reciprocal Pronoun: se] + [Future Verb Phrase: van a despedir] + [Location: en la estación]"
-    },
-    {
       spanish: "Nosotros nos vamos a reunir en la cafetería",
       english: "We are going to meet up in the cafeteria",
       distractors: ["se", "reunirse", "reúnen"],
       hint: "Place the reciprocal pronoun for nosotros before the conjugated auxiliary verb.",
       syntaxBreakdown: "[Subject: Nosotros] + [Fronted Reciprocal Pronoun: nos] + [Future Verb Phrase: vamos a reunir] + [Location: en la cafetería]"
+    },
+    {
+      spanish: "El médico me examina la garganta en el consultorio",
+      english: "The doctor examines my throat in the office",
+      distractors: ["te", "examino", "al"],
+      hint: "Indirect object pronoun 'me' goes before conjugated verb 'examina'.",
+      syntaxBreakdown: "[Subject: El médico] + [Indirect Object Pronoun: me] + [Conjugated Verb: examina] + [Direct Object (body part): la garganta] + [Location: en el consultorio]"
+    },
+    {
+      spanish: "Tengo fiebre alta y necesito tomar este antibiótico",
+      english: "I have a high fever and need to take this antibiotic",
+      distractors: ["estoy", "toma", "esta"],
+      hint: "Use 'tener' for bodily symptoms and 'necesito + infinitive' for medical needs.",
+      syntaxBreakdown: "[Symptom: Tengo fiebre alta] + [Conjunction: y] + [Modal Phrase: necesito tomar] + [Direct Object (masc.): este antibiótico]"
+    },
+    {
+      spanish: "Compramos las pastillas para el dolor en la farmacia",
+      english: "We buy the pain pills at the pharmacy",
+      distractors: ["por", "compro", "los"],
+      hint: "Use 'para' for purpose or intended remedy ('para el dolor').",
+      syntaxBreakdown: "[Subject: (Nosotros)] + [Present Verb: Compramos] + [Direct Object: las pastillas] + [Purpose (para): para el dolor] + [Location: en la farmacia]"
+    },
+    {
+      spanish: "La ambulancia lleva al paciente a la sala de emergencias",
+      english: "The ambulance takes the patient to the emergency room",
+      distractors: ["el", "llevo", "por"],
+      hint: "Remember the personal 'a' before direct human object 'al paciente'.",
+      syntaxBreakdown: "[Subject: La ambulancia] + [Conjugated Verb: lleva] + [Personal 'a' + Direct Object: al paciente] + [Destination: a la sala de emergencias]"
+    },
+    {
+      spanish: "Ella estornuda mucho porque tiene alergia al polen",
+      english: "She sneezes a lot because she is allergic to pollen",
+      distractors: ["estornudo", "por qué", "el"],
+      hint: "Conjugate 'estornudar' for 'ella' and use 'porque' for reason.",
+      syntaxBreakdown: "[Subject: Ella] + [Conjugated Verb: estornuda] + [Adverb: mucho] + [Causal Clause: porque tiene alergia al polen]"
+    },
+    {
+      spanish: "A mí me duele la espalda después del entrenamiento",
+      english: "My back hurts after the workout",
+      distractors: ["duelen", "te", "en"],
+      hint: "Use 'A mí me duele' with singular 'la espalda'.",
+      syntaxBreakdown: "[Clarifier: A mí] + [Indirect Object Pronoun: me] + [Verb of Pain (sing.): duele] + [Singular Subject: la espalda] + [Time Clause: después del entrenamiento]"
+    },
+    {
+      spanish: "A mi abuelo le duelen las rodillas cuando camina mucho",
+      english: "My grandfather's knees hurt when he walks a lot",
+      distractors: ["duele", "me", "les"],
+      hint: "Use plural 'duelen' for plural body parts ('las rodillas').",
+      syntaxBreakdown: "[Clarifier: A mi abuelo] + [Indirect Object Pronoun: le] + [Verb of Pain (plural): duelen] + [Plural Subject: las rodillas] + [Conditional Clause: cuando camina mucho]"
+    },
+    {
+      spanish: "Él se lastimó el tobillo jugando al fútbol ayer",
+      english: "He injured his ankle playing soccer yesterday",
+      distractors: ["me", "lastima", "la"],
+      hint: "Reflexive verb 'lastimarse' in preterite for 3rd person singular.",
+      syntaxBreakdown: "[Subject: Él] + [Reflexive Pronoun: se] + [Preterite Verb: lastimó] + [Direct Object (body part): el tobillo] + [Activity & Time: jugando al fútbol ayer]"
+    },
+    {
+      spanish: "A nosotros nos duelen los ojos de mirar la pantalla",
+      english: "Our eyes hurt from looking at the screen",
+      distractors: ["duele", "se", "les"],
+      hint: "Doler agrees with plural 'los ojos' ('duelen') with indirect object 'nos'.",
+      syntaxBreakdown: "[Clarifier: A nosotros] + [Indirect Object Pronoun: nos] + [Verb of Pain (plural): duelen] + [Plural Subject: los ojos] + [Cause: de mirar la pantalla]"
+    },
+    {
+      spanish: "Yo me despierto a las seis y me ducho con agua tibia",
+      english: "I wake up at six and take a shower with warm water",
+      distractors: ["te", "despierta", "ducha"],
+      hint: "Reflexive pronouns 'me' before both 1st person singular verbs.",
+      syntaxBreakdown: "[Subject: Yo] + [Reflexive Action 1: me despierto a las seis] + [Connector: y] + [Reflexive Action 2: me ducho con agua tibia]"
+    },
+    {
+      spanish: "Los niños se visten rápidamente para ir a la escuela",
+      english: "The children get dressed quickly to go to school",
+      distractors: ["nos", "viste", "por"],
+      hint: "Stem-changing verb 'vestirse' (e -> i) in plural 'se visten'.",
+      syntaxBreakdown: "[Subject: Los niños] + [Reflexive Pronoun: se] + [Stem-Changing Verb: visten] + [Adverb: rápidamente] + [Purpose (para): para ir a la escuela]"
+    },
+    {
+      spanish: "Mi padre se afeita la cara antes de desayunar",
+      english: "My father shaves his face before having breakfast",
+      distractors: ["me", "afeitan", "el"],
+      hint: "Reflexive 'afeitarse' for 3rd person singular.",
+      syntaxBreakdown: "[Subject: Mi padre] + [Reflexive Pronoun: se] + [Conjugated Verb: afeita] + [Direct Object: la cara] + [Time Clause: antes de desayunar]"
+    },
+    {
+      spanish: "Tú te duermes temprano cuando estás muy cansado",
+      english: "You fall asleep early when you are very tired",
+      distractors: ["se", "duermen", "duermo"],
+      hint: "Dormirse (o -> ue) indicates falling asleep.",
+      syntaxBreakdown: "[Subject: Tú] + [Reflexive Pronoun: te] + [Stem-Changing Verb (o->ue): duermes] + [Adverb: temprano] + [State Clause: cuando estás muy cansado]"
+    },
+    {
+      spanish: "Ella se pone una chaqueta abrigada porque hace frío",
+      english: "She puts on a warm jacket because it is cold",
+      distractors: ["me", "ponen", "por"],
+      hint: "Ponerse expresses putting on clothing.",
+      syntaxBreakdown: "[Subject: Ella] + [Reflexive Pronoun: se] + [Conjugated Verb: pone] + [Direct Object: una chaqueta abrigada] + [Causal Clause: porque hace frío]"
+    },
+    {
+      spanish: "Tenemos que terminar el informe médico para el lunes",
+      english: "We have to finish the medical report for Monday",
+      distractors: ["por", "termino", "la"],
+      hint: "Use 'para' to express a future deadline or due date.",
+      syntaxBreakdown: "[Obligation Phrase: Tenemos que terminar] + [Direct Object: el informe médico] + [Deadline (para): para el lunes]"
+    },
+    {
+      spanish: "Ella va a la clínica para visitar a su tía enferma",
+      english: "She goes to the clinic to visit her sick aunt",
+      distractors: ["por", "visita", "al"],
+      hint: "Use 'para' before an infinitive to state purpose or goal.",
+      syntaxBreakdown: "[Subject: Ella] + [Verb & Destination: va a la clínica] + [Purpose (para + inf.): para visitar] + [Personal 'a' + Object: a su tía enferma]"
+    },
+    {
+      spanish: "Pagué veinte dólares por el jarabe para la tos",
+      english: "I paid twenty dollars for the cough syrup",
+      distractors: ["a", "pago", "al"],
+      hint: "Use 'por' for cost, money, or exchange, and 'para' for purpose or remedy ('para la tos').",
+      syntaxBreakdown: "[Subject & Verb: Pagué] + [Amount: veinte dólares] + [Exchange (por): por el jarabe] + [Purpose (para): para la tos]"
+    },
+    {
+      spanish: "Caminamos por el parque durante media hora cada tarde",
+      english: "We walk through the park for half an hour every afternoon",
+      distractors: ["para", "camino", "la"],
+      hint: "Use 'por' for movement through, along, or around an area.",
+      syntaxBreakdown: "[Verb: Caminamos] + [Path / Movement (por): por el parque] + [Duration: durante media hora] + [Frequency: cada tarde]"
+    },
+    {
+      spanish: "Gracias por ayudarme con las medicinas de mi abuela",
+      english: "Thank you for helping me with my grandmother's medicines",
+      distractors: ["para", "ayudar", "la"],
+      hint: "Always use 'por' after 'gracias' to express gratitude for an action.",
+      syntaxBreakdown: "[Gratitude (por): Gracias por] + [Infinitive + Pronoun: ayudarme] + [Prepositional Phrase: con las medicinas de mi abuela]"
+    },
+    {
+      spanish: "Mis primos y yo nos escribimos mensajes todas las semanas",
+      english: "My cousins and I text each other every week",
+      distractors: ["se", "escriben", "los"],
+      hint: "Reciprocal action for 1st person plural ('nosotros nos escribimos').",
+      syntaxBreakdown: "[Subject: Mis primos y yo] + [Reciprocal Pronoun: nos] + [Conjugated Verb: escribimos] + [Direct Object: mensajes] + [Frequency: todas las semanas]"
+    },
+    {
+      spanish: "Ellos no se entienden bien cuando discuten sobre política",
+      english: "They do not understand each other well when they argue about politics",
+      distractors: ["nos", "entiende", "por"],
+      hint: "Reciprocal verb expressing mutual comprehension with plural pronoun 'se'.",
+      syntaxBreakdown: "[Subject: Ellos] + [Negation & Reciprocal: no se entienden] + [Adverb: bien] + [Time Clause: cuando discuten sobre política]"
+    },
+    {
+      spanish: "Los dos hermanos siempre se apoyan en los momentos difíciles",
+      english: "The two brothers always support each other in difficult moments",
+      distractors: ["nos", "apoya", "el"],
+      hint: "Reciprocal verb 'apoyarse' expressing mutual emotional support.",
+      syntaxBreakdown: "[Subject: Los dos hermanos] + [Frequency: siempre] + [Reciprocal Pronoun: se] + [Reciprocal Verb: apoyan] + [Circumstance: en los momentos difíciles]"
+    },
+    {
+      spanish: "A menudo me cepillo los dientes tres veces al día",
+      english: "I often brush my teeth three times a day",
+      distractors: ["te", "cepilla", "por"],
+      hint: "'A menudo' is an adverb of frequency ('often').",
+      syntaxBreakdown: "[Frequency Adverb: A menudo] + [Reflexive Pronoun: me] + [Conjugated Verb: cepillo] + [Direct Object: los dientes] + [Frequency: tres veces al día]"
+    },
+    {
+      spanish: "Casi nunca me enfermo durante el invierno",
+      english: "I almost never get sick during the winter",
+      distractors: ["te", "enferma", "por"],
+      hint: "'Casi nunca' expresses 'almost never' with reflexive 'enfermarse'.",
+      syntaxBreakdown: "[Frequency Adverb: Casi nunca] + [Reflexive Pronoun: me] + [Conjugated Verb: enfermo] + [Time Phrase: durante el invierno]"
+    },
+    {
+      spanish: "De vez en cuando nos reunimos con el doctor para un chequeo",
+      english: "From time to time we meet with the doctor for a checkup",
+      distractors: ["se", "reúnen", "por"],
+      hint: "'De vez en cuando' is an idiom for 'from time to time / occasionally'.",
+      syntaxBreakdown: "[Frequency Idiom: De vez en cuando] + [Reciprocal/Reflexive Pronoun: nos] + [Conjugated Verb: reunimos] + [Companion: con el doctor] + [Purpose (para): para un chequeo]"
     },
     {
       spanish: "Yo me voy a acostar temprano esta noche",
@@ -544,11 +649,11 @@ export const SENTENCE_POOLS = {
       syntaxBreakdown: "[Subject: Mis abuelos] + [Reciprocal Pronoun: se] + [Reciprocal Verb: miran] + [Manner: con mucho cariño y amor]"
     },
     {
-      spanish: "Los dos hermanos se abrazan con alegría en el aeropuerto",
-      english: "The two brothers hug each other with joy at the airport",
-      distractors: ["abrazamos", "abraza", "abrazarse"],
-      hint: "Reciprocal verb expressing mutual action for plural subjects.",
-      syntaxBreakdown: "[Subject: Los dos hermanos] + [Reciprocal Pronoun: se] + [Reciprocal Verb: abrazan] + [Manner: con alegría] + [Location: en el aeropuerto]"
+      spanish: "El paciente se siente mejor después de descansar",
+      english: "The patient feels better after resting",
+      distractors: ["me", "sienten", "un"],
+      hint: "Reflexive verb sentirse for 3rd person singular.",
+      syntaxBreakdown: "[Subject: El paciente] + [Reflexive Pronoun: se] + [Conjugated Verb: siente] + [Adverb: mejor] + [Time Clause: después de descansar]"
     },
     {
       spanish: "Nosotros nos vemos todos los días en la cafetería",

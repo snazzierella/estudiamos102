@@ -21,7 +21,7 @@ function resolveMistakeItem(spanishWord) {
   const vocabMatch = vocabularyData.find(item => 
     item.spanish && item.spanish.trim().toLowerCase() === target
   );
-  if (vocabMatch) return vocabMatch;
+  if (vocabMatch) return { ...vocabMatch, rawMistake: spanishWord };
 
   // 2. Syllabus / Stage sentences match
   const sentenceMatch = ALL_SENTENCE_ITEMS.find(s => 
@@ -34,7 +34,8 @@ function resolveMistakeItem(spanishWord) {
       category: "Sentences",
       subcategory: "Syllabus Sentences",
       unit: "Sentences",
-      isSentence: true
+      isSentence: true,
+      rawMistake: spanishWord
     };
   }
 
@@ -44,7 +45,7 @@ function resolveMistakeItem(spanishWord) {
     const itemNorm = item.spanish.trim().toLowerCase();
     return itemNorm.startsWith(target) || target.startsWith(itemNorm);
   });
-  if (partialMatch) return partialMatch;
+  if (partialMatch) return { ...partialMatch, rawMistake: spanishWord };
 
   // 4. Safe fallback item
   return {
@@ -52,7 +53,8 @@ function resolveMistakeItem(spanishWord) {
     english: spanishWord.trim(),
     category: "Vocabulary",
     subcategory: "Mistakes Review",
-    unit: "Review"
+    unit: "Review",
+    rawMistake: spanishWord
   };
 }
 
@@ -69,6 +71,8 @@ const SYNONYM_GROUPS = [
   ["apartamento", "departamento", "apartment"],
   ["lápiz", "lapiz", "pencil"],
   ["esposa", "mujer", "wife", "woman"],
+  ["me", "to me", "(to) me", "indirect object (to) me", "indirect object: (to) me"],
+  ["a", "to / at", "to/at", "to", "at"],
 ];
 
 const cleanAnswer = (str) => {
@@ -104,11 +108,23 @@ const compareAnswers = (correct, user) => {
   if (checkSynonyms(correct, user)) return true;
   if (checkSynonyms(stripArticles(correct), stripArticles(user))) return true;
 
+  // Normalized slash matching (e.g., "to / at" and "to/at")
+  const normCorrect = cleanAnswer(correct).replace(/\//g, " ").replace(/\s+/g, " ");
+  const normUser = cleanAnswer(user).replace(/\//g, " ").replace(/\s+/g, " ");
+  if (normCorrect && normUser && normCorrect === normUser) return true;
+
   if (correct.includes("/")) {
     const parts = correct.split("/");
     for (let part of parts) {
       if (checkSynonyms(part, user)) return true;
       if (checkSynonyms(stripArticles(part), stripArticles(user))) return true;
+    }
+  }
+  if (user.includes("/")) {
+    const userParts = user.split("/");
+    for (let uPart of userParts) {
+      if (checkSynonyms(correct, uPart)) return true;
+      if (checkSynonyms(stripArticles(correct), stripArticles(uPart))) return true;
     }
   }
   return false;
@@ -172,9 +188,18 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
       }
     }
 
+    const isSentenceItem = Boolean(
+      item.isSentence ||
+      item.category === "Sentences" ||
+      (typeof item.spanish === 'string' && item.spanish.length > 25 && item.spanish.includes(" "))
+    );
+
     // Determine question type: 0 = MC es->en, 1 = MC en->es, 2 = typing en->es
     let qType = Math.floor(Math.random() * 3);
-    if (qType === 2 && (item.isSentence || item.spanish.includes("/") || item.spanish.includes("(") || item.spanish.length > 25)) {
+    if (isSentenceItem) {
+      // Sentences are always multiple choice between full sentence options
+      qType = Math.random() > 0.5 ? 0 : 1;
+    } else if (qType === 2 && (item.spanish.includes("/") || item.spanish.includes("(") || item.spanish.length > 25)) {
       qType = Math.random() > 0.5 ? 0 : 1;
     }
 
@@ -185,24 +210,44 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
     // Generate distractors
     const distractors = [];
     let attempts = 0;
-    while (distractors.length < 3 && attempts < 50) {
-      attempts++;
-      const rand = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
-      const val = isEsToEn ? formatEnglishPrompt(rand.spanish, rand.english) : rand.spanish;
-      if (
-        val &&
-        val.toLowerCase() !== correctText.toLowerCase() &&
-        !checkSynonyms(val, correctText) &&
-        !distractors.includes(val) &&
-        val.length < 45
-      ) {
-        distractors.push(val);
+
+    if (isSentenceItem && ALL_SENTENCE_ITEMS.length >= 3) {
+      // Pick 3 full sentence distractors
+      while (distractors.length < 3 && attempts < 60) {
+        attempts++;
+        const rand = ALL_SENTENCE_ITEMS[Math.floor(Math.random() * ALL_SENTENCE_ITEMS.length)];
+        const val = isEsToEn ? rand.english : rand.spanish;
+        if (
+          val &&
+          val.toLowerCase() !== correctText.toLowerCase() &&
+          !checkSynonyms(val, correctText) &&
+          !distractors.includes(val)
+        ) {
+          distractors.push(val);
+        }
+      }
+    } else {
+      // Pick vocabulary distractors
+      while (distractors.length < 3 && attempts < 50) {
+        attempts++;
+        const rand = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
+        const val = isEsToEn ? formatEnglishPrompt(rand.spanish, rand.english) : rand.spanish;
+        if (
+          val &&
+          val.toLowerCase() !== correctText.toLowerCase() &&
+          !checkSynonyms(val, correctText) &&
+          !distractors.includes(val) &&
+          val.length < 45
+        ) {
+          distractors.push(val);
+        }
       }
     }
 
     setQuestion({
       item,
       isConjugation: false,
+      isSentenceItem,
       type: qType, // 0: MC es->en, 1: MC en->es, 2: typing en->es
       questionWord: questionText,
       correct: correctText,
@@ -300,14 +345,19 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
       heal(10);
       
       const spanishKey = question.item.spanish;
+      const rawKey = question.item.rawMistake;
       setClearedWords(prev => {
         const next = new Set(prev);
-        next.add(spanishKey.trim().toLowerCase());
+        if (spanishKey) next.add(spanishKey.trim().toLowerCase());
+        if (rawKey) next.add(rawKey.trim().toLowerCase());
         return next;
       });
 
       // Safely remove word from global mistake queue in parent state
-      removeMistake(spanishKey);
+      if (spanishKey) removeMistake(spanishKey);
+      if (rawKey && rawKey.trim().toLowerCase() !== spanishKey?.trim().toLowerCase()) {
+        removeMistake(rawKey);
+      }
       setTimeout(() => setHealTrigger(false), 500);
     } else {
       setShakeTrigger(true);
@@ -621,10 +671,16 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
               ) : (
                 <>
                   <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: '4px' }}>
-                    {isTyping ? "Write Translation" : "Translate Word / Sentence"}
+                    {isTyping ? "Write Translation" : (currentQ.isSentenceItem ? "Choose Matching Sentence Translation" : "Translate Word / Sentence")}
                   </div>
                   <div>
-                    <div className="quiz-word" style={{ fontSize: '2rem' }}>{currentQ.questionWord}</div>
+                    <div className="quiz-word" style={{ 
+                      fontSize: currentQ.questionWord?.length > 40 ? '1.35rem' : (currentQ.questionWord?.length > 25 ? '1.65rem' : '2rem'),
+                      lineHeight: '1.35',
+                      maxWidth: '650px',
+                      margin: '0 auto',
+                      wordBreak: 'break-word'
+                    }}>{currentQ.questionWord}</div>
                     <button 
                       onClick={() => speakSpanish(currentItem.spanish)}
                       style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '8px' }}
@@ -677,7 +733,7 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
             )}
           </form>
         ) : (
-          <div className="quiz-choices-grid">
+          <div className="quiz-choices-grid" style={currentQ.isSentenceItem ? { gridTemplateColumns: '1fr', gap: '12px' } : {}}>
             {currentQ.choices.map((choice, i) => {
               const isChoiceSelected = selectedChoice === choice;
               const isThisCorrect = choice.trim().toLowerCase() === currentQ.correct.trim().toLowerCase() ||
@@ -695,6 +751,15 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
                 <button
                   key={i}
                   className={`quiz-choice-btn ${btnClass}`}
+                  style={currentQ.isSentenceItem ? {
+                    minHeight: '48px',
+                    padding: '12px 18px',
+                    textAlign: 'left',
+                    fontSize: '0.98rem',
+                    lineHeight: '1.4',
+                    whiteSpace: 'normal',
+                    wordBreak: 'break-word'
+                  } : {}}
                   disabled={answered}
                   onClick={() => handleChoiceAnswer(choice)}
                 >

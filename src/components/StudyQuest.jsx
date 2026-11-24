@@ -502,13 +502,15 @@ export default function StudyQuest({
 
   // Listen for user fainting during an active Quest Campaign level
   useEffect(() => {
-    if (state.fainted && questStarted) {
+    if (state.fainted && questStarted && !redemptionActive) {
       setQuestStarted(false);
-      const finalMissed = [...questMissedQuestions];
-      if (currentQuestQ && !finalMissed.some(q => q.questionWord === currentQuestQ.questionWord)) {
-        finalMissed.push(currentQuestQ);
-      }
-      setRedemptionQuestions(finalMissed);
+      setRedemptionQuestions(() => {
+        const list = [...questMissedQuestions];
+        if (currentQuestQ && !list.some(q => q.questionWord === currentQuestQ.questionWord)) {
+          list.push(currentQuestQ);
+        }
+        return list;
+      });
       setRedemptionActive(true);
 
       setQuestFinished(false);
@@ -522,7 +524,7 @@ export default function StudyQuest({
       setRedemptionHintRevealed(false);
       setComboCount(0);
     }
-  }, [state.fainted, questStarted]);
+  }, [state.fainted, questStarted, redemptionActive, currentQuestQ, questMissedQuestions]);
 
   // Autoplay TTS for card introductions
   useEffect(() => {
@@ -2058,7 +2060,7 @@ export default function StudyQuest({
     const userStr = redemptionTyped;
     const isCorrect = currentQ.isConjugation
       ? cleanConjugationInput(userStr, correctStr)
-      : cleanAnswer(correctStr) === cleanAnswer(userStr);
+      : compareAnswers(correctStr, userStr);
     setRedemptionSelected(userStr);
 
     if (isCorrect) {
@@ -2098,13 +2100,51 @@ export default function StudyQuest({
 
   const handleCancelRedemption = () => {
     setRedemptionActive(false);
+    setRedemptionSuccess(false);
+    setRedemptionFailed(false);
+    setRedemptionQuestions([]);
     setQuestMissedQuestions([]);
+    setQuestStarted(false);
+    setQuestQuestions([]);
+    setQuestCurrentIdx(0);
+  };
+
+  const handleClaimAndExit = () => {
+    revive(10);
+    setRedemptionActive(false);
+    setRedemptionSuccess(false);
+    setRedemptionFailed(false);
+    setRedemptionQuestions([]);
+    setQuestMissedQuestions([]);
+    setQuestStarted(false);
+    setQuestQuestions([]);
+    setQuestCurrentIdx(0);
   };
 
   const handleClaimRedemption = () => {
     revive(10);
     setRedemptionActive(false);
+    setRedemptionSuccess(false);
+    setRedemptionFailed(false);
+    setRedemptionQuestions([]);
     setQuestMissedQuestions([]);
+
+    // Continue the quiz from the exact point where the user failed
+    if (questQuestions && questQuestions.length > 0 && questCurrentIdx < questQuestions.length) {
+      setQuestAnswered(false);
+      setQuestSelected(null);
+      setTypedAnswer("");
+      setQuestHintRevealed(false);
+      setQuestFlipped(false);
+      setQuestFinished(false);
+      setEarlyBossFailed(false);
+      setShakeTrigger(false);
+      setHealTrigger(false);
+      setQuestStarted(true);
+      setActiveTab("quest");
+    } else {
+      setQuestStarted(false);
+    }
   };
 
   const finishQuestSession = () => {
@@ -4109,6 +4149,7 @@ export default function StudyQuest({
               {currentQuestQ.isSentenceBuilder ? (
                 <div style={{ marginTop: '10px' }}>
                   <SentenceBuilder
+                    key={`quest-sb-${questCurrentIdx}-${questStarted ? 'active' : 'paused'}`}
                     question={currentQuestQ}
                     onAnswer={handleQuestSentenceAnswer}
                     answered={questAnswered}
@@ -5160,7 +5201,9 @@ export default function StudyQuest({
           </div>
 
           <div style={{ padding: '8px 12px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--warning)', textAlign: 'center', marginBottom: '16px', fontWeight: '500' }}>
-            Answer all missed questions correctly to revive with 10 HP!
+            {questQuestions.length > 0
+              ? `Answer all missed questions correctly to revive with 10 HP and continue Level ${activeQuestLevel} at Question ${questCurrentIdx + 1} of ${questQuestions.length}!`
+              : "Answer all missed questions correctly to revive with 10 HP!"}
           </div>
 
           {/* Question card */}
@@ -5299,11 +5342,22 @@ export default function StudyQuest({
                     <div style={{ fontSize: '3rem', marginBottom: '10px' }}>💖</div>
                     <h3 style={{ color: 'var(--accent)', marginBottom: '10px' }}>Redemption Successful!</h3>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>
-                      Excellent! You answered all missed questions correctly.
+                      {questQuestions.length > 0 
+                        ? `Excellent! You answered all missed questions correctly. You can now revive with 10 HP and continue your level from Question ${questCurrentIdx + 1} of ${questQuestions.length}!`
+                        : "Excellent! You answered all missed questions correctly."}
                     </p>
-                    <button className="btn btn-accent" onClick={handleClaimRedemption} style={{ width: '100%', maxWidth: '240px', margin: '0 auto' }}>
-                      Claim & Revive (10 HP)
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '320px', margin: '0 auto' }}>
+                      <button className="btn btn-accent" onClick={handleClaimRedemption} style={{ width: '100%' }}>
+                        {questQuestions.length > 0
+                          ? `💖 Revive & Continue Level (${questCurrentIdx + 1}/${questQuestions.length})`
+                          : "Claim & Revive (10 HP)"}
+                      </button>
+                      {questQuestions.length > 0 && (
+                        <button className="btn btn-secondary" onClick={handleClaimAndExit} style={{ width: '100%' }}>
+                          Exit to Level Map
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div>

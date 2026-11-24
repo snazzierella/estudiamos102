@@ -3,6 +3,10 @@ import vocabularyData from '../data/vocabulary.json';
 import { STAGES, formatEnglishPrompt } from '../utils/difficultyMapper';
 import { 
   generateConjugationQuestion, 
+  generatePreteriteTranslationMC,
+  getPreteriteFlashcardDetails,
+  getVocabKey,
+  isPreteriteFocusItem,
   generateFillInTheBlank, 
   conjugate,
   isVerbItem,
@@ -524,7 +528,10 @@ export default function StudyQuest({
   useEffect(() => {
     if (questStarted && currentQuestQ && currentQuestQ.isCardIntro && state.autoSpeak) {
       if (!questFlipped) {
-        speakSpanish(currentQuestQ.item.spanish);
+        const pretDetails = isPreteriteFocusItem(currentQuestQ.item)
+          ? getPreteriteFlashcardDetails(currentQuestQ.item, state.excludeVosotros)
+          : null;
+        speakSpanish(pretDetails ? pretDetails.speechText : currentQuestQ.item.spanish);
       }
     }
   }, [questStarted, questCurrentIdx, questFlipped]);
@@ -755,6 +762,38 @@ export default function StudyQuest({
   // -------------------------------------------------------------
   // QUEST CAMPAIGN CORE LOGIC
   // -------------------------------------------------------------
+  const getPreteriteDifficultyTier = (item, levelVal = null, sessionIdx = 0, sessionTotal = 1) => {
+    const mastery = state.wordMastery?.[getVocabKey(item)] ?? 2;
+    if (levelVal !== null) {
+      if (levelVal >= 14 || mastery >= 4) return 3;
+      if (levelVal >= 6 || mastery >= 3) return 2;
+      return 1;
+    }
+    const progress = sessionTotal > 1 ? sessionIdx / sessionTotal : 0;
+    if (mastery >= 4 || sessionIdx >= 6 || progress >= 0.65) return 3;
+    if (mastery >= 3 || sessionIdx >= 3 || progress >= 0.3) return 2;
+    return 1;
+  };
+
+  const buildPreteriteDrillStep = (item, options = {}) => {
+    const tier = options.difficultyTier || getPreteriteDifficultyTier(
+      item,
+      options.levelVal ?? null,
+      options.sessionIdx ?? 0,
+      options.sessionTotal ?? 1
+    );
+    const qSpec = generatePreteriteTranslationMC(item, {
+      difficultyTier: tier,
+      excludeVosotros: state.excludeVosotros,
+      allowTyped: Boolean(options.allowTyped)
+    });
+    if (!qSpec) return null;
+    return {
+      item,
+      ...qSpec
+    };
+  };
+
   const buildProgressiveQuizStep = (item, L, allowConjugation = false) => {
     const fillSpec = generateFillInTheBlank(item);
     if (fillSpec) {
@@ -774,6 +813,7 @@ export default function StudyQuest({
     }
 
     const isVerb = isVerbItem(item) && !isSentenceItem(item);
+    const isPretFocus = isPreteriteFocusItem(item);
 
     let format = "mc"; // "mc", "conjugation", "typing", "sentenceBuilder"
     
@@ -835,6 +875,14 @@ export default function StudyQuest({
           choices: []
         };
       }
+    }
+
+    if (isPretFocus) {
+      const drillStep = buildPreteriteDrillStep(item, {
+        levelVal: L,
+        allowTyped: L >= 15 && Math.random() < 0.35
+      });
+      if (drillStep) return drillStep;
     }
 
     if (format === "conjugation") {
@@ -907,7 +955,7 @@ export default function StudyQuest({
     const questionText = isEsToEn ? item.spanish : formatEnglishPrompt(item.spanish, item.english);
 
     const distractors = [];
-    const answeredCorrectlyBefore = state.wordsAnsweredCorrectly?.includes(item.spanish);
+    const answeredCorrectlyBefore = state.wordsAnsweredCorrectly?.includes(getVocabKey(item));
 
     if (answeredCorrectlyBefore) {
       const sameSub = vocabularyData.filter(rand => rand.subcategory === item.subcategory);
@@ -1003,7 +1051,8 @@ export default function StudyQuest({
     const wordMastery = state.wordMastery || {};
     const weightedItems = [];
     stageItemsRaw.forEach(item => {
-      const rating = wordMastery[item.spanish] !== undefined ? wordMastery[item.spanish] : 2;
+      const key = getVocabKey(item);
+      const rating = wordMastery[key] !== undefined ? wordMastery[key] : 2;
       const weight = rating <= 2 ? 3 : 1;
       for (let w = 0; w < weight; w++) {
         weightedItems.push(item);
@@ -1015,9 +1064,10 @@ export default function StudyQuest({
       const seen = new Set(excludeSet);
       const shuffled = [...weighted].sort(() => Math.random() - 0.5);
       for (let x of shuffled) {
-        if (!seen.has(x.spanish)) {
+        const key = getVocabKey(x);
+        if (!seen.has(key)) {
           result.push(x);
-          seen.add(x.spanish);
+          seen.add(key);
         }
         if (result.length === count) break;
       }
@@ -1031,7 +1081,7 @@ export default function StudyQuest({
     // Full sentences (like "a ellos les gusta besarse bajo la lluvia") and conversational phrases
     // must NEVER be presented as flashcard introductions!
     const flashcardEligibleStageItems = stageItems.filter(item => isEligibleForFlashcard(item));
-    const unseenStageItems = flashcardEligibleStageItems.filter(item => !seenWords.includes(item.spanish));
+    const unseenStageItems = flashcardEligibleStageItems.filter(item => !seenWords.includes(getVocabKey(item)));
 
     const isUnit1 = stageVal === 1;
     let finalQuestions = [];
@@ -1365,8 +1415,14 @@ export default function StudyQuest({
       const seenStageVerbs = new Set();
       for (const vItem of stageVerbs) {
         if (chosenConjugations.length >= 10) break;
-        if (!seenStageVerbs.has(vItem.spanish)) {
-          seenStageVerbs.add(vItem.spanish);
+        const vKey = getVocabKey(vItem);
+        if (!seenStageVerbs.has(vKey)) {
+          seenStageVerbs.add(vKey);
+          if (isPreteriteFocusItem(vItem)) {
+            const drillStep = buildPreteriteDrillStep(vItem, { levelVal: 20, allowTyped: Math.random() < 0.35 });
+            if (drillStep) chosenConjugations.push(drillStep);
+            continue;
+          }
           const qSpec = generateConjugationQuestion(vItem, { 
             tense: stageTense, 
             excludeVosotros: state.excludeVosotros 
@@ -1400,7 +1456,7 @@ export default function StudyQuest({
 
       // Fill remaining spots with vocabulary/grammar steps
       const otherStageItems = stageItems.filter(item => 
-        !seenStageVerbs.has(item.spanish) && !seenFills.has(item.spanish)
+        !seenStageVerbs.has(getVocabKey(item)) && !seenFills.has(item.spanish)
       ).sort(() => Math.random() - 0.5);
 
       const chosenVocab = [];
@@ -1464,7 +1520,7 @@ export default function StudyQuest({
         const takeUnseen = unseenStageItems.slice(0, cardCount);
         selectedFlashcards.push(...takeUnseen);
 
-        const newlySeen = takeUnseen.map(item => item.spanish);
+        const newlySeen = takeUnseen.map(item => getVocabKey(item));
         if (newlySeen.length > 0 && markFlashcardsSeen) {
           markFlashcardsSeen(newlySeen);
         }
@@ -1478,10 +1534,12 @@ export default function StudyQuest({
       // STRICT PEDAGOGICAL GUARANTEE:
       // A word MUST be seen in a flashcard (either in seenWords or in current selectedFlashcards)
       // before it can EVER appear in a standalone quiz question!
-      const currentlyIntroduced = selectedFlashcards.map(item => item.spanish);
-      const eligibleStageItems = stageItems.filter(item => 
-        seenWords.includes(item.spanish) || currentlyIntroduced.includes(item.spanish)
-      );
+      const currentlyIntroduced = selectedFlashcards.map(item => getVocabKey(item));
+      const currentlyIntroducedSet = new Set(currentlyIntroduced);
+      const eligibleStageItems = stageItems.filter(item => {
+        const key = getVocabKey(item);
+        return seenWords.includes(key) || currentlyIntroducedSet.has(key);
+      });
 
       // 1. Sentence Builder questions (scaling upward by level)
       let targetSentenceCount = 2;
@@ -1535,16 +1593,33 @@ export default function StudyQuest({
         }
       }
 
-      // 3. Verb Conjugations (strictly for verbs that have been introduced)
-      const eligibleVerbs = eligibleStageItems.filter(item => isVerbItem(item) && !isSentenceItem(item)).sort(() => Math.random() - 0.5);
+      // 3. Verb Conjugations (strictly for verbs that have been introduced; prioritize newly introduced preterite flashcards)
+      const allEligibleVerbs = eligibleStageItems.filter(item => isVerbItem(item) && !isSentenceItem(item));
+      const newPretVerbs = allEligibleVerbs
+        .filter(item => currentlyIntroducedSet.has(getVocabKey(item)) && isPreteriteFocusItem(item))
+        .sort(() => Math.random() - 0.5);
+      const otherEligibleVerbs = allEligibleVerbs
+        .filter(item => !(currentlyIntroducedSet.has(getVocabKey(item)) && isPreteriteFocusItem(item)))
+        .sort(() => Math.random() - 0.5);
+      const eligibleVerbs = [...newPretVerbs, ...otherEligibleVerbs];
+
       const stageTense = (stageVal === 5) ? "imperfect" : ((stageVal >= 3) ? "preterite" : "present");
-      const targetConjugationCount = isReview ? 4 : (levelVal >= 6 ? 3 : 2);
+      const targetConjugationCount = isReview ? 4 : Math.max(newPretVerbs.length, levelVal >= 6 ? 3 : 2);
       const chosenConjugations = [];
       const seenVerbNames = new Set();
       for (const vItem of eligibleVerbs) {
         if (chosenConjugations.length >= targetConjugationCount) break;
-        if (!seenVerbNames.has(vItem.spanish)) {
-          seenVerbNames.add(vItem.spanish);
+        const vKey = getVocabKey(vItem);
+        if (!seenVerbNames.has(vKey)) {
+          seenVerbNames.add(vKey);
+          if (isPreteriteFocusItem(vItem)) {
+            const drillStep = buildPreteriteDrillStep(vItem, {
+              levelVal,
+              allowTyped: levelVal >= 15 && Math.random() < 0.3
+            });
+            if (drillStep) chosenConjugations.push(drillStep);
+            continue;
+          }
           const qSpec = generateConjugationQuestion(vItem, { tense: stageTense, excludeVosotros: state.excludeVosotros });
           if (qSpec) {
             chosenConjugations.push({
@@ -1668,6 +1743,22 @@ export default function StudyQuest({
   // -------------------------------------------------------------
   // WRITTEN TRANSLATION SUBMIT HANDLERS
   // -------------------------------------------------------------
+  const recordItemOutcome = (item, isCorrect, { recordCorrectly = false } = {}) => {
+    if (!item) return;
+    const key = getVocabKey(item);
+    if (!key) return;
+    if (updateWordMastery) {
+      updateWordMastery(key, isCorrect);
+    }
+    if (isCorrect) {
+      if (recordCorrectly && recordWordAnsweredCorrectly) {
+        recordWordAnsweredCorrectly(key);
+      }
+    } else if (addMistake) {
+      addMistake(key);
+    }
+  };
+
   const handleQuestSubmitTyped = (e) => {
     e.preventDefault();
     if (questAnswered || !typedAnswer.trim()) return;
@@ -1676,54 +1767,39 @@ export default function StudyQuest({
     const currentQ = questQuestions[questCurrentIdx];
     const correctStr = currentQ.correct;
     const userStr = typedAnswer;
-    const isCorrect = compareAnswers(correctStr, userStr);
+    const isCorrect = currentQ.isConjugation
+      ? cleanConjugationInput(userStr, correctStr)
+      : compareAnswers(correctStr, userStr);
 
     if (isCorrect) {
       setQuestScore(prev => prev + 1);
       setQuestSelected(correctStr);
       setHealTrigger(true);
       playSound('correct');
-      
-      // Update Leitner SRS
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, true);
-      }
+      recordItemOutcome(currentQ.item, true, { recordCorrectly: true });
 
-      // Combo count increment
       setComboCount(prev => {
         const next = prev + 1;
         setMaxCombo(m => Math.max(m, next));
         return next;
       });
-
-      if (recordWordAnsweredCorrectly && currentQ.item) {
-        recordWordAnsweredCorrectly(currentQ.item.spanish);
-      }
       setTimeout(() => setHealTrigger(false), 500);
     } else {
       setQuestSelected(userStr);
       setShakeTrigger(true);
       playSound('wrong');
-      
-      setComboCount(0); // reset combo
+      setComboCount(0);
 
       if (activeQuestIsEarlyBoss) {
         setEarlyBossFailed(true);
       }
 
-      // Update Leitner SRS
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, false);
-      }
+      recordItemOutcome(currentQ.item, false);
 
       setQuestMissedQuestions(prev => {
         if (prev.some(q => q.questionWord === currentQ.questionWord)) return prev;
         return [...prev, currentQ];
       });
-
-      if (addMistake && currentQ.item) {
-        addMistake(currentQ.item.spanish);
-      }
 
       takeDamage(15);
       setTimeout(() => setShakeTrigger(false), 500);
@@ -1747,20 +1823,13 @@ export default function StudyQuest({
       setPracticeSelected(correctStr);
       setHealTrigger(true);
       playSound('correct');
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, true);
-      }
+      recordItemOutcome(currentQ.item, true);
       setTimeout(() => setHealTrigger(false), 500);
     } else {
       setPracticeSelected(userStr);
       setShakeTrigger(true);
       playSound('wrong');
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, false);
-      }
-      if (addMistake && currentQ.item) {
-        addMistake(currentQ.item.spanish);
-      }
+      recordItemOutcome(currentQ.item, false);
       // Zero damage in practice mode!
       setTimeout(() => setShakeTrigger(false), 500);
     }
@@ -1778,19 +1847,12 @@ export default function StudyQuest({
       setPracticeScore(prev => prev + 1);
       setHealTrigger(true);
       playSound('correct');
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, true);
-      }
+      recordItemOutcome(currentQ.item, true);
       setTimeout(() => setHealTrigger(false), 500);
     } else {
       setShakeTrigger(true);
       playSound('wrong');
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, false);
-      }
-      if (addMistake && currentQ.item) {
-        addMistake(currentQ.item.spanish);
-      }
+      recordItemOutcome(currentQ.item, false);
       // Zero damage in practice mode!
       setTimeout(() => setShakeTrigger(false), 500);
     }
@@ -1806,19 +1868,12 @@ export default function StudyQuest({
       setPracticeScore(prev => prev + 1);
       setHealTrigger(true);
       playSound('correct');
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, true);
-      }
+      recordItemOutcome(currentQ.item, true);
       setTimeout(() => setHealTrigger(false), 500);
     } else {
       setShakeTrigger(true);
       playSound('wrong');
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, false);
-      }
-      if (addMistake && currentQ.item) {
-        addMistake(currentQ.item.spanish);
-      }
+      recordItemOutcome(currentQ.item, false);
       // Zero damage in practice mode!
       setTimeout(() => setShakeTrigger(false), 500);
     }
@@ -1872,20 +1927,13 @@ export default function StudyQuest({
       setQuestScore(prev => prev + 1);
       setHealTrigger(true);
       playSound('correct');
-      
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, true);
-      }
+      recordItemOutcome(currentQ.item, true, { recordCorrectly: true });
 
       setComboCount(prev => {
         const next = prev + 1;
         setMaxCombo(m => Math.max(m, next));
         return next;
       });
-
-      if (recordWordAnsweredCorrectly && currentQ.item) {
-        recordWordAnsweredCorrectly(currentQ.item.spanish);
-      }
       setTimeout(() => setHealTrigger(false), 500);
     } else {
       setShakeTrigger(true);
@@ -1896,18 +1944,12 @@ export default function StudyQuest({
         setEarlyBossFailed(true);
       }
 
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, false);
-      }
+      recordItemOutcome(currentQ.item, false);
 
       setQuestMissedQuestions(prev => {
         if (prev.some(q => q.questionWord === currentQ.questionWord)) return prev;
         return [...prev, currentQ];
       });
-
-      if (addMistake && currentQ.item) {
-        addMistake(currentQ.item.spanish);
-      }
 
       takeDamage(15);
       setTimeout(() => setShakeTrigger(false), 500);
@@ -1924,20 +1966,13 @@ export default function StudyQuest({
       setQuestScore(prev => prev + 1);
       setHealTrigger(true);
       playSound('correct');
-      
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, true);
-      }
+      recordItemOutcome(currentQ.item, true, { recordCorrectly: true });
 
       setComboCount(prev => {
         const next = prev + 1;
         setMaxCombo(m => Math.max(m, next));
         return next;
       });
-
-      if (recordWordAnsweredCorrectly && currentQ.item) {
-        recordWordAnsweredCorrectly(currentQ.item.spanish);
-      }
       setTimeout(() => setHealTrigger(false), 500);
     } else {
       setShakeTrigger(true);
@@ -1948,18 +1983,12 @@ export default function StudyQuest({
         setEarlyBossFailed(true);
       }
 
-      if (updateWordMastery && currentQ.item) {
-        updateWordMastery(currentQ.item.spanish, false);
-      }
+      recordItemOutcome(currentQ.item, false);
 
       setQuestMissedQuestions(prev => {
         if (prev.some(q => q.questionWord === currentQ.questionWord)) return prev;
         return [...prev, currentQ];
       });
-
-      if (addMistake && currentQ.item) {
-        addMistake(currentQ.item.spanish);
-      }
 
       takeDamage(15);
       setTimeout(() => setShakeTrigger(false), 500);
@@ -2027,7 +2056,9 @@ export default function StudyQuest({
     const currentQ = redemptionQuestions[redemptionCurrentIdx];
     const correctStr = currentQ.correct;
     const userStr = redemptionTyped;
-    const isCorrect = cleanAnswer(correctStr) === cleanAnswer(userStr);
+    const isCorrect = currentQ.isConjugation
+      ? cleanConjugationInput(userStr, correctStr)
+      : cleanAnswer(correctStr) === cleanAnswer(userStr);
     setRedemptionSelected(userStr);
 
     if (isCorrect) {
@@ -2233,13 +2264,12 @@ export default function StudyQuest({
         isCardIntro: true
       }));
 
-      // 2. Conjugation & Translation Quiz challenges
+      // 2. Conjugation & Translation Quiz challenges (prioritize verbs introduced in cardBatch)
       const quizSlots = Math.max(1, targetCount - cardSteps.length - 1);
-      let quizItemsPool = [];
-      if (verbItems.length > 0) {
-        const shuffledVerbs = [...verbItems].sort(() => Math.random() - 0.5);
-        quizItemsPool.push(...shuffledVerbs.slice(0, quizSlots));
-      }
+      const cardKeys = new Set(cardBatch.map(c => getVocabKey(c)));
+      const remainingVerbs = verbItems.filter(v => !cardKeys.has(getVocabKey(v))).sort(() => Math.random() - 0.5);
+      let quizItemsPool = [...cardBatch.filter(c => isVerbItem(c) && !isSentenceItem(c)), ...remainingVerbs].slice(0, quizSlots);
+
       if (quizItemsPool.length < quizSlots && otherItems.length > 0) {
         const shuffledOther = [...otherItems].sort(() => Math.random() - 0.5);
         quizItemsPool.push(...shuffledOther.slice(0, quizSlots - quizItemsPool.length));
@@ -2248,7 +2278,16 @@ export default function StudyQuest({
         quizItemsPool = [...practiceCards].sort(() => Math.random() - 0.5).slice(0, quizSlots);
       }
 
-      const quizSteps = quizItemsPool.map(item => {
+      const quizSteps = quizItemsPool.map((item, idx) => {
+        if (isPreteriteFocusItem(item)) {
+          const drillStep = buildPreteriteDrillStep(item, {
+            sessionIdx: idx,
+            sessionTotal: quizItemsPool.length,
+            allowTyped: practiceInputMode === "typed"
+          });
+          if (drillStep) return drillStep;
+        }
+
         const isVerb = isVerbItem(item);
         if (isVerb) {
           let chosenTense = practiceTense;
@@ -2404,7 +2443,16 @@ export default function StudyQuest({
       const shuffled = [...pool].sort(() => Math.random() - 0.5);
       const chosen = shuffled.slice(0, targetCount);
 
-      questions = chosen.map(item => {
+      questions = chosen.map((item, idx) => {
+        if (!isVerbLab && isPreteriteFocusItem(item)) {
+          const drillStep = buildPreteriteDrillStep(item, {
+            sessionIdx: idx,
+            sessionTotal: chosen.length,
+            allowTyped: practiceInputMode === "typed"
+          });
+          if (drillStep) return drillStep;
+        }
+
         const isVerb = isVerbItem(item) && !isSentenceItem(item);
         const wantsConjugation = isVerb && (practiceQuizMode === "conjugation" || isVerbLab);
 
@@ -2579,7 +2627,9 @@ export default function StudyQuest({
   const isQuestUserCorrect = questAnswered && currentQuestQ && (
     currentQuestQ.isSentenceBuilder
       ? questSelected?.trim().toLowerCase() === currentQuestQ.correct?.trim().toLowerCase()
-      : compareAnswers(currentQuestQ.correct, questSelected)
+      : currentQuestQ.isConjugation
+        ? cleanConjugationInput(questSelected, currentQuestQ.correct)
+        : compareAnswers(currentQuestQ.correct, questSelected)
   );
   const isPracticeUserCorrect = practiceAnswered && practiceQuestions[practiceCurrentIdx] && (
     practiceQuestions[practiceCurrentIdx].isSentenceBuilder
@@ -2606,6 +2656,247 @@ export default function StudyQuest({
   const monsterHpPct = currentQuestQ 
     ? Math.max(0, Math.round(((questQuestions.length - questCurrentIdx) / questQuestions.length) * 100))
     : 100;
+
+  const renderFlashcardCard = (item, {
+    categoryFront,
+    categoryBack,
+    backLabel = null,
+    hintFront,
+    hintBack,
+    flipped,
+    onToggleFlip,
+    wrapperStyle = {}
+  }) => {
+    const pretDetails = isPreteriteFocusItem(item)
+      ? getPreteriteFlashcardDetails(item, state.excludeVosotros)
+      : null;
+
+    return (
+      <div
+        className={`flashcard-wrapper ${pretDetails ? 'flashcard-wrapper--tall' : ''}`}
+        onClick={onToggleFlip}
+        style={pretDetails ? { ...wrapperStyle, height: undefined } : wrapperStyle}
+      >
+        <div className={`flashcard ${flipped ? 'flipped' : ''}`}>
+          <div className={`flashcard-face flashcard-front ${pretDetails ? 'flashcard-face--preterite' : ''}`}>
+            <span className="flashcard-category">{categoryFront}</span>
+
+            {(isVerbItem(item) || item?.subcategory?.includes("Objeto")) && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={(e) => { e.stopPropagation(); openCodex(item); }}
+                style={{ position: 'absolute', top: '16px', right: '16px', padding: '6px 12px', fontSize: '0.75rem', gap: '4px' }}
+              >
+                📖 Codex
+              </button>
+            )}
+
+            {pretDetails ? (
+              <div className="flashcard-preterite-body">
+                <h3 className="flashcard-term flashcard-preterite-infinitive">{pretDetails.infinitive}</h3>
+                <div className="flashcard-preterite-subtitle">
+                  {translateInstructions ? "Preterite Conjugations (Pretérito)" : "Conjugaciones en Pretérito"}
+                </div>
+                <div className="flashcard-preterite-grid">
+                  {pretDetails.rows.map((row) => (
+                    <div
+                      key={row.idx}
+                      className={`flashcard-preterite-row ${row.isHighlighted ? 'highlighted' : ''}`}
+                    >
+                      <span className="flashcard-preterite-pronoun">{row.pronoun}</span>
+                      <span className="flashcard-preterite-form">{row.form}</span>
+                    </div>
+                  ))}
+                </div>
+                {speechAvailable && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary flashcard-preterite-audio"
+                    onClick={(e) => { e.stopPropagation(); speakSpanish(pretDetails.speechText); }}
+                    title="Listen to infinitive and preterite forms"
+                  >
+                    <Volume2 size={16} color="var(--primary)" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                <h3 className="flashcard-term" style={{ fontSize: '2rem' }}>{item.spanish}</h3>
+                {speechAvailable && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={(e) => { e.stopPropagation(); speakSpanish(item.spanish); }}
+                    style={{ position: 'absolute', bottom: '60px', borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}
+                  >
+                    <Volume2 size={16} color="var(--primary)" />
+                  </button>
+                )}
+              </>
+            )}
+
+            <span className="flashcard-hint">{hintFront}</span>
+          </div>
+
+          <div className="flashcard-face flashcard-back">
+            <span className="flashcard-category">{categoryBack}</span>
+            {backLabel && (
+              <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', fontWeight: 'bold', marginBottom: '8px' }}>
+                {backLabel}
+              </span>
+            )}
+            {pretDetails ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', padding: '0 10px' }}>
+                <h4 className="flashcard-translation" style={{ fontSize: '1.8rem' }}>{pretDetails.englishMeaning}</h4>
+                <div className="flashcard-preterite-past-summary">
+                  {pretDetails.pastSummary}
+                </div>
+              </div>
+            ) : (
+              <h4 className="flashcard-translation" style={{ fontSize: '1.6rem' }}>{item.english}</h4>
+            )}
+            <span className="flashcard-hint">{hintBack}</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderConjugationQuestionContent = (q, { isTypedView = false, showCodex = false } = {}) => {
+    const isPret = isPreteriteTense(q);
+    if (q.isPreteriteDrill) {
+      return (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 14px',
+              borderRadius: '12px',
+              background: 'rgba(249, 115, 22, 0.15)',
+              border: '1px solid #f97316',
+              color: '#fed7aa',
+              fontWeight: '700',
+              fontSize: '0.8rem',
+              letterSpacing: '0.03em'
+            }}>
+              <span>⏳</span>
+              <span>{translateInstructions ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Pretérito'}</span>
+            </span>
+          </div>
+
+          <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
+            {isTypedView || q.isTyped
+              ? (translateInstructions ? "Escribe la forma en pretérito (Type the Spanish preterite form):" : "Escribe la forma correcta en pretérito:")
+              : (translateInstructions ? "Elige la forma en pretérito (Choose the Spanish preterite form):" : "Elige la forma correcta en pretérito:")}
+          </div>
+
+          <h3 className="quiz-word" style={{ fontSize: '2.2rem', margin: '12px 0 8px', color: 'var(--text-primary)' }}>
+            {q.questionWord}
+          </h3>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '4px 14px',
+            borderRadius: '12px',
+            background: isPret ? 'rgba(249, 115, 22, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+            border: isPret ? '1px solid #f97316' : '1px solid #10b981',
+            color: isPret ? '#fed7aa' : '#a7f3d0',
+            fontWeight: '700',
+            fontSize: '0.8rem',
+            letterSpacing: '0.03em'
+          }}>
+            <span>{isPret ? '⏳' : '⚡'}</span>
+            <span>{isPret ? (translateInstructions ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Pretérito') : (translateInstructions ? 'Tiempo Presente (Present Tense)' : 'Tiempo Presente')}</span>
+          </span>
+        </div>
+
+        <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
+          {q.isGustar
+            ? (isTypedView || q.isTyped
+                ? (translateInstructions ? "Escribe la forma correcta de gustar (Type form):" : "Escribe la forma correcta de gustar:")
+                : (translateInstructions ? "Selecciona la forma correcta de gustar (Select correct form of gustar):" : "Selecciona la forma correcta de gustar:"))
+            : (isTypedView || q.isTyped
+                ? (translateInstructions ? "Escribe la conjugación para el pronombre (Type conjugation):" : "Escribe la conjugación para el pronombre:")
+                : (translateInstructions ? "Conjuga para el pronombre (Conjugate for the subject pronoun):" : "Conjuga para el pronombre:"))}
+        </div>
+
+        {(q.isReciprocal || q.isReflexive || q.isSpellChanger || q.isStemChangerPreterite || q.isDoubleVowel || q.isGustar) && (
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+            {q.isReciprocal ? (
+              <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
+                {translateInstructions ? '🤝 Acción Recíproca ("Each Other")' : '🤝 Acción Recíproca'}
+              </span>
+            ) : q.isReflexive ? (
+              <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc', borderColor: 'rgba(99, 102, 241, 0.3)' }}>
+                🪞 Reflexivo (me, te, se, nos, os, se)
+              </span>
+            ) : null}
+            {q.isSpellChanger && (
+              <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
+                ✍️ Cambio Ortográfico (-car/-gar/-zar)
+              </span>
+            )}
+            {q.isStemChangerPreterite && (
+              <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', borderColor: 'rgba(168, 85, 247, 0.3)' }}>
+                👟 Verbo Sandalia (e➔i / o➔u)
+              </span>
+            )}
+            {q.isDoubleVowel && (
+              <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                📖 Doble Vocal (i ➔ y)
+              </span>
+            )}
+            {q.isGustar && (
+              <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.15)', color: 'var(--gold)', borderColor: 'rgba(234, 179, 8, 0.3)' }}>
+                ✨ Tipo Gustar ({isPret ? 'gustó vs gustaron' : 'gusta vs gustan'})
+              </span>
+            )}
+          </div>
+        )}
+
+        <h3 className="quiz-word" style={{ fontSize: q.isGustar ? '1.8rem' : '2.3rem', margin: '8px 0 4px' }}>
+          {q.isGustar ? (
+            q.questionWord
+          ) : (
+            <>
+              <span style={{ color: 'var(--gold)', fontWeight: 800 }}>
+                {q.subjectPronoun || q.questionWord?.split(' ')[0]}
+              </span>{' '}
+              <span style={{ color: 'var(--primary)' }}>
+                ({q.infinitive || q.item?.spanish || q.questionWord?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
+              </span>
+            </>
+          )}
+        </h3>
+
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '14px' }}>
+          {q.isGustar ? sanitizeMeaningForQuiz(q.meaning) : `${q.pronoun} • ${sanitizeMeaningForQuiz(q.meaning)}`}
+        </p>
+
+        {showCodex && (
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => openCodex(q.item)}
+            style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
+          >
+            📖 {translateInstructions ? "Ver Conjugaciones (View Conjugations)" : "Ver Conjugaciones"}
+          </button>
+        )}
+      </>
+    );
+  };
 
   return (
     <div className={`view-container ${shakeClass}`} style={{ transition: 'background-color 0.25s ease' }}>
@@ -3592,54 +3883,15 @@ export default function StudyQuest({
 
           {currentQuestQ.isCardIntro ? (
             <div style={{ textAlign: 'center', animation: 'pop-in 0.3s ease-out' }}>
-              <div 
-                className="flashcard-wrapper"
-                onClick={() => setQuestFlipped(!questFlipped)}
-                style={{ height: '240px' }}
-              >
-                <div className={`flashcard ${questFlipped ? 'flipped' : ''}`}>
-                  <div className="flashcard-face flashcard-front">
-                    <span className="flashcard-category">
-                      {translateInstructions ? "Preview New Word (+2 XP)" : "Vista Previa de Palabra (+2 XP)"}
-                    </span>
-                    <h3 className="flashcard-term" style={{ fontSize: '2rem' }}>{currentQuestQ.item.spanish}</h3>
-                    
-                    {isVerbItem(currentQuestQ.item) && (
-                      <button 
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={(e) => { e.stopPropagation(); openCodex(currentQuestQ.item); }}
-                        style={{ position: 'absolute', top: '16px', right: '16px', padding: '6px 12px', fontSize: '0.75rem', gap: '4px' }}
-                      >
-                        📖 Codex
-                      </button>
-                    )}
-
-                    {speechAvailable && (
-                      <button 
-                        className="btn btn-secondary"
-                        onClick={(e) => { e.stopPropagation(); speakSpanish(currentQuestQ.item.spanish); }}
-                        style={{ position: 'absolute', bottom: '60px', borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}
-                      >
-                        <Volume2 size={16} color="var(--primary)" />
-                      </button>
-                    )}
-                    <span className="flashcard-hint">
-                      {translateInstructions ? "Click card to reveal translation (Haz clic para ver la traducción)" : "Haz clic para ver la traducción"}
-                    </span>
-                  </div>
-
-                  <div className="flashcard-face flashcard-back">
-                    <span className="flashcard-category">
-                      {translateInstructions ? "Preview New Word (+2 XP)" : "Vista Previa de Palabra (+2 XP)"}
-                    </span>
-                    <h4 className="flashcard-translation" style={{ fontSize: '1.6rem' }}>{currentQuestQ.item.english}</h4>
-                    <span className="flashcard-hint">
-                      {translateInstructions ? "Click card to reveal Spanish (Haz clic para volver al español)" : "Haz clic para volver al español"}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              {renderFlashcardCard(currentQuestQ.item, {
+                categoryFront: translateInstructions ? "Preview New Word (+2 XP)" : "Vista Previa de Palabra (+2 XP)",
+                categoryBack: translateInstructions ? "Preview New Word (+2 XP)" : "Vista Previa de Palabra (+2 XP)",
+                hintFront: translateInstructions ? "Click card to reveal translation (Haz clic para ver la traducción)" : "Haz clic para ver la traducción",
+                hintBack: translateInstructions ? "Click card to reveal Spanish (Haz clic para volver al español)" : "Haz clic para volver al español",
+                flipped: questFlipped,
+                onToggleFlip: () => setQuestFlipped(!questFlipped),
+                wrapperStyle: { height: '240px' }
+              })}
 
               <button className="btn btn-accent" onClick={handleQuestCardLearned} style={{ width: '100%', maxWidth: '280px', marginTop: '10px' }}>
                 {translateInstructions ? "I learned this word! (¡Aprendí esta palabra!)" : "¡Aprendí esta palabra!"}
@@ -3738,84 +3990,10 @@ export default function StudyQuest({
                       )}
                     </>
                   ) : currentQuestQ.isConjugation ? (
-                    <>
-                      {/* Tasteful Compact Tense Pill */}
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '4px 14px',
-                          borderRadius: '12px',
-                          background: isPreteriteTense(currentQuestQ) 
-                            ? 'rgba(249, 115, 22, 0.15)' 
-                            : 'rgba(16, 185, 129, 0.15)',
-                          border: isPreteriteTense(currentQuestQ) ? '1px solid #f97316' : '1px solid #10b981',
-                          color: isPreteriteTense(currentQuestQ) ? '#fed7aa' : '#a7f3d0',
-                          fontWeight: '700',
-                          fontSize: '0.8rem',
-                          letterSpacing: '0.03em'
-                        }}>
-                          <span>{isPreteriteTense(currentQuestQ) ? '⏳' : '⚡'}</span>
-                          <span>{isPreteriteTense(currentQuestQ) ? (translateInstructions ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Pretérito') : (translateInstructions ? 'Tiempo Presente (Present Tense)' : 'Tiempo Presente')}</span>
-                        </span>
-                      </div>
-
-                      <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
-                        {currentQuestQ.isGustar 
-                          ? (translateInstructions ? "Selecciona la forma correcta de gustar (Select correct form of gustar):" : "Selecciona la forma correcta de gustar:") 
-                          : (translateInstructions ? "Conjuga para el pronombre (Conjugate for the subject pronoun):" : "Conjuga para el pronombre:")}
-                      </div>
-
-                      {(currentQuestQ.isReciprocal || currentQuestQ.isReflexive || currentQuestQ.isSpellChanger || currentQuestQ.isStemChangerPreterite || currentQuestQ.isDoubleVowel) && (
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                          {currentQuestQ.isReciprocal ? (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
-                              {translateInstructions ? '🤝 Acción Recíproca ("Each Other")' : '🤝 Acción Recíproca'}
-                            </span>
-                          ) : currentQuestQ.isReflexive ? (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc', borderColor: 'rgba(99, 102, 241, 0.3)' }}>
-                              {translateInstructions ? '🪞 Reflexivo (me, te, se, nos, os, se)' : '🪞 Reflexivo (me, te, se, nos, os, se)'}
-                            </span>
-                          ) : null}
-                          {currentQuestQ.isSpellChanger && (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
-                              {translateInstructions ? '✍️ Cambio Ortográfico (-car/-gar/-zar)' : '✍️ Cambio Ortográfico (-car/-gar/-zar)'}
-                            </span>
-                          )}
-                          {currentQuestQ.isStemChangerPreterite && (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', borderColor: 'rgba(168, 85, 247, 0.3)' }}>
-                              {translateInstructions ? '👟 Verbo Sandalia (e➔i / o➔u)' : '👟 Verbo Sandalia (e➔i / o➔u)'}
-                            </span>
-                          )}
-                          {currentQuestQ.isDoubleVowel && (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                              {translateInstructions ? '📖 Doble Vocal (i ➔ y)' : '📖 Doble Vocal (i ➔ y)'}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Prominent Subject + Verb Headline: e.g. "yo (tener)" */}
-                      <h3 className="quiz-word" style={{ fontSize: currentQuestQ.isGustar ? '1.8rem' : '2.3rem', margin: '8px 0 4px' }}>
-                        {currentQuestQ.isGustar ? (
-                          currentQuestQ.questionWord
-                        ) : (
-                          <>
-                            <span style={{ color: 'var(--gold)', fontWeight: 800 }}>
-                              {currentQuestQ.subjectPronoun || currentQuestQ.questionWord?.split(' ')[0]}
-                            </span>{' '}
-                            <span style={{ color: 'var(--primary)' }}>
-                              ({currentQuestQ.infinitive || currentQuestQ.item?.spanish || currentQuestQ.questionWord?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
-                            </span>
-                          </>
-                        )}
-                      </h3>
-
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '14px' }}>
-                        {currentQuestQ.isGustar ? sanitizeMeaningForQuiz(currentQuestQ.meaning) : `${currentQuestQ.pronoun} • ${sanitizeMeaningForQuiz(currentQuestQ.meaning)}`}
-                      </p>
-                    </>
+                    renderConjugationQuestionContent(currentQuestQ, {
+                      isTypedView: Boolean(currentQuestQ.isTyped),
+                      showCodex: false
+                    })
                   ) : currentQuestQ.isFillInTheBlank ? (
                     <>
                       <div className="quiz-question-lbl">
@@ -3879,7 +4057,7 @@ export default function StudyQuest({
                     </>
                   )}
                   
-                  {currentQuestQ.isFillInTheBlank && currentQuestQ.targetVerb ? (
+                  {currentQuestQ.hideHints ? null : currentQuestQ.isFillInTheBlank && currentQuestQ.targetVerb ? (
                     <button 
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -3940,7 +4118,7 @@ export default function StudyQuest({
                     translateInstructions={translateInstructions}
                   />
                 </div>
-              ) : currentQuestQ.isConjugation || currentQuestQ.isFillInTheBlank || currentQuestQ.type !== 2 ? (
+              ) : !currentQuestQ.isTyped && (currentQuestQ.isConjugation || currentQuestQ.isFillInTheBlank || currentQuestQ.type !== 2) ? (
                 <div className="quiz-choices-grid">
                   {currentQuestQ.choices.map((choice, idx) => {
                     let btnClass = "";
@@ -3971,7 +4149,11 @@ export default function StudyQuest({
                       <input
                         type="text"
                         ref={questInputRef}
-                        placeholder={translateInstructions ? "Escribe la traducción al español... (Type Spanish translation...)" : "Escribe la traducción al español..."}
+                        placeholder={
+                          currentQuestQ.isConjugation
+                            ? (translateInstructions ? "Escribe la forma en pretérito... (Type Spanish form...)" : "Escribe la forma en pretérito...")
+                            : (translateInstructions ? "Escribe la traducción al español... (Type Spanish translation...)" : "Escribe la traducción al español...")
+                        }
                         value={typedAnswer}
                         onChange={(e) => setTypedAnswer(e.target.value)}
                         disabled={questAnswered}
@@ -4010,7 +4192,9 @@ export default function StudyQuest({
 
                     {!questAnswered && (
                       <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={!typedAnswer.trim()}>
-                        {translateInstructions ? "Enviar Traducción (Submit Translation)" : "Enviar Traducción"}
+                        {currentQuestQ.isConjugation
+                          ? (translateInstructions ? "Enviar Conjugación (Submit Answer)" : "Enviar Conjugación")
+                          : (translateInstructions ? "Enviar Traducción (Submit Translation)" : "Enviar Traducción")}
                       </button>
                     )}
                   </div>
@@ -4035,7 +4219,7 @@ export default function StudyQuest({
                             : `Incorrect! Correct translation: "${currentQuestQ.correct}"`
                   }
 
-                  {currentQuestQ.ruleExplanation && (
+                  {(currentQuestQ.ruleExplanation || currentQuestQ.explanationEn) && (
                     <div style={{
                       marginTop: '10px',
                       padding: '10px 14px',
@@ -4047,7 +4231,7 @@ export default function StudyQuest({
                       textAlign: 'left',
                       lineHeight: 1.4
                     }}>
-                      <strong>💡 Grammar Rule:</strong> {currentQuestQ.ruleExplanation}
+                      <strong>💡 Grammar Rule:</strong> {currentQuestQ.ruleExplanation || currentQuestQ.explanationEn}
                     </div>
                   )}
                   
@@ -4340,57 +4524,25 @@ export default function StudyQuest({
           {practiceMode === "cards" && (
             practiceCards.length > 0 && practiceCards[practiceCurrentIdx] ? (
               <div style={{ textAlign: 'center' }}>
-                <div className="flashcard-wrapper" onClick={() => setPracticeFlipped(!practiceFlipped)}>
-                  <div className={`flashcard ${practiceFlipped ? 'flipped' : ''}`}>
-                    
-                    <div className="flashcard-face flashcard-front">
-                      <span className="flashcard-category">
-                        {isVerbLab 
-                          ? `${selectedCategory} • ${practiceCards[practiceCurrentIdx]?.subcategory || 'Verbo'}`
-                          : selectedSubcategory.startsWith("All of ")
-                            ? `${selectedCategory} • ${practiceCards[practiceCurrentIdx]?.subcategory || 'General'}`
-                            : selectedSubcategory}
-                      </span>
-                      <h3 className="flashcard-term">{practiceCards[practiceCurrentIdx].spanish}</h3>
-                      
-                      {(isVerbItem(practiceCards[practiceCurrentIdx]) || practiceCards[practiceCurrentIdx]?.subcategory?.includes("Objeto")) && (
-                        <button 
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          onClick={(e) => { e.stopPropagation(); openCodex(practiceCards[practiceCurrentIdx]); }}
-                          style={{ position: 'absolute', top: '16px', right: '16px', padding: '6px 12px', fontSize: '0.75rem', gap: '4px' }}
-                        >
-                          📖 Codex
-                        </button>
-                      )}
-
-                      {speechAvailable && (
-                        <button 
-                          className="btn btn-secondary"
-                          onClick={(e) => { e.stopPropagation(); speakSpanish(practiceCards[practiceCurrentIdx].spanish); }}
-                          style={{ position: 'absolute', bottom: '70px', borderRadius: '50%', width: '45px', height: '45px', padding: 0 }}
-                        >
-                          <Volume2 size={20} color="var(--primary)" />
-                        </button>
-                      )}
-                      <span className="flashcard-hint">Click card to reveal translation</span>
-                    </div>
-
-                    <div className="flashcard-face flashcard-back">
-                      <span className="flashcard-category">
-                        {selectedSubcategory.startsWith("All of ")
-                          ? `${selectedCategory} • ${practiceCards[practiceCurrentIdx]?.subcategory || 'General'}`
-                          : selectedSubcategory}
-                      </span>
-                      <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--accent)', letterSpacing: '0.1em', fontWeight: 'bold', marginBottom: '8px' }}>
-                        English Translation
-                      </span>
-                      <h4 className="flashcard-translation">{practiceCards[practiceCurrentIdx].english}</h4>
-                      <span className="flashcard-hint">Click card to flip Spanish</span>
-                    </div>
-
-                  </div>
-                </div>
+                {(() => {
+                  const activeCard = practiceCards[practiceCurrentIdx];
+                  const catLabel = isVerbLab
+                    ? `${selectedCategory} • ${activeCard?.subcategory || 'Verbo'}`
+                    : selectedSubcategory.startsWith("All of ")
+                      ? `${selectedCategory} • ${activeCard?.subcategory || 'General'}`
+                      : selectedSubcategory;
+                  return renderFlashcardCard(activeCard, {
+                    categoryFront: catLabel,
+                    categoryBack: selectedSubcategory.startsWith("All of ")
+                      ? `${selectedCategory} • ${activeCard?.subcategory || 'General'}`
+                      : selectedSubcategory,
+                    backLabel: "English Translation",
+                    hintFront: "Click card to reveal translation",
+                    hintBack: "Click card to flip Spanish",
+                    flipped: practiceFlipped,
+                    onToggleFlip: () => setPracticeFlipped(!practiceFlipped)
+                  });
+                })()}
 
                 <div className="study-nav-controls">
                   <button 
@@ -4716,50 +4868,15 @@ export default function StudyQuest({
 
               {practiceQuestions[practiceCurrentIdx]?.isCardIntro ? (
                 <div style={{ textAlign: 'center', animation: 'pop-in 0.3s ease-out' }}>
-                  <div 
-                    className="flashcard-wrapper"
-                    onClick={() => setPracticeFlipped(!practiceFlipped)}
-                    style={{ height: '240px', maxWidth: '500px', margin: '0 auto 16px' }}
-                  >
-                    <div className={`flashcard ${practiceFlipped ? 'flipped' : ''}`}>
-                      <div className="flashcard-face flashcard-front">
-                        <span className="flashcard-category">Repaso de Tarjeta (+2 XP)</span>
-                        <h3 className="flashcard-term" style={{ fontSize: '2.2rem' }}>
-                          {practiceQuestions[practiceCurrentIdx].item.spanish}
-                        </h3>
-                        
-                        {isVerbItem(practiceQuestions[practiceCurrentIdx].item) && (
-                          <button 
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={(e) => { e.stopPropagation(); openCodex(practiceQuestions[practiceCurrentIdx].item); }}
-                            style={{ position: 'absolute', top: '16px', right: '16px', padding: '6px 12px', fontSize: '0.75rem', gap: '4px' }}
-                          >
-                            📖 Codex
-                          </button>
-                        )}
-
-                        {speechAvailable && (
-                          <button 
-                            className="btn btn-secondary"
-                            onClick={(e) => { e.stopPropagation(); speakSpanish(practiceQuestions[practiceCurrentIdx].item.spanish); }}
-                            style={{ position: 'absolute', bottom: '60px', borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}
-                          >
-                            <Volume2 size={16} color="var(--primary)" />
-                          </button>
-                        )}
-                        <span className="flashcard-hint">Haz clic para ver la traducción</span>
-                      </div>
-
-                      <div className="flashcard-face flashcard-back">
-                        <span className="flashcard-category">Traducción al Inglés</span>
-                        <h4 className="flashcard-translation" style={{ fontSize: '1.6rem' }}>
-                          {practiceQuestions[practiceCurrentIdx].item.english}
-                        </h4>
-                        <span className="flashcard-hint">Haz clic para volver al español</span>
-                      </div>
-                    </div>
-                  </div>
+                  {renderFlashcardCard(practiceQuestions[practiceCurrentIdx].item, {
+                    categoryFront: "Repaso de Tarjeta (+2 XP)",
+                    categoryBack: "Traducción al Inglés",
+                    hintFront: "Haz clic para ver la traducción",
+                    hintBack: "Haz clic para volver al español",
+                    flipped: practiceFlipped,
+                    onToggleFlip: () => setPracticeFlipped(!practiceFlipped),
+                    wrapperStyle: { height: '240px', maxWidth: '500px', margin: '0 auto 16px' }
+                  })}
 
                   <button className="btn btn-accent" onClick={handlePracticeCardLearned} style={{ width: '100%', maxWidth: '280px', margin: '0 auto' }}>
                     ¡Entendido! / Siguiente (+2 XP)
@@ -4778,98 +4895,10 @@ export default function StudyQuest({
                         boxShadow: isPret ? '0 -2px 18px rgba(249, 115, 22, 0.2)' : '0 -2px 18px rgba(16, 185, 129, 0.2)'
                       }}
                     >
-                      {/* Tasteful Compact Tense Pill */}
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '4px 14px',
-                          borderRadius: '12px',
-                          background: isPret 
-                            ? 'rgba(249, 115, 22, 0.15)' 
-                            : 'rgba(16, 185, 129, 0.15)',
-                          border: isPret ? '1px solid #f97316' : '1px solid #10b981',
-                          color: isPret ? '#fed7aa' : '#a7f3d0',
-                          fontWeight: '700',
-                          fontSize: '0.8rem',
-                          letterSpacing: '0.03em'
-                        }}>
-                          <span>{isPret ? '⏳' : '⚡'}</span>
-                          <span>{isPret ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Presente'}</span>
-                        </span>
-                      </div>
-
-                      <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
-                        {currQ?.isGustar 
-                          ? (practiceInputMode === "typed" || currQ?.isTyped 
-                              ? (translateInstructions ? "Escribe la forma correcta de gustar (Type form):" : "Escribe la forma correcta de gustar:")
-                              : (translateInstructions ? "Elige la forma correcta de gustar (Choose form):" : "Elige la forma correcta de gustar:"))
-                          : (practiceInputMode === "typed" || currQ?.isTyped
-                              ? (translateInstructions ? "Escribe la conjugación para el pronombre (Type conjugation):" : "Escribe la conjugación para el pronombre:")
-                              : (translateInstructions ? "Elige la conjugación para el pronombre (Choose conjugation):" : "Elige la conjugación para el pronombre:"))}
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                        {currQ.isReciprocal ? (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
-                            🤝 Acción Recíproca ("Each Other")
-                          </span>
-                        ) : currQ.isReflexive ? (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc', borderColor: 'rgba(99, 102, 241, 0.3)' }}>
-                            🪞 Reflexivo (me, te, se, nos, os, se)
-                          </span>
-                        ) : null}
-                        {currQ.isSpellChanger && (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
-                            ✍️ Cambio Ortográfico (-car/-gar/-zar)
-                          </span>
-                        )}
-                        {currQ.isStemChangerPreterite && (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', borderColor: 'rgba(168, 85, 247, 0.3)' }}>
-                            👟 Verbo Sandalia (e➔i / o➔u)
-                          </span>
-                        )}
-                        {currQ.isDoubleVowel && (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                            📖 Doble Vocal (i ➔ y)
-                          </span>
-                        )}
-                        {currQ.isGustar && (
-                          <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.15)', color: 'var(--gold)', borderColor: 'rgba(234, 179, 8, 0.3)' }}>
-                            ✨ Tipo Gustar ({isPret ? 'gustó vs gustaron' : 'gusta vs gustan'})
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Prominent Subject + Verb Headline: e.g. "yo (tener)" */}
-                      <h3 className="quiz-word" style={{ fontSize: currQ?.isGustar ? '1.8rem' : '2.3rem', margin: '8px 0 4px' }}>
-                        {currQ.isGustar ? (
-                          currQ.questionWord
-                        ) : (
-                          <>
-                            <span style={{ color: 'var(--gold)', fontWeight: 800 }}>
-                              {currQ.subjectPronoun || currQ.questionWord?.split(' ')[0]}
-                            </span>{' '}
-                            <span style={{ color: 'var(--primary)' }}>
-                              ({currQ.infinitive || currQ.item?.spanish || currQ.questionWord?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
-                            </span>
-                          </>
-                        )}
-                      </h3>
-
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '14px' }}>
-                        {currQ.isGustar ? currQ.meaning : `${currQ.pronoun} • ${currQ.meaning}`}
-                      </p>
-                      
-                      <button 
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => openCodex(currQ.item)}
-                        style={{ padding: '4px 10px', fontSize: '0.75rem', margin: '10px auto 0', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}
-                      >
-                        📖 {translateInstructions ? "Ver Conjugaciones (View Conjugations)" : "Ver Conjugaciones"}
-                      </button>
+                      {renderConjugationQuestionContent(currQ, {
+                        isTypedView: practiceInputMode === "typed" || Boolean(currQ?.isTyped),
+                        showCodex: !currQ.hideHints
+                      })}
                     </div>
                   );
                 })()
@@ -5087,6 +5116,21 @@ export default function StudyQuest({
                           ? `Incorrect! Correct form for "${practiceQuestions[practiceCurrentIdx]?.subjectPronoun || 'subject'}" (${isPreteriteTense(practiceQuestions[practiceCurrentIdx]) ? 'Preterite' : 'Present'}): "${practiceQuestions[practiceCurrentIdx].correct}"`
                           : `Incorrect! Correct answer: "${practiceQuestions[practiceCurrentIdx].correct}"`
                   }
+                  {(practiceQuestions[practiceCurrentIdx]?.ruleExplanation || practiceQuestions[practiceCurrentIdx]?.explanationEn) && (
+                    <div style={{
+                      marginTop: '10px',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      background: isPracticeUserCorrect ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.15)',
+                      border: isPracticeUserCorrect ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                      fontSize: '0.82rem',
+                      color: isPracticeUserCorrect ? '#a7f3d0' : '#fca5a5',
+                      textAlign: 'left',
+                      lineHeight: 1.4
+                    }}>
+                      <strong>💡 Grammar Rule:</strong> {practiceQuestions[practiceCurrentIdx].ruleExplanation || practiceQuestions[practiceCurrentIdx].explanationEn}
+                    </div>
+                  )}
                   <button className="btn btn-primary" onClick={handlePracticeNext} style={{ width: '100%', marginTop: '16px' }}>
                     {practiceCurrentIdx === practiceQuestions.length - 1 
                       ? (translateInstructions ? "Finalizar Práctica (Finish Practice)" : "Finalizar Práctica") 
@@ -5125,7 +5169,9 @@ export default function StudyQuest({
             if (!currentQ) return null;
 
             const isRedemptionCorrect = redemptionAnswered && (
-              redemptionSelected === currentQ.correct || cleanAnswer(redemptionSelected) === cleanAnswer(currentQ.correct)
+              currentQ.isConjugation
+                ? cleanConjugationInput(redemptionSelected, currentQ.correct)
+                : (redemptionSelected === currentQ.correct || cleanAnswer(redemptionSelected) === cleanAnswer(currentQ.correct))
             );
 
             return (
@@ -5170,83 +5216,11 @@ export default function StudyQuest({
                         </p>
                       </>
                     ) : currentQ.isConjugation ? (
-                    <>
-                      {/* Tasteful Compact Tense Pill */}
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '4px 14px',
-                          borderRadius: '12px',
-                          background: isPreteriteTense(currentQ) 
-                            ? 'rgba(249, 115, 22, 0.15)' 
-                            : 'rgba(16, 185, 129, 0.15)',
-                          border: isPreteriteTense(currentQ) ? '1px solid #f97316' : '1px solid #10b981',
-                          color: isPreteriteTense(currentQ) ? '#fed7aa' : '#a7f3d0',
-                          fontWeight: '700',
-                          fontSize: '0.8rem',
-                          letterSpacing: '0.03em'
-                        }}>
-                          <span>{isPreteriteTense(currentQ) ? '⏳' : '⚡'}</span>
-                          <span>{isPreteriteTense(currentQ) ? 'Tiempo Pretérito (Past Tense)' : 'Tiempo Presente'}</span>
-                        </span>
-                      </div>
-
-                      <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
-                        {currentQ.isGustar ? "Select the correct form of gustar:" : "Conjugate for the subject pronoun:"}
-                      </div>
-
-                      {(currentQ.isReciprocal || currentQ.isReflexive || currentQ.isSpellChanger || currentQ.isStemChangerPreterite || currentQ.isDoubleVowel) && (
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                          {currentQ.isReciprocal ? (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', borderColor: 'rgba(236, 72, 153, 0.3)' }}>
-                              🤝 Acción Recíproca ("Each Other")
-                            </span>
-                          ) : currentQ.isReflexive ? (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc', borderColor: 'rgba(99, 102, 241, 0.3)' }}>
-                              🪞 Reflexivo (me, te, se, nos, os, se)
-                            </span>
-                          ) : null}
-                          {currentQ.isSpellChanger && (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
-                              ✍️ Cambio Ortográfico (-car/-gar/-zar)
-                            </span>
-                          )}
-                          {currentQ.isStemChangerPreterite && (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', borderColor: 'rgba(168, 85, 247, 0.3)' }}>
-                              👟 Verbo Sandalia (e➔i / o➔u)
-                            </span>
-                          )}
-                          {currentQ.isDoubleVowel && (
-                            <span className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                              📖 Doble Vocal (i ➔ y)
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Prominent Subject + Verb Headline: e.g. "yo (tener)" */}
-                      <h3 className="quiz-word" style={{ fontSize: currentQ.isGustar ? '1.8rem' : '2.3rem', margin: '8px 0 4px' }}>
-                        {currentQ.isGustar ? (
-                          currentQ.questionWord
-                        ) : (
-                          <>
-                            <span style={{ color: 'var(--gold)', fontWeight: 800 }}>
-                              {currentQ.subjectPronoun || currentQ.questionWord?.split(' ')[0]}
-                            </span>{' '}
-                            <span style={{ color: 'var(--primary)' }}>
-                              ({currentQ.infinitive || currentQ.item?.spanish || currentQ.questionWord?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
-                            </span>
-                          </>
-                        )}
-                      </h3>
-
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '14px' }}>
-                        {currentQ.isGustar ? currentQ.meaning : `${currentQ.pronoun} • ${currentQ.meaning}`}
-                      </p>
-                    </>
-                  ) : currentQ.isFillInTheBlank ? (
+                      renderConjugationQuestionContent(currentQ, {
+                        isTypedView: Boolean(currentQ.isTyped),
+                        showCodex: false
+                      })
+                    ) : currentQ.isFillInTheBlank ? (
                     <>
                       <div className="quiz-question-lbl">Completar la frase (Fill in the blank):</div>
                       <h3 className="quiz-word" style={{ color: 'var(--accent)' }}>{currentQ.questionWord}</h3>
@@ -5343,7 +5317,7 @@ export default function StudyQuest({
                           showSubmitButton={true}
                         />
                       </div>
-                    ) : currentQ.isConjugation || currentQ.isFillInTheBlank || currentQ.type !== 2 ? (
+                    ) : !currentQ.isTyped && (currentQ.isConjugation || currentQ.isFillInTheBlank || currentQ.type !== 2) ? (
                       <div className="quiz-choices-grid">
                         {currentQ.choices.map((choice, idx) => {
                           let btnClass = "";
@@ -5372,7 +5346,7 @@ export default function StudyQuest({
                         <div className="quiz-input-wrapper" style={{ marginTop: '16px' }}>
                           <input
                             type="text"
-                            placeholder="Type the Spanish translation..."
+                            placeholder={currentQ.isConjugation ? "Type the Spanish preterite form..." : "Type the Spanish translation..."}
                             value={redemptionTyped}
                             onChange={(e) => setRedemptionTyped(e.target.value)}
                             disabled={redemptionAnswered}
@@ -5399,7 +5373,7 @@ export default function StudyQuest({
 
                           {!redemptionAnswered && (
                             <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={!redemptionTyped.trim()}>
-                              Submit Translation
+                              {currentQ.isConjugation ? "Submit Answer" : "Submit Translation"}
                             </button>
                           )}
                         </div>
@@ -5422,7 +5396,7 @@ export default function StudyQuest({
                                 : `Incorrect. Correct answer: "${currentQ.correct}"`
                         }
 
-                        {currentQ.ruleExplanation && (
+                        {(currentQ.ruleExplanation || currentQ.explanationEn) && (
                           <div style={{
                             marginTop: '10px',
                             padding: '10px 14px',
@@ -5434,7 +5408,7 @@ export default function StudyQuest({
                             textAlign: 'left',
                             lineHeight: 1.4
                           }}>
-                            <strong>💡 Grammar Rule:</strong> {currentQ.ruleExplanation}
+                            <strong>💡 Grammar Rule:</strong> {currentQ.ruleExplanation || currentQ.explanationEn}
                           </div>
                         )}
                         <button className="btn btn-primary" onClick={handleRedemptionNext} style={{ width: '100%', marginTop: '16px' }}>

@@ -224,12 +224,27 @@ export const IMPERFECT_IRREGULARS = {
   "haber": ["había", "habías", "había", "habíamos", "habíais", "habían"]
 };
 
+export function getVocabKey(item) {
+  if (!item) return "";
+  if (typeof item === "string") return item;
+  return item.cardKey || item.spanish || "";
+}
+
+export function isPreteriteFocusItem(item) {
+  if (!item || typeof item !== "object") return false;
+  return item.conjugationFocus === "preterite" || item.subcategory === "Verbos en Pretérito";
+}
+
 /**
  * Parses raw verb inputs (including reflexives, slash variants, and multi-word phrases)
  */
 export function parseVerb(rawVerb) {
   let cleaned = (rawVerb || "").trim().toLowerCase();
   
+  if (cleaned === "ir / ser" || cleaned === "ser / ir") {
+    return { base: "ir", isReflexive: false, suffix: "" };
+  }
+
   // Handle slash formats like "lavé / lavaste / lavó"
   if (cleaned.includes("/")) {
     const parts = cleaned.split("/").map(p => p.trim());
@@ -1501,6 +1516,328 @@ export function generateConjugationQuestion(verbItem, options = {}) {
     questionWord: prompt,
     correct: correctForm,
     choices: choices
+  };
+}
+
+const ENGLISH_PAST_MAP = {
+  "lavar": "washed",
+  "barrer": "swept",
+  "sacudir": "dusted",
+  "comprar": "bought",
+  "pagar": "paid",
+  "buscar": "searched for",
+  "pedir": "ordered",
+  "servir": "served",
+  "dormir": "slept",
+  "preferir": "preferred",
+  "medir": "measured",
+  "repetir": "repeated",
+  "seguir": "followed",
+  "hacer": "made / did",
+  "tener": "had",
+  "estar": (subjectEn) => (subjectEn === "I" || subjectEn === "he" || subjectEn === "she" ? "was" : "were"),
+  "poder": "could / managed to",
+  "poner": "put",
+  "saber": "found out",
+  "venir": "came",
+  "decir": "said",
+  "traer": "brought",
+  "dar": "gave",
+  "ver": "saw",
+  "conducir": "drove",
+  "ir": "went",
+  "ser": (subjectEn) => (subjectEn === "I" || subjectEn === "he" || subjectEn === "she" ? "was" : "were")
+};
+
+const PRETERITE_CROSS_VERB_LOOKALIKES = {
+  "lavar": ["limpiar", "comprar", "pagar"],
+  "barrer": ["sacudir", "lavar", "correr"],
+  "sacudir": ["barrer", "lavar", "subir"],
+  "comprar": ["pagar", "buscar", "lavar"],
+  "pagar": ["comprar", "llegar", "jugar"],
+  "buscar": ["tocar", "sacar", "pagar"],
+  "pedir": ["servir", "medir", "repetir"],
+  "servir": ["pedir", "seguir", "preferir"],
+  "dormir": ["morir", "servir", "pedir"],
+  "preferir": ["servir", "repetir", "pedir"],
+  "medir": ["pedir", "servir", "repetir"],
+  "repetir": ["pedir", "preferir", "medir"],
+  "seguir": ["servir", "pedir", "conseguir"],
+  "ir": ["dar", "ver", "hacer"],
+  "ser": ["dar", "ver", "estar"],
+  "hacer": ["decir", "tener", "poner"],
+  "tener": ["estar", "poder", "poner"],
+  "estar": ["tener", "andar", "poner"],
+  "poder": ["poner", "tener", "saber"],
+  "poner": ["poder", "tener", "saber"],
+  "saber": ["poner", "poder", "tener"],
+  "venir": ["ver", "tener", "decir"],
+  "decir": ["hacer", "traer", "conducir"],
+  "traer": ["decir", "conducir", "hacer"],
+  "dar": ["ver", "ir", "decir"],
+  "ver": ["dar", "ir", "venir"],
+  "conducir": ["decir", "traer", "producir"]
+};
+
+const RADICAL_PRETERITE_BASES = new Set([
+  "ir", "ser", "hacer", "tener", "estar", "poder", "poner",
+  "saber", "venir", "decir", "traer", "dar", "ver", "conducir"
+]);
+
+const SUBJECT_EN_OPTIONS = {
+  0: ["I"],
+  1: ["you (informal)"],
+  2: ["he", "she", "you (formal)"],
+  3: ["we"],
+  4: ["you all (Spain)"],
+  5: ["they", "you all"]
+};
+
+const FLASHCARD_PRONOUN_ROWS = [
+  { idx: 0, label: "yo" },
+  { idx: 1, label: "tú" },
+  { idx: 2, label: "él / ella / Ud." },
+  { idx: 3, label: "nosotros" },
+  { idx: 4, label: "vosotros" },
+  { idx: 5, label: "ellos / Uds." }
+];
+
+function getEnglishPastVerb(base, subjectEn) {
+  const entry = ENGLISH_PAST_MAP[base];
+  if (typeof entry === "function") return entry(subjectEn);
+  if (typeof entry === "string") {
+    if (entry.includes(" / ")) {
+      const parts = entry.split(" / ");
+      return parts[Math.floor(Math.random() * parts.length)];
+    }
+    return entry;
+  }
+  return null;
+}
+
+function getPreteriteTrapDistractors(base, personIdx) {
+  const traps = [];
+  const normBase = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  // 1. -car / -gar / -zar spelling traps
+  if (normBase.endsWith("car") || normBase.endsWith("gar") || normBase.endsWith("zar")) {
+    if (personIdx === 0) {
+      traps.push(base.slice(0, -2) + "é"); // e.g., pagé, buscé
+    } else {
+      const yoStem = normBase.endsWith("car")
+        ? base.slice(0, -3) + "qu"
+        : normBase.endsWith("gar")
+          ? base.slice(0, -3) + "gu"
+          : base.slice(0, -3) + "c";
+      traps.push(yoStem + PRET_AR_ENDINGS[personIdx]); // e.g., paguó, busquaste
+    }
+  }
+
+  // 2. Sandal -ir verbs: un-stem-changed 3rd person OR over-changed 1st/2nd person
+  if (isPreteriteStemChanger(base)) {
+    const stem = base.slice(0, -2);
+    if (personIdx === 2 || personIdx === 5) {
+      traps.push(stem + (personIdx === 2 ? "ió" : "ieron")); // e.g., dormió, pedió
+    } else {
+      const thirdForm = PRETERITE_IRREGULARS[base]?.[2] || "";
+      const changedStem = thirdForm.replace(/ió$/, "");
+      if (changedStem) {
+        traps.push(changedStem + PRET_ER_IR_ENDINGS[personIdx]); // e.g., durmí, pidiste
+      }
+    }
+  }
+
+  // 3. Regularized or mis-accented forms for Unit 4 irregulars
+  const customTraps = {
+    "ir": ["fuí", "fué", "iró", "fuió"],
+    "ser": ["fuí", "fué", "seró", "fuió"],
+    "hacer": ["hació", "hací", "hicó", "hacieron", "hizo", "hice"],
+    "tener": ["tenió", "tení", "tuvó", "tuví", "tuveron"],
+    "estar": ["estuvó", "estuví", "esté", "estuvieron", "estuvo"],
+    "poder": ["pudió", "pudí", "pudó", "podí", "pudieron"],
+    "poner": ["ponió", "poní", "pusó", "pusí", "ponieron"],
+    "saber": ["sabió", "sabí", "supó", "supí", "sabieron"],
+    "venir": ["venió", "vení", "vinó", "viní", "venieron"],
+    "decir": ["deció", "decí", "dijió", "dijó", "dijieron"],
+    "traer": ["traí", "trayó", "trajió", "trajó", "trajieron"],
+    "dar": ["dió", "dó", "daí", "daron"],
+    "ver": ["vió", "veí", "veó", "veron"],
+    "conducir": ["condució", "conducí", "condujió", "condujó", "condujieron"]
+  };
+  if (customTraps[base]) {
+    traps.push(...customTraps[base]);
+  }
+
+  // 4. Cross-ending traps for regular verbs (-ar vs -er/-ir)
+  if (!PRETERITE_IRREGULARS[base] && !PRETERITE_IRREGULARS[normBase]) {
+    const stem = base.slice(0, -2);
+    if (normBase.endsWith("ar")) {
+      traps.push(stem + PRET_ER_IR_ENDINGS[personIdx]); // e.g., lavió, comprí
+      if (personIdx === 0) traps.push(stem + "e");
+      if (personIdx === 2) traps.push(stem + "o");
+    } else if (normBase.endsWith("er") || normBase.endsWith("ir")) {
+      traps.push(stem + PRET_AR_ENDINGS[personIdx]); // e.g., barró, sacudé
+    }
+  }
+
+  return traps;
+}
+
+/**
+ * Builds structured flashcard data for preterite-focused verbs:
+ * Front shows infinitive + full preterite conjugation list;
+ * Back shows English infinitive + past-tense summary.
+ */
+export function getPreteriteFlashcardDetails(verbItem, excludeVosotros = true) {
+  if (!verbItem || !verbItem.spanish) return null;
+  const raw = verbItem.spanish.trim();
+  const isIrSer = raw.toLowerCase() === "ir / ser";
+  const { base } = parseVerb(raw);
+  const normBase = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  const isSpell = isPreteriteSpellingChanger(base);
+  const isSandal = isPreteriteStemChanger(base);
+  const isDouble = isPreteriteDoubleVowel(base);
+  const isRadical = RADICAL_PRETERITE_BASES.has(normBase) || RADICAL_PRETERITE_BASES.has(base);
+
+  const rows = FLASHCARD_PRONOUN_ROWS
+    .filter(row => !(excludeVosotros && row.idx === 4))
+    .map(row => {
+      const form = conjugate(raw, row.idx, "preterite");
+      const isHighlighted = isRadical
+        || (isSpell && row.idx === 0)
+        || ((isSandal || isDouble) && (row.idx === 2 || row.idx === 5));
+      return {
+        idx: row.idx,
+        pronoun: row.label,
+        form,
+        isHighlighted
+      };
+    });
+
+  const englishMeaning = verbItem.baseEnglish || sanitizeMeaningForQuiz(verbItem.english) || "";
+  const pastSample = isIrSer
+    ? "went / was, were"
+    : (typeof ENGLISH_PAST_MAP[base] === "string"
+      ? ENGLISH_PAST_MAP[base]
+      : (base === "estar" ? "was / were" : ""));
+
+  const pastSummary = isIrSer
+    ? "I went/was, you went/were, he/she went/was, we went/were, they went/were"
+    : pastSample
+      ? `I ${pastSample}, you ${pastSample}, he/she ${pastSample}, we ${pastSample}, they ${pastSample}`
+      : verbItem.english;
+
+  return {
+    infinitive: raw,
+    englishMeaning,
+    pastSample,
+    pastSummary,
+    rows,
+    speechText: `${raw}. ${rows.map(r => r.form).join(", ")}`
+  };
+}
+
+/**
+ * Generates a single-form, spoiler-free English-to-Spanish preterite drill
+ * with 3-tier adaptive difficulty (and optional typed recall on Tier 3).
+ */
+export function generatePreteriteTranslationMC(verbItem, options = {}) {
+  if (!verbItem || !verbItem.spanish) return null;
+  const raw = verbItem.spanish.trim();
+  const isIrSer = raw.toLowerCase() === "ir / ser";
+  const { base } = parseVerb(raw);
+  const difficultyTier = Math.max(1, Math.min(3, Number(options.difficultyTier) || 1));
+  const excludeVosotros = options.excludeVosotros !== undefined ? options.excludeVosotros : true;
+
+  const allowedIndices = [0, 1, 2, 3, 5];
+  if (!excludeVosotros) allowedIndices.push(4);
+  const chosenIdx = allowedIndices[Math.floor(Math.random() * allowedIndices.length)];
+
+  const subjectCandidates = SUBJECT_EN_OPTIONS[chosenIdx] || ["I"];
+  const subjectEn = subjectCandidates[Math.floor(Math.random() * subjectCandidates.length)];
+
+  const effectiveBase = isIrSer ? (Math.random() > 0.5 ? "ir" : "ser") : base;
+  const pastVerbEn = getEnglishPastVerb(effectiveBase, subjectEn)
+    || sanitizeMeaningForQuiz(verbItem.baseEnglish || verbItem.english || raw).replace(/^to\s+/i, "");
+
+  const englishPrompt = `${subjectEn} ${pastVerbEn}`;
+  const correctForm = conjugate(raw, chosenIdx, "preterite");
+
+  const sameVerbOthers = [];
+  for (const idx of allowedIndices) {
+    if (idx !== chosenIdx) {
+      sameVerbOthers.push(conjugate(raw, idx, "preterite"));
+    }
+  }
+
+  const traps = getPreteriteTrapDistractors(effectiveBase, chosenIdx);
+  const presentTrap = conjugate(effectiveBase, chosenIdx, "present");
+  const imperfectTrap = conjugate(effectiveBase, chosenIdx, "imperfect");
+  const lookalikeVerbs = PRETERITE_CROSS_VERB_LOOKALIKES[effectiveBase] || [];
+  const crossVerbTraps = lookalikeVerbs.map(v => conjugate(v, chosenIdx, "preterite"));
+
+  const distractorPool = [];
+  const addCandidate = (form) => {
+    if (
+      form &&
+      form !== correctForm &&
+      !distractorPool.includes(form) &&
+      !form.includes("/")
+    ) {
+      distractorPool.push(form);
+    }
+  };
+
+  if (difficultyTier === 1) {
+    // Tier 1: Clear different-person preterite options from the same verb
+    [...sameVerbOthers].sort(() => Math.random() - 0.5).forEach(addCandidate);
+  } else if (difficultyTier === 2) {
+    // Tier 2: Plausible stem/spelling traps + close person pairs
+    [...traps].sort(() => Math.random() - 0.5).slice(0, 2).forEach(addCandidate);
+    [...sameVerbOthers].sort(() => Math.random() - 0.5).forEach(addCandidate);
+  } else {
+    // Tier 3: Stem/spelling traps + tense traps + cross-verb lookalikes
+    [...traps].sort(() => Math.random() - 0.5).slice(0, 1).forEach(addCandidate);
+    [presentTrap, imperfectTrap].sort(() => Math.random() - 0.5).slice(0, 1).forEach(addCandidate);
+    [...crossVerbTraps].sort(() => Math.random() - 0.5).slice(0, 1).forEach(addCandidate);
+    [...traps, ...sameVerbOthers, ...crossVerbTraps].sort(() => Math.random() - 0.5).forEach(addCandidate);
+  }
+
+  // Safety backfill if needed
+  if (distractorPool.length < 3) {
+    [...sameVerbOthers, ...traps, ...crossVerbTraps].forEach(addCandidate);
+  }
+
+  const finalDistractors = distractorPool.slice(0, 3);
+  const choices = [correctForm, ...finalDistractors].sort(() => Math.random() - 0.5);
+  const isTyped = Boolean(options.allowTyped && difficultyTier === 3);
+
+  const spanishSubject = CONCRETE_PRONOUN_MAP[chosenIdx]?.[0]?.pronoun || "";
+  const categoryInfo = getVerbCategoryInfo(effectiveBase, "preterite");
+  const ruleSummary = categoryInfo?.subcategory?.nameEn || categoryInfo?.category?.nameEn || "Preterite conjugation";
+
+  return {
+    isCardIntro: false,
+    isConjugation: true,
+    isPreteriteDrill: true,
+    hideHints: true,
+    isTyped,
+    type: isTyped ? 2 : 0,
+    difficultyTier,
+    tense: "preterite",
+    tenseLabel: "Pretérito (Past Tense)",
+    infinitive: raw,
+    subjectPronoun: spanishSubject,
+    subjectMeaning: subjectEn,
+    prompt: englishPrompt,
+    questionWord: englishPrompt,
+    meaning: "",
+    pronoun: "",
+    correct: correctForm,
+    choices: isTyped ? [] : choices,
+    explanationEn: `${raw} (${spanishSubject}) ➔ ${correctForm} (${ruleSummary})`,
+    explanationEs: `${raw} (${spanishSubject}) ➔ ${correctForm}`
   };
 }
 

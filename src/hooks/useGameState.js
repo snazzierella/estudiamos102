@@ -1,6 +1,50 @@
 import { useState, useEffect } from 'react';
 import { TOTAL_STAGES, STAGES } from '../utils/difficultyMapper';
+import { getVocabKey } from '../utils/conjugationHelper';
 import vocabularyData from '../data/vocabulary.json';
+
+const LEGACY_PRETERITE_KEY_MAP = {
+  "lavé / lavaste / lavó": "lavar::preterite",
+  "barrí / barriste / barrió": "barrer::preterite",
+  "sacudí / sacudiste / sacudió": "sacudir::preterite",
+  "compré / compraste / compró": "comprar::preterite",
+  "pagué / pagaste / pagó": "pagar::preterite",
+  "busqué / buscaste / buscó": "buscar::preterite",
+  "pidió / pidieron": "pedir::preterite",
+  "sirvió / sirvieron": "servir::preterite",
+  "durmió / durmieron": "dormir::preterite",
+  "prefirió / prefirieron": "preferir::preterite",
+  "midió / midieron": "medir::preterite",
+  "repitió / repitieron": "repetir::preterite",
+  "siguió / siguieron": "seguir::preterite",
+  "fui / fuiste / fue / fuimos / fueron": "ir-ser::preterite",
+  "hice / hiciste / hizo / hicimos / hicieron": "hacer::preterite",
+  "tuve / tuviste / tuvo / tuvimos / tuvieron": "tener::preterite",
+  "estuve / estuviste / estuvo / estuvimos / estuvieron": "estar::preterite",
+  "pude / pudiste / pudo / pudimos / pudieron": "poder::preterite",
+  "puse / pusiste / puso / pusimos / pusieron": "poner::preterite",
+  "supe / supiste / supo / supimos / supieron": "saber::preterite",
+  "vine / viniste / vino / vinimos / vinieron": "venir::preterite",
+  "dije / dijiste / dijo / dijimos / dijeron": "decir::preterite",
+  "traje / trajiste / trajo / trajimos / trajeron": "traer::preterite",
+  "di / diste / dio / dimos / dieron": "dar::preterite",
+  "vi / viste / vio / vimos / vieron": "ver::preterite"
+};
+
+function mapLegacyKey(key) {
+  if (!key || typeof key !== "string") return key;
+  return LEGACY_PRETERITE_KEY_MAP[key] || key;
+}
+
+function migrateMasteryMap(rawMastery) {
+  if (!rawMastery || typeof rawMastery !== "object") return {};
+  const next = {};
+  for (const [k, v] of Object.entries(rawMastery)) {
+    const mapped = mapLegacyKey(k);
+    next[mapped] = next[mapped] !== undefined ? Math.max(next[mapped], v) : v;
+  }
+  return next;
+}
 
 export const getStageWords = (stageNum) => {
   const stage = STAGES[stageNum];
@@ -9,7 +53,7 @@ export const getStageWords = (stageNum) => {
   return Array.from(new Set(
     vocabularyData
       .filter(item => subcats.has(item.subcategory))
-      .map(item => item.spanish)
+      .map(item => getVocabKey(item))
   ));
 };
 
@@ -130,11 +174,13 @@ export function useGameState() {
         const excludeVosotros = parsed._hasSetVosotros ? parsed.excludeVosotros : true;
 
         const unit1Words = getStageWords(1);
-        let stageFlashcardsSeen = [...new Set([...(parsed.stageFlashcardsSeen || []), ...unit1Words])];
-        let wordsAnsweredCorrectly = parsed.wordsAnsweredCorrectly || [];
+        const migratedSeen = (parsed.stageFlashcardsSeen || []).map(mapLegacyKey);
+        let stageFlashcardsSeen = [...new Set([...migratedSeen, ...unit1Words])];
+        let wordsAnsweredCorrectly = (parsed.wordsAnsweredCorrectly || []).map(mapLegacyKey);
         if (parsed.questStage > 1) {
           wordsAnsweredCorrectly = [...new Set([...wordsAnsweredCorrectly, ...unit1Words])];
         }
+        const wordMastery = migrateMasteryMap(parsed.wordMastery);
 
         let questStage = Math.max(1, Number(parsed.questStage) || 1);
         let questLevel = Math.max(1, Number(parsed.questLevel) || 1);
@@ -185,11 +231,13 @@ export function useGameState() {
           excludeVosotros,
           stageFlashcardsSeen,
           wordsAnsweredCorrectly,
+          wordMastery,
           levelRecords: parsed.levelRecords || {},
           hintlessLessonsCount: parsed.hintlessLessonsCount || 0,
           translateInstructions: Boolean(parsed.translateInstructions),
           mistakes: Array.isArray(parsed.mistakes)
             ? parsed.mistakes
+                .map(mapLegacyKey)
                 .map(sanitizeMistakeEntry)
                 .filter(w => typeof w === 'string' && w.trim().length > 0)
                 .reduce((acc, curr) => {
@@ -1253,8 +1301,12 @@ export function useGameState() {
       }
 
       const unit1Words = getStageWords(1);
-      let stageFlashcardsSeen = [...new Set([...(rawState.stageFlashcardsSeen || []), ...unit1Words])];
-      let wordsAnsweredCorrectly = Array.isArray(rawState.wordsAnsweredCorrectly) ? rawState.wordsAnsweredCorrectly : [];
+      const migratedSeen = (rawState.stageFlashcardsSeen || []).map(mapLegacyKey);
+      let stageFlashcardsSeen = [...new Set([...migratedSeen, ...unit1Words])];
+      let wordsAnsweredCorrectly = Array.isArray(rawState.wordsAnsweredCorrectly)
+        ? rawState.wordsAnsweredCorrectly.map(mapLegacyKey)
+        : [];
+      const wordMastery = migrateMasteryMap(rawState.wordMastery);
       const questStage = Math.max(1, Number(rawState.questStage) || 1);
       let questLevel = Math.max(1, Number(rawState.questLevel) || 1);
       let isReviewReady = Boolean(rawState.isReviewReady);
@@ -1288,6 +1340,7 @@ export function useGameState() {
         isReviewReady,
         stageFlashcardsSeen,
         wordsAnsweredCorrectly,
+        wordMastery,
         completedLevels,
         levelRecords: (rawState.levelRecords && typeof rawState.levelRecords === 'object') ? rawState.levelRecords : {},
         inventory: {
@@ -1309,6 +1362,7 @@ export function useGameState() {
         badges: Array.isArray(rawState.badges) ? rawState.badges : [],
         mistakes: Array.isArray(rawState.mistakes)
           ? rawState.mistakes
+              .map(mapLegacyKey)
               .map(sanitizeMistakeEntry)
               .filter(w => typeof w === 'string' && w.trim().length > 0)
               .reduce((acc, curr) => {
@@ -1319,7 +1373,6 @@ export function useGameState() {
                 return acc;
               }, [])
           : [],
-        wordMastery: (rawState.wordMastery && typeof rawState.wordMastery === 'object') ? rawState.wordMastery : {},
         hasCompletedPlacement: Boolean(rawState.hasCompletedPlacement),
         hasMidtermHpDoubler: Boolean(rawState.hasMidtermHpDoubler),
         oralExamProgress: {

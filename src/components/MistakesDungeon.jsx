@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import vocabularyData from '../data/vocabulary.json';
 import { SENTENCE_POOLS } from '../utils/sentenceBuilderHelper';
-import { generateConjugationQuestion, isPreteriteTense } from '../utils/conjugationHelper';
+import { generateConjugationQuestion, generatePreteriteTranslationMC, getVocabKey, isPreteriteFocusItem, isPreteriteTense } from '../utils/conjugationHelper';
 import { formatEnglishPrompt } from '../utils/difficultyMapper';
 import { speakSpanish as speakSpanishUtil } from '../utils/speechHelper';
 import { ArrowLeft, Trophy, Volume2 } from 'lucide-react';
@@ -17,9 +17,10 @@ function resolveMistakeItem(spanishWord) {
   if (!spanishWord || typeof spanishWord !== 'string') return null;
   const target = spanishWord.trim().toLowerCase();
 
-  // 1. Direct match in vocabulary
+  // 1. Direct match by cardKey or spanish in vocabulary
   const vocabMatch = vocabularyData.find(item => 
-    item.spanish && item.spanish.trim().toLowerCase() === target
+    getVocabKey(item).trim().toLowerCase() === target ||
+    (item.spanish && item.spanish.trim().toLowerCase() === target)
   );
   if (vocabMatch) return { ...vocabMatch, rawMistake: spanishWord };
 
@@ -159,6 +160,17 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
     setIsAnswerCorrect(false);
     setSelectedChoice(null);
     setTypedAnswer("");
+
+    if (isPreteriteFocusItem(item)) {
+      const qSpec = generatePreteriteTranslationMC(item, {
+        difficultyTier: 2,
+        excludeVosotros: state.excludeVosotros
+      });
+      if (qSpec) {
+        setQuestion({ item, ...qSpec });
+        return;
+      }
+    }
 
     const isVerb = item.category === "Verbs" && item.subcategory !== "Verbs Structured Like Gustar";
     // 40% chance of conjugation for verbs, otherwise translation
@@ -645,28 +657,47 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                    Conjugate for the subject pronoun:
-                  </div>
+                  {currentQ.isPreteriteDrill ? (
+                    <>
+                      <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                        Choose the Spanish preterite form:
+                      </div>
+                      <div style={{
+                        fontSize: '2.1rem',
+                        fontFamily: 'var(--font-display)',
+                        fontWeight: '800',
+                        margin: '10px 0 6px',
+                        color: 'var(--text-primary)'
+                      }}>
+                        {currentQ.questionWord}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                        Conjugate for the subject pronoun:
+                      </div>
 
-                  {/* Prominent Subject + Verb Headline: e.g. "yo (tener)" */}
-                  <div style={{ 
-                    fontSize: '2.1rem', 
-                    fontFamily: 'var(--font-display)', 
-                    fontWeight: '800', 
-                    margin: '8px 0 4px'
-                  }}>
-                    <span style={{ color: 'var(--gold)' }}>
-                      {currentQ.subjectPronoun || currentQ.questionWord?.split(' ')[0]}
-                    </span>{' '}
-                    <span style={{ color: 'var(--primary)' }}>
-                      ({currentQ.infinitive || currentQ.item?.spanish || currentQ.questionWord?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
-                    </span>
-                  </div>
+                      {/* Prominent Subject + Verb Headline: e.g. "yo (tener)" */}
+                      <div style={{ 
+                        fontSize: '2.1rem', 
+                        fontFamily: 'var(--font-display)', 
+                        fontWeight: '800', 
+                        margin: '8px 0 4px'
+                      }}>
+                        <span style={{ color: 'var(--gold)' }}>
+                          {currentQ.subjectPronoun || currentQ.questionWord?.split(' ')[0]}
+                        </span>{' '}
+                        <span style={{ color: 'var(--primary)' }}>
+                          ({currentQ.infinitive || currentQ.item?.spanish || currentQ.questionWord?.replace(/^[^(]+\(/, '').replace(/\)$/, '')})
+                        </span>
+                      </div>
 
-                  <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '12px' }}>
-                    {currentQ.pronoun} • ({currentQ.meaning})
-                  </div>
+                      <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '12px' }}>
+                        {currentQ.pronoun} • ({currentQ.meaning})
+                      </div>
+                    </>
+                  )}
                 </div>
               ) : (
                 <>
@@ -778,6 +809,11 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
                 <span>✨ ¡Excelente! Correct answer: <strong>{question.correct}</strong> (Ghost purified! +10 HP restored)</span>
               ) : (
                 <span>⚠️ Incorrect! Correct {isConjugation ? `form (${isPreteriteTense(question) ? 'Pretérito / Past' : 'Presente'}):` : 'translation:'} <strong>{question.correct}</strong></span>
+              )}
+              {question.explanationEn && (
+                <div style={{ marginTop: '8px', fontSize: '0.82rem', opacity: 0.9 }}>
+                  💡 {question.explanationEn}
+                </div>
               )}
             </div>
 

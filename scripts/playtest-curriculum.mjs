@@ -20,7 +20,11 @@ import {
   isSentenceItem,
   PRONOUNS,
   BLANK_SPECS,
-  sanitizeMeaningForQuiz
+  sanitizeMeaningForQuiz,
+  getVocabKey,
+  isPreteriteFocusItem,
+  getPreteriteFlashcardDetails,
+  generatePreteriteTranslationMC
 } from '../src/utils/conjugationHelper.js';
 import { getLevelInfo } from '../src/utils/levelInfoHelper.js';
 import { STAGES } from '../src/utils/difficultyMapper.js';
@@ -294,7 +298,7 @@ for (let stage = 1; stage <= 5; stage++) {
     // Flashcard allocation
     const newCards = remainingUnseen.slice(0, actualCards);
     remainingUnseen = remainingUnseen.slice(actualCards);
-    newCards.forEach(c => seenInStage.add(c.spanish));
+    newCards.forEach(c => seenInStage.add(getVocabKey(c)));
 
     // INVARIANT 1: Level 1 must not exceed 10 cards
     if (lvl === 1) {
@@ -310,10 +314,10 @@ for (let stage = 1; stage <= 5; stage++) {
     // Any vocabulary question must only be drawn from words seen in current or previous flashcards
     if (stage > 1) {
       const allowedWords = new Set([...seenInStage]);
-      newCards.forEach(c => allowedWords.add(c.spanish));
+      newCards.forEach(c => allowedWords.add(getVocabKey(c)));
 
       // Simulate question generation pool for this level
-      const eligibleItems = stageVocab.filter(item => allowedWords.has(item.spanish));
+      const eligibleItems = stageVocab.filter(item => allowedWords.has(getVocabKey(item)));
       assert(eligibleItems.length === allowedWords.size, `Eligible items count mismatch in Stage ${stage} Level ${lvl}`);
     }
   }
@@ -376,11 +380,39 @@ for (const [unitStr, pool] of Object.entries(SENTENCE_POOLS)) {
 }
 console.log(`  ✓ Audited ${sbHintAudits} Sentence Builder hints: zero colon giveaways or quoted answers.`);
 
+// -------------------------------------------------------------
+// 7. UNIT 3 & UNIT 4 PRETERITE FLASHCARDS & ADAPTIVE MC AUDIT
+// -------------------------------------------------------------
+console.log("\n--- [7/7] Auditing Unit 3 & Unit 4 Preterite Flashcards & Tier 1-3 Drills ---");
+const preteriteFocusItems = vocabData.filter(item => isPreteriteFocusItem(item));
+assert(preteriteFocusItems.length === 26, `Expected 26 preterite-focus items across Unit 3 & 4, got ${preteriteFocusItems.length}`);
+
+preteriteFocusItems.forEach(item => {
+  const detailsNoVos = getPreteriteFlashcardDetails(item, true);
+  const detailsWithVos = getPreteriteFlashcardDetails(item, false);
+  assert(detailsNoVos && detailsNoVos.rows.length === 5, `Preterite flashcard '${item.spanish}' should have 5 rows when vosotros excluded`);
+  assert(detailsWithVos && detailsWithVos.rows.length === 6, `Preterite flashcard '${item.spanish}' should have 6 rows when vosotros included`);
+  assert(!detailsNoVos.infinitive.includes("é /"), `Preterite flashcard '${item.spanish}' must show infinitive, not partial slash forms`);
+  assert(detailsNoVos.englishMeaning && !/preterite/i.test(detailsNoVos.englishMeaning), `Preterite flashcard '${item.spanish}' englishMeaning should not expose 'preterite' spoiler`);
+
+  for (const tier of [1, 2, 3]) {
+    const q = generatePreteriteTranslationMC(item, { difficultyTier: tier, excludeVosotros: true });
+    assert(q && q.isPreteriteDrill && q.hideHints, `Failed to build Tier ${tier} drill for '${item.spanish}'`);
+    assert(q.choices.length === 4 && new Set(q.choices).size === 4, `Tier ${tier} drill for '${item.spanish}' must have 4 unique choices, got ${JSON.stringify(q.choices)}`);
+    assert(q.choices.includes(q.correct), `Tier ${tier} drill for '${item.spanish}' choices missing correct answer '${q.correct}'`);
+    assert(!q.questionWord.includes("(") || /\(informal\)|\(formal\)/.test(q.questionWord), `Tier ${tier} prompt leaked parenthetical hint: '${q.questionWord}'`);
+    assert(!q.questionWord.toLowerCase().includes(q.correct.toLowerCase()), `Tier ${tier} prompt '${q.questionWord}' leaked Spanish answer '${q.correct}'`);
+    assert(!/preterite|sandalia|stem|o->u|e->i/i.test(q.questionWord), `Tier ${tier} prompt leaked grammar label: '${q.questionWord}'`);
+  }
+});
+console.log(`  ✓ Audited ${preteriteFocusItems.length} Unit 3 & Unit 4 preterite verbs across flashcards and Tiers 1–3.`);
+
 console.log("\n===================================================================");
 console.log(`🎉 AUDIT COMPLETE: ${totalPassed} / ${totalAudits} checks passed.`);
 if (issues.length > 0) {
   console.log(`⚠️  ${issues.length} issues identified:`);
   issues.forEach((iss, i) => console.log(`   ${i + 1}. ${iss.message}`));
+  process.exitCode = 1;
 } else {
   console.log("🌟 ZERO DEFECTS FOUND: Spanish grammar, orthography, syntax breakdowns, and 25-level pacing are 100% clean!");
 }

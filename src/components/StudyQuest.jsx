@@ -2829,13 +2829,24 @@ export default function StudyQuest({
 
           <div className="quiz-question-lbl" style={{ marginBottom: '6px' }}>
             {isTypedView || q.isTyped
-              ? (translateInstructions ? "Escribe la forma en pretérito (Type the Spanish preterite form):" : "Escribe la forma correcta en pretérito:")
-              : (translateInstructions ? "Elige la forma en pretérito (Choose the Spanish preterite form):" : "Elige la forma correcta en pretérito:")}
+              ? (translateInstructions ? "Escribe la conjugación para el pronombre (Type conjugation):" : "Escribe la conjugación para el pronombre:")
+              : (translateInstructions ? "Conjuga para el pronombre (Conjugate for the subject pronoun):" : "Conjuga para el pronombre:")}
           </div>
 
-          <h3 className="quiz-word" style={{ fontSize: '2.2rem', margin: '12px 0 8px', color: 'var(--text-primary)' }}>
-            {q.questionWord}
+          <h3 className="quiz-word" style={{ fontSize: '2.3rem', margin: '8px 0 4px' }}>
+            <span style={{ color: 'var(--gold)', fontWeight: 800 }}>
+              {q.subjectPronoun}
+            </span>{' '}
+            <span style={{ color: 'var(--primary)' }}>
+              ({q.displayInfinitive || q.infinitive})
+            </span>
           </h3>
+
+          {q.meaning && (
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '14px' }}>
+              {q.meaning}
+            </p>
+          )}
         </>
       );
     }

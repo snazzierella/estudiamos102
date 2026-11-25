@@ -1584,15 +1584,6 @@ const RADICAL_PRETERITE_BASES = new Set([
   "saber", "venir", "decir", "traer", "dar", "ver", "conducir"
 ]);
 
-const SUBJECT_EN_OPTIONS = {
-  0: ["I"],
-  1: ["you (informal)"],
-  2: ["he", "she", "you (formal)"],
-  3: ["we"],
-  4: ["you all (Spain)"],
-  5: ["they", "you all"]
-};
-
 const FLASHCARD_PRONOUN_ROWS = [
   { idx: 0, label: "yo" },
   { idx: 1, label: "tú" },
@@ -1601,19 +1592,6 @@ const FLASHCARD_PRONOUN_ROWS = [
   { idx: 4, label: "vosotros" },
   { idx: 5, label: "ellos / Uds." }
 ];
-
-function getEnglishPastVerb(base, subjectEn) {
-  const entry = ENGLISH_PAST_MAP[base];
-  if (typeof entry === "function") return entry(subjectEn);
-  if (typeof entry === "string") {
-    if (entry.includes(" / ")) {
-      const parts = entry.split(" / ");
-      return parts[Math.floor(Math.random() * parts.length)];
-    }
-    return entry;
-  }
-  return null;
-}
 
 function getPreteriteTrapDistractors(base, personIdx) {
   const traps = [];
@@ -1754,14 +1732,17 @@ export function generatePreteriteTranslationMC(verbItem, options = {}) {
   if (!excludeVosotros) allowedIndices.push(4);
   const chosenIdx = allowedIndices[Math.floor(Math.random() * allowedIndices.length)];
 
-  const subjectCandidates = SUBJECT_EN_OPTIONS[chosenIdx] || ["I"];
-  const subjectEn = subjectCandidates[Math.floor(Math.random() * subjectCandidates.length)];
+  const candidates = CONCRETE_PRONOUN_MAP[chosenIdx] || CONCRETE_PRONOUN_MAP[0];
+  const chosenPronounObj = candidates[Math.floor(Math.random() * candidates.length)];
+  const spanishSubject = chosenPronounObj.pronoun;
 
   const effectiveBase = isIrSer ? (Math.random() > 0.5 ? "ir" : "ser") : base;
-  const pastVerbEn = getEnglishPastVerb(effectiveBase, subjectEn)
-    || sanitizeMeaningForQuiz(verbItem.baseEnglish || verbItem.english || raw).replace(/^to\s+/i, "");
+  const displayInfinitive = isIrSer ? effectiveBase : raw;
+  const cleanEnglish = isIrSer
+    ? (effectiveBase === "ir" ? "to go" : "to be")
+    : (verbItem.baseEnglish || sanitizeMeaningForQuiz(verbItem.english || raw));
 
-  const englishPrompt = `${subjectEn} ${pastVerbEn}`;
+  const promptText = `${spanishSubject} (${displayInfinitive})`;
   const correctForm = conjugate(raw, chosenIdx, "preterite");
 
   const sameVerbOthers = [];
@@ -1813,7 +1794,6 @@ export function generatePreteriteTranslationMC(verbItem, options = {}) {
   const choices = [correctForm, ...finalDistractors].sort(() => Math.random() - 0.5);
   const isTyped = Boolean(options.allowTyped && difficultyTier === 3);
 
-  const spanishSubject = CONCRETE_PRONOUN_MAP[chosenIdx]?.[0]?.pronoun || "";
   const categoryInfo = getVerbCategoryInfo(effectiveBase, "preterite");
   const ruleSummary = categoryInfo?.subcategory?.nameEn || categoryInfo?.category?.nameEn || "Preterite conjugation";
 
@@ -1827,17 +1807,18 @@ export function generatePreteriteTranslationMC(verbItem, options = {}) {
     difficultyTier,
     tense: "preterite",
     tenseLabel: "Pretérito (Past Tense)",
-    infinitive: raw,
+    infinitive: displayInfinitive,
+    displayInfinitive,
     subjectPronoun: spanishSubject,
-    subjectMeaning: subjectEn,
-    prompt: englishPrompt,
-    questionWord: englishPrompt,
-    meaning: "",
+    subjectMeaning: chosenPronounObj.meaning,
+    prompt: promptText,
+    questionWord: promptText,
+    meaning: cleanEnglish,
     pronoun: "",
     correct: correctForm,
     choices: isTyped ? [] : choices,
-    explanationEn: `${raw} (${spanishSubject}) ➔ ${correctForm} (${ruleSummary})`,
-    explanationEs: `${raw} (${spanishSubject}) ➔ ${correctForm}`
+    explanationEn: `${displayInfinitive} (${spanishSubject}) ➔ ${correctForm} (${ruleSummary})`,
+    explanationEs: `${displayInfinitive} (${spanishSubject}) ➔ ${correctForm}`
   };
 }
 

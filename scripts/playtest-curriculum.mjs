@@ -400,9 +400,9 @@ preteriteFocusItems.forEach(item => {
     assert(q && q.isPreteriteDrill && q.hideHints, `Failed to build Tier ${tier} drill for '${item.spanish}'`);
     assert(q.choices.length === 4 && new Set(q.choices).size === 4, `Tier ${tier} drill for '${item.spanish}' must have 4 unique choices, got ${JSON.stringify(q.choices)}`);
     assert(q.choices.includes(q.correct), `Tier ${tier} drill for '${item.spanish}' choices missing correct answer '${q.correct}'`);
-    assert(!q.questionWord.includes("(") || /\(informal\)|\(formal\)/.test(q.questionWord), `Tier ${tier} prompt leaked parenthetical hint: '${q.questionWord}'`);
+    assert(q.questionWord === `${q.subjectPronoun} (${q.displayInfinitive})`, `Tier ${tier} prompt should be 'pronoun (infinitive)', got '${q.questionWord}'`);
     assert(!q.questionWord.toLowerCase().includes(q.correct.toLowerCase()), `Tier ${tier} prompt '${q.questionWord}' leaked Spanish answer '${q.correct}'`);
-    assert(!/preterite|sandalia|stem|o->u|e->i/i.test(q.questionWord), `Tier ${tier} prompt leaked grammar label: '${q.questionWord}'`);
+    assert(!/preterite|sandalia|stem|o->u|e->i/i.test(q.questionWord + " " + q.meaning), `Tier ${tier} prompt/meaning leaked grammar label: '${q.questionWord}' / '${q.meaning}'`);
   }
 });
 console.log(`  ✓ Audited ${preteriteFocusItems.length} Unit 3 & Unit 4 preterite verbs across flashcards and Tiers 1–3.`);

@@ -660,17 +660,26 @@ export default function MistakesDungeon({ state, takeDamage, heal, removeMistake
                   {currentQ.isPreteriteDrill ? (
                     <>
                       <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                        Choose the Spanish preterite form:
+                        Conjugate for the subject pronoun:
                       </div>
                       <div style={{
                         fontSize: '2.1rem',
                         fontFamily: 'var(--font-display)',
                         fontWeight: '800',
-                        margin: '10px 0 6px',
-                        color: 'var(--text-primary)'
+                        margin: '8px 0 4px'
                       }}>
-                        {currentQ.questionWord}
+                        <span style={{ color: 'var(--gold)' }}>
+                          {currentQ.subjectPronoun}
+                        </span>{' '}
+                        <span style={{ color: 'var(--primary)' }}>
+                          ({currentQ.displayInfinitive || currentQ.infinitive})
+                        </span>
                       </div>
+                      {currentQ.meaning && (
+                        <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '12px' }}>
+                          {currentQ.meaning}
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>

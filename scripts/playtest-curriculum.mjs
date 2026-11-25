@@ -111,13 +111,15 @@ for (const [unitStr, pool] of Object.entries(SENTENCE_POOLS)) {
     }
   });
 }
+assert(SENTENCE_POOLS[3] && SENTENCE_POOLS[3].length >= 55, `Stage 3 sentence pool must have at least 55 sentences, found ${SENTENCE_POOLS[3]?.length}`);
 assert(SENTENCE_POOLS[5] && SENTENCE_POOLS[5].length >= 48, `Stage 5 sentence pool must have at least 48 sentences, found ${SENTENCE_POOLS[5]?.length}`);
-console.log(`  ✓ Checked ${totalSentencesChecked} sentence construction puzzles with zero token ambiguity (Stage 5 has ${SENTENCE_POOLS[5].length} sentences).\n`);
+console.log(`  ✓ Checked ${totalSentencesChecked} sentence construction puzzles with zero token ambiguity (Stage 3 has ${SENTENCE_POOLS[3].length} sentences, Stage 5 has ${SENTENCE_POOLS[5].length} sentences).\n`);
 
 // -------------------------------------------------------------
 // 3. CONTRAST DECISION AUDIT (CONTRAST_QUESTIONS)
 // -------------------------------------------------------------
 console.log("--- [3/5] Auditing Contrast Decision Engine (Which One to Use When) ---");
+assert(CONTRAST_QUESTIONS[3] && CONTRAST_QUESTIONS[3].length >= 24, `Stage 3 contrast questions must have at least 24 questions, found ${CONTRAST_QUESTIONS[3]?.length}`);
 assert(CONTRAST_QUESTIONS[5] && CONTRAST_QUESTIONS[5].length >= 28, `Stage 5 contrast questions must have at least 28 questions, found ${CONTRAST_QUESTIONS[5]?.length}`);
 let totalContrastsChecked = 0;
 

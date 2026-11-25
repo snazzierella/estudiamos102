@@ -729,7 +729,7 @@ export const SENTENCE_POOLS = {
             "lo",
             "las"
         ],
-        "hint": "Use masculine plural direct object pronoun 'los' to replace 'los platos'",
+        "hint": "Replace the masculine plural noun object with the appropriate direct object pronoun placed before the second preterite verb.",
         "syntaxBreakdown": "[Time: Ayer] + [Verbo 1: lavé los platos] + [Conjunción: y] + [DOP Pronoun: los] + [Verbo 2: sequé]"
     },
     {
@@ -740,7 +740,7 @@ export const SENTENCE_POOLS = {
             "lo",
             "las"
         ],
-        "hint": "Use feminine singular direct object pronoun 'la' to replace 'la basura'",
+        "hint": "Replace the feminine singular direct object with the corresponding pronoun preceding the conjugated preterite verb.",
         "syntaxBreakdown": "[Subject: Mi padre] + [Verbo 1: sacó la basura] + [Conjunción: y] + [DOP Pronoun: la] + [Verbo 2: llevó al contenedor]"
     },
     {
@@ -762,7 +762,7 @@ export const SENTENCE_POOLS = {
             "le",
             "los"
         ],
-        "hint": "Direct object pronoun 'lo' placed before the conjugated verb 'debes'",
+        "hint": "When using a modal auxiliary verb with an infinitive, you may place the direct object pronoun immediately before the conjugated modal verb.",
         "syntaxBreakdown": "[Negación: No] + [DOP Pronoun: lo] + [Verbo modal: debes] + [Infinitivo: barrer] + [Time: ahora]"
     },
     {
@@ -773,7 +773,7 @@ export const SENTENCE_POOLS = {
             "barrerle",
             "barrerlos"
         ],
-        "hint": "Direct object pronoun '-lo' attached to the end of the infinitive 'barrer'",
+        "hint": "When using a modal auxiliary verb with an infinitive, you may attach the direct object pronoun directly to the end of the infinitive.",
         "syntaxBreakdown": "[Negación: No] + [Verbo modal: debes] + [Infinitivo con OD adjunto: barrerlo] + [Time: ahora]"
     },
     {
@@ -1050,6 +1050,259 @@ export const SENTENCE_POOLS = {
         ],
         "hint": "Preterite regular -ar verb ending for 3rd person singular (-ó).",
         "syntaxBreakdown": "[Subject: Mi hermano] + [Preterite Verb: pasó] + [Direct Object: la aspiradora] + [Location: en la sala]"
+    },
+    {
+        "spanish": "Yo me probé los zapatos de cuero en la zapatería",
+        "english": "I tried on the leather shoes at the shoe store",
+        "distractors": [
+            "se",
+            "probaste",
+            "una"
+        ],
+        "hint": "Remember to use the 1st person singular reflexive pronoun with the regular preterite -é ending.",
+        "syntaxBreakdown": "[Subject: Yo] + [Reflexive Pronoun: me] + [Preterite Verb: probé] + [Direct Object: los zapatos de cuero] + [Location: en la zapatería]"
+    },
+    {
+        "spanish": "Mi hermana se puso un vestido muy elegante para la fiesta",
+        "english": "My sister put on a very elegant dress for the party",
+        "distractors": [
+            "pusieron",
+            "una",
+            "te"
+        ],
+        "hint": "Ponerse in the preterite has an irregular stem (pus-) and requires the 3rd person singular reflexive pronoun.",
+        "syntaxBreakdown": "[Subject: Mi hermana] + [Reflexive Pronoun: se] + [Irregular Preterite: puso] + [Direct Object: un vestido muy elegante] + [Purpose: para la fiesta]"
+    },
+    {
+        "spanish": "Nosotros nos quitamos las botas sucias en la entrada",
+        "english": "We took off our dirty boots at the entrance",
+        "distractors": [
+            "se",
+            "quitaron",
+            "los"
+        ],
+        "hint": "Reflexive verb expressing removing clothing; match 1st person plural pronoun with the preterite -amos ending.",
+        "syntaxBreakdown": "[Subject: Nosotros] + [Reflexive Pronoun: nos] + [Preterite Verb: quitamos] + [Direct Object: las botas sucias] + [Location: en la entrada]"
+    },
+    {
+        "spanish": "Él se vistió con un traje azul y una corbata de seda",
+        "english": "He got dressed in a blue suit and a silk tie",
+        "distractors": [
+            "vestió",
+            "me",
+            "otro"
+        ],
+        "hint": "Vestirse is a sandal verb in the preterite — stem changes from e to i exclusively in the 3rd person singular and plural.",
+        "syntaxBreakdown": "[Subject: Él] + [Reflexive Pronoun: se] + [Sandal Preterite Verb: vistió] + [Prepositional Phrase: con un traje azul y una corbata de seda]"
+    },
+    {
+        "spanish": "Ellas se vistieron con ropa de moda para salir",
+        "english": "They dressed in fashionable clothes to go out",
+        "distractors": [
+            "vestieron",
+            "nos",
+            "por"
+        ],
+        "hint": "Third person plural preterite of vestirse undergoes the sandal vowel shift e -> i.",
+        "syntaxBreakdown": "[Subject: Ellas] + [Reflexive Pronoun: se] + [Sandal Preterite Verb: vistieron] + [Prepositional Phrase: con ropa de moda] + [Purpose: para salir]"
+    },
+    {
+        "spanish": "El abuelo se probó una chaqueta de lana bastante cómoda",
+        "english": "Grandfather tried on a quite comfortable wool jacket",
+        "distractors": [
+            "me",
+            "probaron",
+            "un"
+        ],
+        "hint": "Combine the 3rd person reflexive pronoun with the regular -ó preterite ending for -ar verbs.",
+        "syntaxBreakdown": "[Subject: El abuelo] + [Reflexive Pronoun: se] + [Preterite Verb: probó] + [Direct Object: una chaqueta de lana bastante cómoda]"
+    },
+    {
+        "spanish": "Nosotros nos quedamos en casa para terminar los quehaceres",
+        "english": "We stayed at home to finish the chores",
+        "distractors": [
+            "se",
+            "quedaron",
+            "las"
+        ],
+        "hint": "Quedarse (to stay/remain) takes reflexive pronouns; regular 1st person plural preterite ending.",
+        "syntaxBreakdown": "[Subject: Nosotros] + [Reflexive Pronoun: nos] + [Preterite Verb: quedamos] + [Location: en casa] + [Purpose: para terminar los quehaceres]"
+    },
+    {
+        "spanish": "Ella se olvidó de comprar la leche en el supermercado",
+        "english": "She forgot to buy milk at the supermarket",
+        "distractors": [
+            "me",
+            "olvidaron",
+            "un"
+        ],
+        "hint": "Olvidarse de requires a reflexive pronoun and is followed by preposition 'de' and an infinitive.",
+        "syntaxBreakdown": "[Subject: Ella] + [Reflexive Pronoun: se] + [Preterite Verb: olvidó] + [Infinitive Phrase: de comprar la leche] + [Location: en el supermercado]"
+    },
+    {
+        "spanish": "La falda de seda estaba rebajada en el escaparate de la tienda",
+        "english": "The silk skirt was discounted in the store window",
+        "distractors": [
+            "rebajado",
+            "estaban",
+            "un"
+        ],
+        "hint": "Past participle used as an adjective must agree in gender and number with the feminine singular subject.",
+        "syntaxBreakdown": "[Subject: La falda de seda] + [Imperfect Verb: estaba] + [Adjective: rebajada] + [Location: en el escaparate de la tienda]"
+    },
+    {
+        "spanish": "Estos pantalones de mezclilla me quedan muy apretados",
+        "english": "These jeans fit me very tight",
+        "distractors": [
+            "apretada",
+            "queda",
+            "te"
+        ],
+        "hint": "Quedar works like gustar to describe how clothing fits someone; adjective agrees with the plural noun.",
+        "syntaxBreakdown": "[Subject: Estos pantalones de mezclilla] + [Indirect Object Pronoun: me] + [Verb: quedan] + [Adverb + Adjective: muy apretados]"
+    },
+    {
+        "spanish": "El cliente pidió una camisa blanca de talla mediana",
+        "english": "The customer asked for a white medium-sized shirt",
+        "distractors": [
+            "pedió",
+            "pidieron",
+            "un"
+        ],
+        "hint": "Pedir is an -ir sandal verb in the preterite — stem shifts from e to i in the 3rd person singular.",
+        "syntaxBreakdown": "[Subject: El cliente] + [Sandal Preterite Verb: pidió] + [Direct Object: una camisa blanca de talla mediana]"
+    },
+    {
+        "spanish": "Los zapatos de marca son demasiado caros en esa tienda",
+        "english": "The brand-name shoes are too expensive in that store",
+        "distractors": [
+            "caras",
+            "es",
+            "este"
+        ],
+        "hint": "Predicate adjective must match the masculine plural subject in gender and number.",
+        "syntaxBreakdown": "[Subject: Los zapatos de marca] + [Verb: son] + [Adverb + Adjective: demasiado caros] + [Location: en esa tienda]"
+    },
+    {
+        "spanish": "La empleada buscó un suéter ancho de color gris",
+        "english": "The employee looked for a loose gray sweater",
+        "distractors": [
+            "ancha",
+            "buscaron",
+            "una"
+        ],
+        "hint": "Regular 3rd person singular preterite of -car verbs keeps the regular -ó ending (spelling change only occurs in the yo form).",
+        "syntaxBreakdown": "[Subject: La empleada] + [Preterite Verb: buscó] + [Direct Object: un suéter ancho de color gris]"
+    },
+    {
+        "spanish": "Compré unos calcetines baratos y cómodos en el mercado",
+        "english": "I bought some cheap and comfortable socks at the market",
+        "distractors": [
+            "baratas",
+            "compró",
+            "un"
+        ],
+        "hint": "1st person singular preterite for -ar verbs takes -é with a written accent; adjectives match masculine plural noun.",
+        "syntaxBreakdown": "[Preterite Verb: Compré] + [Direct Object: unos calcetines baratos y cómodos] + [Location: en el mercado]"
+    },
+    {
+        "spanish": "El cajero guardó el dinero en efectivo en la caja registradora",
+        "english": "The cashier put the cash in the cash register",
+        "distractors": [
+            "guarda",
+            "guardaron",
+            "un"
+        ],
+        "hint": "Preterite regular -ar verb ending for 3rd person singular (-ó); vocabulary focuses on retail payment methods.",
+        "syntaxBreakdown": "[Subject: El cajero] + [Preterite Verb: guardó] + [Direct Object: el dinero en efectivo] + [Location: en la caja registradora]"
+    },
+    {
+        "spanish": "Tengo que devolver estos pantalones anchos a la tienda de ropa",
+        "english": "I have to return these wide pants to the clothing store",
+        "distractors": [
+            "anchas",
+            "volver",
+            "estas"
+        ],
+        "hint": "Devolver is used for returning items/merchandise (volver is returning in person); preceded by modal phrase tener que.",
+        "syntaxBreakdown": "[Modal Verb Phrase: Tengo que devolver] + [Direct Object: estos pantalones anchos] + [Recipient/Location: a la tienda de ropa]"
+    },
+    {
+        "spanish": "Pusimos tres latas de atún y dos frascos de mermelada en el carrito",
+        "english": "We put three cans of tuna and two jars of jam in the cart",
+        "distractors": [
+            "puso",
+            "cuatro",
+            "la"
+        ],
+        "hint": "Poner has the irregular preterite stem pus-; 1st person plural ending is -imos.",
+        "syntaxBreakdown": "[Irregular Preterite: Pusimos] + [Direct Object 1: tres latas de atún] + [Conjunction: y] + [Direct Object 2: dos frascos de mermelada] + [Location: en el carrito]"
+    },
+    {
+        "spanish": "Compré una libra de carne y medio kilo de queso fresco",
+        "english": "I bought a pound of meat and half a kilo of fresh cheese",
+        "distractors": [
+            "compraste",
+            "media",
+            "un"
+        ],
+        "hint": "Use 1st person preterite for -ar verbs with an accent on -é; measure nouns take feminine or masculine gender matching.",
+        "syntaxBreakdown": "[Preterite Verb: Compré] + [Direct Object 1: una libra de carne] + [Conjunction: y] + [Direct Object 2: medio kilo de queso fresco]"
+    },
+    {
+        "spanish": "Ellos encontraron botellas de aceite de oliva en el último estante",
+        "english": "They found bottles of olive oil on the top shelf",
+        "distractors": [
+            "encontró",
+            "última",
+            "la"
+        ],
+        "hint": "Regular 3rd person plural preterite ending -aron for -ar verbs.",
+        "syntaxBreakdown": "[Subject: Ellos] + [Preterite Verb: encontraron] + [Direct Object: botellas de aceite de oliva] + [Location: en el último estante]"
+    },
+    {
+        "spanish": "La dependienta llenó el formulario para recibir el descuento especial",
+        "english": "The clerk filled out the form to receive the special discount",
+        "distractors": [
+            "llena",
+            "llenaron",
+            "este"
+        ],
+        "hint": "Preterite 3rd person singular ending -ó; followed by purpose preposition para and an infinitive.",
+        "syntaxBreakdown": "[Subject: La dependienta] + [Preterite Verb: llenó] + [Direct Object: el formulario] + [Purpose: para recibir el descuento especial]"
+    },
+    {
+        "spanish": "Ayer escribí un ensayo largo y entregué la composición a tiempo",
+        "english": "Yesterday I wrote a long essay and turned in the composition on time",
+        "distractors": [
+            "entregé",
+            "escribió",
+            "el"
+        ],
+        "hint": "Entregar is a -gar verb requiring the spelling change -gu- before -é in the 1st person preterite (yo).",
+        "syntaxBreakdown": "[Time: Ayer] + [Preterite Verb 1: escribí un ensayo largo] + [Conjunction: y] + [Spelling-change Preterite Verb 2: entregué la composición] + [Adverbial Phrase: a tiempo]"
+    },
+    {
+        "spanish": "Mi hermano cortó el césped y sacudió el polvo de los muebles",
+        "english": "My brother mowed the lawn and dusted the furniture",
+        "distractors": [
+            "corta",
+            "sacude",
+            "la"
+        ],
+        "hint": "Both household chore actions happened in the past: 3rd person singular preterite endings -ó (-ar) and -ió (-ir).",
+        "syntaxBreakdown": "[Subject: Mi hermano] + [Preterite Verb 1: cortó el césped] + [Conjunction: y] + [Preterite Verb 2: sacudió el polvo de los muebles]"
+    },
+    {
+        "spanish": "Fui al banco y deposité un cheque antes de devolver los libros",
+        "english": "I went to the bank and deposited a check before returning the books",
+        "distractors": [
+            "fue",
+            "deposita",
+            "las"
+        ],
+        "hint": "Ir has the irregular preterite form fui for the 1st person singular; regular preterite deposité has accented -é.",
+        "syntaxBreakdown": "[Irregular Preterite Verb 1: Fui al banco] + [Conjunction: y] + [Preterite Verb 2: deposité un cheque] + [Time Phrase: antes de devolver los libros]"
     }
 ],
 

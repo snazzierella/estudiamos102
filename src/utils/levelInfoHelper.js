@@ -223,25 +223,25 @@ export function getLevelInfo(stageNum, levelNum, isEarlyBoss = false, translate 
       return {
         title: translate ? `De Compras y Pretérito Regular (Shopping & Regular Preterite) (Pt. ${levelNum - 5})` : `De Compras y Pretérito Regular (Pt. ${levelNum - 5})`,
         focus: "Shopping, Stores & Regular Preterite (-car/-gar/-zar yo changes)",
-        desc: "Clothing, sizes, supermarket items, regular past tense endings, and -car/-gar/-zar yo spelling changes (busqué, pagué, almorcé)."
+        desc: "Clothing, sizes, supermarket items, regular past tense endings (-é, -í), and -car/-gar/-zar yo spelling shifts (busqué, pagué, empecé)."
       };
     } else if (levelNum <= 14) {
       return {
-        title: translate ? `Pretérito con Cambio de Raíz y Pronombres de Objeto Directo (Pt. ${levelNum - 10})` : `Pretérito con Cambio de Raíz y Pronombres DO (Pt. ${levelNum - 10})`,
-        focus: "Preterite Stem Changers (-ir only) & DO Pronouns (lo/la/los/las)",
-        desc: "Mastering e->i and o->u stem changes in 3rd person preterite (pidió/durmió) and direct object pronouns (all 83 unit words introduced by Level 14!)."
+        title: translate ? `Pretérito de Sandalia y Pronombres de Objeto Directo (Pt. ${levelNum - 10})` : `Pretérito de Sandalia y Pronombres DO (Pt. ${levelNum - 10})`,
+        focus: "Sandal Verbs (e->i, o->u in 3rd person) & DO Pronoun Placement (lo/la/los/las)",
+        desc: "Mastering sandal shifts (pidió/durmió/se vistió - 3rd person only) and DO pronoun placement (before conjugated verbs or attached to infinitives). All 83 unit words introduced by Level 14!"
       };
     } else if (levelNum <= 19) {
       return {
-        title: translate ? `Contrastes Pretéritos y Diálogos de Tienda (Preterite Contrasts & Dialogues) (Pt. ${levelNum - 14})` : `Contrastes Pretéritos y Diálogos de Tienda (Pt. ${levelNum - 14})`,
-        focus: "Twin Verbs (fui/di/vi), Preterite Contrasts & Market Dialogues • Zero Flashcards",
-        desc: "Distinguishing irregular preterite twin forms, direct object pronoun placement, and interactive market bargaining dialogues."
+        title: translate ? `Pretérito Reflexivo y Diálogos de Tienda (Reflexive Preterite & Shopping) (Pt. ${levelNum - 14})` : `Pretérito Reflexivo y Diálogos de Tienda (Pt. ${levelNum - 14})`,
+        focus: "Reflexive Preterites (probarse, ponerse, vestirse), Twin Verbs (fui/di/vi) & Retail Decisions",
+        desc: "Combining reflexive pronouns with the preterite tense (me probé, se puso, se vistió), irregular twin verbs, and shopping dialogues with zero flashcards."
       };
     } else if (levelNum <= 24) {
       return {
         title: translate ? `Síntesis de Unidad 3: Traducción en Pasado (Unidad 3 Past Synthesis) (Pt. ${levelNum - 19})` : `Síntesis de Unidad 3: Traducción en Pasado (Pt. ${levelNum - 19})`,
         focus: "100% Active Challenge • Zero Flashcards",
-        desc: "Pure active mastery: complex past narrative sentence builders, DO pronoun substitutions, and shopping conversations."
+        desc: "Pure active mastery: complex past narrative sentence builders, reflexive preterite combinations, DO pronoun substitutions, and shopping conversations."
       };
     } else {
       return {

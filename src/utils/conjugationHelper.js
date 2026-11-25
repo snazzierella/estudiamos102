@@ -3249,6 +3249,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Did you wash the kitchen dishes? —Yes, I already washed them all.",
       choices: ["los", "les", "lo", "las"],
       correct: "los",
+      hint: "Identify the direct object noun being replaced and match its gender and plural number.",
       ruleExplanation: "'Los platos' is masculine plural direct object; it is replaced exclusively by 'los' (never 'les').",
       ruleExplanationEs: "'Los platos' es el objeto directo masculino plural; se reemplaza únicamente por 'los' (nunca 'les')."
     },
@@ -3258,8 +3259,29 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Did you take out the trash to the bin? —Yes, my brother took it out last night.",
       choices: ["la", "le", "lo", "las"],
       correct: "la",
+      hint: "Determine the gender and singular number of the feminine noun being replaced.",
       ruleExplanation: "'La basura' is feminine singular direct object; it is replaced by 'la'.",
       ruleExplanationEs: "'La basura' es objeto directo femenino singular; se reemplaza por 'la'."
+    },
+    {
+      contrastPair: "Objeto Directo vs Indirecto (Destinatario)",
+      sentenceWithBlank: "Yo [_____] di el dinero en efectivo a la cajera para pagar la cuenta.",
+      englishMeaning: "I gave the cash to the cashier to pay the bill.",
+      choices: ["le", "la", "lo", "se"],
+      correct: "le",
+      hint: "The person receiving the action ('a la cajera') is the indirect object recipient; distinguish from the direct item given.",
+      ruleExplanation: "'A la cajera' is the 3rd person singular indirect object recipient, requiring the indirect pronoun 'le'.",
+      ruleExplanationEs: "'A la cajera' es el objeto indirecto que recibe la acción, requiriendo el pronombre 'le'."
+    },
+    {
+      contrastPair: "Colocación de Pronombres de Objeto Directo",
+      sentenceWithBlank: "El piso de la cocina está sucio; voy a [_____] con la escoba.",
+      englishMeaning: "The kitchen floor is dirty; I am going to sweep it with the broom.",
+      choices: ["barrerlo", "barrerla", "barrerle", "barrerlos"],
+      correct: "barrerlo",
+      hint: "When attaching a direct object pronoun to an infinitive, agree with the masculine singular noun 'el piso'.",
+      ruleExplanation: "'El piso' is masculine singular direct object; attach '-lo' to the end of the infinitive 'barrer'.",
+      ruleExplanationEs: "'El piso' es objeto directo masculino singular; se adjunta '-lo' al final del infinitivo 'barrer'."
     },
     {
       contrastPair: "Personal 'a'",
@@ -3267,6 +3289,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Yesterday my mother accompanied my grandmother to the supermarket.",
       choices: ["a", "— (sin preposición)", "con", "de"],
       correct: "a",
+      hint: "Consider whether the direct object receiving the action designates specific human beings.",
       ruleExplanation: "The personal 'a' is strictly required because the direct object is a specific person ('mi abuela').",
       ruleExplanationEs: "Se requiere obligatoriamente la 'a' personal porque el objeto directo es una persona específica ('mi abuela')."
     },
@@ -3276,6 +3299,7 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "We cleaned the cafeteria tables after eating.",
       choices: ["— (sin preposición)", "a", "al", "para"],
       correct: "— (sin preposición)",
+      hint: "Determine whether the noun receiving the verb's action is a person or an inanimate physical thing.",
       ruleExplanation: "Do NOT use the personal 'a' when the direct object is an inanimate thing or object ('las mesas').",
       ruleExplanationEs: "NO se usa la 'a' personal cuando el objeto directo es una cosa u objeto inanimado ('las mesas')."
     },
@@ -3285,35 +3309,79 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "Aunt Rosa took her little dog Lucas to the veterinary clinic.",
       choices: ["a", "— (sin preposición)", "en", "por"],
       correct: "a",
+      hint: "Recall the convention for named household pets treated as family members.",
       ruleExplanation: "Use the personal 'a' when a household pet is treated as a beloved member of the family.",
       ruleExplanationEs: "Se utiliza la 'a' personal cuando el animal doméstico es considerado parte afectiva de la familia."
     },
     {
-      contrastPair: "Pretérito: Cambio de Raíz",
+      contrastPair: "Personal 'a'",
+      sentenceWithBlank: "La empleada guardó [_____] los vestidos nuevos en el almacén.",
+      englishMeaning: "The employee stored the new dresses in the stockroom.",
+      choices: ["— (sin preposición)", "a", "al", "de"],
+      correct: "— (sin preposición)",
+      hint: "Decide if the direct object refers to human beings or merchandise items.",
+      ruleExplanation: "Store items and clothing are non-human direct objects, so no personal 'a' is used.",
+      ruleExplanationEs: "Las prendas y objetos de tienda son inanimados, por lo que no llevan la 'a' personal."
+    },
+    {
+      contrastPair: "Pretérito: Cambio de Raíz (e -> i)",
       sentenceWithBlank: "En el restaurante elegante, el cliente [_____] salmón con verduras.",
       englishMeaning: "In the elegant restaurant, the customer ordered salmon with vegetables.",
       choices: ["pidió", "pedió", "pide", "pediste"],
       correct: "pidió",
+      hint: "Remember that -ir verbs with e->i stem changes shift only in the 3rd person singular and plural of the preterite.",
       ruleExplanation: "Only -ir verbs stem-change in the preterite (e -> i) in the 3rd person: pedir -> pidió (never 'pedió').",
       ruleExplanationEs: "Solo los verbos -ir tienen cambio de raíz en el pretérito (e -> i) en 3ª persona: pedir -> pidió (nunca 'pedió')."
     },
     {
-      contrastPair: "Pretérito: Cambio de Raíz",
+      contrastPair: "Pretérito: Cambio de Raíz (e -> i)",
       sentenceWithBlank: "Los camareros [_____] los platos principales con mucha rapidez.",
       englishMeaning: "The waiters served the main dishes very quickly.",
       choices: ["sirvieron", "servieron", "sirven", "servieronse"],
       correct: "sirvieron",
+      hint: "Identify the sandal vowel change in the 3rd person plural for this -ir verb in the preterite.",
       ruleExplanation: "The verb servir (-ir) changes e -> i in the 3rd person plural of the preterite: sirvieron.",
       ruleExplanationEs: "El verbo servir (-ir) cambia e -> i en 3ª persona plural del pretérito: sirvieron."
     },
     {
-      contrastPair: "Pretérito: Cambio de Raíz",
+      contrastPair: "Pretérito: Cambio de Raíz (e -> i)",
+      sentenceWithBlank: "El profesor [_____] la explicación de gramática para los estudiantes.",
+      englishMeaning: "The teacher repeated the grammar explanation for the students.",
+      choices: ["repitió", "repetió", "repite", "repetiste"],
+      correct: "repitió",
+      hint: "Apply the 3rd person singular preterite sandal vowel shift to the -ir verb repetir.",
+      ruleExplanation: "Repetir undergoes the preterite sandal stem change (e -> i) in the 3rd person singular: repitió.",
+      ruleExplanationEs: "Repetir experimenta el cambio de raíz en pretérito (e -> i) en la 3ª persona del singular: repitió."
+    },
+    {
+      contrastPair: "Pretérito: Cambio de Raíz (e -> i)",
+      sentenceWithBlank: "Los turistas [_____] al guía por las calles del centro histórico.",
+      englishMeaning: "The tourists followed the guide through the streets of the historic center.",
+      choices: ["siguieron", "seguieron", "siguen", "seguieronse"],
+      correct: "siguieron",
+      hint: "Follow the sandal verb pattern for 3rd person plural in the preterite, including spelling harmony.",
+      ruleExplanation: "Seguir undergoes the sandal change e -> i in the 3rd person plural of the preterite: siguieron.",
+      ruleExplanationEs: "Seguir realiza el cambio e -> i en la 3ª persona plural del pretérito: siguieron."
+    },
+    {
+      contrastPair: "Pretérito: Cambio de Raíz (o -> u)",
       sentenceWithBlank: "Anoche mi hermano pequeño [_____] diez horas seguidas en su cama.",
       englishMeaning: "Last night my little brother slept ten straight hours in his bed.",
       choices: ["durmió", "dormió", "duerme", "dormiste"],
       correct: "durmió",
+      hint: "Notice that -ir verbs with 'o' in the stem shift to 'u' in the 3rd person of the preterite.",
       ruleExplanation: "Dormir changes o -> u in the 3rd person singular of the preterite: durmió (never 'dormió').",
       ruleExplanationEs: "Dormir cambia o -> u en la 3ª persona del singular del pretérito: durmió (nunca 'dormió')."
+    },
+    {
+      contrastPair: "Pretérito: Cambio de Raíz (o -> u)",
+      sentenceWithBlank: "Después del largo viaje, los niños [_____] profundamente en el coche.",
+      englishMeaning: "After the long trip, the children slept deeply in the car.",
+      choices: ["durmieron", "dormieron", "duermen", "dormisteis"],
+      correct: "durmieron",
+      hint: "Apply the sandal stem change (o -> u) to the 3rd person plural preterite.",
+      ruleExplanation: "Dormir shifts o -> u in both 3rd person forms of the preterite: ellos durmieron.",
+      ruleExplanationEs: "Dormir cambia o -> u en ambas formas de 3ª persona en el pretérito: ellos durmieron."
     },
     {
       contrastPair: "Pretérito: Sin Cambio en -ar/-er",
@@ -3321,35 +3389,119 @@ export const CONTRAST_QUESTIONS = {
       englishMeaning: "We return books today, but yesterday they returned their clothes at the store.",
       choices: ["devolvieron", "devuelvieron", "devolvó", "devuelven"],
       correct: "devolvieron",
-      ruleExplanation: "Key rule! Verbs in -ar and -er with present tense stem changes NEVER change stems in the preterite: devolvieron.",
-      ruleExplanationEs: "¡Regla clave! Los verbos -ar y -er con cambio en presente NUNCA tienen cambio de raíz en pretérito: devolvieron."
+      hint: "Remember the cardinal rule: stem-changing -ar and -er verbs NEVER change vowels in the preterite.",
+      ruleExplanation: "Verbs in -ar and -er with present tense stem changes never change stems in the preterite: devolvieron.",
+      ruleExplanationEs: "Los verbos -ar y -er con cambio en presente no cambian su raíz en pretérito: devolvieron."
     },
     {
-      contrastPair: "Pretérito: Ortografía en Yo",
+      contrastPair: "Pretérito: Sin Cambio en -ar/-er",
+      sentenceWithBlank: "Durante la clase de ayer, ningún estudiante [_____] la tarea difícil.",
+      englishMeaning: "During yesterday's class, no student understood the difficult homework.",
+      choices: ["entendió", "entiendió", "entiende", "entende"],
+      correct: "entendió",
+      hint: "Unlike -ir verbs, -er verbs with present e->ie changes retain their regular stem in the preterite.",
+      ruleExplanation: "-er verbs do not stem change in the preterite; entender uses its regular stem entend-: entendió.",
+      ruleExplanationEs: "Los verbos en -er no sufren cambios de raíz en pretérito; entender mantiene su raíz regular: entendió."
+    },
+    {
+      contrastPair: "Pretérito: Ortografía en Yo (-gar)",
       sentenceWithBlank: "Ayer yo [_____] la ropa en efectivo en la caja registradora.",
       englishMeaning: "Yesterday I paid for the clothes in cash at the cash register.",
       choices: ["pagué", "pagé", "pagó", "pago"],
       correct: "pagué",
+      hint: "Consider which spelling preserves the hard /g/ sound before 'e' in the 1st person singular.",
       ruleExplanation: "Verbs ending in -gar change g -> gu before 'e' in the 'yo' preterite form to maintain the hard /g/ sound: pagué.",
       ruleExplanationEs: "Los verbos en -gar cambian g -> gu delante de 'e' en la forma yo del pretérito para mantener el sonido /g/: pagué."
     },
     {
-      contrastPair: "Pretérito: Ortografía en Yo",
+      contrastPair: "Pretérito: Ortografía en Yo (-car)",
       sentenceWithBlank: "Yo [_____] un buzón para depositar la carta durante media hora.",
       englishMeaning: "I looked for a mailbox to drop off the letter for half an hour.",
       choices: ["busqué", "buscé", "buscó", "busco"],
       correct: "busqué",
+      hint: "Identify the orthographic letter combination needed to represent the /k/ sound before the letter 'e'.",
       ruleExplanation: "Verbs ending in -car change c -> qu in the 'yo' preterite form to maintain the /k/ sound: busqué.",
       ruleExplanationEs: "Los verbos en -car cambian c -> qu en la forma yo del pretérito para mantener el sonido /k/: busqué."
+    },
+    {
+      contrastPair: "Pretérito: Ortografía en Yo (-zar)",
+      sentenceWithBlank: "Esta mañana yo [_____] a limpiar mi dormitorio muy temprano.",
+      englishMeaning: "This morning I started to clean my bedroom very early.",
+      choices: ["empecé", "empezé", "empezó", "empiezo"],
+      correct: "empecé",
+      hint: "Recall the Spanish spelling rule regarding the letter 'z' when followed by the vowel 'e' in preterite yo.",
+      ruleExplanation: "Verbs ending in -zar change z -> c before 'e' in the 1st person singular preterite: empecé (Spanish avoids 'ze').",
+      ruleExplanationEs: "Los verbos en -zar cambian z -> c delante de 'e' en la forma yo del pretérito: empecé (se evita la combinación 'ze')."
+    },
+    {
+      contrastPair: "Pretérito: Doble Vocal Intervocálica (y)",
+      sentenceWithBlank: "Ayer el dependiente [_____] la etiqueta del precio en el escaparate.",
+      englishMeaning: "Yesterday the clerk read the price tag in the store window.",
+      choices: ["leyó", "leió", "lee", "leyeron"],
+      correct: "leyó",
+      hint: "Notice what happens when an unaccented 'i' falls between two vowels in 3rd person singular preterite.",
+      ruleExplanation: "When the preterite ending -ió is preceded by a vowel (le-ió), the unstressed 'i' changes to 'y': leyó.",
+      ruleExplanationEs: "Cuando la terminación -ió va tras una vocal, la 'i' átona entre vocales cambia a 'y': leyó."
+    },
+    {
+      contrastPair: "Pretérito: Doble Vocal Intervocálica (y)",
+      sentenceWithBlank: "Los clientes no [_____] que los precios estuvieran tan rebajados.",
+      englishMeaning: "The customers did not believe that the prices were so discounted.",
+      choices: ["creyeron", "creieron", "creen", "creyeran"],
+      correct: "creyeron",
+      hint: "Look for the intervocalic 'y' spelling shift in the 3rd person plural of double-vowel verbs.",
+      ruleExplanation: "In double-vowel verbs like creer, the 3rd person plural ending -ieron changes to -yeron: creyeron.",
+      ruleExplanationEs: "En verbos con doble vocal como creer, la terminación -ieron de 3ª persona plural cambia a -yeron: creyeron."
+    },
+    {
+      contrastPair: "Pretérito Reflexivo: Ropa (Probarse vs Probar)",
+      sentenceWithBlank: "Mi hermana fue al probador y [_____] una chaqueta de lana gris.",
+      englishMeaning: "My sister went to the fitting room and tried on a gray wool jacket.",
+      choices: ["se probó", "probó", "se prueba", "le probó"],
+      correct: "se probó",
+      hint: "Trying on clothes on oneself requires the reflexive pronoun with the preterite form.",
+      ruleExplanation: "Trying on clothes (*probarse*) is reflexive: 'se probó'. Non-reflexive 'probó' means to taste food or test something.",
+      ruleExplanationEs: "Probarse ropa es reflexivo: 'se probó'. En cambio, 'probó' sin pronombre significa degustar o probar una cosa."
+    },
+    {
+      contrastPair: "Pretérito Reflexivo: Verbo Sandalia (Vestirse)",
+      sentenceWithBlank: "Para la boda de su primo, Roberto [_____] con un traje muy elegante.",
+      englishMeaning: "For his cousin's wedding, Roberto got dressed in a very elegant suit.",
+      choices: ["se vistió", "se vestió", "vistió", "se viste"],
+      correct: "se vistió",
+      hint: "Combine both the 3rd person reflexive pronoun and the sandal e->i stem change in the preterite.",
+      ruleExplanation: "Vestirse requires both the reflexive pronoun 'se' and the sandal stem change (e -> i) in the 3rd person: se vistió.",
+      ruleExplanationEs: "Vestirse combina el pronombre reflexivo 'se' con el cambio de raíz de sandalia (e -> i) en 3ª persona: se vistió."
     },
     {
       contrastPair: "Devolver vs Volver",
       sentenceWithBlank: "Tengo que [_____] esta camisa apretada a la tienda de ropa.",
       englishMeaning: "I have to return this tight shirt to the clothing store.",
-      choices: ["devolver", "volver"],
+      choices: ["devolver", "volver", "devolví", "vuelvo"],
       correct: "devolver",
+      hint: "Choose between returning an object/merchandise versus a human physically returning to a location.",
       ruleExplanation: "Use 'devolver' to return an item or money to a place/store. Use 'volver' for a person returning physically.",
       ruleExplanationEs: "Usa 'devolver' para devolver un objeto o dinero a su lugar. Usa 'volver' para el regreso físico de una persona."
+    },
+    {
+      contrastPair: "Pretérito vs Presente (-é vs -o)",
+      sentenceWithBlank: "Ayer por la tarde yo [_____] una corbata de seda para mi padre.",
+      englishMeaning: "Yesterday afternoon I bought a silk tie for my father.",
+      choices: ["compré", "compro", "compró", "compras"],
+      correct: "compré",
+      hint: "Check the past time marker 'ayer por la tarde' to select the accented 1st person preterite ending.",
+      ruleExplanation: "The past indicator 'ayer' triggers the preterite: regular -ar 1st person takes -é (compré), while -o (compro) is present.",
+      ruleExplanationEs: "El marcador temporal de pasado 'ayer' exige pretérito: 1ª persona -é (compré); -o (compro) es presente."
+    },
+    {
+      contrastPair: "Pretérito: Gemelos Irregulares (Ser / Ir)",
+      sentenceWithBlank: "El sábado pasado mi familia y yo [_____] al centro comercial en autobús.",
+      englishMeaning: "Last Saturday my family and I went to the mall by bus.",
+      choices: ["fuimos", "íbamos", "vamos", "fueron"],
+      correct: "fuimos",
+      hint: "Identify the irregular preterite form shared by 'ser' and 'ir' for the 1st person plural.",
+      ruleExplanation: "Ser and ir share identical forms in the preterite; for nosotros, the completed journey to a place uses 'fuimos'.",
+      ruleExplanationEs: "Ser e ir comparten formas idénticas en pretérito; para nosotros, el viaje completado a un lugar usa 'fuimos'."
     }
   ],
 

@@ -11,6 +11,8 @@ export const CONTRAST_CODEX_TABS = [
   { id: 'reciprocal_reflexive', labelEn: '🤝 Reciprocal vs Reflexive', labelEs: '🤝 Recíproco vs Reflexivo' },
   { id: 'saber_conocer_ser_estar', labelEn: '🔍 Saber & Ser', labelEs: '🔍 Saber & Ser' },
   { id: 'preterite_families', labelEn: '📦 Preterite Families', labelEs: '📦 Familias Pretérito' },
+  { id: 'preterite_sandals', labelEn: '👟 Sandal Verbs (e->i, o->u)', labelEs: '👟 Verbos Sandalia (e->i, o->u)' },
+  { id: 'preterite_spelling', labelEn: '✍️ Preterite Spelling (-car/-gar/-zar)', labelEs: '✍️ Ortografía Pretérito (-car/-gar/-zar)' },
   { id: 'devolver_volver', labelEn: '🔄 Devolver vs Volver', labelEs: '🔄 Devolver vs Volver' },
   { id: 'preterite_imperfect', labelEn: '⏳ Preterite vs Imperfect', labelEs: '⏳ Pretérito vs Imperfecto' },
   { id: 'indefinite_negative', labelEn: '🚫 Indefinite & Negative Words', labelEs: '🚫 Palabras Indefinidas y Negativas' },
@@ -158,6 +160,47 @@ export const CONTRAST_TABS_CONTENT = {
     ],
     warningEn: "⚠️ Critical Rule: Verbs in -ar and -er (like volver, devolver, entender) NEVER stem-change in the preterite (*ellos devolvieron*, *él entendió*).",
     warningEs: "⚠️ Regla Crítica: Los verbos -ar y -er (como volver, devolver, entender) NUNCA tienen cambio de raíz en pretérito (*ellos devolvieron*, *él entendió*)."
+  },
+
+  preterite_sandals: {
+    bannerEn: "👟 The Sandal Rule: ONLY -ir verbs change stems in the preterite, and ONLY in the 3rd person singular (él/ella/usted) and 3rd person plural (ellos/ellas/ustedes). The vowels change e ➔ i or o ➔ u.",
+    bannerEs: "👟 La Regla de la Sandalia: ¡SOLO los verbos -ir cambian de raíz en pretérito, y ÚNICAMENTE en 3ª persona singular (él/ella/usted) y plural (ellos/ellas/ustedes)! Las vocales cambian e ➔ i u o ➔ u.",
+    headersEn: ["Infinitive", "Stem Shift", "3rd Person Singular", "3rd Person Plural", "Key Context"],
+    headersEs: ["Infinitivo", "Cambio", "3ª Persona Singular", "3ª Persona Plural", "Contexto Clave"],
+    rows: [
+      { verb: "pedir", shift: "e ➔ i", sing: "pidió", plur: "pidieron", exEn: "El cliente pidió una camisa.", exEs: "El cliente pidió una camisa." },
+      { verb: "servir", shift: "e ➔ i", sing: "sirvió", plur: "sirvieron", exEn: "Los meseros sirvieron la comida.", exEs: "Los meseros sirvieron la comida." },
+      { verb: "dormir", shift: "o ➔ u", sing: "durmió", plur: "durmieron", exEn: "El bebé durmió ocho horas.", exEs: "El bebé durmió ocho horas." },
+      { verb: "preferir", shift: "e ➔ i", sing: "prefirió", plur: "prefirieron", exEn: "Ella prefirió pagar en efectivo.", exEs: "Ella prefirió pagar en efectivo." },
+      { verb: "vestirse", shift: "e ➔ i", sing: "se vistió", plur: "se vistieron", exEn: "Él se vistió con un traje azul.", exEs: "Él se vistió con un traje azul." },
+      { verb: "repetir", shift: "e ➔ i", sing: "repitió", plur: "repitieron", exEn: "El profesor repitió la regla.", exEs: "El profesor repitió la regla." },
+      { verb: "seguir", shift: "e ➔ i", sing: "siguió", plur: "siguieron", exEn: "Ellos siguieron las instrucciones.", exEs: "Ellos siguieron las instrucciones." },
+      { verb: "morir", shift: "o ➔ u", sing: "murió", plur: "murieron", exEn: "La planta murió por el frío.", exEs: "La planta murió por el frío." }
+    ],
+    warningEn: "⚠️ Crucial Contrast: -ar and -er stem-changing verbs (like cerrar, volver, devolver, entender) NEVER change in the preterite (*cerró, volvió, devolvieron, entendió*). Only -ir verbs change!",
+    warningEs: "⚠️ Contraste Crucial: Los verbos -ar y -er con cambio en presente (como cerrar, volver, devolver, entender) NUNCA cambian en pretérito (*cerró, volvió, devolvieron, entendió*). ¡Solo los verbos -ir!",
+    tipEn: "💡 Why called 'Sandal Verbs'? Because when arranged in a traditional 2-column conjugation chart (yo/tú/él on the left, nosotros/vosotros/ellos on the right), drawing a loop around only the 3rd person forms (bottom row) resembles the shape of a sandal sole!",
+    tipEs: "💡 ¿Por qué se llaman 'Verbos Sandalia'? Porque en la tabla tradicional de conjugación, al encerrar únicamente las formas de tercera persona (fila inferior: él y ellos), el contorno parece la suela de una sandalia."
+  },
+
+  preterite_spelling: {
+    bannerEn: "✍️ Phonetic Conservation: Verbs ending in -car, -gar, and -zar undergo a spelling change EXCLUSIVELY in the 1st person singular ('yo') of the preterite to preserve their original consonant pronunciation before the vowel 'e'. All other persons are 100% regular.",
+    bannerEs: "✍️ Conservación Fonética: Los verbos en -car, -gar y -zar sufren un cambio ortográfico EXCLUSIVAMENTE en la 1ª persona singular ('yo') del pretérito para conservar el sonido consonántico original ante la vocal 'e'. Todas las demás personas son 100% regulares.",
+    headersEn: ["Ending Category", "Yo Form Shift", "Example Verb", "Preterite Yo Form", "Other Persons (Regular)"],
+    headersEs: ["Terminación", "Cambio en Yo", "Verbo Ejemplo", "Forma Yo Pretérito", "Otras Personas (Regulares)"],
+    rows: [
+      { cat: "-car", shift: "c ➔ qu", verb: "buscar", yoForm: "busqué", other: "buscaste, buscó, buscamos, buscaron" },
+      { cat: "-car", shift: "c ➔ qu", verb: "practicar", yoForm: "practiqué", other: "practicaste, practicó, practicamos" },
+      { cat: "-car", shift: "c ➔ qu", verb: "sacar", yoForm: "saqué", other: "sacaste, sacó la basura, sacamos" },
+      { cat: "-gar", shift: "g ➔ gu", verb: "pagar", yoForm: "pagué", other: "pagaste, pagó en efectivo, pagamos" },
+      { cat: "-gar", shift: "g ➔ gu", verb: "llegar", yoForm: "llegué", other: "llegaste, llegó a tiempo, llegamos" },
+      { cat: "-gar", shift: "g ➔ gu", verb: "entregar", yoForm: "entregué", other: "entregaste, entregó la tarea, entregamos" },
+      { cat: "-zar", shift: "z ➔ c", verb: "empezar", yoForm: "empecé", other: "empezaste, empezó, empezamos, empezaron" },
+      { cat: "-zar", shift: "z ➔ c", verb: "almorzar", yoForm: "almorcé", other: "almorzaste, almorzó, almorzamos" },
+      { cat: "-zar", shift: "z ➔ c", verb: "cruzar", yoForm: "crucé", other: "cruzaste, cruzó la calle, cruzamos" }
+    ],
+    tipEn: "💡 Memory Aid: The letters c, g, and z sound different before 'e' (ce = /se/, ge = /he/, ze = forbidden). The shifts to qu, gu, and c preserve the /k/, /g/, and /s/ sounds: busqué, pagué, empecé.",
+    tipEs: "💡 Ayuda Memoria: Las letras c, g y z sonarían distinto ante 'e'. Los cambios a qu, gu y c mantienen los sonidos originales /k/, /g/ y /s/: busqué, pagué, empecé."
   },
 
   devolver_volver: {

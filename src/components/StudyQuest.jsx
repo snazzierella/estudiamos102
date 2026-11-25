@@ -6082,7 +6082,7 @@ export default function StudyQuest({
                         </thead>
                         <tbody>
                           {content.rows.map((r, i) => {
-                            if (contrastCodexTab === 'por_para') {
+                            if (contrastCodexTab === 'por_para' || contrastCodexTab === 'preterite_imperfect' || contrastCodexTab === 'indefinite_negative' || contrastCodexTab === 'comparatives') {
                               return (
                                 <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: r.prep === 'por' ? 'rgba(59, 130, 246, 0.04)' : 'rgba(16, 185, 129, 0.04)' }}>
                                   <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{isEn ? r.ruleEn : r.ruleEs}</td>
@@ -6163,6 +6163,28 @@ export default function StudyQuest({
                                   <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{r.fam}</td>
                                   <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{isEn ? r.ruleEn : r.ruleEs}</td>
                                   <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{r.ex}</td>
+                                </tr>
+                              );
+                            }
+                            if (contrastCodexTab === 'preterite_sandals') {
+                              return (
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                  <td style={{ padding: '6px 8px', color: '#60a5fa', fontWeight: 700 }}>{r.verb}</td>
+                                  <td style={{ padding: '6px 8px', color: '#f59e0b', fontWeight: 600 }}>{r.shift}</td>
+                                  <td style={{ padding: '6px 8px', color: '#34d399', fontWeight: 700 }}>{r.sing}</td>
+                                  <td style={{ padding: '6px 8px', color: '#38bdf8', fontWeight: 700 }}>{r.plur}</td>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{isEn ? r.exEn : r.exEs}</td>
+                                </tr>
+                              );
+                            }
+                            if (contrastCodexTab === 'preterite_spelling') {
+                              return (
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                  <td style={{ padding: '6px 8px', color: '#c084fc', fontWeight: 700 }}>{r.cat}</td>
+                                  <td style={{ padding: '6px 8px', color: '#f59e0b', fontWeight: 600 }}>{r.shift}</td>
+                                  <td style={{ padding: '6px 8px', color: '#60a5fa' }}>{r.verb}</td>
+                                  <td style={{ padding: '6px 8px', color: '#34d399', fontWeight: 700 }}>{r.yoForm}</td>
+                                  <td style={{ padding: '6px 8px', color: 'var(--text-muted)', fontSize: '0.78rem' }}>{r.other}</td>
                                 </tr>
                               );
                             }

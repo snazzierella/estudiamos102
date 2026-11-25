@@ -93,6 +93,7 @@ export default function StudyQuest({
   const [questStarted, setQuestStarted] = useState(false);
   const [questQuestions, setQuestQuestions] = useState([]);
   const [questCurrentIdx, setQuestCurrentIdx] = useState(0);
+  const currentQuestQ = questQuestions[questCurrentIdx];
   const [questFinished, setQuestFinished] = useState(false);
   const [questScore, setQuestScore] = useState(0);
   const [questFlipped, setQuestFlipped] = useState(false); // for card intro
@@ -382,6 +383,11 @@ export default function StudyQuest({
   const [speechAvailable, setSpeechAvailable] = useState(false);
   const audioCtxRef = useRef(null);
 
+  const speakSpanish = (text) => {
+    if (!speechAvailable) return;
+    speakSpanishUtil(text, { state });
+  };
+
   // Initialize Speech
   useEffect(() => {
     if ('speechSynthesis' in window) {
@@ -664,11 +670,6 @@ export default function StudyQuest({
     } catch (e) {
       console.warn("Audio synthesis block:", e);
     }
-  };
-
-  const speakSpanish = (text) => {
-    if (!speechAvailable) return;
-    speakSpanishUtil(text, { state });
   };
 
   const SYNONYM_GROUPS = [
@@ -2661,7 +2662,6 @@ export default function StudyQuest({
   const selectedStageSpec = STAGES[selectedStage];
   const selectedLevelInfo = getLevelInfo(selectedStage, selectedLevel, isEarlyBossLevel(selectedStage, selectedLevel), showCardTranslate);
 
-  const currentQuestQ = questQuestions[questCurrentIdx];
   const shakeClass = shakeTrigger ? "shake damage-flash" : healTrigger ? "heal-flash" : "";
 
   const isQuestUserCorrect = questAnswered && currentQuestQ && (
